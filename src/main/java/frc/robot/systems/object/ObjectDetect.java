@@ -1,0 +1,5 @@
+package frc.robot.systems.object;
+
+public class ObjectDetect {
+    
+}
