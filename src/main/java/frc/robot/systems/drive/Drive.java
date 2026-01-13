@@ -48,6 +48,8 @@ import frc.robot.game.FieldConstants;
 import frc.robot.game.GameDriveManager;
 import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.apriltag.AprilTag;
+import frc.robot.systems.apriltag.AprilTag.VisionObservation;
 import frc.robot.systems.drive.controllers.HeadingController;
 import frc.robot.systems.drive.controllers.HolonomicController;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
@@ -56,8 +58,6 @@ import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles
 import frc.robot.systems.drive.gyro.GyroIO;
 import frc.robot.systems.drive.gyro.GyroInputsAutoLogged;
 import frc.robot.systems.drive.modules.Module;
-import frc.robot.systems.vision.Vision;
-import frc.robot.systems.vision.Vision.VisionObservation;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -86,7 +86,7 @@ public class Drive extends SubsystemBase {
     private final Module[] mModules;
     private final GyroIO mGyro;
     private final GyroInputsAutoLogged mGyroInputs = new GyroInputsAutoLogged();
-    private final Vision mVision;
+    private final AprilTag mVision;
 
     private Rotation2d mRobotRotation;
     private final SwerveDriveOdometry mOdometry;
@@ -135,7 +135,7 @@ public class Drive extends SubsystemBase {
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
     
 
-    public Drive(Module[] modules, GyroIO gyro, Vision vision) {
+    public Drive(Module[] modules, GyroIO gyro, AprilTag vision) {
         this.mModules = modules;
         this.mGyro = gyro;
         this.mVision = vision;
