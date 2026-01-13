@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.systems.drive.Drive;
-import frc.robot.game.GameGoalPoseChooser.SIDE;
 import frc.lib.math.AllianceFlipUtil;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -371,10 +370,10 @@ public class AutonCommands extends SubsystemBase {
         }
     }
 
-    public SIDE getSide(String name){
-        String n = name.substring(6, 7);
-        return (n.equals("L")) ? SIDE.LEFT : SIDE.RIGHT;
-    }
+    // public SIDE getSide(String name){
+    //     String n = name.substring(6, 7);
+    //     return (n.equals("L")) ? SIDE.LEFT : SIDE.RIGHT;
+    // }
 
     public FunctionalCommand autoPlaceholder() {
         return new FunctionalCommand(() -> {}, () -> {}, (interrupted) -> {}, () -> false, this);

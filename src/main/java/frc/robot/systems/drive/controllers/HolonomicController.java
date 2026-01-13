@@ -12,6 +12,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import frc.lib.tuning.LoggedTunableNumber;
+
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class HolonomicController {
@@ -77,6 +80,8 @@ public class HolonomicController {
 
     private ConstraintType tType = ConstraintType.AXIS;
 
+    private Supplier<Rotation2d> mLineDirection = () -> new Rotation2d();
+
     public HolonomicController() {
 
         this.tXController = new ProfiledPIDController(
@@ -112,6 +117,10 @@ public class HolonomicController {
 
     public void reset(Pose2d pStartPose, Pose2d pGoalPose) {
         reset(pStartPose, new ChassisSpeeds(), pGoalPose);
+    }
+
+    public void setLineDirection(Supplier<Rotation2d> direction) {
+        mLineDirection = direction;
     }
 
     /*
@@ -176,6 +185,38 @@ public class HolonomicController {
                                         Math.toDegrees(pGoalSpeed.omegaRadiansPerSecond)))
                         + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity))),
                 pCurrentPose.getRotation());
+    }
+
+    public ChassisSpeeds lineAlignCalculate(Pose2d goalPose, ChassisSpeeds goalSpeed, Pose2d currentPose, ChassisSpeeds teleopSpeeds) {
+        double ffScalar = Math.min(
+                Math.hypot(goalPose.getX() - currentPose.getX(), goalPose.getY() - currentPose.getY()) / tFFRadius.get(),
+                1.0);
+
+        ChassisSpeeds teleopSpeedsRobotRelative = ChassisSpeeds.fromFieldRelativeSpeeds(teleopSpeeds, currentPose.getRotation()) ;
+        ChassisSpeeds teleopSpeedsLineRelative = ChassisSpeeds.fromRobotRelativeSpeeds(teleopSpeedsRobotRelative, mLineDirection.get().plus(currentPose.getRotation()));
+
+        ChassisSpeeds alignRelative = ChassisSpeeds.fromFieldRelativeSpeeds(
+                (tXController.calculate(
+                                currentPose.getX(),
+                                new TrapezoidProfile.State(goalPose.getX(), goalSpeed.vxMetersPerSecond))
+                        + ffScalar * tXFeedforward.calculate(tXController.getSetpoint().velocity)),
+                (tYController.calculate(
+                                currentPose.getY(),
+                                new TrapezoidProfile.State(goalPose.getY(), goalSpeed.vyMetersPerSecond))
+                        + ffScalar * tYFeedforward.calculate(tYController.getSetpoint().velocity)),
+                (Math.toRadians(tOmegaController.calculate(
+                                currentPose.getRotation().getDegrees(),
+                                new TrapezoidProfile.State(
+                                        goalPose.getRotation().getDegrees(),
+                                        Math.toDegrees(goalSpeed.omegaRadiansPerSecond)))
+                        + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity))),
+                mLineDirection.get().plus(currentPose.getRotation()));
+
+        return new ChassisSpeeds(
+                teleopSpeedsLineRelative.vxMetersPerSecond + alignRelative.vxMetersPerSecond,
+                teleopSpeedsLineRelative.vxMetersPerSecond * 0 + alignRelative.vyMetersPerSecond,
+                alignRelative.omegaRadiansPerSecond
+        );
     }
 
     ////////////////////////// GETTERS \\\\\\\\\\\\\\\\\\\\\\\\\\\\

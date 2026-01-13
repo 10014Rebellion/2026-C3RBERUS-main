@@ -248,7 +248,6 @@ public class Drive extends SubsystemBase {
     private void updateDriveControllers() {
         mHeadingController.updateHeadingController();
         mAutoAlignController.updateAlignmentControllers();
-        GameGoalPoseChooser.updateSideStuff();
     }
 
     private void computeDesiredSpeeds() {
@@ -385,6 +384,64 @@ public class Drive extends SubsystemBase {
                     mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.iYawVelocityPS);
                 })
                 .andThen(setDriveStateCommandContinued(DriveState.HEADING_ALIGN));
+    }
+
+    public Command setToGenericLineAlign(Supplier<Pose2d> desiredPose) {
+        return setToGenericLineAlign(desiredPose, () -> desiredPose.get().getRotation());
+    }
+
+    public Command setToGenericLineAlign(Supplier<Pose2d> desiredPose, Supplier<Rotation2d> desiredRotation) {
+        return setToGenericLineAlign(
+            () -> Math.atan2(desiredPose.get().getY(), desiredPose.get().getX()), 
+            () -> desiredPose.get().getX(),
+            () -> desiredPose.get().getY(),
+            desiredRotation);
+    }
+
+    /*
+     * Reference GameDriveManager to use game-specific implementation of this command
+     * @param Goal strategy, based on where you're aligning
+     * @param Constraint type, linear or on an axis
+     */
+    private Command setToGenericLineAlign(DoubleSupplier slope, DoubleSupplier anchorX, DoubleSupplier anchorY, Supplier<Rotation2d> desiredRotation) {
+        return new InstantCommand(() -> {
+                    if(!Double.isNaN(slope.getAsDouble())) {
+                        DoubleSupplier m = slope;
+                        DoubleSupplier b = ()-> - anchorX.getAsDouble() * m.getAsDouble() + anchorY.getAsDouble();
+
+                        DoubleSupplier x1 = () -> getPoseEstimate().getX();
+                        DoubleSupplier y1 = () -> getPoseEstimate().getY();
+
+                        mGoalPoseSup = () -> new Pose2d(
+                            ( x1.getAsDouble() 
+                                + m.getAsDouble() * y1.getAsDouble() 
+                                - m.getAsDouble() * b.getAsDouble() ) 
+                                    / ( 1 + m.getAsDouble() * m.getAsDouble()),
+                            ( m.getAsDouble() * x1.getAsDouble() 
+                                + m.getAsDouble() * m.getAsDouble() * y1.getAsDouble() 
+                                + b.getAsDouble() ) 
+                                    / ( 1 + m.getAsDouble() * m.getAsDouble()),
+                            desiredRotation.get()
+                        );
+
+                        mAutoAlignController.setLineDirection(() -> new Rotation2d(slope.getAsDouble(), 1.0));
+                    } else {
+                        mGoalPoseSup = () -> new Pose2d(
+                            anchorX.getAsDouble(),
+                            getPoseEstimate().getY(),
+                            desiredRotation.get());
+
+                            mAutoAlignController.setLineDirection(() -> Rotation2d.kCCW_90deg);
+                    }
+
+                    mAutoAlignController.setConstraintType(ConstraintType.AXIS);
+                    mAutoAlignController.reset(
+                            getPoseEstimate(),
+                            ChassisSpeeds.fromRobotRelativeSpeeds(
+                                    getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
+                            mGoalPoseSup.get());
+                })
+                .andThen(setDriveStateCommandContinued(DriveState.LINE_ALIGN));
     }
 
     ////// BASE STATES \\\\\\
@@ -557,8 +614,6 @@ public class Drive extends SubsystemBase {
     public Command setDriveProfile(DriverProfiles profile) {
         return new InstantCommand(() -> {
             mTeleopController.updateTuneablesWithProfiles(profile);
-
-            GameGoalPoseChooser.setSwapSides(profile.swapSides());
         });
     }
 
