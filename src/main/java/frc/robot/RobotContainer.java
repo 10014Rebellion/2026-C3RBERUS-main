@@ -17,7 +17,7 @@ import frc.robot.systems.drive.modules.ModuleIO;
 import frc.robot.systems.drive.modules.ModuleIOKraken;
 import frc.robot.systems.drive.modules.ModuleIOSim;
 import frc.robot.systems.vision.CameraIO;
-// import frc.robot.systems.vision.CameraIOPVTag;
+import frc.robot.systems.vision.CameraIOPVTag;
 import frc.robot.systems.vision.Vision;
 import frc.robot.systems.vision.VisionConstants;
 import frc.robot.systems.vision.VisionConstants.Orientation;
@@ -42,14 +42,14 @@ public class RobotContainer {
                         },
                         new GyroIOPigeon2(),
                         new Vision(new CameraIO[] {
-                            new CameraIO() {},
-                            new CameraIO() {}
-                            // new CameraIOPVTag(
-                            //         VisionConstants.kRightCamName,
-                            //         VisionConstants.kRightCamTransform,
-                            //         Orientation.BACK),
-                            // new CameraIOPVTag(
-                            //         VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
+                            // new CameraIO() {},
+                            // new CameraIO() {}
+                            new CameraIOPVTag(
+                                    VisionConstants.kRightCamName,
+                                    VisionConstants.kRightCamTransform,
+                                    Orientation.BACK),
+                            new CameraIOPVTag(
+                                    VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
                         }));
                 break;
 
@@ -65,12 +65,12 @@ public class RobotContainer {
                         new Vision(new CameraIO[] {
                             new CameraIO() {},
                             new CameraIO() {},
-                            // new CameraIOPVTag(
-                            //         VisionConstants.kRightCamName,
-                            //         VisionConstants.kRightCamTransform,
-                            //         Orientation.BACK),
-                            // new CameraIOPVTag(
-                            //         VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
+                            new CameraIOPVTag(
+                                    VisionConstants.kRightCamName,
+                                    VisionConstants.kRightCamTransform,
+                                    Orientation.BACK),
+                            new CameraIOPVTag(
+                                    VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
                         }));
                 break;
 

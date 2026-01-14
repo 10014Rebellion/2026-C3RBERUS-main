@@ -14,14 +14,14 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ModuleIOSim implements ModuleIO {
     private final DCMotorSim mDriveMotor = new DCMotorSim(
         LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.004, kDriveMotorGearing),
-        DCMotor.getKrakenX60Foc(1),
+        DCMotor.getKrakenX60Foc(1).withReduction(kDriveMotorGearing),
         0.0,
         0.0
     );
 
     private final DCMotorSim mAzimuthMotor = new DCMotorSim(
-        LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.025, 52),
-        DCMotor.getKrakenX60Foc(1),
+        LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.025, kAzimuthMotorGearing),
+        DCMotor.getKrakenX60Foc(1).withReduction(kAzimuthMotorGearing),
         0.0,
         0.0
     );
