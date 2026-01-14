@@ -9,9 +9,13 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.game.FieldConstants;
@@ -128,6 +132,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
         pInputs.iTrackedTargetsPitch = new double[0];
         pInputs.iTrackedTargetsYaw = new double[0];
         pInputs.iTrackedTargetsSkew = new double[0];
+        pInputs.iTrackedTargetsPoses = new Pose2d[0];
         pInputs.iTrackedTargetsCornersX = new double[0][0];
         pInputs.iTrackedTargetsCornersY = new double[0][0];
     }
@@ -146,12 +151,28 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
 
         double distance = kDiameterFuel / Math.tan(theta);
 
-        Transform2d transform = 
-        new Transform2d(
-            distance * Math.cos(theta), 
-            distance * Math.sin(theta), 
-            new Rotation2d());
+        Pose3d pose = new Pose3d(
+            new Translation3d(
+                distance * Math.cos(theta),
+                distance * Math.sin(theta),
+                0.0
+            ), 
+            new Rotation3d());
+
+        if (mOrientation.equals(Orientation.BACK)){
+            pose.transformBy(
+                new Transform3d(
+                    new Translation3d(), 
+                    new Rotation3d(0.0, 0.0, Math.PI)));
+        }
+
+        Pose2d poseFinal = new Pose2d(
+            new Translation2d(
+                pose.getX() + pLastPose.getX(), 
+                pose.getY() + pLastPose.getY()), 
+                new Rotation2d());
+
         
-        return pLastPose.transformBy(transform);
+        return poseFinal;
     }
 }
