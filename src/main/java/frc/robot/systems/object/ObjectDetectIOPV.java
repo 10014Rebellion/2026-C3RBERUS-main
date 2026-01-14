@@ -108,6 +108,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
                 pInputs.iTrackedTargetsPitch = pitches;
                 pInputs.iTrackedTargetsYaw = yaws;
                 pInputs.iTrackedTargetsSkew = skews;
+                pInputs.iTrackedTargetsPoses = poses;
                 pInputs.iTrackedTargetsCornersX = cornersX;
                 pInputs.iTrackedTargetsCornersY = cornersY;
             }
@@ -152,14 +153,14 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
 
         Pose3d pose = new Pose3d(
             new Translation3d(
-                distance * Math.cos(theta),
-                distance * Math.sin(theta),
+                (distance * Math.cos(theta)) + mCameraTransform.getX(),
+                (distance * Math.sin(theta)) + mCameraTransform.getY(),
                 0.0
             ), 
             new Rotation3d());
 
         if (mOrientation.equals(Orientation.BACK)){
-            pose.transformBy(
+            pose = pose.transformBy(
                 new Transform3d(
                     new Translation3d(), 
                     new Rotation3d(0.0, 0.0, Math.PI)));
@@ -167,8 +168,8 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
 
         Pose2d poseFinal = new Pose2d(
             new Translation2d(
-                pose.getX() + pLastPose.getX() + mCameraTransform.getX(), 
-                pose.getY() + pLastPose.getY() + mCameraTransform.getY()), 
+                pose.getX() + pLastPose.getX(), 
+                pose.getY() + pLastPose.getY()), 
                 new Rotation2d());
 
         
