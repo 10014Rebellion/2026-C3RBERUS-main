@@ -4,7 +4,6 @@ package frc.robot;
 
 import static frc.robot.systems.drive.DriveConstants.*;
 
-import edu.wpi.first.apriltag.AprilTagDetection;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.bindings.BindingsConstants;
 import frc.robot.bindings.ButtonBindings;
