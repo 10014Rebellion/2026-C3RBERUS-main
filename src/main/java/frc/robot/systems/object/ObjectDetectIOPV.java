@@ -137,7 +137,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
         pInputs.iTrackedTargetsCornersY = new double[0][0];
     }
 
-    public String mapObjectID(int pId){
+    private String mapObjectID(int pId){
         if(pId == 0){
             return "fuel";
         }
@@ -145,7 +145,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
         return "";
     }
 
-    public Pose2d computePose(double[] pXcoords, double[] pYcoords, double pPixelToRad, Pose2d pLastPose){
+    private Pose2d computePose(double[] pXcoords, double[] pYcoords, double pPixelToRad, Pose2d pLastPose){
         double heightinPixels = pYcoords[1] - pYcoords[0];
         double theta = heightinPixels - pPixelToRad;
 

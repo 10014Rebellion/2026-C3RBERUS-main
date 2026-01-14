@@ -76,6 +76,11 @@ public class ObjectDetectConstants {
         FRONT
     }
 
+    public static enum Camera {
+        FRONT_RIGHT,
+        FRONT_LEFT
+    }
+
     public static double kDiameterFuel = Units.inchesToMeters(6);
     public static double kPixelToRad = 2.0;
 }

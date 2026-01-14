@@ -3,6 +3,8 @@ package frc.robot.systems.object;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.systems.object.ObjectDetectConstants.Camera;
 import frc.robot.systems.object.ObjectDetectIO.ObjectDetectIOInputs;
 
 public class ObjectDetect {
@@ -26,6 +28,21 @@ public class ObjectDetect {
 
         mFrontLeftCamera.updateInputs(mFrontLeftData, pLastRobotPose);
         Logger.processInputs("Vision/" + mFrontLeftData.iCamName, mFrontLeftData);
+    }
+
+    public Pose2d[] getObjectPoses(Camera camera){
+        if(camera.equals(Camera.FRONT_RIGHT)){
+            return mFrontRightData.iTrackedTargetsPoses;
+        }
+
+        else if(camera.equals(Camera.FRONT_LEFT)){
+            return mFrontLeftData.iTrackedTargetsPoses;
+        }
+
+        else{
+            DriverStation.reportError("Obj camera to get poses does not exist", true);
+            return new Pose2d[0];
+        }
     }
     
 }
