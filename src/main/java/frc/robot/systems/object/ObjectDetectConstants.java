@@ -53,34 +53,6 @@ public class ObjectDetectConstants {
                     Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
                     ));
 
-    public static final String kBackLeftCamName = "BackLeft"; // >>> TODO: TUNE ME
-    public static final Orientation kBackLeftCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
-    public static final Transform3d kBackLeftCamTransform = new Transform3d(
-            new Translation3d(
-                    Units.inchesToMeters(0.0), // X: inches forward // >>> TODO: TUNE ME
-                    Units.inchesToMeters(0.0), // Y: inches left // >>> TODO: TUNE ME
-                    Units.inchesToMeters(0.0) // Z: inches above ground // >>> TODO: TUNE ME
-                    ),
-            new Rotation3d(
-                    Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
-                    Units.degreesToRadians(0.0), // Pitch: upward tilt // >>> TODO: TUNE ME
-                    Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
-                    ));
-
-    public static final String kBackRightCamName = "BackRight"; // >>> TODO: TUNE ME
-    public static final Orientation kBackRightCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
-    public static final Transform3d kBackRightCamTransform = new Transform3d(
-            new Translation3d(
-                    Units.inchesToMeters(0.0), // X: inches forward // >>> TODO: TUNE ME
-                    Units.inchesToMeters(0.0), // Y: inches right // >>> TODO: TUNE ME
-                    Units.inchesToMeters(0.0) // Z: inches above ground // >>> TODO: TUNE ME
-                    ),
-            new Rotation3d(
-                    Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME
-                    Units.degreesToRadians(0.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
-                    Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
-                    ));
-
 
     public enum CameraSimConfigs {
         resWidth(960),

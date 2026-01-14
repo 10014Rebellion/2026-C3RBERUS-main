@@ -63,7 +63,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
     }
 
     @Override
-    public void updateInputs(ObjDetectionIOInputs pInputs, Pose2d pLastRobotPose){
+    public void updateInputs(ObjectDetectIOInputs pInputs, Pose2d pLastRobotPose){
         pInputs.iCamName = mCamName;
         pInputs.iCameraToRobot = mCameraTransform;
 
@@ -120,7 +120,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
         }
     }
 
-    public void resetInputs(ObjDetectionIOInputs pInputs){
+    public void resetInputs(ObjectDetectIOInputs pInputs){
         pInputs.iIsConnected = false;
         pInputs.iHasTarget = false;
         pInputs.iHasBeenUpdated = false;

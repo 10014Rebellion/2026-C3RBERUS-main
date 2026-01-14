@@ -7,7 +7,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 
 public interface ObjectDetectIO {
     @AutoLog
-    public static class ObjDetectionIOInputs {
+    public static class ObjectDetectIOInputs {
         public String iCamName = "";
         public boolean iIsConnected = false;
         public double iLatencySeconds = 0.0;
@@ -25,6 +25,6 @@ public interface ObjectDetectIO {
         public double[][] iTrackedTargetsCornersY = new double[][] {};
     }
 
-    public default void updateInputs(ObjDetectionIOInputs inputs, Pose2d latestPose) {}
+    public default void updateInputs(ObjectDetectIOInputs inputs, Pose2d latestPose) {}
     
 }

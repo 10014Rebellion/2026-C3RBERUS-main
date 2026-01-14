@@ -86,7 +86,7 @@ public class Drive extends SubsystemBase {
     private final Module[] mModules;
     private final GyroIO mGyro;
     private final GyroInputsAutoLogged mGyroInputs = new GyroInputsAutoLogged();
-    private final AprilTag mVision;
+    private final AprilTag mAprilTag;
 
     private Rotation2d mRobotRotation;
     private final SwerveDriveOdometry mOdometry;
@@ -138,7 +138,7 @@ public class Drive extends SubsystemBase {
     public Drive(Module[] modules, GyroIO gyro, AprilTag vision) {
         this.mModules = modules;
         this.mGyro = gyro;
-        this.mVision = vision;
+        this.mAprilTag = vision;
 
         mRobotRotation = mGyroInputs.iYawPosition;
 
@@ -213,9 +213,9 @@ public class Drive extends SubsystemBase {
                             /* Scopes result between 0 and 360 */
                             % 360.0);
 
-        /* VISION */
-        mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
-        VisionObservation[] observations = mVision.getVisionObservations();
+        /* APRIL TAG VISION */
+        mAprilTag.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
+        VisionObservation[] observations = mAprilTag.getVisionObservations();
         for (VisionObservation observation : observations) {
             if (observation.hasObserved())
                 mPoseEstimator.addVisionMeasurement(observation.pose(), observation.timeStamp(), observation.stdDevs());
