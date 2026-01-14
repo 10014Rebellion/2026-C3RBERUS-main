@@ -47,7 +47,6 @@ import frc.lib.tuning.SysIDCharacterization;
 import frc.robot.game.FieldConstants;
 import frc.robot.game.GameDriveManager;
 import frc.robot.game.GameDriveManager.GameDriveStates;
-import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.controllers.HeadingController;
 import frc.robot.systems.drive.controllers.HolonomicController;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
@@ -741,11 +740,11 @@ public class Drive extends SubsystemBase {
                 < HeadingController.mToleranceDegrees.get();
     }
 
-    @AutoLogOutput(key = "Drive/Odometry/DistanceFromReef")
-    public double distanceFromReefCenter() {
+    @AutoLogOutput(key = "Drive/Odometry/DistanceFromHub")
+    public double distanceFromHubCenter() {
         return getPoseEstimate()
                 .getTranslation()
-                .getDistance(AllianceFlipUtil.apply(FieldConstants.kReefCenter).getTranslation());
+                .getDistance(AllianceFlipUtil.apply(FieldConstants.kField.hubPose().toPose2d()).getTranslation());
     }
 
     public void acceptJoystickInputs(
