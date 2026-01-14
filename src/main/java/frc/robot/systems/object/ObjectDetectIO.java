@@ -3,6 +3,7 @@ package frc.robot.systems.object;
 import org.littletonrobotics.junction.AutoLog;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 public interface ObjectDetectIO {
@@ -19,7 +20,8 @@ public interface ObjectDetectIO {
         public double[] iTrackedTargetsArea = new double[] {};
         public double[] iTrackedTargetsPitch = new double[] {};
         public double[] iTrackedTargetsYaw = new double[] {};  
-        public double[] iTrackedTargetsSkew = new double[] {};   
+        public double[] iTrackedTargetsSkew = new double[] {};  
+        public Pose2d[] iTrackedTargetsPoses = new Pose2d[] {}; 
         public double[][] iTrackedTargetsCornersX = new double[][] {};
         public double[][] iTrackedTargetsCornersY = new double[][] {};
     }

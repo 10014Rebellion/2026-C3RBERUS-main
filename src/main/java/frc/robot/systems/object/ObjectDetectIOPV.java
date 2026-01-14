@@ -10,12 +10,16 @@ import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.game.FieldConstants;
 import frc.robot.systems.apriltag.AprilTagConstants.CameraSimConfigs;
 import frc.robot.systems.object.ObjectDetectConstants.Orientation;
+
+import static frc.robot.systems.object.ObjectDetectConstants.kDiameterFuel;
+import static frc.robot.systems.object.ObjectDetectConstants.kPixelToRad;
 
 public class ObjectDetectIOPV implements ObjectDetectIO{
     private String mCamName;
@@ -77,6 +81,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
                 double[] pitches = new double[latestResult.targets.size()];
                 double[] yaws = new double[latestResult.targets.size()];
                 double[] skews = new double[latestResult.targets.size()];
+                Pose2d[] poses = new Pose2d[latestResult.targets.size()];
                 double[][] cornersX = new double[4][latestResult.targets.size()];
                 double[][] cornersY = new double[4][latestResult.targets.size()];
 
@@ -91,6 +96,8 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
                         cornersX[j][i] = latestResult.targets.get(i).getMinAreaRectCorners().get(j).x;
                         cornersY[j][i] = latestResult.targets.get(i).getMinAreaRectCorners().get(j).y;
                     }
+
+                    poses[i] = computePose(cornersX[i], cornersY[i], kPixelToRad, pLastRobotPose);
                 }
 
                 pInputs.iTrackedTargetsClass = classes;
@@ -131,5 +138,20 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
         }
 
         return "";
+    }
+
+    public Pose2d computePose(double[] pXcoords, double[] pYcoords, double pPixelToRad, Pose2d pLastPose){
+        double heightinPixels = pYcoords[1] - pYcoords[0];
+        double theta = heightinPixels - pPixelToRad;
+
+        double distance = kDiameterFuel / Math.tan(theta);
+
+        Transform2d transform = 
+        new Transform2d(
+            distance * Math.cos(theta), 
+            distance * Math.sin(theta), 
+            new Rotation2d());
+        
+        return pLastPose.transformBy(transform);
     }
 }
