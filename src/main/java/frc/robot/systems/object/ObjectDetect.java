@@ -1,11 +1,12 @@
 package frc.robot.systems.object;
 
+import java.util.List;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.systems.object.ObjectDetectConstants.Camera;
-import frc.robot.systems.object.ObjectDetectIO.ObjectDetectIOInputs;
 
 public class ObjectDetect {
 
@@ -30,7 +31,7 @@ public class ObjectDetect {
         Logger.processInputs("Vision/" + mFrontLeftData.iCamName, mFrontLeftData);
     }
 
-    public Pose2d[] getObjectPoses(Camera camera){
+    public Pose2d[] getObjectPoseForCamera(Camera camera){
         if(camera.equals(Camera.FRONT_RIGHT)){
             return mFrontRightData.iTrackedTargetsPoses;
         }
@@ -44,5 +45,27 @@ public class ObjectDetect {
             return new Pose2d[0];
         }
     }
+
+    public double getDistance(Pose2d pose){
+        return Math.sqrt((pose.getX() * pose.getX()) + (pose.getY() * pose.getY()));
+    }
+
+    public Pose2d[] getObjectPoses(){
+        Pose2d[] frontRightPoses = getObjectPoseForCamera(Camera.FRONT_RIGHT);
+        Pose2d[] frontLeftPoses = getObjectPoseForCamera(Camera.FRONT_LEFT);
+
+        List<Pose2d> poses = List.of();
+
+        for(int i = 0; i < frontLeftPoses.length; i++){
+            poses.add(frontLeftPoses[i]);
+        }
+
+        for(int j = 0; j < frontRightPoses.length; j++){
+            poses.add(frontRightPoses[j]);
+        }
+
+        return (Pose2d[]) poses.toArray();
+    }
+
     
 }

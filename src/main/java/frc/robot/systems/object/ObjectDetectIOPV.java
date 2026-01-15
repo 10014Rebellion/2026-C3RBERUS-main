@@ -147,7 +147,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
 
     private Pose2d computePose(double[] pXcoords, double[] pYcoords, double pPixelToRad, Pose2d pLastPose){
         double heightinPixels = pYcoords[1] - pYcoords[0];
-        double theta = heightinPixels - pPixelToRad;
+        double theta = heightinPixels / pPixelToRad;
 
         double distance = kDiameterFuel / Math.tan(theta);
 
