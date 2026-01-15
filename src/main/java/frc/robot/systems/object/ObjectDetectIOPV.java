@@ -13,7 +13,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -166,13 +165,13 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
                     new Rotation3d(0.0, 0.0, Math.PI)));
         }
 
-        Pose2d poseFinal = new Pose2d(
-            new Translation2d(
-                pose.getX() + pLastPose.getX(), 
-                pose.getY() + pLastPose.getY()), 
-                new Rotation2d());
+        // Pose2d poseFinal = new Pose2d(
+        //     new Translation2d(
+        //         pose.getX() + pLastPose.getX(), 
+        //         pose.getY() + pLastPose.getY()), 
+        //         new Rotation2d());
 
         
-        return poseFinal;
+        return pose.toPose2d();
     }
 }
