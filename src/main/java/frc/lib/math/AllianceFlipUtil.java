@@ -14,7 +14,7 @@ import frc.robot.game.FieldConstants;
 public class AllianceFlipUtil {
     public static double apply(double xCoordinate) {
         if (shouldFlip()) {
-            return FieldConstants.kField.fieldLengthXM() - xCoordinate;
+            return FieldConstants.kFieldXM - xCoordinate;
         } else {
             return xCoordinate;
         }
@@ -24,7 +24,7 @@ public class AllianceFlipUtil {
      */
     public static Translation2d apply(Translation2d translation) {
         if (shouldFlip()) {
-            return new Translation2d(apply(translation.getX()), FieldConstants.kField.fieldLengthXM() - translation.getY());
+            return new Translation2d(apply(translation.getX()), FieldConstants.kFieldYM - translation.getY());
         } else {
             return translation;
         }
@@ -58,7 +58,7 @@ public class AllianceFlipUtil {
 
     public static Translation2d apply(Translation2d translation, boolean flip) {
         if (flip) {
-            return new Translation2d(apply(translation.getX()), FieldConstants.kField.fieldLengthXM() - translation.getY());
+            return new Translation2d(apply(translation.getX()), FieldConstants.kFieldYM - translation.getY());
         } else {
             return translation;
         }

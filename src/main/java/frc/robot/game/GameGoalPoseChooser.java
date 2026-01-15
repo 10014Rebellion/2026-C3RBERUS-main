@@ -48,7 +48,7 @@ public class GameGoalPoseChooser {
 
     /* Accoumts for rotation from reef, and offsets for red-side logic */
     public static Rotation2d turnFromHub(Pose2d robotPose) {
-        Pose2d reefCenter = AllianceFlipUtil.apply(FieldConstants.kField.hubPose().toPose2d());
+        Pose2d reefCenter = AllianceFlipUtil.apply(FieldConstants.kHubPose);
         Rotation2d angleFromReefCenter = Rotation2d.fromRadians(
                 Math.atan2(robotPose.getY() - reefCenter.getY(), robotPose.getX() - reefCenter.getX()));
 

@@ -44,7 +44,7 @@ public class AprilTagIOPVTag implements AprilTagIO {
         this.mOrientation = pOrientation;
 
         mPoseEstimator = new PhotonPoseEstimator(
-            FieldConstants.kField.aprilTags(), 
+            FieldConstants.kApriltagLayout, 
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, 
             pCameraTransform);
 
@@ -57,7 +57,7 @@ public class AprilTagIOPVTag implements AprilTagIO {
 
     private void setupSimulation() {
         mVisionSim = new VisionSystemSim("main");
-        mVisionSim.addAprilTags(FieldConstants.kField.aprilTags());
+        mVisionSim.addAprilTags(FieldConstants.kApriltagLayout);
 
         SimCameraProperties cameraProps = new SimCameraProperties();
         cameraProps.setCalibration(

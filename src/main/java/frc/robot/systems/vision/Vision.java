@@ -95,7 +95,7 @@ public class Vision {
 
         Pose2d pose;
         if (KUseSingleTagTransform) {
-            Optional<Pose3d> tagPoseOpt = FieldConstants.kField.aprilTags().getTagPose(pCamData.iSingleTagAprilTagID);
+            Optional<Pose3d> tagPoseOpt = FieldConstants.kApriltagLayout.getTagPose(pCamData.iSingleTagAprilTagID);
             if (tagPoseOpt.isEmpty()) {
                 DriverStation.reportWarning("<<< COULD NOT FIND TAG ON FIELD! >>>", true);
                 return makeUntrustedObservation(pCamData);

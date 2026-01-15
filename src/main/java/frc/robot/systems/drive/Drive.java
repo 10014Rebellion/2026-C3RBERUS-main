@@ -744,7 +744,7 @@ public class Drive extends SubsystemBase {
     public double distanceFromHubCenter() {
         return getPoseEstimate()
                 .getTranslation()
-                .getDistance(AllianceFlipUtil.apply(FieldConstants.kField.hubPose().toPose2d()).getTranslation());
+                .getDistance(AllianceFlipUtil.apply(FieldConstants.kHubPose).getTranslation());
     }
 
     public void acceptJoystickInputs(
