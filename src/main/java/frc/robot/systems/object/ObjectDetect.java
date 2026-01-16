@@ -6,7 +6,10 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.sorting.Pose2dSorter;
 import frc.robot.systems.object.ObjectDetectConstants.Camera;
+
+import static frc.robot.systems.object.ObjectDetectConstants.kDiameterFuelMeters;
 
 public class ObjectDetect {
 
@@ -51,20 +54,36 @@ public class ObjectDetect {
     }
 
     public Pose2d[] getObjectPoses(){
-        Pose2d[] frontRightPoses = getObjectPoseForCamera(Camera.FRONT_RIGHT);
         Pose2d[] frontLeftPoses = getObjectPoseForCamera(Camera.FRONT_LEFT);
+        Pose2d[] frontRightPoses = getObjectPoseForCamera(Camera.FRONT_RIGHT);
 
-        List<Pose2d> poses = List.of();
+        // Create a big list of the poses //
+        Pose2d[] poses = new Pose2d[frontLeftPoses.length + frontRightPoses.length];
 
+        // Add the poses for each camera //
         for(int i = 0; i < frontLeftPoses.length; i++){
-            poses.add(frontLeftPoses[i]);
+            poses[i] = frontLeftPoses[i];
         }
 
-        for(int j = 0; j < frontRightPoses.length; j++){
-            poses.add(frontRightPoses[j]);
+        for(int i = frontLeftPoses.length; i < frontRightPoses.length; i++){
+            poses[i] = frontRightPoses[i];
         }
 
-        return (Pose2d[]) poses.toArray();
+        // Run quick sort based on Distance from the robot //
+        poses = Pose2dSorter.quickSort(poses);
+
+        return poses;
+    }
+
+    private boolean inTolerance(Pose2d pose1, Pose2d pose2){
+
+        // This boolean expression checks if two poses are 
+        return !(
+            pose2.getX() - (kDiameterFuelMeters / 2.0) < pose1.getX() &&
+            pose1.getX() < pose2.getX() + (kDiameterFuelMeters / 2.0) &&
+            pose2.getY() - (kDiameterFuelMeters / 2.0) < pose1.getY() &&
+            pose1.getY() < pose2.getY() + (kDiameterFuelMeters / 2.0));
+
     }
 
     

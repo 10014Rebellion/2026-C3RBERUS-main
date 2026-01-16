@@ -20,7 +20,7 @@ import frc.robot.game.FieldConstants;
 import frc.robot.systems.apriltag.AprilTagConstants.CameraSimConfigs;
 import frc.robot.systems.object.ObjectDetectConstants.Orientation;
 
-import static frc.robot.systems.object.ObjectDetectConstants.kDiameterFuel;
+import static frc.robot.systems.object.ObjectDetectConstants.kDiameterFuelMeters;
 import static frc.robot.systems.object.ObjectDetectConstants.kPixelToRad;
 
 public class ObjectDetectIOPV implements ObjectDetectIO{
@@ -148,7 +148,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
         double heightinPixels = pYcoords[1] - pYcoords[0];
         double theta = heightinPixels / pPixelToRad;
 
-        double distance = kDiameterFuel / Math.tan(theta);
+        double distance = kDiameterFuelMeters / Math.tan(theta);
 
         Pose3d pose = new Pose3d(
             new Translation3d(
