@@ -81,6 +81,6 @@ public class ObjectDetectConstants {
         FRONT_LEFT
     }
 
-    public static double kDiameterFuel = Units.inchesToMeters(6);
+    public static double kDiameterFuelMeters = Units.inchesToMeters(6);
     public static double kPixelToRad = 2.0;
 }
