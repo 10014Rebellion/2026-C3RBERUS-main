@@ -83,4 +83,6 @@ public class ObjectDetectConstants {
 
     public static double kDiameterFuelMeters = Units.inchesToMeters(6);
     public static double kPixelToRad = 2.0;
+    public static double kTranslationToleranceMeters = kDiameterFuelMeters / 2.0;
+    public static double kRotationalToleranceDegrees = 3.0;
 }

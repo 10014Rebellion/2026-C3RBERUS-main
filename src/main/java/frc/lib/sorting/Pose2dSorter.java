@@ -20,13 +20,6 @@ public class Pose2dSorter {
         return copy;
     }
     
-    /**
-     * Recursive QuickSort helper method.
-     * 
-     * @param poses The array of Pose2d objects
-     * @param low The starting index
-     * @param high The ending index
-     */
     private static void quickSort(Pose2d[] poses, int low, int high) {
         if (low < high) {
             int partitionIndex = partition(poses, low, high);
@@ -35,14 +28,6 @@ public class Pose2dSorter {
         }
     }
     
-    /**
-     * Partitions the array around a pivot element.
-     * 
-     * @param poses The array of Pose2d objects
-     * @param low The starting index
-     * @param high The ending index
-     * @return The partition index
-     */
     private static int partition(Pose2d[] poses, int low, int high) {
         double pivot = poses[high].getTranslation().getNorm();
         int i = low - 1;
@@ -58,13 +43,6 @@ public class Pose2dSorter {
         return i + 1;
     }
     
-    /**
-     * Swaps two elements in the array.
-     * 
-     * @param poses The array of Pose2d objects
-     * @param i Index of first element
-     * @param j Index of second element
-     */
     private static void swap(Pose2d[] poses, int i, int j) {
         Pose2d temp = poses[i];
         poses[i] = poses[j];
