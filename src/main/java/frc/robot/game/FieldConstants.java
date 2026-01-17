@@ -46,8 +46,8 @@ public class FieldConstants {
     public static final Pose3d[] kHubInnerHexPoints = buildHubHex(kHubInnerPose, kHubHexInnerOffsetM);
 
     public static final AprilTagFieldLayout kApriltagLayout = kFieldType.equals(FieldType.ANDYMARK) 
-        ? AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark) 
-        : AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+        ? AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark) 
+        : AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
     private static Pose3d[] buildHubHex(Pose3d pHubPose, double pHubHexOffsetM) {
         Pose3d[] hex = new Pose3d[6];
