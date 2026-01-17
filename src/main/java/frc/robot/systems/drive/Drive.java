@@ -197,10 +197,11 @@ public class Drive extends SubsystemBase {
         if(mPrevStates == null || mPrevPositions == null) {
             mPrevStates = SwerveUtils.zeroStates();
             mPrevPositions = SwerveUtils.zeroPositions();
-        } else {
-            mPrevStates = getModuleStates();
-            mPrevPositions = getModulePositions();
-        }
+        } 
+        // else {
+        //     mPrevStates = getModuleStates();
+        //     mPrevPositions = getModulePositions();
+        // }
 
         
         for (Module module : mModules) module.periodic();
@@ -228,23 +229,26 @@ public class Drive extends SubsystemBase {
                     observation.stdDevs().get(2));
         }
 
-
         double[] sampleTimestamps =
             mModules[0].getOdometryTimeStamps(); // All signals are sampled together
         int sampleCount = sampleTimestamps.length;
+        // System.out.println("\n\n\n\n\n\n\n\n"+sampleCount+"\n\n\n\n\n\n\n\n\n\n");
+        // Telemetry.reportException(new Exception("SAMPLE COUNT:" + sampleCount));
         for (int i = 0; i < sampleCount; i++) {
             // Read wheel positions and deltas from each module
-            SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-            SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+            SwerveModulePosition[] modulePositions = SwerveUtils.zeroPositions();
+            SwerveModulePosition[] moduleDeltas = SwerveUtils.zeroPositions();
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+                // System.out.println("\n\n\n\n\n\n\n\n"+mModules[moduleIndex].getOdometryPositions().length+"\n\n\n\n\n\n\n\n\n\n");
                 modulePositions[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
-                moduleDeltas[moduleIndex] =
-                new SwerveModulePosition(
+                moduleDeltas[moduleIndex] = new SwerveModulePosition(
                     modulePositions[moduleIndex].distanceMeters
                         - mPrevPositions[moduleIndex].distanceMeters,
                     modulePositions[moduleIndex].angle);
                 mPrevPositions[moduleIndex] = modulePositions[moduleIndex];
             }
+
+            Logger.recordOutput("Drive/ModulePositions250", modulePositions);
 
             // Update gyro angle
             if (mGyroInputs.iConnected) {
@@ -255,6 +259,8 @@ public class Drive extends SubsystemBase {
                 Twist2d twist = kKinematics.toTwist2d(moduleDeltas);
                 mRobotRotation = mRobotRotation.plus(new Rotation2d(twist.dtheta));
             }
+
+            mPoseEstimator.updateWithTime(sampleTimestamps[i], mRobotRotation, modulePositions);
         }
 
         // Apply update
@@ -740,7 +746,7 @@ public class Drive extends SubsystemBase {
 
     @AutoLogOutput(key = "Drive/Odometry/PoseEstimate")
     public Pose2d getPoseEstimate() {
-        return (RobotBase.isReal()) ? mPoseEstimator.getEstimatedPosition() : getOdometryPose();
+        return mPoseEstimator.getEstimatedPosition();
     }
 
     @AutoLogOutput(key = "Drive/Odometry/OdometryPose")
@@ -771,12 +777,12 @@ public class Drive extends SubsystemBase {
                 < HeadingController.mToleranceDegrees.get();
     }
 
-    @AutoLogOutput(key = "Drive/Odometry/DistanceFromHub")
-    public double distanceFromHubCenter() {
-        return getPoseEstimate()
-                .getTranslation()
-                .getDistance(AllianceFlipUtil.apply(FieldConstants.kHubPose).getTranslation());
-    }
+    // @AutoLogOutput(key = "Drive/Odometry/DistanceFromHub")
+    // public double distanceFromHubCenter() {
+    //     return getPoseEstimate()
+    //             .getTranslation()
+    //             .getDistance(AllianceFlipUtil.apply(FieldConstants.kHubPose).getTranslation());
+    // }
 
     public void acceptJoystickInputs(
             DoubleSupplier pXSupplier,

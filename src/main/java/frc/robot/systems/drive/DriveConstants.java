@@ -86,7 +86,7 @@ public class DriveConstants {
     public static final CANBus kCANBus = new CANBus("drive"); // TODO: TUNE ME
     public static final boolean isCANFD = true; 
     public static final double kOdometryFrequency = isCANFD ? 250.0 : 100.0;
-    public static final Lock kOdometryLock = new ReentrantLock(); 
+    static final Lock kOdometryLock = new ReentrantLock(); 
 
     public static final int kPigeonCANID = 5; // TODO: TUNE ME
 

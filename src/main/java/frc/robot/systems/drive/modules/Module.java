@@ -54,6 +54,16 @@ public class Module {
         mCurrentState = new SwerveModuleState(mInputs.iDriveVelocityMPS, mInputs.iAzimuthPosition);
         mCurrentPosition = new SwerveModulePosition(mInputs.iDrivePositionM, mInputs.iAzimuthPosition);
 
+        int sampleCount = mInputs.odometryTimestamps.length;
+        odometryPositions = new SwerveModulePosition[sampleCount];
+        // System.out.println("\n\n\n\n\n\n\n\n"+sampleCount+"\n\n\n\n\n\n\n\n\n\n");
+        for (int i = 0; i < sampleCount; i++) {
+            odometryPositions[i] = 
+                new SwerveModulePosition(
+                    mInputs.odometryDrivePositionsM[i], 
+                    mInputs.odometryTurnPositions[i]);
+        }
+
         if (mVelocitySetpointMPS != null) {
             if (mAmperageFeedforward != null) {
                 double ffOutput = mDriveFF.calculateWithVelocities(mVelocitySetpointMPS, mAmperageFeedforward);
@@ -71,54 +81,45 @@ public class Module {
                 Telemetry.log("Drive/" + kModuleName + "/SimpleFeedforward", ffOutput);
                 mIO.setAzimuthPosition(mAzimuthSetpointAngle, ffOutput);
             }
-
-            int sampleCount = mInputs.odometryTimestamps.length;
-            odometryPositions = new SwerveModulePosition[sampleCount];
-            for (int i = 0; i < sampleCount; i++) {
-                odometryPositions[i] = 
-                    new SwerveModulePosition(
-                        mInputs.odometryDrivePositionsM[i], 
-                        mInputs.odometryTurnPositions[i]);
-            }
-
-            if (DriverStation.isDisabled()) stop();
-
-            LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get());
-                },
-                tDriveP,
-                tDriveD
-            );
-
-            LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mDriveFF = new SimpleMotorFeedforward(tDriveS.get(), tDriveV.get(), tDriveA.get());
-                },
-                tDriveS,
-                tDriveV,
-                tDriveA
-            );
-
-            LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mIO.setAzimuthPID(tTurnP.get(), 0.0, tTurnD.get());
-                },
-                tTurnP,
-                tTurnD
-            );
-
-            LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mAzimuthFF = new SimpleMotorFeedforward(tTurnS.get(), 0.0, 0.0);
-                },
-                tTurnS
-            );
         }
+
+        if (DriverStation.isDisabled()) stop();
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get());
+            },
+            tDriveP,
+            tDriveD
+        );
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                mDriveFF = new SimpleMotorFeedforward(tDriveS.get(), tDriveV.get(), tDriveA.get());
+            },
+            tDriveS,
+            tDriveV,
+            tDriveA
+        );
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                mIO.setAzimuthPID(tTurnP.get(), 0.0, tTurnD.get());
+            },
+            tTurnP,
+            tTurnD
+        );
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                mAzimuthFF = new SimpleMotorFeedforward(tTurnS.get(), 0.0, 0.0);
+            },
+            tTurnS
+        );
     }
 
     /* Sets the desired setpoint of the module with FF. Disables the all FF include velocity FF
