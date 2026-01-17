@@ -81,6 +81,11 @@ public class ObjectDetect {
 
     }
 
+    public double calculateDensity(Pose2d[] poses, Pose2d poseInstance){
+        
+        return 1;
+    }
+
     private double getDistance(Pose2d pose){
         return Math.sqrt((pose.getX() * pose.getX()) + (pose.getY() * pose.getY()));
     }

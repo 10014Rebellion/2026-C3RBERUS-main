@@ -85,4 +85,8 @@ public class ObjectDetectConstants {
     public static double kPixelToRad = 2.0;
     public static double kTranslationToleranceMeters = kDiameterFuelMeters / 2.0;
     public static double kRotationalToleranceDegrees = 3.0;
+
+    public static double kDensityHeuristic = 1;
+    public static double kDistanceHeuristic = 1;
+    public static double kHeadingsHeuristic = 1;
 }
