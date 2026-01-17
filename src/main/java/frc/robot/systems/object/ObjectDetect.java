@@ -2,8 +2,6 @@ package frc.robot.systems.object;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -77,23 +75,25 @@ public class ObjectDetect {
             }
         }
 
-        return new Pose2d[0];
+        poses = Pose2dSorter.quickSort((Pose2d[]) uniquePosesList.toArray());
+
+        return poses;
 
     }
 
-    public double getDistance(Pose2d pose){
+    private double getDistance(Pose2d pose){
         return Math.sqrt((pose.getX() * pose.getX()) + (pose.getY() * pose.getY()));
     }
 
-    public double arcsin(double x, double y){
+    private double arcsin(double x, double y){
         return Math.toDegrees(Math.asin((y) / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))));
     }
 
-    public double arccos(double x, double y){
+    private double arccos(double x, double y){
         return Math.toDegrees(Math.acos((x) / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))));
     }
 
-    public boolean inequality(double x, double y, double tolerance){
+    private boolean inequality(double x, double y, double tolerance){
         return (x < (y + tolerance) && (y - tolerance) < x);
     }
     
