@@ -70,8 +70,8 @@ public class HeadingController {
             "Drive/HeadingController/HeadingSetpoint",
             Rotation2d.fromDegrees(mSnapController.getSetpoint().position));
 
-        Rotation2d pidOutput = Rotation2d.fromRadians(mSnapController.calculate(pRobotRotation.getDegrees(), mGoal.get().getDegrees()));
-        Rotation2d profileFFOutput = Rotation2d.fromRadians(mSnapController.getSetpoint().velocity);
+        Rotation2d pidOutput = Rotation2d.fromDegrees(mSnapController.calculate(pRobotRotation.getDegrees(), mGoal.get().getDegrees()));
+        Rotation2d profileFFOutput = Rotation2d.fromDegrees(mSnapController.getSetpoint().velocity);
         Rotation2d turnPointFFOutput = mTurnPointFF.computeOmegaFeedforward();
 
         double outputRadians = pidOutput.getRadians() + profileFFOutput.getRadians() + turnPointFFOutput.getRadians();

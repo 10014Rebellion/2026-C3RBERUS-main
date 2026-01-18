@@ -2,7 +2,6 @@ package frc.lib.controls;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -41,7 +40,6 @@ public class TurnPointFeedforward {
         double deltaVY = mPointFieldSpeeds.get().vyMetersPerSecond - mRobotFieldSpeeds.get().vyMetersPerSecond;
 
         // Equation derived using tan(theta) = (xPoint - xRobot) / (yPoint - yRobot)
-
         if(EqualsUtil.epsilonEquals(deltaX, 0.0) && EqualsUtil.epsilonEquals(deltaY, 0.0)) return Rotation2d.kZero;
 
         double omega = 
