@@ -27,14 +27,18 @@ public class ButtonBindings {
 
         mDriverController.y().onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
 
-        mDriverController.a()
-            .onTrue(
-                Commands.runOnce(() -> mDriveSS.setPose(new Pose2d()), mDriveSS)
-                    .andThen(mDriveSS.setToGenericAutoAlign(() -> new Pose2d(0.5, 0, Rotation2d.kCCW_Pi_2), ConstraintType.LINEAR)))
-            .onFalse(mDriveSS.setToTeleop());
+        // mDriverController.a()
+        //     .onTrue(
+        //         Commands.runOnce(() -> mDriveSS.setPose(new Pose2d()), mDriveSS)
+        //             .andThen(mDriveSS.setToGenericAutoAlign(() -> new Pose2d(0.5, 0, Rotation2d.kCCW_Pi_2), ConstraintType.LINEAR)))
+        //     .onFalse(mDriveSS.setToTeleop());
 
         mDriverController.x()
             .onTrue(mDriveSS.characterizeAzimuths(0))
             .onFalse(mDriveSS.setToTeleop());
+
+        // mDriverController.a()
+        //     .onTrue(Commands.runOnce(() -> mDriveSS.setPose(new Pose2d()), mDriveSS)
+        //             .andThen(mDriveSS.setToGenericLineAlign(() -> new Pose2d(2.5, 2.5, Rotation2d.fromDegrees(45.0)), () -> Rotation2d.fromDegrees(45.0))));
     }
 }

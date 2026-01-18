@@ -83,20 +83,20 @@ public class DriveConstants {
     /* MODULE SPECIFIC CONSTANTS */
     /* If 180 was added, the person who got the offset had the bevel gears on the wrong side when they did it */
     // BEVEL FACING LEFT (it shoulda been facing right tho)
-    public static final CANBus kCANBus = new CANBus("drive"); // TODO: TUNE ME
+    public static final CANBus kCANBus = new CANBus("rebeldrive"); // TODO: TUNE ME
     public static final boolean isCANFD = true; 
     public static final double kOdometryFrequency = isCANFD ? 250.0 : 100.0;
     static final Lock kOdometryLock = new ReentrantLock(); 
 
     public static final int kPigeonCANID = 5; // TODO: TUNE ME
 
-    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, 0); // TODO: TUNE ME
+    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, -0.350 + 0.5);
 
-    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, 0); // TODO: TUNE ME
+    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, 0.259766 + 0.5);
 
-    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(33, 23, 13, 0); // TODO: TUNE ME
+    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(33, 23, 13, -0.249 + 0.5);
 
-    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(34, 24, 14, 0); // TODO: TUNE ME
+    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(34, 24, 14, -0.368 + 0.5);
 
     public static record ModuleHardwareConfig(int driveID, int azimuthID, int encoderID, double offset) {}
 

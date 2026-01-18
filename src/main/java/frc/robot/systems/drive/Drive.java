@@ -561,13 +561,13 @@ public class Drive extends SubsystemBase {
                     driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
                 }
 
-                Rotation2d deltaChange = mPrevPositions[i].angle.minus(getModulePositions()[i].angle);
+                // Rotation2d deltaChange = mPrevPositions[i].angle.minus(getModulePositions()[i].angle);
 
-                double deltaV = deltaChange.getRadians() * DriveConstants.kDriveMotorGearing * DriveConstants.kWheelCircumferenceMeters / 0.02;
-                double desV = Math.abs(setpointStates[i].speedMetersPerSecond);
-                double desDriveV = desV - deltaV;
+                // double deltaV = deltaChange.getRadians() * DriveConstants.kDriveMotorGearing * DriveConstants.kWheelCircumferenceMeters / 0.02;
+                // double desV = Math.abs(setpointStates[i].speedMetersPerSecond);
+                // double desDriveV = desV - deltaV;
 
-                setpointStates[i] = new SwerveModuleState(desDriveV, setpointStates[i].angle);
+                // setpointStates[i] = new SwerveModuleState(desDriveV, setpointStates[i].angle);
 
                 optimizedSetpointStates[i] = mModules[i].setDesiredStateWithAmpFF(setpointStates[i], driveAmps);
 

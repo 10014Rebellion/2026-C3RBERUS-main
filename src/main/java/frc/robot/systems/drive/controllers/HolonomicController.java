@@ -210,11 +210,11 @@ public class HolonomicController {
                                         goalPose.getRotation().getDegrees(),
                                         Math.toDegrees(goalSpeed.omegaRadiansPerSecond)))
                         + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity))),
-                mLineDirection.get().plus(currentPose.getRotation()));
+                mLineDirection.get());
 
         return new ChassisSpeeds(
                 teleopSpeedsLineRelative.vxMetersPerSecond + alignRelative.vxMetersPerSecond,
-                teleopSpeedsLineRelative.vxMetersPerSecond * 0 + alignRelative.vyMetersPerSecond,
+                teleopSpeedsLineRelative.vxMetersPerSecond + alignRelative.vyMetersPerSecond,
                 alignRelative.omegaRadiansPerSecond
         );
     }
