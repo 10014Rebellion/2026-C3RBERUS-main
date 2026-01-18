@@ -26,7 +26,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,7 +34,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.lib.math.AllianceFlipUtil;
+import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.GeomUtil;
 import frc.lib.optimizations.PPRobotConfigLoader;
 import frc.lib.pathplanner.SwerveSetpoint;
@@ -45,7 +44,6 @@ import frc.lib.swerve.SwerveUtils;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.lib.tuning.SysIDCharacterization;
-import frc.robot.game.FieldConstants;
 import frc.robot.game.GameDriveManager;
 import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.systems.drive.controllers.HeadingController;
@@ -114,7 +112,7 @@ public class Drive extends SubsystemBase {
 
     private final ManualTeleopController mTeleopController = new ManualTeleopController();
 
-    private final HeadingController mHeadingController = new HeadingController();
+    private final HeadingController mHeadingController = new HeadingController(TurnPointFeedforward.zeroTurnPointFF());
 
     @AutoLogOutput(key = "Drive/HeadingController/GoalRotation")
     private Supplier<Rotation2d> mGoalRotationSup = () -> new Rotation2d();
@@ -197,11 +195,7 @@ public class Drive extends SubsystemBase {
         if(mPrevStates == null || mPrevPositions == null) {
             mPrevStates = SwerveUtils.zeroStates();
             mPrevPositions = SwerveUtils.zeroPositions();
-        } 
-        // else {
-        //     mPrevStates = getModuleStates();
-        //     mPrevPositions = getModulePositions();
-        // }
+        }
 
         
         for (Module module : mModules) module.periodic();
@@ -210,8 +204,6 @@ public class Drive extends SubsystemBase {
         mGyro.updateInputs(mGyroInputs);
         Logger.processInputs("Drive/Gyro", mGyroInputs);
         kOdometryLock.unlock();
-
-
 
         /* VISION */
         mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
@@ -263,21 +255,6 @@ public class Drive extends SubsystemBase {
             mPoseEstimator.updateWithTime(sampleTimestamps[i], mRobotRotation, modulePositions);
         }
 
-        // Apply update
-        // poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-
-        // if (mGyroInputs.iConnected) mRobotRotation = mGyroInputs.iYawPosition;
-        // else
-        //     mRobotRotation = Rotation2d.fromRadians(
-        //             (mPoseEstimator.getEstimatedPosition().getRotation().getRadians()
-        //                             /* D=vt. Uses modules and IK to estimate turn */
-        //                             + getRobotChassisSpeeds().omegaRadiansPerSecond * 0.02)
-        //                     /* Scopes result between 0 and 360 */
-        //                     % 360.0);
-
-        // mPoseEstimator.update(mRobotRotation, getModulePositions());
-        // mOdometry.update(mRobotRotation, getModulePositions());
-
         mField.setRobotPose(getPoseEstimate());
     }
 
@@ -305,7 +282,7 @@ public class Drive extends SubsystemBase {
                 mDesiredSpeeds = new ChassisSpeeds(
                         teleopSpeeds.vxMetersPerSecond,
                         teleopSpeeds.vyMetersPerSecond,
-                        mHeadingController.getSnapOutput(getPoseEstimate().getRotation()));
+                        mHeadingController.getSnapOutputRadians(getPoseEstimate().getRotation()));
                 break;
             case AUTO_ALIGN:
                 mDesiredSpeeds = mAutoAlignController.calculate(mGoalPoseSup.get(), getPoseEstimate());
@@ -413,13 +390,24 @@ public class Drive extends SubsystemBase {
      * Reference GameDriveManager to use game-specific implementation of this command
      * @param The desired rotation
      */
-    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation) {
+    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation, TurnPointFeedforward pTurnPointFeedforward) {
         return new InstantCommand(() -> {
                     mGoalRotationSup = pGoalRotation;
                     mHeadingController.setHeadingGoal(mGoalRotationSup);
                     mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.iYawVelocityPS);
+                    mHeadingController.setTurnPointFF(pTurnPointFeedforward);
                 })
                 .andThen(setDriveStateCommandContinued(DriveState.HEADING_ALIGN));
+    }
+
+    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation) {
+        return setToGenericHeadingAlign(
+            pGoalRotation, 
+            new TurnPointFeedforward(
+                mPoseEstimator::getEstimatedPosition, 
+                () -> getDesiredChassisSpeeds(), 
+                mGoalPoseSup, 
+                () -> new ChassisSpeeds()));
     }
 
     public Command setToGenericLineAlign(Supplier<Pose2d> desiredPose) {
@@ -776,13 +764,6 @@ public class Drive extends SubsystemBase {
                         .getDegrees()
                 < HeadingController.mToleranceDegrees.get();
     }
-
-    // @AutoLogOutput(key = "Drive/Odometry/DistanceFromHub")
-    // public double distanceFromHubCenter() {
-    //     return getPoseEstimate()
-    //             .getTranslation()
-    //             .getDistance(AllianceFlipUtil.apply(FieldConstants.kHubPose).getTranslation());
-    // }
 
     public void acceptJoystickInputs(
             DoubleSupplier pXSupplier,

@@ -2,13 +2,14 @@
 
 package frc.robot.systems.drive.controllers;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
+
 import java.util.function.Supplier;
 
 public class HeadingController {
@@ -31,12 +32,13 @@ public class HeadingController {
             new LoggedTunableNumber("SwerveHeadingController/Tolerance", 0.75);
 
     private ProfiledPIDController mSnapController;
+    private TurnPointFeedforward mTurnPointFF;
 
-    private PIDController mStabilizingController;
+    // private PIDController mStabilizingController;
 
     private Supplier<Rotation2d> mGoal;
 
-    public HeadingController() {
+    public HeadingController(TurnPointFeedforward pTurnPointFF) {
         mSnapController = new ProfiledPIDController(
                 mSnapP.get(),
                 mSnapI.get(),
@@ -45,6 +47,8 @@ public class HeadingController {
 
         mSnapController.enableContinuousInput(0, 360);
         mSnapController.setTolerance(1.0);
+
+        setTurnPointFF(pTurnPointFF);
 
         // stabilizingController =
         //     new PIDController(stablizingP.get(), stablizingI.get(), stablizingD.get());
@@ -61,41 +65,42 @@ public class HeadingController {
     }
 
     // Designed for large jumps toward a setpoint, kind of like an azimuth alignment
-    public double getSnapOutput(Rotation2d pRobotRotation) {
+    public double getSnapOutputRadians(Rotation2d pRobotRotation) {
         Telemetry.log(
-                "Drive/HeadingController/HeadingSetpoint",
-                Rotation2d.fromDegrees(mSnapController.getSetpoint().position));
+            "Drive/HeadingController/HeadingSetpoint",
+            Rotation2d.fromDegrees(mSnapController.getSetpoint().position));
 
-        double pidOutput = mSnapController.calculate(
-                pRobotRotation.getDegrees(), mGoal.get().getDegrees());
-        double ffOutput = mSnapController.getSetpoint().velocity;
-        double output = Math.toRadians(pidOutput + ffOutput);
+        Rotation2d pidOutput = Rotation2d.fromRadians(mSnapController.calculate(pRobotRotation.getDegrees(), mGoal.get().getDegrees()));
+        Rotation2d profileFFOutput = Rotation2d.fromRadians(mSnapController.getSetpoint().velocity);
+        Rotation2d turnPointFFOutput = mTurnPointFF.computeOmegaFeedforward();
 
-        double setpointErrorDegrees = mSnapController.getSetpoint().position - pRobotRotation.getDegrees();
-        double goalErrorDegrees = mSnapController.getGoal().position - pRobotRotation.getDegrees();
+        double outputRadians = pidOutput.getRadians() + profileFFOutput.getRadians() + turnPointFFOutput.getRadians();
 
-        double adjustedOutput = output;
-        if (Math.abs(goalErrorDegrees) < mToleranceDegrees.get()) adjustedOutput *= 0.0;
+        Rotation2d setpointError = Rotation2d.fromDegrees( mSnapController.getSetpoint().position - pRobotRotation.getDegrees() );
+        Rotation2d goalError = Rotation2d.fromDegrees( mSnapController.getGoal().position - pRobotRotation.getDegrees() );
 
-        Telemetry.log("Drive/HeadingController/unAdjustedOutput", output);
+        double adjustedOutputRadians = outputRadians;
+        if (Math.abs(goalError.getDegrees()) < mToleranceDegrees.get()) adjustedOutputRadians *= 0.0;
 
-        Telemetry.log("Drive/HeadingController/setpointErrorDegrees", setpointErrorDegrees);
-        Telemetry.log("Drive/HeadingController/goalErrorDegrees", goalErrorDegrees);
 
-        Telemetry.log("Drive/HeadingController/adjustedOutput", adjustedOutput);
+        Telemetry.log("Drive/HeadingController/setpointError", setpointError);
+        Telemetry.log("Drive/HeadingController/goalError", goalError);
 
+        Telemetry.log("Drive/HeadingController/unAdjustedOutput", outputRadians);
+        Telemetry.log("Drive/HeadingController/adjustedOutput", adjustedOutputRadians);
         Telemetry.log("Drive/HeadingController/pidOutput", pidOutput);
-        Telemetry.log("Drive/HeadingController/ffOutput", ffOutput);
+        Telemetry.log("Drive/HeadingController/profileFFOutput", profileFFOutput);
+        Telemetry.log("Drive/HeadingController/turnPointFFOutput", turnPointFFOutput);
 
-        return output;
+        return adjustedOutputRadians;
     }
 
     // Designed for shoot on move and short distance. In most cases velocityDPS is 0.
-    public double getStabilizingOutput(Rotation2d pRobotRotation, double pVelocityDPS) {
-        return Math.toRadians(mStabilizingController.calculate(
-                        pRobotRotation.getDegrees(), mGoal.get().getDegrees())
-                + pVelocityDPS);
-    }
+    // public double getStabilizingOutput(Rotation2d pRobotRotation, double pVelocityDPS) {
+    //     return Math.toRadians(mStabilizingController.calculate(
+    //                     pRobotRotation.getDegrees(), mGoal.get().getDegrees())
+    //             + pVelocityDPS);
+    // }
 
     public void updateHeadingController() {
         LoggedTunableNumber.ifChanged(
@@ -113,5 +118,9 @@ public class HeadingController {
         // LoggedTunableNumber.ifChanged(hashCode(), () -> {
         //     stabilizingController.setPID(stablizingP.get(), stablizingI.get(), stablizingD.get());
         // }, stablizingP, stablizingI, stablizingD);
+    }
+
+    public void setTurnPointFF(TurnPointFeedforward pTurnPointFF) {
+        mTurnPointFF = pTurnPointFF;
     }
 }
