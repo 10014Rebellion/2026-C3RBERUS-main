@@ -65,15 +65,19 @@ public class Module {
         }
 
         if (mVelocitySetpointMPS != null) {
-            if (mAmperageFeedforward != null) {
-                double ffOutput = mDriveFF.calculateWithVelocities(mVelocitySetpointMPS, mAmperageFeedforward);
-
-                Telemetry.log("Drive/" + kModuleName + "/AmperageFeedforward", mAmperageFeedforward);
-                Telemetry.log("Drive/" + kModuleName + "/ffOutput", ffOutput);
-
-                mIO.setDriveVelocity(mVelocitySetpointMPS, ffOutput);
+            if(DriveConstants.useVoltageFeedforward) {
+                    mIO.setDriveVelocity(mVelocitySetpointMPS, mDriveFF.calculate(mVelocitySetpointMPS));
             } else {
-                mIO.setDriveVelocity(mVelocitySetpointMPS, 0.0);
+                if (mAmperageFeedforward != null) {
+                    double ffOutput = mDriveFF.calculateWithVelocities(mVelocitySetpointMPS, mAmperageFeedforward);
+
+                    Telemetry.log("Drive/" + kModuleName + "/AmperageFeedforward", mAmperageFeedforward);
+                    Telemetry.log("Drive/" + kModuleName + "/ffOutput", ffOutput);
+
+                    mIO.setDriveVelocity(mVelocitySetpointMPS, ffOutput);
+                } else {
+                    mIO.setDriveVelocity(mVelocitySetpointMPS, 0.0);
+                }
             }
         
             if (mAzimuthSetpointAngle != null) {
