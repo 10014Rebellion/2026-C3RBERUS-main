@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.GeomUtil;
 import frc.lib.optimizations.PPRobotConfigLoader;
+import frc.lib.pathplanner.AzimuthFeedForward;
 import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
 import frc.lib.swerve.LocalADStarAK;
@@ -95,7 +96,7 @@ public class Drive extends SubsystemBase {
     public static RobotConfig mRobotConfig;
     private final SwerveSetpointGenerator mSetpointGenerator;
     private SwerveSetpoint mPreviousSetpoint =
-            new SwerveSetpoint(new ChassisSpeeds(), SwerveUtils.zeroStates(), DriveFeedforwards.zeros(4));
+            new SwerveSetpoint(new ChassisSpeeds(), SwerveUtils.zeroStates(), DriveFeedforwards.zeros(4), AzimuthFeedForward.zeros());
 
     @AutoLogOutput(key = "Drive/State")
     private DriveState mDriveState = DriveState.TELEOP;
@@ -506,11 +507,7 @@ public class Drive extends SubsystemBase {
                     driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
                 }
 
-                double desiredAzimuthVelocityRadPS = 
-                    Math.min(
-                        GeomUtil.getSmallestChangeInRotation(setpointStates[i].angle, mPrevSetpointStates[i].angle).getRadians()
-                            / 0.02,
-                        DriveConstants.kMaxAzimuthAngularRadiansPS);
+                double desiredAzimuthVelocityRadPS = mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i];
 
                 Logger.recordOutput("Drive/DesiredAzimuthRotationSpeed"+mModules[i].getModuleName(), desiredAzimuthVelocityRadPS);
 

@@ -377,6 +377,7 @@ public class SwerveSetpointGenerator {
         double[] torqueCurrentFF = new double[config.numModules];
         double[] forceXFF = new double[config.numModules];
         double[] forceYFF = new double[config.numModules];
+        double[] azimuthRadiansPSFF = new double[config.numModules];
         for (int m = 0; m < config.numModules; m++) {
             double wheelForceDist = wheelForces[m].getNorm();
             double appliedForce = wheelForceDist > 1e-6
@@ -399,26 +400,32 @@ public class SwerveSetpointGenerator {
                 }
                 retStates[m].angle = override;
             }
-            final var deltaRotation =
+            Rotation2d deltaRotation =
                     prevSetpoint.moduleStates()[m].angle.unaryMinus().rotateBy(retStates[m].angle);
             if (flipHeading(deltaRotation)) {
                 retStates[m].angle = retStates[m].angle.rotateBy(Rotation2d.k180deg);
+                deltaRotation =
+                    prevSetpoint.moduleStates()[m].angle.unaryMinus().rotateBy(retStates[m].angle);
                 retStates[m].speedMetersPerSecond *= -1.0;
                 appliedForce *= -1.0;
                 torqueCurrent *= -1.0;
             }
+
+            double azimuthRadiansPS = deltaRotation.getRadians() / 0.02;
 
             accelFF[m] = (retStates[m].speedMetersPerSecond - prevSetpoint.moduleStates()[m].speedMetersPerSecond) / dt;
             linearForceFF[m] = appliedForce;
             torqueCurrentFF[m] = torqueCurrent;
             forceXFF[m] = wheelForces[m].getX();
             forceYFF[m] = wheelForces[m].getY();
+            azimuthRadiansPSFF[m] = azimuthRadiansPS;
         }
 
         return new SwerveSetpoint(
                 retSpeeds,
                 retStates,
-                new DriveFeedforwards(accelFF, linearForceFF, torqueCurrentFF, forceXFF, forceYFF));
+                new DriveFeedforwards(accelFF, linearForceFF, torqueCurrentFF, forceXFF, forceYFF),
+                new AzimuthFeedForward(azimuthRadiansPSFF));
     }
 
     /**
