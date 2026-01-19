@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 
+// TODO: UPDATE ALL POSES FOR GAME
 public class FieldConstants {
     // ALL OF THESE VALUES ARE ASSUMED TO BE FROM 🔵 BLUE SIDE 🔵
     // ALL VALUES ARE FROM: https://firstfrc.blob.core.windows.net/frc2026/FieldAssets/2026-field-dimension-dwgs.pdf
@@ -41,6 +42,8 @@ public class FieldConstants {
     public static final Pose2d kHubPose = new Pose2d(new Translation2d(kHubXM, kHubYM), Rotation2d.kZero);
     public static final Pose3d kHubInnerPose = new Pose3d(new Translation3d(kHubXM, kHubYM, kHubInnerHeightM), Rotation3d.kZero);
     public static final Pose3d kHubOuterPose = new Pose3d(new Translation3d(kHubXM, kHubYM, kHubOuterHeightM), Rotation3d.kZero);
+
+    public static final Pose2d kSafeScoringPose = new Pose2d();
 
     public static final Pose3d[] kHubOuterHexPoints = buildHubHex(kHubOuterPose, kHubHexOuterOffsetM);
     public static final Pose3d[] kHubInnerHexPoints = buildHubHex(kHubInnerPose, kHubHexInnerOffsetM);

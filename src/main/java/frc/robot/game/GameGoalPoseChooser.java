@@ -9,9 +9,14 @@ import frc.lib.math.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
 /* Chooses pose based of strategy and psoe */
+// TODO: UPDATE ALL POSES FOR GAME
 public class GameGoalPoseChooser {
     public static enum CHOOSER_STRATEGY {
         kTest
+    }
+
+    public static Pose2d getSafeScoringPosition() {
+        return new Pose2d();
     }
 
     public static Pose2d getClosestTrench(Pose2d robotPose) {
