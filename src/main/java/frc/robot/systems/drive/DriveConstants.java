@@ -76,8 +76,8 @@ public class DriveConstants {
 
     public static final ModuleControlConfig kModuleControllerConfigs = RobotBase.isReal()
             ? new ModuleControlConfig(
-                    new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0), // DRIVE // TODO: TUNE ME
-                    new PIDController(3.5, 0.0, 0.0), new SimpleMotorFeedforward(0.3, 2.25, 0.0)) // AZIMUTH // TODO: TUNE ME
+                    new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(1.0, 0.0, 1.0), // DRIVE // TODO: TUNE ME
+                    new PIDController(3.5, 0.0, 0.0), new SimpleMotorFeedforward(0.3, 1.0 / 2.25, 0.0)) // AZIMUTH // TODO: TUNE ME
             : new ModuleControlConfig(
                     new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005), // TODO: TUNE ME
                     new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.5)); // TODO: TUNE ME
