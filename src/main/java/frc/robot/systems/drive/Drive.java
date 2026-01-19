@@ -506,6 +506,14 @@ public class Drive extends SubsystemBase {
                     driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
                 }
 
+                double desiredAzimuthVelocityRadPS = 
+                    Math.min(
+                        GeomUtil.getSmallestChangeInRotation(setpointStates[i].angle, mPrevSetpointStates[i].angle).getRadians()
+                            / 0.02,
+                        DriveConstants.kMaxAzimuthAngularRadiansPS);
+
+                Logger.recordOutput("Drive/DesiredAzimuthRotationSpeed"+mModules[i].getModuleName(), desiredAzimuthVelocityRadPS);
+
                 // Rotation2d deltaChange = mPrevPositions[i].angle.minus(getModulePositions()[i].angle);
 
                 // double deltaV = deltaChange.getRadians() * DriveConstants.kDriveMotorGearing * DriveConstants.kWheelCircumferenceMeters / 0.02;
@@ -513,6 +521,8 @@ public class Drive extends SubsystemBase {
                 // double desDriveV = desV - deltaV;
 
                 // setpointStates[i] = new SwerveModuleState(desDriveV, setpointStates[i].angle);
+
+                mModules[i].setDesiredAzimuthVelocityRadPS(desiredAzimuthVelocityRadPS);
 
                 optimizedSetpointStates[i] = mModules[i].setDesiredStateWithAmpFF(setpointStates[i], driveAmps);
 

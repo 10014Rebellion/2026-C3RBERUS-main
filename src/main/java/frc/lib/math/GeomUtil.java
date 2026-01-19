@@ -129,7 +129,7 @@ public class GeomUtil {
     }
 
     public static Rotation2d getSmallestChangeInRotation(Rotation2d rotation1, Rotation2d rotation2) {
-        return Rotation2d.fromRadians(Math.min(
+        Rotation2d smallestRotMagnitude = Rotation2d.fromRadians(Math.min(
                 Math.min(
                         Math.abs(rotation2.minus(rotation1).getRadians()),
                         Math.abs(rotation2
@@ -139,5 +139,13 @@ public class GeomUtil {
                 Math.abs(rotation2
                         .minus(rotation1.minus(Rotation2d.k180deg))
                         .getRadians())));
+        
+        if(smallestRotMagnitude.equals(Rotation2d.fromRadians(Math.abs(rotation2.minus(rotation1).getRadians())))) {
+            return rotation2.minus(rotation1);
+        } else if(smallestRotMagnitude.equals((Rotation2d.fromRadians(Math.abs(rotation2.minus(rotation1).getRadians()))))) {
+            return rotation2.minus(Rotation2d.k180deg).minus(rotation1);
+        } else {
+            return rotation2.minus(rotation1.minus(Rotation2d.k180deg));
+        }
     }
 }

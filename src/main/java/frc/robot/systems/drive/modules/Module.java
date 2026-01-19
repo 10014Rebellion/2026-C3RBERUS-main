@@ -24,6 +24,7 @@ public class Module {
     public static final LoggedTunableNumber tTurnP = new LoggedTunableNumber("Module/AzimuthP", kModuleControllerConfigs.azimuthController().getP());
     public static final LoggedTunableNumber tTurnD = new LoggedTunableNumber("Module/AzimuthD", kModuleControllerConfigs.azimuthController().getD());
     public static final LoggedTunableNumber tTurnS = new LoggedTunableNumber("Module/AzimuthS", kModuleControllerConfigs.azimuthFF().getKs());
+    public static final LoggedTunableNumber tTurnV = new LoggedTunableNumber("Module/AzimuthV", kModuleControllerConfigs.azimuthFF().getKv());
 
     private final ModuleIO mIO;
     private final ModuleInputsAutoLogged mInputs = new ModuleInputsAutoLogged();
@@ -35,6 +36,7 @@ public class Module {
     private SimpleMotorFeedforward mDriveFF = DriveConstants.kModuleControllerConfigs.driveFF();
 
     private Rotation2d mAzimuthSetpointAngle = null;
+    private double mAzimuthSetpointAngularVelocityRadPS = 0.0;
     private SimpleMotorFeedforward mAzimuthFF = DriveConstants.kModuleControllerConfigs.azimuthFF();
 
     private SwerveModuleState mCurrentState = new SwerveModuleState();
@@ -69,7 +71,7 @@ public class Module {
                     mIO.setDriveVelocity(mVelocitySetpointMPS, mDriveFF.calculate(mVelocitySetpointMPS));
             } else {
                 if (mAmperageFeedforward != null) {
-                    double ffOutput = mDriveFF.calculateWithVelocities(mVelocitySetpointMPS, mAmperageFeedforward);
+                    double ffOutput = mDriveFF.calculate(mVelocitySetpointMPS, mAmperageFeedforward);
 
                     Telemetry.log("Drive/" + kModuleName + "/AmperageFeedforward", mAmperageFeedforward);
                     Telemetry.log("Drive/" + kModuleName + "/ffOutput", ffOutput);
@@ -81,8 +83,8 @@ public class Module {
             }
         
             if (mAzimuthSetpointAngle != null) {
-                double ffOutput = mAzimuthFF.calculateWithVelocities(0, 0);
-                Telemetry.log("Drive/" + kModuleName + "/SimpleFeedforward", ffOutput);
+                double ffOutput = mAzimuthFF.calculate(mAzimuthSetpointAngularVelocityRadPS);
+                Telemetry.log("Drive/" + kModuleName + "/SimpleFeedforwardAzimuth", ffOutput);
                 mIO.setAzimuthPosition(mAzimuthSetpointAngle, ffOutput);
             }
         }
@@ -120,9 +122,10 @@ public class Module {
         LoggedTunableNumber.ifChanged(
             hashCode(),
             () -> {
-                mAzimuthFF = new SimpleMotorFeedforward(tTurnS.get(), 0.0, 0.0);
+                mAzimuthFF = new SimpleMotorFeedforward(tTurnS.get(), tTurnV.get(), 0.0);
             },
-            tTurnS
+            tTurnS,
+            tTurnV
         );
     }
 
@@ -143,6 +146,11 @@ public class Module {
         setDesiredVelocity(pState.speedMetersPerSecond);
         setDesiredRotation(pState.angle);
         return getDesiredState();
+    }
+
+    public double setDesiredAzimuthVelocityRadPS(double pAzimuthSetpointAngularVelocityRadPS) {
+        mAzimuthSetpointAngularVelocityRadPS = pAzimuthSetpointAngularVelocityRadPS;
+        return mAzimuthSetpointAngularVelocityRadPS;
     }
 
     /* Runs characterization of by setting motor drive voltage and rotates the module forward
@@ -243,5 +251,9 @@ public class Module {
 
     public SwerveModulePosition[] getOdometryPositions() {
         return odometryPositions;
+    }
+
+    public String getModuleName() {
+        return kModuleName;
     }
 }
