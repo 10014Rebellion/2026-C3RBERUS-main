@@ -118,7 +118,7 @@ public class LineController {
     }
 
     private double getDistanceFromLine(double slope, double anchorX, double anchorY, Pose2d robotPose) {
-        if(!Double.isNaN(slope) && !Double.isInfinite(slope)) {
+        if(!Double.isNaN(slope) || !Double.isInfinite(slope)) {
             double m = slope;
             double b = - anchorX * m + anchorY;
 
