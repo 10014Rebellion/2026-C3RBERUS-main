@@ -140,9 +140,9 @@ public class GeomUtil {
                         .minus(rotation1.minus(Rotation2d.k180deg))
                         .getRadians())));
         
-        if(smallestRotMagnitude.equals(Rotation2d.fromRadians(Math.abs(rotation2.minus(rotation1).getRadians())))) {
+        if(smallestRotMagnitude.equals( Rotation2d.fromRadians( Math.abs( rotation2.minus(rotation1).getRadians() ) ) ) ) {
             return rotation2.minus(rotation1);
-        } else if(smallestRotMagnitude.equals((Rotation2d.fromRadians(Math.abs(rotation2.minus(rotation1).getRadians()))))) {
+        } else if(smallestRotMagnitude.equals( ( Rotation2d.fromRadians( Math.abs( rotation2.minus( Rotation2d.k180deg ).minus( rotation1 ).getRadians() ) ) ) ) ) {
             return rotation2.minus(Rotation2d.k180deg).minus(rotation1);
         } else {
             return rotation2.minus(rotation1.minus(Rotation2d.k180deg));
