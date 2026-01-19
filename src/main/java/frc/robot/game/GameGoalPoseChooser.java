@@ -75,7 +75,7 @@ public class GameGoalPoseChooser {
                 &&
             DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)) 
                 ||
-            (!robotPose.getY() > FieldConstants.kFieldYM / 2.0
+            (!(robotPose.getY() > FieldConstants.kFieldYM / 2.0)
                 &&
             !DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue));
     }
