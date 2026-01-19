@@ -181,9 +181,6 @@ public class Drive extends SubsystemBase {
     }
 
     ///// ENTRY POINT TO THE DRIVE \\\\\
-    public Command getGameDriveCommand(GameDriveStates pGameDriveStates) {
-        return mGameDriveManager.getSetGameDriveStateCmd(pGameDriveStates);
-    }
     ////////////////////////////////////
 
     @Override
@@ -328,127 +325,7 @@ public class Drive extends SubsystemBase {
         }
     }
 
-    ///////////////////////// STATE SETTING \\\\\\\\\\\\\\\\\\\\\\\\
-    public Command setToTeleop() {
-        return setDriveStateCommandContinued(DriveState.TELEOP);
-    }
-
-    public Command setToTeleopSniper() {
-        return setDriveStateCommandContinued(DriveState.TELEOP_SNIPER);
-    }
-
-    public Command setToPOVSniper() {
-        return setDriveStateCommandContinued(DriveState.POV_SNIPER);
-    }
-
-    public Command setToStop() {
-        return setDriveStateCommandContinued(DriveState.STOP);
-    }
-
-    public Command setToDriftTest() {
-        return setDriveStateCommandContinued(DriveState.DRIFT_TEST);
-    }
-
-    public Command setToLinearTest() {
-        return setDriveStateCommandContinued(DriveState.LINEAR_TEST);
-    }
-
-    public Command setToSysIDCharacterization() {
-        return setDriveStateCommandContinued(DriveState.SYSID_CHARACTERIZATION);
-    }
-
-    public Command setToWheelCharacterization() {
-        return setDriveStateCommandContinued(DriveState.WHEEL_CHARACTERIZATION);
-    }
-
-    public Command customFollowPathComamnd(PathPlannerPath path) {
-        return customFollowPathComamnd(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
-    }
-
-    public Command customFollowPathComamnd(PathPlannerPath path, PPHolonomicDriveController drivePID) {
-        return new FollowPathCommand(
-                path,
-                this::getPoseEstimate,
-                this::getRobotChassisSpeeds,
-                (speeds, ff) -> {
-                    setDriveState(DriveState.AUTON);
-                    mPPDesiredSpeeds = speeds;
-                    mPathPlanningFF = ff;
-                },
-                drivePID,
-                mRobotConfig,
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red),
-                this);
-    }
-
-    /*
-     * Reference GameDriveManager to use game-specific implementation of this command
-     * @param Goal strategy, based on where you're aligning
-     * @param Constraint type, linear or on an axis
-     */
-    public Command setToGenericAutoAlign(Supplier<Pose2d> pGoalPoseSup, ConstraintType pConstraintType) {
-        return new InstantCommand(() -> {
-                    mGoalPoseSup = pGoalPoseSup;
-                    mAutoAlignController.setConstraintType(pConstraintType);
-                    mAutoAlignController.reset(
-                            getPoseEstimate(),
-                            ChassisSpeeds.fromRobotRelativeSpeeds(
-                                    getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
-                            mGoalPoseSup.get());
-                })
-                .andThen(setDriveStateCommandContinued(DriveState.AUTO_ALIGN));
-    }
-
-    /*
-     * Reference GameDriveManager to use game-specific implementation of this command
-     * @param The desired rotation
-     * @param Turn feedforward
-     */
-    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation, TurnPointFeedforward pTurnPointFeedforward) {
-        return new InstantCommand(() -> {
-                    mGoalRotationSup = pGoalRotation;
-                    mHeadingController.setHeadingGoal(mGoalRotationSup);
-                    mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.iYawVelocityPS);
-                    mHeadingController.setTurnPointFF(pTurnPointFeedforward);
-                })
-                .andThen(setDriveStateCommandContinued(DriveState.HEADING_ALIGN));
-    }
-
-    /* Accoutns for velocity of drive when turning */
-    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation) {
-        return setToGenericHeadingAlign(
-            pGoalRotation, 
-            new TurnPointFeedforward(
-                mPoseEstimator::getEstimatedPosition, 
-                () -> getDesiredChassisSpeeds(), 
-                mGoalPoseSup, 
-                () -> new ChassisSpeeds()));
-    }
-
-    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSupplier, Supplier<Rotation2d> pLineAngle, DoubleSupplier pTeleopScalar, BooleanSupplier pTeleopInvert) {
-        return new InstantCommand(() -> {
-            mGoalPoseSup = pGoalPoseSupplier;
-            mLineAlignController.setControllerGoalSettings(pTeleopScalar, () -> pLineAngle.get().getTan(), pTeleopInvert);
-            mLineAlignController.reset(getPoseEstimate(), mGoalPoseSup.get());
-        }).andThen(setDriveStateCommandContinued(DriveState.LINE_ALIGN));
-    }
-
-    ////// BASE STATES \\\\\\
-    private Command setDriveStateCommand(DriveState state) {
-        return Commands.runOnce(() -> setDriveState(state), this);
-    }
-
-    /* Set's state initially, and doesn't end till interruped by another drive command */
-    private Command setDriveStateCommandContinued(DriveState state) {
-        return new FunctionalCommand(() -> setDriveState(state), () -> {}, (interrupted) -> {}, () -> false, this);
-    }
-
-    /* Sets the drive state used in periodic(), and handles init condtions like resetting PID controllers */
-    private void setDriveState(DriveState state) {
-        mDriveState = state;
-    }
-
-    ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
+        ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
     /* Sets the desired swerve module states to the robot */
     public void runSwerve(ChassisSpeeds speeds) {
         mDesiredSpeeds = SwerveUtils.discretize(speeds, tDriftRate.get());
@@ -578,6 +455,131 @@ public class Drive extends SubsystemBase {
         }
     }
 
+    ///////////////////////// STATE SETTING \\\\\\\\\\\\\\\\\\\\\\\\
+    public Command setToTeleop() {
+        return setDriveStateCommandContinued(DriveState.TELEOP);
+    }
+
+    public Command setToTeleopSniper() {
+        return setDriveStateCommandContinued(DriveState.TELEOP_SNIPER);
+    }
+
+    public Command setToPOVSniper() {
+        return setDriveStateCommandContinued(DriveState.POV_SNIPER);
+    }
+
+    public Command setToStop() {
+        return setDriveStateCommandContinued(DriveState.STOP);
+    }
+
+    public Command setToDriftTest() {
+        return setDriveStateCommandContinued(DriveState.DRIFT_TEST);
+    }
+
+    public Command setToLinearTest() {
+        return setDriveStateCommandContinued(DriveState.LINEAR_TEST);
+    }
+
+    public Command setToSysIDCharacterization() {
+        return setDriveStateCommand(DriveState.SYSID_CHARACTERIZATION);
+    }
+
+    public Command setToWheelCharacterization() {
+        return setDriveStateCommand(DriveState.WHEEL_CHARACTERIZATION);
+    }
+
+    public Command customFollowPathComamnd(PathPlannerPath path) {
+        return customFollowPathComamnd(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
+    }
+
+    public Command customFollowPathComamnd(PathPlannerPath path, PPHolonomicDriveController drivePID) {
+        return new FollowPathCommand(
+                path,
+                this::getPoseEstimate,
+                this::getRobotChassisSpeeds,
+                (speeds, ff) -> {
+                    setDriveState(DriveState.AUTON);
+                    mPPDesiredSpeeds = speeds;
+                    mPathPlanningFF = ff;
+                },
+                drivePID,
+                mRobotConfig,
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red),
+                this);
+    }
+
+    public Command getGameDriveCommand(GameDriveStates pGameDriveStates) {
+        return mGameDriveManager.getSetGameDriveStateCmd(pGameDriveStates);
+    }
+
+    /*
+     * Reference GameDriveManager to use game-specific implementation of this command
+     * @param Goal strategy, based on where you're aligning
+     * @param Constraint type, linear or on an axis
+     */
+    public Command setToGenericAutoAlign(Supplier<Pose2d> pGoalPoseSup, ConstraintType pConstraintType) {
+        return new InstantCommand(() -> {
+            mGoalPoseSup = pGoalPoseSup;
+            mAutoAlignController.setConstraintType(pConstraintType);
+            mAutoAlignController.reset(
+                getPoseEstimate(), 
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                    getRobotChassisSpeeds(), 
+                    getPoseEstimate().getRotation()),
+                mGoalPoseSup.get());
+            })
+            .andThen(setDriveStateCommandContinued(DriveState.AUTO_ALIGN));
+    }
+
+    /*
+     * Reference GameDriveManager to use game-specific implementation of this command
+     * @param The desired rotation
+     * @param Turn feedforward
+     */
+    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation, TurnPointFeedforward pTurnPointFeedforward) {
+        return new InstantCommand(() -> {
+                mGoalRotationSup = pGoalRotation;
+                mHeadingController.setHeadingGoal(mGoalRotationSup);
+                mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.iYawVelocityPS);
+                mHeadingController.setTurnPointFF(pTurnPointFeedforward);
+            })
+            .andThen(setDriveStateCommandContinued(DriveState.HEADING_ALIGN));
+    }
+
+    /* Accoutns for velocity of drive when turning */
+    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation) {
+        return setToGenericHeadingAlign(
+            pGoalRotation, 
+            new TurnPointFeedforward(
+                mPoseEstimator::getEstimatedPosition, 
+                () -> getDesiredChassisSpeeds(), 
+                mGoalPoseSup, 
+                () -> new ChassisSpeeds()));
+    }
+
+    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSupplier, Supplier<Rotation2d> pLineAngle, DoubleSupplier pTeleopScalar, BooleanSupplier pTeleopInvert) {
+        return new InstantCommand(() -> {
+            mGoalPoseSup = pGoalPoseSupplier;
+            mLineAlignController.setControllerGoalSettings(pTeleopScalar, () -> pLineAngle.get().getTan(), pTeleopInvert);
+            mLineAlignController.reset(getPoseEstimate(), mGoalPoseSup.get());
+        }).andThen(setDriveStateCommandContinued(DriveState.LINE_ALIGN));
+    }
+
+    ////// BASE STATES \\\\\\
+    private Command setDriveStateCommand(DriveState state) {
+        return Commands.runOnce(() -> setDriveState(state), this);
+    }
+
+    /* Set's state initially, and doesn't end till interruped by another drive command */
+    private Command setDriveStateCommandContinued(DriveState state) {
+        return new FunctionalCommand(() -> setDriveState(state), () -> {}, (interrupted) -> {}, () -> false, this);
+    }
+
+    /* Sets the drive state used in periodic(), and handles init condtions like resetting PID controllers */
+    private void setDriveState(DriveState state) {
+        mDriveState = state;
+    }
+
     ////////////// LOCALIZATION(MAINLY RESETING LOGIC) \\\\\\\\\\\\\\\\
     public void resetGyro() {
         /* Robot is usually facing the other way(relative to field) when doing cycles on red side, so gyro is reset to 180 */
@@ -615,7 +617,7 @@ public class Drive extends SubsystemBase {
     //////////////////////// CHARACTERIZATION \\\\\\\\\\\\\\\\\\\\\\\\\\
     /* LINEAR CHARACTERIZATION: The x-y movement of the drivetrain(basically drive motor feedforward) */
     public Command characterizeLinearMotion() {
-        return setDriveStateCommand(DriveState.SYSID_CHARACTERIZATION)
+        return setToSysIDCharacterization()
                 .andThen(SysIDCharacterization.runDriveSysIDTests(
                         (voltage) -> {
                             runLinearCharcterization(voltage);
@@ -625,7 +627,7 @@ public class Drive extends SubsystemBase {
 
     /* Runs the robot forward at a voltage */
     public void runLinearCharcterization(double volts) {
-        setDriveState(DriveState.SYSID_CHARACTERIZATION);
+        setToSysIDCharacterization().initialize();
         for (int i = 0; i < 4; i++) mModules[i].runCharacterization(volts);
     }
 
@@ -642,14 +644,14 @@ public class Drive extends SubsystemBase {
      * https://choreo.autos/usage/estimating-moi/
      */
     public Command characterizeAngularMotion() {
-        return setDriveStateCommand(DriveState.SYSID_CHARACTERIZATION)
+        return setToSysIDCharacterization()
                 .andThen(SysIDCharacterization.runDriveSysIDTests(
                         (voltage) -> runAngularCharacterization(voltage), this));
     }
 
     /* Runs the rotate's robot at a voltage */
     public void runAngularCharacterization(double volts) {
-        setDriveState(DriveState.SYSID_CHARACTERIZATION);
+        setToSysIDCharacterization().initialize();
         mModules[0].runCharacterization(volts, Rotation2d.fromDegrees(-45.0));
         mModules[1].runCharacterization(-volts, Rotation2d.fromDegrees(45.0));
         mModules[2].runCharacterization(volts, Rotation2d.fromDegrees(45.0));
@@ -657,7 +659,7 @@ public class Drive extends SubsystemBase {
     }
 
     public Command characterizeAzimuths(int pModNumber) {
-        return setDriveStateCommand(DriveState.SYSID_CHARACTERIZATION)
+        return setToSysIDCharacterization()
             .andThen(SysIDCharacterization.runDriveSysIDTests(
                 (voltage) -> {
                 mModules[pModNumber].setDesiredRotation(null);
