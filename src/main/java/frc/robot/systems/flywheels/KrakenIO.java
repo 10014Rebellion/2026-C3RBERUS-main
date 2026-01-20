@@ -3,7 +3,10 @@ package frc.robot.systems.flywheels;
 import static frc.robot.systems.drive.DriveConstants.kCANBus;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -16,78 +19,104 @@ import frc.robot.systems.drive.modules.ModuleIO.ModuleInputs;
 import frc.robot.systems.flywheels.FlywheelConstants.FlywheelHardwareConfiguration;
 
 public class KrakenIO implements FlywheelIO{
-    private final TalonFX mFlywheelTopMotor;
-    private StatusSignal<Voltage> mFlywheelTopMotorVoltage;
-    public StatusSignal<AngularVelocity> mFlywheelTopMotorVelocity;
+    private final TalonFX mFlywheelLeftMotor;
+    private StatusSignal<Voltage> mFlywheelLeftMotorVoltage;
+    private StatusSignal<AngularVelocity> mFlywheelLeftMotorVelocity;
 
 
-    private final TalonFX mFlywheelBottomMotor;
-    private StatusSignal<Voltage> mFlywheelBottomMotorVoltage;
-    public StatusSignal<AngularVelocity> mFlywheelBottomMotorVelocity;
+    private final TalonFX mFlywheelRightMotor;
+    private StatusSignal<Voltage> mFlywheelRightMotorVoltage;
+    private StatusSignal<AngularVelocity> mFlywheelRightMotorVelocity;
 
-
+    private final VelocityVoltage motorSetpointRequestLeft = new VelocityVoltage(0);
+    private final VelocityVoltage motorSetpointRequestRight = new VelocityVoltage(0);
+    
     public KrakenIO(FlywheelHardwareConfiguration pFlywheelHardwareConfiguration){
 
         /*TODO: check if I need to add anything more for the configs! Also should I init the other logging inputs? What are the main things I need?*/
         
-        /*TOP MOTOR CONFIGS */
-        mFlywheelTopMotor = new TalonFX(pFlywheelHardwareConfiguration.kMotorID(), pFlywheelHardwareConfiguration.kCanBus());
-        TalonFXConfiguration mTopMotorConfig = new TalonFXConfiguration();
-        mTopMotorConfig.CurrentLimits.StatorCurrentLimit = FlywheelConstants.kSmartCurrentLimit;
-        mTopMotorConfig.Voltage.PeakForwardVoltage = FlywheelConstants.kPeakVoltage;
-        mTopMotorConfig.Voltage.PeakReverseVoltage = -FlywheelConstants.kPeakVoltage;
-        mTopMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        mTopMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        mFlywheelTopMotor.getConfigurator().apply(mTopMotorConfig);
+        /*Left MOTOR CONFIGS */
+        mFlywheelLeftMotor = new TalonFX(pFlywheelHardwareConfiguration.kMotorID(), pFlywheelHardwareConfiguration.kCanBus());
+        TalonFXConfiguration mLeftMotorConfig = new TalonFXConfiguration();
+        mLeftMotorConfig.CurrentLimits.StatorCurrentLimit = FlywheelConstants.kSmartCurrentLimit;
+        mLeftMotorConfig.Voltage.PeakForwardVoltage = FlywheelConstants.kPeakVoltage;
+        mLeftMotorConfig.Voltage.PeakReverseVoltage = -FlywheelConstants.kPeakVoltage;
+        mLeftMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        mLeftMotorConfig.MotorOutput.Inverted = FlywheelConstants.kInverted ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        mFlywheelLeftMotor.getConfigurator().apply(mLeftMotorConfig);
 
-        mFlywheelTopMotorVoltage = mFlywheelTopMotor.getMotorVoltage();
-        mFlywheelTopMotorVelocity = mFlywheelTopMotor.getVelocity();
+        mFlywheelLeftMotorVoltage = mFlywheelLeftMotor.getMotorVoltage();
+        mFlywheelLeftMotorVelocity = mFlywheelLeftMotor.getVelocity();
 
 
-        /*BOTTOM MOTOR CONFIGS */
-        mFlywheelBottomMotor = new TalonFX(pFlywheelHardwareConfiguration.kMotorID(), pFlywheelHardwareConfiguration.kCanBus());
-        TalonFXConfiguration mBottomMotorConfig = new TalonFXConfiguration();
-        mBottomMotorConfig.CurrentLimits.StatorCurrentLimit = FlywheelConstants.kSmartCurrentLimit;
-        mBottomMotorConfig.Voltage.PeakForwardVoltage = FlywheelConstants.kPeakVoltage;
-        mBottomMotorConfig.Voltage.PeakReverseVoltage = -FlywheelConstants.kPeakVoltage;
-        mBottomMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        mBottomMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        mFlywheelBottomMotor.getConfigurator().apply(mBottomMotorConfig);
+        /*Right MOTOR CONFIGS */
+        mFlywheelRightMotor = new TalonFX(pFlywheelHardwareConfiguration.kMotorID(), pFlywheelHardwareConfiguration.kCanBus());
+        TalonFXConfiguration mRightMotorConfig = new TalonFXConfiguration();
+        mRightMotorConfig.CurrentLimits.StatorCurrentLimit = FlywheelConstants.kSmartCurrentLimit;
+        mRightMotorConfig.Voltage.PeakForwardVoltage = FlywheelConstants.kPeakVoltage;
+        mRightMotorConfig.Voltage.PeakReverseVoltage = -FlywheelConstants.kPeakVoltage;
+        mRightMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        mRightMotorConfig.MotorOutput.Inverted = FlywheelConstants.kInverted ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        mFlywheelRightMotor.getConfigurator().apply(mRightMotorConfig);
 
-        mFlywheelBottomMotorVoltage = mFlywheelBottomMotor.getMotorVoltage();
-        mFlywheelBottomMotorVelocity = mFlywheelBottomMotor.getVelocity();
+        mFlywheelRightMotorVoltage = mFlywheelRightMotor.getMotorVoltage();
+        mFlywheelRightMotorVelocity = mFlywheelRightMotor.getVelocity();
 
     }
 
     @Override
     public void updateInputs(FlywheelInputs inputs) {
         /*TODO: init more values to log */
-        inputs.iFlywheelTopMotorVolts = mFlywheelTopMotorVoltage.getValueAsDouble();
-        inputs.iFlywheelTopVelocityMPS = mFlywheelTopMotorVelocity.getValueAsDouble();
+        inputs.iFlywheelLeftMotorVolts = mFlywheelLeftMotorVoltage.getValueAsDouble();
+        inputs.iFlywheelLeftVelocityMPS = mFlywheelLeftMotorVelocity.getValueAsDouble();
 
-        inputs.iFlywheelBottomMotorVolts = mFlywheelBottomMotorVoltage.getValueAsDouble();
-        inputs.iFlywheelBottomVelocityMPS = mFlywheelBottomMotorVelocity.getValueAsDouble();
+        inputs.iFlywheelRightMotorVolts = mFlywheelRightMotorVoltage.getValueAsDouble();
+        inputs.iFlywheelRightVelocityMPS = mFlywheelRightMotorVelocity.getValueAsDouble();
 
     }
 
  
     @Override
-    public void setTopFlywheeVolts(double volts) {
-        mFlywheelTopMotor.setVoltage(volts);
+    public void setLeftFlywheeVolts(double volts) {
+        mFlywheelLeftMotor.setVoltage(volts);
     }
 
-    //TODO: do flywheel PID's later
+    //TODO: see if I am doing this right
     @Override
-    public void setTopFlywheePID(double kP, double kI, double kD) {}
+    public void setLeftFlywheePID(AngularVelocity setpointRPS) {
+        var slotConfigLeft = new Slot0Configs();
+        slotConfigLeft.kP = FlywheelConstants.kP;
+        slotConfigLeft.kI = FlywheelConstants.kI;
+        slotConfigLeft.kD = FlywheelConstants.kD;
+        slotConfigLeft.kV = FlywheelConstants.kV;
+        slotConfigLeft.kA = FlywheelConstants.kA;
+        mFlywheelLeftMotor.getConfigurator().apply(slotConfigLeft);
+        motorSetpointRequestLeft.withVelocity(setpointRPS);
+
+        mFlywheelLeftMotor.setControl(motorSetpointRequestLeft);
+
+    }
     
     @Override
-    public void setBottomFlywheeVolts(double volts) {
-        mFlywheelBottomMotor.setVoltage(volts);
+    public void setRightFlywheeVolts(double volts) {
+        mFlywheelRightMotor.setVoltage(volts);
     }
 
-    //TODO: do flywheel PID's later
+    //TODO: NOT SURE IF THIS METHOD WORKS RIGHT!!!
     @Override
-    public void setBottomFlywheePID(double kP, double kI, double kD) {}
+    public void setRightFlywheePID(AngularVelocity setpointRPS) {
+        var slotConfigRight = new Slot0Configs();
+        slotConfigRight.kP = FlywheelConstants.kP;
+        slotConfigRight.kI = FlywheelConstants.kI;
+        slotConfigRight.kD = FlywheelConstants.kD;
+        slotConfigRight.kV = FlywheelConstants.kV;
+        slotConfigRight.kA = FlywheelConstants.kA;
+        mFlywheelRightMotor.getConfigurator().apply(slotConfigRight);
+
+        motorSetpointRequestRight.withVelocity(setpointRPS);
+
+        mFlywheelLeftMotor.setControl(motorSetpointRequestRight);
+    }
 
 
     

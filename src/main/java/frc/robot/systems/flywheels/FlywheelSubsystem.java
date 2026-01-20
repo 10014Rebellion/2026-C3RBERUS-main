@@ -2,9 +2,12 @@ package frc.robot.systems.flywheels;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.systems.flywheels.FlywheelConstants.FlywheelSetpoint;
 
 public class FlywheelSubsystem extends SubsystemBase{
     private FlywheelIO io;
@@ -16,40 +19,40 @@ public class FlywheelSubsystem extends SubsystemBase{
 
     @Override
     public void periodic(){
-        io.recordOutput(inputs);
+        io.updateInputs(inputs);
     }
 
-    public void setTopFlyWheelVolts(double pVolts){
-        io.setTopFlywheeVolts(pVolts);
+    public void setLeftFlyWheelVolts(double pVolts){
+        io.setLeftFlywheeVolts(pVolts);
     }
 
-    //TODO: acc make this method later
-    public void setTopPID(double kP, double kD, double kI){
-        io.setTopFlywheePID(kP, kD, kI);
+    public void setLeftPID(AngularVelocity setpointRPS){
+        io.setLeftFlywheePID(setpointRPS);
     }
 
     
-    public void setBottomFlyWheelVolts(double pVolts){
-        io.setBottomFlywheeVolts(pVolts);
+    public void setRightFlyWheelVolts(double pVolts){
+        io.setRightFlywheeVolts(pVolts);
     }
 
-    //TODO: acc make this method later
-    public void setBottomPID(double kP, double kD, double kI){
-        io.setBottomFlywheePID(kP, kD, kI);
+    public void setRightPID(AngularVelocity setpointRPS){
+        io.setRightFlywheePID(setpointRPS);
     }
 
     /*TEMPORARY SHOOTER METHOD!! */
-    //TODO: need to make better later!
+    //TODO: check if im doing this right; do i even need a setVolts method if I can just set the PID directly?
     public Command shootCmd() {
         return new FunctionalCommand(
             () -> {
-                setTopFlyWheelVolts(-12);
-                setBottomFlyWheelVolts(-12);
+                /*setLeftFlyWheelVolts*/
+                setLeftPID(FlywheelSetpoint.Outtake.getRPS());
+                // setRightFlyWheelVolts(-12);
+                setRightPID(FlywheelSetpoint.Outtake.getRPS());
             },
             () -> {},
             (interrupted) -> {
-                setTopFlyWheelVolts(0);
-                setBottomFlyWheelVolts(0);
+                setLeftFlyWheelVolts(0);
+                setRightFlyWheelVolts(0);
             },
             () -> false,
             this);

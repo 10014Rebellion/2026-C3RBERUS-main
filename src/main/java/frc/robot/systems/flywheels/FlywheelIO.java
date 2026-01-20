@@ -2,6 +2,9 @@ package frc.robot.systems.flywheels;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
+
 
 public interface FlywheelIO {
 
@@ -10,35 +13,35 @@ public interface FlywheelIO {
 
     /*TODO: update the values I don't initilize later! */
     /*Let me know if I should add more for logging. Just base values for now */
-    public double iFlywheelTopVelocityMPS = 0.0;
-    public double iFlywheelTopStatorCurrentAmps = 0.0;
-    public double iFlywheelTopSupplyCurrentAmps = 0.0;
-    public double iFlywheelTopTorqueCurrentAmps = 0.0;
-    public double iFlywheelTopTemperatureCelsius = 0.0;
-    public double iFlywheelTopAppliedVolts = 0.0;
-    public double iFlywheelTopMotorVolts = 0.0;
-    public double iFlywheelTopAccelerationMPSS = 0.0;
+    public double iFlywheelLeftVelocityMPS = 0.0;
+    public double iFlywheelLeftStatorCurrentAmps = 0.0;
+    public double iFlywheelLeftSupplyCurrentAmps = 0.0;
+    public double iFlywheelLeftTorqueCurrentAmps = 0.0;
+    public double iFlywheelLeftTemperatureCelsius = 0.0;
+    public double iFlywheelLeftAppliedVolts = 0.0;
+    public double iFlywheelLeftMotorVolts = 0.0;
+    public double iFlywheelLeftAccelerationMPSS = 0.0;
 
-    public double iFlywheelBottomVelocityMPS = 0.0;
-    public double iFlywheelBottomStatorCurrentAmps = 0.0;
-    public double iFlywheelBottomSupplyCurrentAmps = 0.0;
-    public double iFlywheelBottomTorqueCurrentAmps = 0.0;
-    public double iFlywheelBottomTemperatureCelsius = 0.0;
-    public double iFlywheelBottomAppliedVolts = 0.0;
-    public double iFlywheelBottomMotorVolts = 0.0;
-    public double iFlywheelBottomAccelerationMPSS = 0.0;
+    public double iFlywheelRightVelocityMPS = 0.0;
+    public double iFlywheelRightStatorCurrentAmps = 0.0;
+    public double iFlywheelRightSupplyCurrentAmps = 0.0;
+    public double iFlywheelRightTorqueCurrentAmps = 0.0;
+    public double iFlywheelRightTemperatureCelsius = 0.0;
+    public double iFlywheelRightAppliedVolts = 0.0;
+    public double iFlywheelRightMotorVolts = 0.0;
+    public double iFlywheelRightAccelerationMPSS = 0.0;
 
     }
 
     /*TODO: DO I need more methods? */
     public default void updateInputs(FlywheelInputs inputs) {}
 
-    public default void setTopFlywheeVolts(double volts) {}
+    public default void setLeftFlywheeVolts(double volts) {}
 
-    public default void setTopFlywheePID(double kP, double kI, double kD) {}
+    public default void setLeftFlywheePID(AngularVelocity setpointRPS) {}
 
-    public default void setBottomFlywheeVolts(double volts) {}
+    public default void setRightFlywheeVolts(double volts) {}
 
-    public default void setBottomFlywheePID(double kP, double kI, double kD) {}
+    public default void setRightFlywheePID(AngularVelocity setpointRPS) {}
 
 }
