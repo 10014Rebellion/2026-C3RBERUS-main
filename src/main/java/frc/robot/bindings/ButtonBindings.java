@@ -48,7 +48,7 @@ public class ButtonBindings {
             .onFalse(mDriveSS.setToTeleop());
 
         mDriverController.x()
-            .onTrue(mDriveSS.setToDriftTest())
+            .onTrue(mDriveSS.setToLinearTest())
             .onFalse(mDriveSS.setToTeleop());
 
         // mDriverController.a()

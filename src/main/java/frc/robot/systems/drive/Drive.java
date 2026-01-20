@@ -117,12 +117,12 @@ public class Drive extends SubsystemBase {
 
     private final HeadingController mHeadingController = new HeadingController(TurnPointFeedforward.zeroTurnPointFF());
 
-    @AutoLogOutput(key = "Drive/HeadingController/GoalRotation")
+    // @AutoLogOutput(key = "Drive/HeadingController/GoalRotation")
     private Supplier<Rotation2d> mGoalRotationSup = () -> new Rotation2d();
 
     private final HolonomicController mAutoAlignController = new HolonomicController();
 
-    @AutoLogOutput(key = "Drive/HeadingController/GoalPose")
+    // @AutoLogOutput(key = "Drive/HeadingController/GoalPose")
     private Supplier<Pose2d> mGoalPoseSup = () -> new Pose2d();
 
     private final LineController mLineAlignController = new LineController(

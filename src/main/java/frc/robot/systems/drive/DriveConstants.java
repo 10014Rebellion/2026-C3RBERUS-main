@@ -33,10 +33,10 @@ public class DriveConstants {
     public static final double kDrivebaseRadiusMeters = Math.hypot(kTrackWidthXMeters / 2.0, kTrackWidthYMeters / 2.0);
 
     /* DRIVEBASE CONSTRAINTS */
-    public static final double kMaxLinearSpeedMPS = 4.5; // TODO: TUNE ME
+    public static final double kMaxLinearSpeedMPS = 4.0; // TODO: TUNE ME
     public static final double kMaxLinearAccelerationMPSS = 12.0; // TODO: TUNE ME
 
-    public static final double kMaxRotationSpeedRadiansPS = Math.toRadians(360); // TODO: TUNE ME
+    public static final double kMaxRotationSpeedRadiansPS = kMaxLinearSpeedMPS / kDrivebaseRadiusMeters; // TODO: TUNE ME
     public static final double kMaxRotationAccelRadiansPS = Math.toRadians(360) * 10; // TODO: TUNE ME
  
     public static final double kMaxAzimuthAngularRadiansPS = Math.toRadians(1200); // TODO: TUNE ME
@@ -67,9 +67,9 @@ public class DriveConstants {
 
     public static final double kPeakVoltage = 12.0;
 
-    public static final double kDriveStatorAmpLimit = 70.0; 
-    public static final double kDriveFOCAmpLimit = 70.0;
-    public static final double kDriveSupplyAmpLimit = 70.0;
+    public static final double kDriveStatorAmpLimit = 80.0; 
+    public static final double kDriveFOCAmpLimit = 80.0;
+    public static final double kDriveSupplyAmpLimit = 80.0;
 
     public static final double kAzimuthStatorAmpLimit = 40.0;
     public static final double kAzimuthFOCAmpLimit = 40.0;

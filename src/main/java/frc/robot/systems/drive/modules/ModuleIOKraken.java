@@ -75,6 +75,8 @@ public class ModuleIOKraken implements ModuleIO {
         driveConfig.CurrentLimits.StatorCurrentLimit = kDriveStatorAmpLimit;
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveConfig.CurrentLimits.SupplyCurrentLimit = kDriveSupplyAmpLimit;
+        driveConfig.CurrentLimits.SupplyCurrentLowerTime = 1.0;
+        driveConfig.CurrentLimits.SupplyCurrentLowerLimit = 60;
 
         driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;

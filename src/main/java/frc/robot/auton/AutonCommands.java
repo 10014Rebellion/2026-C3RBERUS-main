@@ -1,7 +1,11 @@
 package frc.robot.auton;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -34,6 +38,7 @@ public class AutonCommands extends SubsystemBase {
     private final Drive mRobotDrive;
 
     private final SendableChooser<Command> mAutoChooser;
+    private final LoggedDashboardChooser<Command> mAutoChooserLogged;
 
     private Trigger mIR1;
     private Trigger mIR2;
@@ -53,7 +58,11 @@ public class AutonCommands extends SubsystemBase {
         mAutoChooser = new SendableChooser<>();
 
         mAutoChooser.setDefaultOption("Stationary", backUpAuton());
-        tryToAddPathToChooser("String", nextScoreCoralPath("A1-Barge"));
+        tryToAddPathToChooser("NewPath", firstPath(
+            "NewPath", 
+            Rotation2d.kZero));
+        
+        mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     
         mIR1 = new Trigger(() ->  true);
         mIR2 = new Trigger(() ->  true);
@@ -66,6 +75,10 @@ public class AutonCommands extends SubsystemBase {
         mInAutoAlignRange = new Trigger(() ->  true);
         mInDrivingScoringTolerance = new Trigger(() ->  true);
         mInIntakeStartTolerance = new Trigger(() ->  true);
+    }
+
+    public Command getAuto() {
+        return mAutoChooserLogged.get();
     }
 
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
@@ -118,6 +131,19 @@ public class AutonCommands extends SubsystemBase {
 
     public Command backUpAuton() {
         return new InstantCommand();
+    }
+
+    public PathPlannerAuto firstPath(String pName, Rotation2d rot) {
+        PathPlannerAuto auto = new PathPlannerAuto(autoPlaceholder());
+        Command autoPath = followFirstChoreoPath(pName, rot);
+
+        auto.activePath(pName)
+            .onTrue(autoPath);
+        
+        auto.condition(() -> autoPath.isFinished())
+            .onTrue(Commands.run(() -> auto.cancel()));
+
+        return auto;
     }
 
     public PathPlannerAuto nextScoreCoralPath(String pName) {

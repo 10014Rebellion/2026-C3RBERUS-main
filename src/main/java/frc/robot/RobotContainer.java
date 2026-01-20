@@ -4,7 +4,9 @@ package frc.robot;
 
 import static frc.robot.systems.drive.DriveConstants.*;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.auton.AutonCommands;
 import frc.robot.bindings.BindingsConstants;
 import frc.robot.bindings.ButtonBindings;
 import frc.robot.game.StateTracker;
@@ -27,9 +29,10 @@ public class RobotContainer {
     private final Drive mDrive;
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
+    private final AutonCommands autos;
 
     public RobotContainer() {
-        new StateTracker();
+        // new StateTracker();
 
         switch (Constants.kCurrentMode) {
             case REAL:
@@ -95,6 +98,8 @@ public class RobotContainer {
                 BindingsConstants.kDefaultProfile.key(), mDrive.setDriveProfile(BindingsConstants.kDefaultProfile));
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDrive.setDriveProfile(profile));
+
+        autos = new AutonCommands(mDrive);
     }
 
     public Drive getDrivetrain() {
@@ -106,7 +111,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return null;
+        return autos.firstPath("NewPath", Rotation2d.kZero);
     }
 
     public Command getDriverProfileCommand() {

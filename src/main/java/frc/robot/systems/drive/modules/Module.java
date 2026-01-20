@@ -158,6 +158,7 @@ public class Module {
         setAmpFeedforward(pAmpFeedforward);
         setDesiredVelocity(pState.speedMetersPerSecond);
         setDesiredRotation(pState.angle);
+        setDesiredAzimuthVelocityRadPS(0.0);
         return getDesiredState();
     }
 
