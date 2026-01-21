@@ -52,8 +52,8 @@ public class FlywheelIOSim implements FlywheelIO{
     }
 
     //TODO: check if I am doing this right
-    public void setLeftFlywheePID(double kP, double kI, double kD) {
-        mLeftController.setPID(kP, kI, kD);
+    public void setLeftFlywheePID() {
+        mLeftController.setPID(mLeftController.getP(), mLeftController.getI(), mLeftController.getD());
     }
     
     @Override
@@ -62,7 +62,9 @@ public class FlywheelIOSim implements FlywheelIO{
     }
 
     //TODO: check if I am doing this right
-    public void setRightFlywheePID(double kP, double kI, double kD) {
-        mRightController.setPID(kP, kI, kD);
+    public void setRightFlywheePID() {
+        mRightController.setPID(mRightController.getP(), mRightController.getI(), mRightController.getD());
     }
+
+
 }

@@ -51,7 +51,7 @@ public class FlywheelSubsystem extends SubsystemBase{
     }
 
     @Override
-    public void periodic(){
+    public void periodic() {
         io.updateInputs(inputs);
 
          LoggedTunableNumber.ifChanged(
@@ -137,5 +137,4 @@ public class FlywheelSubsystem extends SubsystemBase{
             () -> false,
             this);
     }
-
 }
