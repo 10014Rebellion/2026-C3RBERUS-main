@@ -27,9 +27,6 @@ public class FlywheelIOSim implements FlywheelIO{
     private ProfiledPIDController mLeftController = new ProfiledPIDController(FlywheelConstants.kP, 0, 0, new Constraints(100, 100));
     private ProfiledPIDController mRightController = new ProfiledPIDController(FlywheelConstants.kP, 0, 0, new Constraints(100, 100));
 
-
-    
-    
     private double mLeftMotorVolts = 0.0;
     private double mRightMotorVolts = 0.0;
 
@@ -49,22 +46,22 @@ public class FlywheelIOSim implements FlywheelIO{
 
     }
     @Override
-    public void setLeftFlywheeVolts(double volts) {
+    public void setLeftFlywheelVolts(double volts) {
         mFlywheelLeftMotor.setInputVoltage(volts);
     }
 
-    //TODO: do flywheel PID's later
-    @Override
-    public void setLeftFlywheePID(double kP, double kI, double kD) {}
+    //TODO: check if I am doing this right
+    public void setLeftFlywheePID(double kP, double kI, double kD) {
+        mLeftController.setPID(kP, kI, kD);
+    }
     
     @Override
-    public void setRightFlywheeVolts(double volts) {
+    public void setRightFlywheelVolts(double volts) {
         mFlywheelRightMotor.setInputVoltage(volts);
     }
 
-    //TODO: do flywheel PID's later
-    @Override
-    public void setRightFlywheePID(double RPS) {
-        setRightFlywheeVolts(mRightController.calculate(kD));
+    //TODO: check if I am doing this right
+    public void setRightFlywheePID(double kP, double kI, double kD) {
+        mRightController.setPID(kP, kI, kD);
     }
 }

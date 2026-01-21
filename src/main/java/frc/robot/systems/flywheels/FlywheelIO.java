@@ -36,12 +36,12 @@ public interface FlywheelIO {
     /*TODO: DO I need more methods? */
     public default void updateInputs(FlywheelInputs inputs) {}
 
-    public default void setLeftFlywheeVolts(double volts) {}
+    public default void setLeftFlywheelVolts(double volts) {}
 
-    public default void setLeftFlywheePID(AngularVelocity setpointRPS) {}
+    public default void setLeftFlywheelPID(AngularVelocity setpointRPS) {}
 
-    public default void setRightFlywheeVolts(double volts) {}
+    public default void setRightFlywheelVolts(double volts) {}
 
-    public default void setRightFlywheePID(AngularVelocity setpointRPS) {}
+    public default void setRightFlywheelPID(AngularVelocity setpointRPS) {}
 
 }

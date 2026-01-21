@@ -23,20 +23,20 @@ public class FlywheelSubsystem extends SubsystemBase{
     }
 
     public void setLeftFlyWheelVolts(double pVolts){
-        io.setLeftFlywheeVolts(pVolts);
+        io.setLeftFlywheelVolts(pVolts);
     }
 
     public void setLeftPID(AngularVelocity setpointRPS){
-        io.setLeftFlywheePID(setpointRPS);
+        io.setLeftFlywheelPID(setpointRPS);
     }
 
     
     public void setRightFlyWheelVolts(double pVolts){
-        io.setRightFlywheeVolts(pVolts);
+        io.setRightFlywheelVolts(pVolts);
     }
 
     public void setRightPID(AngularVelocity setpointRPS){
-        io.setRightFlywheePID(setpointRPS);
+        io.setRightFlywheelPID(setpointRPS);
     }
 
     /*TEMPORARY SHOOTER METHOD!! */

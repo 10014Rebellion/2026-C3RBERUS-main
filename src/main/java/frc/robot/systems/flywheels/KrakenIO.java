@@ -77,13 +77,13 @@ public class KrakenIO implements FlywheelIO{
 
  
     @Override
-    public void setLeftFlywheeVolts(double volts) {
+    public void setLeftFlywheelVolts(double volts) {
         mFlywheelLeftMotor.setVoltage(volts);
     }
 
     //TODO: see if I am doing this right
     @Override
-    public void setLeftFlywheePID(AngularVelocity setpointRPS) {
+    public void setLeftFlywheelPID(AngularVelocity setpointRPS) {
         var slotConfigLeft = new Slot0Configs();
         slotConfigLeft.kP = FlywheelConstants.kP;
         slotConfigLeft.kI = FlywheelConstants.kI;
@@ -98,13 +98,13 @@ public class KrakenIO implements FlywheelIO{
     }
     
     @Override
-    public void setRightFlywheeVolts(double volts) {
+    public void setRightFlywheelVolts(double volts) {
         mFlywheelRightMotor.setVoltage(volts);
     }
 
     //TODO: NOT SURE IF THIS METHOD WORKS RIGHT!!!
     @Override
-    public void setRightFlywheePID(AngularVelocity setpointRPS) {
+    public void setRightFlywheelPID(AngularVelocity setpointRPS) {
         var slotConfigRight = new Slot0Configs();
         slotConfigRight.kP = FlywheelConstants.kP;
         slotConfigRight.kI = FlywheelConstants.kI;
