@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Rotation;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -137,7 +138,7 @@ public class AutonCommands extends SubsystemBase {
         PathPlannerAuto auto = new PathPlannerAuto(autoPlaceholder());
         Command autoPath = followFirstChoreoPath(pName, rot);
 
-        auto.activePath(pName)
+        auto.isRunning()
             .onTrue(autoPath);
         
         auto.condition(() -> autoPath.isFinished())
@@ -371,20 +372,18 @@ public class AutonCommands extends SubsystemBase {
 
     public Command followChoreoPath(String pathName) {
         PathPlannerPath path = getTraj(pathName).get();
-        path.getIdealTrajectory(Drive.mRobotConfig);
         double totalTimeSeconds = path.getIdealTrajectory(Drive.mRobotConfig).get().getTotalTimeSeconds();
         return 
-                mRobotDrive.customFollowPathComamnd(path).withTimeout(totalTimeSeconds).andThen(
-                mRobotDrive.setToStop());
+            mRobotDrive.customFollowPathComamnd(path).withTimeout(totalTimeSeconds).andThen(
+            mRobotDrive.setToStop());
     }
 
     public Command followChoreoPath(String pathName, PPHolonomicDriveController PID) {
         PathPlannerPath path = getTraj(pathName).get();
-        path.getIdealTrajectory(Drive.mRobotConfig);
         double totalTimeSeconds = path.getIdealTrajectory(Drive.mRobotConfig).get().getTotalTimeSeconds();
         return 
-        mRobotDrive.customFollowPathComamnd(path, PID).withTimeout(totalTimeSeconds).andThen(
-            mRobotDrive.setToStop());
+            mRobotDrive.customFollowPathComamnd(path, PID).withTimeout(totalTimeSeconds).andThen(
+                mRobotDrive.setToStop());
     }
 
     public Optional<PathPlannerPath> getTraj(String pathName) {

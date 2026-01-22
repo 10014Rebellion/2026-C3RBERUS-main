@@ -320,7 +320,7 @@ public class Drive extends SubsystemBase {
                 mDesiredSpeeds = null;
             case STOP:
                 for (int i = 0; i < mModules.length; i++) {
-                    mModules[i].setDesiredState(new SwerveModuleState(0.0, mModules[i].getCurrentState().angle));
+                    mDesiredSpeeds = new ChassisSpeeds();
                 }
                 break;
             default:
