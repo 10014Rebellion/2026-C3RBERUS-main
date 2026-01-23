@@ -10,13 +10,14 @@ import frc.robot.systems.IntakeRoller.IntakeRollerConstants.IntakeRollerHardware
 import frc.robot.systems.IntakeRoller.IOlayers.IntakeRollerIO.IntakeRollerIO.IntakeRollerIOInputs;
 
 public class IntakeRollerIOTalonFX implements IntakeRollerIO{
-    private final TalonFX kMotor;
+    private final TalonFX kOuterMotor;
+    private final TalonFX kInnerMotor;
     private TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
     
     private IntakeRollerConfiguration indexerConfiguration;
 
     public IntakeRollerIOTalonFX(IntakeRollerHardware hardware, IntakeRollerConfiguration indexerConfiguration){
-        kMotor = new TalonFX(hardware.kMotorPort(), hardware.kCanBus());
+        kOuterMotor = new TalonFX(hardware.kMotorPort(), hardware.kCanBus());
         this.indexerConfiguration = indexerConfiguration;
 
         motorConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
