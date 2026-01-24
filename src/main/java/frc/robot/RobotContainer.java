@@ -44,13 +44,24 @@ public class RobotContainer {
                         new GyroIOPigeon2(),
                         new AprilTag(new AprilTagIO[]{
                             new AprilTagIOPVTag(
-                                AprilTagConstants.kRightCamName, 
-                                AprilTagConstants.kRightCamTransform, 
-                                AprilTagConstants.kRightCamOrientation),
+                                AprilTagConstants.kFrontLeftCamName, 
+                                AprilTagConstants.kFrontLeftCamTransform, 
+                                AprilTagConstants.kFrontLeftCamOrientation),
+
                             new AprilTagIOPVTag(
-                                AprilTagConstants.kLeftCamName, 
-                                AprilTagConstants.kLeftCamTransform, 
-                                AprilTagConstants.kLeftCamOrientation)}));
+                                AprilTagConstants.kFrontRightCamName, 
+                                AprilTagConstants.kFrontRightCamTransform, 
+                                AprilTagConstants.kFrontRightCamOrientation),
+
+                            new AprilTagIOPVTag(
+                                AprilTagConstants.kBackLeftCamName, 
+                                AprilTagConstants.kBackLeftCamTransform, 
+                                AprilTagConstants.kBackLeftCamOrientation),
+                                
+                            new AprilTagIOPVTag(
+                                AprilTagConstants.kBackRightCamName, 
+                                AprilTagConstants.kBackRightCamTransform, 
+                                AprilTagConstants.kBackRightCamOrientation)}));
                 break;
 
             case SIM:
@@ -64,13 +75,25 @@ public class RobotContainer {
                         new GyroIO() {},
                         new AprilTag(new AprilTagIO[]{
                             new AprilTagIOPVTag(
-                                AprilTagConstants.kRightCamName, 
-                                AprilTagConstants.kRightCamTransform, 
-                                AprilTagConstants.kRightCamOrientation),
+                                AprilTagConstants.kFrontRightCamName, 
+                                AprilTagConstants.kFrontRightCamTransform, 
+                                AprilTagConstants.kFrontRightCamOrientation),
+
                             new AprilTagIOPVTag(
-                                AprilTagConstants.kLeftCamName, 
-                                AprilTagConstants.kLeftCamTransform, 
-                                AprilTagConstants.kLeftCamOrientation)}));
+                                AprilTagConstants.kFrontLeftCamName, 
+                                AprilTagConstants.kFrontLeftCamTransform, 
+                                AprilTagConstants.kFrontLeftCamOrientation),
+
+                            new AprilTagIOPVTag(
+                                AprilTagConstants.kBackLeftCamName, 
+                                AprilTagConstants.kBackLeftCamTransform, 
+                                AprilTagConstants.kBackLeftCamOrientation),
+
+                            new AprilTagIOPVTag(
+                                AprilTagConstants.kBackRightCamName, 
+                                AprilTagConstants.kBackRightCamTransform, 
+                                AprilTagConstants.kBackRightCamOrientation)
+                            }));
                 break;
 
             default:
@@ -82,7 +105,7 @@ public class RobotContainer {
                             new Module("BR", new ModuleIO() {})
                         },
                         new GyroIO() {},
-                        new AprilTag(new AprilTagIO[] {new AprilTagIO() {}, new AprilTagIO() {}}));
+                        new AprilTag(new AprilTagIO[] {new AprilTagIO() {}, new AprilTagIO() {}, new AprilTagIO() {}, new AprilTagIO() {}}));
                 break;
         }
 
