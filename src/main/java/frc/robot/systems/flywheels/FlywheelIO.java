@@ -3,6 +3,7 @@ package frc.robot.systems.flywheels;
 import org.littletonrobotics.junction.AutoLog;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 
@@ -17,6 +18,7 @@ public interface FlywheelIO {
         public double iFlywheelLeftTemperatureCelsius = 0.0;
         public double iFlywheelLeftMotorVolts = 0.0;
         public double iFlywheelLeftAccelerationMPSS = 0.0;
+        public Rotation2d iFlywheelLeftPosition = new Rotation2d();
 
         public double iFlywheelRightVelocityMPS = 0.0;
         public double iFlywheelRightStatorCurrentAmps = 0.0;
@@ -25,6 +27,8 @@ public interface FlywheelIO {
         public double iFlywheelRightTemperatureCelsius = 0.0;
         public double iFlywheelRightMotorVolts = 0.0;
         public double iFlywheelRightAccelerationMPSS = 0.0;
+        public Rotation2d iFlywheelRightPosition = new Rotation2d();
+
     }
 
     public default void updateInputs(FlywheelInputs inputs) {}

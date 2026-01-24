@@ -1,5 +1,7 @@
 package frc.robot.systems.flywheels;
 
+import static edu.wpi.first.units.Units.Degree;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -7,10 +9,13 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -58,11 +63,14 @@ public class FlywheelIOSim implements FlywheelIO{
         inputs.iFlywheelLeftVelocityMPS = (mFlywheelLeftMotor.getAngularVelocityRPM());
         inputs.iFlywheelLeftStatorCurrentAmps = Math.abs(mFlywheelLeftMotor.getCurrentDrawAmps());
         inputs.iFlywheelLeftTemperatureCelsius = 0.0;
+        inputs.iFlywheelLeftPosition = Rotation2d.fromRadians(mFlywheelLeftMotor.getAngularPosition().in(Radians));
 
         inputs.iFlywheelRightMotorVolts = mRightMotorVolts;
         inputs.iFlywheelRightVelocityMPS = (mFlywheelRightMotor.getAngularVelocityRPM());
         inputs.iFlywheelRightStatorCurrentAmps = Math.abs(mFlywheelRightMotor.getCurrentDrawAmps());
         inputs.iFlywheelRightTemperatureCelsius = 0.0;
+        inputs.iFlywheelRightPosition = Rotation2d.fromRadians(mFlywheelRightMotor.getAngularPosition().in(Radians));
+
 
     }
 
@@ -79,7 +87,8 @@ public class FlywheelIOSim implements FlywheelIO{
 
     @Override
     public void setLeftFlywheelVelocity(AngularVelocity setpointRPS, double pFF){
-        setLeftFlywheelVolts(mLeftController.calculate(mFlywheelLeftMotor.getAngularVelocityRPM(), setpointRPS.in(RotationsPerSecond)) + pFF);
+        setLeftFlywheelVolts(mLeftController.calculate(mFlywheelLeftMotor.getAngularVelocityRPM() / 60, setpointRPS.in(RotationsPerSecond)) + pFF);
+        mLeftController.reset(mFlywheelLeftMotor.getAngularVelocity().in(RotationsPerSecond));
     }
     
     @Override
@@ -95,7 +104,8 @@ public class FlywheelIOSim implements FlywheelIO{
 
     @Override
     public void setRightFlywheelVelocity(AngularVelocity setpointRPS, double pFF){
-        setRightFlywheelVolts(mRightController.calculate(mFlywheelRightMotor.getAngularVelocityRPM(), setpointRPS.in(RotationsPerSecond)) + pFF);
+        setRightFlywheelVolts(mRightController.calculate(mFlywheelRightMotor.getAngularVelocityRPM() / 60, setpointRPS.in(RotationsPerSecond)) + pFF);
+        mRightController.reset(mFlywheelRightMotor.getAngularVelocity().in(RotationsPerSecond));
     }
 
 

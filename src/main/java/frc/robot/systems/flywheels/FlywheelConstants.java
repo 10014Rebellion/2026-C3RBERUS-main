@@ -26,14 +26,14 @@ public class FlywheelConstants {
     public static double kPeakVoltage = 12;
 
     //TODO: tune me!
-    public static double kP = 0.0;
+    public static double kP = 0.1;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kVMax = 0.0;
-    public static double kAMax = 0.0;
-    public static double kS = 0.0;
-    public static double kV = 0.0;
-    public static double kA = 0.0;
+    public static double kVMax = 100.0;
+    public static double kAMax = 100.0;
+    public static double kS = 0.1;
+    public static double kV = 0.1;
+    public static double kA = 0.1;
     
     public enum FlywheelSetpoint {
         Outtake(RotationsPerSecond.of(80));

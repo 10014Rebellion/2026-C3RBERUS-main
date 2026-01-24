@@ -8,6 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
 import frc.robot.systems.flywheels.FlywheelConstants.FlywheelHardwareConfiguration;
 
@@ -20,6 +21,7 @@ public class FlywheelKrakenIO implements FlywheelIO{
     private StatusSignal<Current> mFlywheelLeftMotorTorqueCurrent;
     private StatusSignal<Temperature> mFlywheelLeftMotorTempCelsius;
     private StatusSignal<AngularAcceleration> mFlywheelLeftMotorAccelerationMPSS;
+    private Rotation2d mFlywheelLeftMotorPosition;
 
     private final TalonFX mFlywheelRightMotor;
     private StatusSignal<Voltage> mFlywheelRightMotorVoltage;
@@ -29,6 +31,8 @@ public class FlywheelKrakenIO implements FlywheelIO{
     private StatusSignal<Current> mFlywheelRightMotorTorqueCurrent;
     private StatusSignal<Temperature> mFlywheelRightMotorTempCelsius;
     private StatusSignal<AngularAcceleration> mFlywheelRightMotorAccelerationMPSS;
+    private Rotation2d mFlywheelRightMotorPosition;
+
 
     private final VelocityVoltage motorSetpointRequestLeft = new VelocityVoltage(0);
     private final VelocityVoltage motorSetpointRequestRight = new VelocityVoltage(0);
@@ -55,6 +59,8 @@ public class FlywheelKrakenIO implements FlywheelIO{
         mFlywheelLeftMotorTorqueCurrent = mFlywheelLeftMotor.getTorqueCurrent();
         mFlywheelLeftMotorTempCelsius = mFlywheelLeftMotor.getDeviceTemp();
         mFlywheelLeftMotorAccelerationMPSS = mFlywheelLeftMotor.getAcceleration();
+        mFlywheelLeftMotorPosition = Rotation2d.fromRotations(mFlywheelLeftMotor.getPosition().getValueAsDouble());
+
 
         /*RIGHT MOTOR CONFIGS*/
         mFlywheelRightMotor = new TalonFX(pRightFlywheelHardwareConfiguration.kMotorID(), pRightFlywheelHardwareConfiguration.kCanBus());
@@ -78,6 +84,7 @@ public class FlywheelKrakenIO implements FlywheelIO{
         mFlywheelRightMotorTorqueCurrent = mFlywheelRightMotor.getTorqueCurrent();
         mFlywheelRightMotorTempCelsius = mFlywheelRightMotor.getDeviceTemp();
         mFlywheelRightMotorAccelerationMPSS = mFlywheelRightMotor.getAcceleration();
+        mFlywheelRightMotorPosition = Rotation2d.fromRotations(mFlywheelRightMotor.getPosition().getValueAsDouble());
 
     }
 
@@ -91,6 +98,7 @@ public class FlywheelKrakenIO implements FlywheelIO{
         inputs.iFlywheelLeftTorqueCurrentAmps = mFlywheelLeftMotorTorqueCurrent.getValueAsDouble();
         inputs.iFlywheelLeftTemperatureCelsius = mFlywheelLeftMotorTempCelsius.getValueAsDouble();
         inputs.iFlywheelLeftAccelerationMPSS = mFlywheelLeftMotorAccelerationMPSS.getValueAsDouble();
+        inputs.iFlywheelLeftPosition = mFlywheelLeftMotorPosition;
 
         /*RIGHT MOTOR LOGGERS*/
         inputs.iFlywheelRightMotorVolts = mFlywheelRightMotorVoltage.getValueAsDouble();
@@ -100,6 +108,8 @@ public class FlywheelKrakenIO implements FlywheelIO{
         inputs.iFlywheelRightTorqueCurrentAmps = mFlywheelRightMotorTorqueCurrent.getValueAsDouble();
         inputs.iFlywheelRightTemperatureCelsius = mFlywheelRightMotorTempCelsius.getValueAsDouble();
         inputs.iFlywheelRightAccelerationMPSS = mFlywheelRightMotorAccelerationMPSS.getValueAsDouble();
+        inputs.iFlywheelRightPosition = mFlywheelRightMotorPosition;
+
 
     }
 

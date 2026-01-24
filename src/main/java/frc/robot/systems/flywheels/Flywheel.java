@@ -1,16 +1,21 @@
 package frc.robot.systems.flywheels;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.systems.flywheels.FlywheelConstants.FlywheelSetpoint;
 
 public class Flywheel extends SubsystemBase{
 
@@ -39,6 +44,69 @@ public class Flywheel extends SubsystemBase{
         public static final LoggedTunableNumber rightFlywheelMotorA = new LoggedTunableNumber("Flywheel/Right/kA", FlywheelConstants.RightControlConfig.motorFF().getKa());
 
 
+    /* MECHANISM 2D */
+    LoggedMechanism2d mechanism2dCanvas = new LoggedMechanism2d(3, 3, new Color8Bit(Color.kNavy));
+    LoggedMechanismRoot2d bridgeRoot = mechanism2dCanvas.getRoot("bridgeRoot", 0.5, 1.5);
+    LoggedMechanismRoot2d rootLeft = mechanism2dCanvas.getRoot("leftRoot", 0.5, 1.5);
+    LoggedMechanismRoot2d rootMiddle = mechanism2dCanvas.getRoot("middleRoot", 1.5, 1.5);
+    LoggedMechanismRoot2d rootRight = mechanism2dCanvas.getRoot("rightRoot", 2.5, 1.5);
+    
+
+        /* LEFT FLYWHEEL*/
+            LoggedMechanismLigament2d mVelocityTrackerLeft = rootLeft.append(new LoggedMechanismLigament2d(
+                "velocityPositionLeft", 
+                0.20, 
+                90, 
+                10.5, 
+                new Color8Bit(255, 255, 255)));
+            LoggedMechanismLigament2d  mLeftFlywheel = rootLeft.append(new LoggedMechanismLigament2d(
+                "leftFlywheel",
+                0.01,    
+                0,        
+                100,  
+                new Color8Bit(128, 0, 3)));
+
+        /* MIDDLE FLYWHEEL */
+            LoggedMechanismLigament2d mVelocityTrackerMiddle = rootMiddle.append(new LoggedMechanismLigament2d(
+                "velocityPositionMiddle", 
+                0.20, 
+                90, 
+                10.5, 
+                new Color8Bit(255, 255, 255)));
+            LoggedMechanismLigament2d  mMiddleFlywheel = rootMiddle.append(new LoggedMechanismLigament2d(
+                "MiddleFlywheel",
+                0.01,    
+                0,        
+                100,  
+                new Color8Bit(128, 0, 3)));
+
+
+        /* RIGHT FLYWHEEL */
+            /*TODO: see if I can make it so the flywheel named object goes BEHIND the tick mark */
+                /*QUICK NOTE:
+                so basically Mechanisms2d are goofy and it's making my right flywheel named object(2nd one) go in the front no  matter what I do,
+                so I changed the variable names in code so it works right. but in AK it's going to say the velocity tracker as the flywheel...pls dont kill me guys*/
+            LoggedMechanismLigament2d mRightFlywheel = rootRight.append(new LoggedMechanismLigament2d(
+                "velocityPositionRight", 
+                0.01, 
+                90, 
+                100, 
+                new Color8Bit(128, 0, 3)));
+            LoggedMechanismLigament2d  mVelocityTrackerRight = rootRight.append(new LoggedMechanismLigament2d(
+                "RightFlywheel",
+                0.2,    
+                90,        
+                10.5,  
+                new Color8Bit(255, 255, 255)));
+
+        /* BRIDGE */
+            LoggedMechanismLigament2d  mBridge = bridgeRoot.append(new LoggedMechanismLigament2d(
+                "bridge",
+                1.77,    
+                0,        
+                3,  
+                new Color8Bit(128, 0, 3)));    
+
     private FlywheelIO io;
     private FlywheelInputsAutoLogged inputs = new FlywheelInputsAutoLogged();
     private SimpleMotorFeedforward mLeftFF = FlywheelConstants.LeftControlConfig.motorFF();
@@ -51,17 +119,30 @@ public class Flywheel extends SubsystemBase{
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        Logger.processInputs("Flywheel/", inputs);
 
-         LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    io.setLeftFlywheelPID(leftFlywheelMotorP.get(), 0.0, leftFlywheelMotorD.get(), leftFlywheelMotorVMax.get(), leftFlywheelMotorAMax.get());
-                },
-                leftFlywheelMotorP,
-                leftFlywheelMotorD,
-                leftFlywheelMotorVMax,
-                leftFlywheelMotorAMax
-            );
+        double setPointAngleLeft = (inputs.iFlywheelLeftPosition.getDegrees());
+        mVelocityTrackerLeft.setAngle(setPointAngleLeft);
+
+        //TODO: I mean technically there isn't a middle motor so can't I just make it share the left side's position? Or do I need to account for the right side as well?
+        double setPointAngleMiddle = (inputs.iFlywheelLeftPosition.getDegrees());
+        mVelocityTrackerMiddle.setAngle(setPointAngleMiddle);
+
+        double setPointAngleRight = (inputs.iFlywheelRightPosition.getDegrees());
+        mVelocityTrackerRight.setAngle(setPointAngleRight);
+
+        Logger.recordOutput("Example/Mechanism", mechanism2dCanvas);
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                io.setLeftFlywheelPID(leftFlywheelMotorP.get(), 0.0, leftFlywheelMotorD.get(), leftFlywheelMotorVMax.get(), leftFlywheelMotorAMax.get());
+            },
+            leftFlywheelMotorP,
+            leftFlywheelMotorD,
+            leftFlywheelMotorVMax,
+            leftFlywheelMotorAMax
+        );
 
         LoggedTunableNumber.ifChanged(
             hashCode(),
@@ -119,6 +200,9 @@ public class Flywheel extends SubsystemBase{
         io.setRightFlywheelVelocity(setpointRPS, ff);
     }
 
+    public Command test(){
+        return  new InstantCommand(()->setLeftFlyWheelVolts(12));
+    }
     public Command shootCmd() {
         return new FunctionalCommand(
             () -> {

@@ -40,7 +40,7 @@ public class ButtonBindings {
             .onTrue(mDriveSS.characterizeAzimuths(0))
             .onFalse(mDriveSS.setToTeleop());
         
-        mDriverController.rightBumper()
+        mDriverController.b()
             .whileTrue(mFlywheel.shootCmd());
 
         
