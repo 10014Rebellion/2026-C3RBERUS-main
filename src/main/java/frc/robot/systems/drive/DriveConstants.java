@@ -63,7 +63,7 @@ public class DriveConstants {
     public static final double kWheelRadiusMeters = Units.inchesToMeters(1.4175); // TODO: TUNE ME
     public static final double kWheelCircumferenceMeters = 2 * Math.PI * kWheelRadiusMeters;
 
-    public static final boolean useVoltageFeedforward = RobotBase.isSimulation();
+    public static final boolean kUseVoltageFeedforward = RobotBase.isSimulation();
 
     public static final double kPeakVoltage = 12.0;
 

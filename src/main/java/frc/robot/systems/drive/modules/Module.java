@@ -68,7 +68,7 @@ public class Module {
         }
 
         if (mVelocitySetpointMPS != null) {
-            if(DriveConstants.useVoltageFeedforward) {
+            if(DriveConstants.kUseVoltageFeedforward) {
                     mIO.setDriveVelocity(mVelocitySetpointMPS, mDriveFF.calculate(mVelocitySetpointMPS));
             } else {
                 if (mAmperageFeedforward != null) {
