@@ -72,7 +72,10 @@ public class Module {
                     mIO.setDriveVelocity(mVelocitySetpointMPS, mDriveFF.calculate(mVelocitySetpointMPS));
             } else {
                 if (mAmperageFeedforward != null) {
-                    double ffOutput = mDriveFF.calculate(mVelocitySetpointMPS, mAmperageFeedforward);
+                    double ffOutput =
+                          mDriveFF.getKs() * Math.signum(mVelocitySetpointMPS)
+                        + mDriveFF.getKv() * mVelocitySetpointMPS
+                        + mDriveFF.getKa() * mAmperageFeedforward;
 
                     Telemetry.log("Drive/" + kModuleName + "/AmperageFeedforward", mAmperageFeedforward);
                     Telemetry.log("Drive/" + kModuleName + "/ffOutput", ffOutput);
