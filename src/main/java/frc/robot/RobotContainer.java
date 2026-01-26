@@ -4,14 +4,10 @@ package frc.robot;
 
 import static frc.robot.systems.drive.DriveConstants.*;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.lib.telemetry.Telemetry;
 import frc.robot.auton.AutonCommands;
 import frc.robot.bindings.BindingsConstants;
 import frc.robot.bindings.ButtonBindings;
-import frc.robot.game.StateTracker;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 import frc.robot.systems.drive.gyro.GyroIO;
@@ -26,8 +22,6 @@ import frc.robot.systems.vision.Vision;
 import frc.robot.systems.vision.VisionConstants;
 import frc.robot.systems.vision.VisionConstants.Orientation;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
-import com.pathplanner.lib.path.PathPlannerPath;
 
 public class RobotContainer {
     private final Drive mDrive;
