@@ -37,6 +37,7 @@ public class ModuleIOKraken implements ModuleIO {
     private final TalonFX mDriveMotor;
     private final VelocityTorqueCurrentFOC mDriveControl = new VelocityTorqueCurrentFOC(0.0);
     private final VoltageOut mDriveVoltageControl = new VoltageOut(0.0);
+    private final TorqueCurrentFOC mDriveAmpControl = new TorqueCurrentFOC(0.0);
     private final double mDriveAppliedVolts = 0.0;
 
     private final StatusSignal<Angle> mDrivePositionM;
@@ -75,11 +76,11 @@ public class ModuleIOKraken implements ModuleIO {
         driveConfig.CurrentLimits.StatorCurrentLimit = kDriveStatorAmpLimit;
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveConfig.CurrentLimits.SupplyCurrentLimit = kDriveSupplyAmpLimit;
-        driveConfig.CurrentLimits.SupplyCurrentLowerTime = 1.0;
-        driveConfig.CurrentLimits.SupplyCurrentLowerLimit = 60;
+        driveConfig.CurrentLimits.SupplyCurrentLowerTime = kDriveSupplyAmpLowerLimitTime;
+        driveConfig.CurrentLimits.SupplyCurrentLowerLimit = kDriveSupplyAmpLowerLimit;
 
-        driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-        driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+        driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = kDriveFOCAmpLimit;
+        driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -kDriveFOCAmpLimit;
         driveConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
 
         driveConfig.Voltage.PeakForwardVoltage = kPeakVoltage;
@@ -237,7 +238,7 @@ public class ModuleIOKraken implements ModuleIO {
 
     @Override
     public void setDriveAmperage(double pAmps) {
-        mDriveMotor.setControl(new TorqueCurrentFOC(pAmps));
+        mDriveMotor.setControl(mDriveAmpControl.withOutput(pAmps));
     }
 
     @Override

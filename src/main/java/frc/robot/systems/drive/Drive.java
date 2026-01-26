@@ -44,7 +44,6 @@ import frc.lib.swerve.LocalADStarAK;
 import frc.lib.swerve.SwerveUtils;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.lib.tuning.SysIDCharacterization;
 import frc.robot.game.GameDriveManager;
 import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.systems.drive.controllers.HeadingController;
