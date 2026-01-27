@@ -121,7 +121,7 @@ public class AutonCommands extends SubsystemBase {
             new InstantCommand(() -> {
                 mRobotDrive.setPose(AllianceFlipUtil.apply(new Pose2d(path.getPathPoses().get(0).getTranslation(), startingRotation)));
             }), 
-            mRobotDrive.customFollowPathComamnd(path).withTimeout(totalTimeSeconds), 
+            mRobotDrive.customFollowPathCommand(path).withTimeout(totalTimeSeconds), 
             mRobotDrive.setToStop());
     }
 
@@ -129,7 +129,7 @@ public class AutonCommands extends SubsystemBase {
         PathPlannerPath path = getTraj(pathName).get();
         double totalTimeSeconds = path.getIdealTrajectory(Drive.mRobotConfig).get().getTotalTimeSeconds();
         return 
-            mRobotDrive.customFollowPathComamnd(path).withTimeout(totalTimeSeconds).andThen(
+            mRobotDrive.customFollowPathCommand(path).withTimeout(totalTimeSeconds).andThen(
             mRobotDrive.setToStop());
     }
 
@@ -137,7 +137,7 @@ public class AutonCommands extends SubsystemBase {
         PathPlannerPath path = getTraj(pathName).get();
         double totalTimeSeconds = path.getIdealTrajectory(Drive.mRobotConfig).get().getTotalTimeSeconds();
         return 
-            mRobotDrive.customFollowPathComamnd(path, PID).withTimeout(totalTimeSeconds).andThen(
+            mRobotDrive.customFollowPathCommand(path, PID).withTimeout(totalTimeSeconds).andThen(
                 mRobotDrive.setToStop());
     }
 
