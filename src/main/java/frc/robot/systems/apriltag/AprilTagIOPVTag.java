@@ -44,7 +44,7 @@ public class AprilTagIOPVTag implements AprilTagIO {
         this.mCameraTransform = pCameraTransform;
         this.mOrientation = pOrientation;
 
-        mPoseEstimator = new PhotonPoseEstimator(FieldConstants.kFieldLayout, pCameraTransform);
+        mPoseEstimator = new PhotonPoseEstimator(FieldConstants.kApriltagLayout, pCameraTransform);
 
         if (Constants.kCurrentMode == Mode.SIM) {
             setupSimulation();
