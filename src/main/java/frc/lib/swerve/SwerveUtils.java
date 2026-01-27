@@ -176,7 +176,8 @@ public class SwerveUtils {
 
         double ratio = moduleTranslationMagnitudes[0] / moduleTranslationMagnitudes[3];
 
-        if(Double.isNaN(ratio) || Double.isInfinite(ratio)) return 0.0;
+        if(moduleTranslationMagnitudes[0] == 0.0 || moduleTranslationMagnitudes[3] == 0.0) return 0.0;
+        if(Double.isNaN(ratio) || Double.isInfinite(ratio)) return kSkidRatioCap+1.0;
 
         return moduleTranslationMagnitudes[0] / moduleTranslationMagnitudes[3];
     }

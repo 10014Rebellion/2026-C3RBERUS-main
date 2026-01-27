@@ -261,7 +261,7 @@ public class Drive extends SubsystemBase {
 
         Logger.recordOutput("Drive/Odometry/SkidFactor", skidFactor);
         Logger.recordOutput("Drive/Odometry/SkidCount", skidCount);
-        Logger.recordOutput("Drive/Odometry/VisionFactor", gyroFactor);
+        Logger.recordOutput("Drive/Odometry/GyroFactor", gyroFactor);
         Logger.recordOutput("Drive/Odometry/VisionFactor", visionFactor);
         
         /* VISION */

@@ -21,8 +21,8 @@ public class GyroIOPigeon2 implements GyroIO {
     private final StatusSignal<Angle> mYaw = mGyro.getYaw();
     private final StatusSignal<AngularVelocity> mYawVelocity = mGyro.getAngularVelocityXWorld();
     private final StatusSignal<LinearAcceleration> mYawAccelerationX = mGyro.getAccelerationX();
-    private final StatusSignal<LinearAcceleration> mYawAccelerationY = mGyro.getAccelerationX();
-    private final StatusSignal<LinearAcceleration> mYawAccelerationZ = mGyro.getAccelerationX();
+    private final StatusSignal<LinearAcceleration> mYawAccelerationY = mGyro.getAccelerationY();
+    private final StatusSignal<LinearAcceleration> mYawAccelerationZ = mGyro.getAccelerationZ();
 
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
