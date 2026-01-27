@@ -502,11 +502,11 @@ public class Drive extends SubsystemBase {
         return setDriveStateCommand(DriveState.WHEEL_CHARACTERIZATION);
     }
 
-    public Command customFollowPathComamnd(PathPlannerPath path) {
-        return customFollowPathComamnd(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
+    public Command customFollowPathCommand(PathPlannerPath path) {
+        return customFollowPathCommand(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
     }
 
-    public Command customFollowPathComamnd(PathPlannerPath path, PPHolonomicDriveController drivePID) {
+    public Command customFollowPathCommand(PathPlannerPath path, PPHolonomicDriveController drivePID) {
         return new FollowPathCommand(
             path, this::getPoseEstimate,
             this::getRobotChassisSpeeds,
