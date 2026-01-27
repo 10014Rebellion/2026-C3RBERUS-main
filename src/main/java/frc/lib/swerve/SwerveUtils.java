@@ -6,6 +6,7 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import static edu.wpi.first.units.Units.Rotation;
 // TODO: Sever this. Do not use imports, we have to pass these in. 
 import static frc.robot.systems.drive.DriveConstants.kDriveMotorGearing;
 import static frc.robot.systems.drive.DriveConstants.kKinematics;
@@ -66,8 +67,8 @@ public class SwerveUtils {
 
     // PATHPLANNER TORQUE UTILS \\ 
     /* Torque isn't directionally changed when the velocity flip case happen SwerveModuleState.optimize() */
-    public static double optimizeTorque(SwerveModuleState unOptimized, SwerveModuleState optimized, double motorAmperage, int i) {
-        return isSpeedOptimized(unOptimized, optimized, i) ? - motorAmperage : motorAmperage;
+    public static double optimizeTorque(SwerveModuleState unOptimized, SwerveModuleState optimized, double motorAmperage, SwerveModuleState current, int i) {
+        return (isSpeedOptimized(unOptimized, optimized, i) ? -motorAmperage : motorAmperage) * Math.abs(optimized.angle.minus(current.angle).getCos());
     }
 
     /* Check if optimize changed module velocity direction */

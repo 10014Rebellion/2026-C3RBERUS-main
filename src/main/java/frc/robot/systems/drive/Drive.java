@@ -345,7 +345,6 @@ public class Drive extends SubsystemBase {
                 setpointStates[i].optimize(mModules[i].getCurrentState().angle);
 
                 /* Feedforward cases based on driveState */
-                /* 0 unless in auto or auto-align */
                 double driveAmps = calculateDriveFeedforward(
                     mPreviousSetpoint, mModules[i].getCurrentState(),
                     unOptimizedSetpointStates[i], setpointStates[i], i);
@@ -397,7 +396,7 @@ public class Drive extends SubsystemBase {
         }
 
         driveAmps = SwerveUtils.optimizeTorque(unoptimizedState, optimizedState,
-                    setpoint.feedforwards().torqueCurrentsAmps()[i], i);
+            setpoint.feedforwards().torqueCurrentsAmps()[i], currentState, i);
 
         if(!mDriveState.equals(DriveState.AUTON) && !mDriveState.equals(DriveState.AUTO_ALIGN)) 
             driveAmps = SwerveUtils.lowPassFilter(mPrevDriveAmps[i], driveAmps, tDriveFFAggressiveness.get());
