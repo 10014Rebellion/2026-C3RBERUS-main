@@ -63,6 +63,7 @@ public class SequentialEndingCommandGroup extends Command {
 
   @Override
   public final void initialize() {
+    hasEnded = false;
     m_currentCommandIndex = 0;
 
     if (!m_commands.isEmpty()) {
