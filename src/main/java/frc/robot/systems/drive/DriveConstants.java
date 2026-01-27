@@ -42,7 +42,7 @@ public class DriveConstants {
     public static final double kMaxAzimuthAngularRadiansPS = Math.toRadians(1200); // TODO: TUNE ME
 
     /* Plugged into setpoint generator */
-    public static final PathConstraints kAutoDriveConstraints = new PathConstraints(
+    public static final PathConstraints kAutoConstraints = new PathConstraints(
             kMaxLinearSpeedMPS, kMaxLinearAccelerationMPSS, kMaxRotationSpeedRadiansPS, kMaxRotationAccelRadiansPS);
 
     /* MISC */

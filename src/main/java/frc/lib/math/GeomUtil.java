@@ -158,4 +158,12 @@ public class GeomUtil {
             return rotation2.minus(rotation1.minus(Rotation2d.k180deg));
         }
     }
+
+    public static double hypot(double x, double y) {
+        return Math.hypot(x, y);
+    }
+
+    public static double hypot(double x, double y, double z) {
+        return Math.hypot(Math.hypot(x, y), z);
+    }
 }

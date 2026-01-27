@@ -45,9 +45,9 @@ public class GyroIOPigeon2 implements GyroIO {
         pInputs.iConnected = BaseStatusSignal.refreshAll(mYaw, mYawVelocity).equals(StatusCode.OK);
         pInputs.iYawPosition = Rotation2d.fromDegrees(mYaw.getValueAsDouble());
         pInputs.iYawVelocityPS = Rotation2d.fromDegrees(mYawVelocity.getValueAsDouble());
-        pInputs.iAccelerationXG = mYawAccelerationX.getValueAsDouble();
-        pInputs.iAccelerationZG = mYawAccelerationX.getValueAsDouble();
-        pInputs.iAccelerationYG = mYawAccelerationX.getValueAsDouble();
+        pInputs.iAccXG = mYawAccelerationX.getValueAsDouble();
+        pInputs.iAccZG = mYawAccelerationY.getValueAsDouble();
+        pInputs.iAccYG = mYawAccelerationZ.getValueAsDouble();
 
         pInputs.odometryYawTimestamps =
             yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();

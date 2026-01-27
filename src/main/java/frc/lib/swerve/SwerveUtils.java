@@ -2,7 +2,9 @@ package frc.lib.swerve;
 
 import edu.wpi.first.math.Vector;
 
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
 // TODO: Sever this. Do not use imports, we have to pass these in. 
 import static frc.robot.systems.drive.DriveConstants.kDriveMotorGearing;
@@ -206,5 +208,21 @@ public class SwerveUtils {
         if(Double.isNaN(ratio) || Double.isInfinite(ratio)) return kSkidRatioCap+1.0;
 
         return moduleTranslationMagnitudes[0] / moduleTranslationMagnitudes[3];
+    }
+
+    public static double correctAmpFFDirection(SwerveModuleState optimizedState, SwerveModuleState prevOptimizedState, double driveAmps, int modNumber) {
+        double directionOfVelChange = Math.signum(
+            optimizedState.speedMetersPerSecond - prevOptimizedState.speedMetersPerSecond);
+        Telemetry.log("Drive/Module/Feedforward/" + modNumber + "/dir", directionOfVelChange);
+        driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
+        return driveAmps;
+    }
+
+    public static void setUpPathPlanner() {
+        Pathfinding.setPathfinder(new LocalADStarAK());
+        PathPlannerLogging.setLogActivePathCallback((activePath) ->
+            Telemetry.log("Drive/Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
+        PathPlannerLogging.setLogTargetPoseCallback(
+            (targetPose) -> Telemetry.log("Drive/Odometry/TrajectorySetpoint", targetPose));
     }
 }

@@ -9,9 +9,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
-import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -25,7 +23,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,12 +32,12 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.controls.TurnPointFeedforward;
+import frc.lib.math.AllianceFlipUtil;
 import frc.lib.math.GeomUtil;
 import frc.lib.optimizations.PPRobotConfigLoader;
 import frc.lib.pathplanner.AzimuthFeedForward;
 import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
-import frc.lib.swerve.LocalADStarAK;
 import frc.lib.swerve.SwerveUtils;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
@@ -55,8 +52,8 @@ import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles
 import frc.robot.systems.drive.gyro.GyroIO;
 import frc.robot.systems.drive.gyro.GyroInputsAutoLogged;
 import frc.robot.systems.drive.modules.Module;
-import frc.robot.systems.vision.Vision;
-import frc.robot.systems.vision.Vision.VisionObservation;
+import frc.robot.systems.apriltag.AprilTag;
+import frc.robot.systems.apriltag.AprilTag.VisionObservation;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -86,7 +83,7 @@ public class Drive extends SubsystemBase {
     private final Module[] mModules;
     private final GyroIO mGyro;
     private final GyroInputsAutoLogged mGyroInputs = new GyroInputsAutoLogged();
-    private final Vision mVision;
+    private final AprilTag mVision;
 
     private Rotation2d mRobotRotation;
     private final SwerveDriveOdometry mOdometry;
@@ -98,35 +95,32 @@ public class Drive extends SubsystemBase {
     private SwerveSetpoint mPreviousSetpoint =
             new SwerveSetpoint(new ChassisSpeeds(), SwerveUtils.zeroStates(), DriveFeedforwards.zeros(4), AzimuthFeedForward.zeros());
 
-    @AutoLogOutput(key = "Drive/State")
-    private DriveState mDriveState = DriveState.TELEOP;
-
-    private final boolean kUseGenerator = true;
-
     private ChassisSpeeds mDesiredSpeeds = new ChassisSpeeds();
     private ChassisSpeeds mPPDesiredSpeeds = new ChassisSpeeds();
     private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
-    private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
-    private final PathConstraints mDriveConstraints = DriveConstants.kAutoDriveConstraints;
+    private final PathConstraints mDriveConstraints = DriveConstants.kAutoConstraints;
 
     private SwerveModuleState[] mPrevSetpointStates = SwerveUtils.zeroStates();
-    private SwerveModuleState[] mPrevStates = null;
-    private SwerveModulePosition[] mPrevPositions = null;
+    private SwerveModulePosition[] mPrevPositions = SwerveUtils.zeroPositions();
+    private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
+
+    private final boolean kUseGenerator = true;
+
+    @AutoLogOutput(key = "Drive/State")
+    private DriveState mDriveState = DriveState.TELEOP;
 
     private final ManualTeleopController mTeleopController = new ManualTeleopController();
 
     private final HeadingController mHeadingController = new HeadingController(TurnPointFeedforward.zeroTurnPointFF());
 
-    // @AutoLogOutput(key = "Drive/HeadingController/GoalRotation")
     private Supplier<Rotation2d> mGoalRotationSup = () -> new Rotation2d();
 
     private final HolonomicController mAutoAlignController = new HolonomicController();
-
-    // @AutoLogOutput(key = "Drive/HeadingController/GoalPose")
-    private Supplier<Pose2d> mGoalPoseSup = () -> new Pose2d();
-
     private final LineController mLineAlignController = new LineController(
         () -> 0.0, () -> 1.0, () -> false);
+
+    private Supplier<Pose2d> mGoalPoseSup = () -> new Pose2d();
+    private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
 
     private final GameDriveManager mGameDriveManager = new GameDriveManager(this);
 
@@ -135,74 +129,49 @@ public class Drive extends SubsystemBase {
     public static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
     public static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
     public static final LoggedTunableNumber tDriveAggressiveness = new LoggedTunableNumber("Drive/Teleop/DriveAggresiveness", 0.0001);
-    // private final LoggedTunableNumber tAzimuthDriveScalar = new LoggedTunableNumber("Drive/AzimuthDriveScalar", DriveConstants.kAzimuthDriveScalar);
-
-    private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
     
-
-    public Drive(Module[] modules, GyroIO gyro, Vision vision) {
+    public Drive(Module[] modules, GyroIO gyro, AprilTag vision) {
         this.mModules = modules;
         this.mGyro = gyro;
         this.mVision = vision;
 
         mRobotRotation = mGyroInputs.iYawPosition;
 
-        mOdometry = new SwerveDriveOdometry(kKinematics, getmRobotRotation(), getModulePositions());
-        mPoseEstimator = new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
+        mOdometry = new SwerveDriveOdometry(kKinematics, getRobotRotation(), getModulePositions());
+        mPoseEstimator = new SwerveDrivePoseEstimator(kKinematics, getRobotRotation(), getModulePositions(), new Pose2d());
 
         mRobotConfig = PPRobotConfigLoader.load();
-
         mSetpointGenerator = new SwerveSetpointGenerator(mRobotConfig, kMaxAzimuthAngularRadiansPS);
 
         PhoenixOdometryThread.getInstance().start();
 
         AutoBuilder.configure(
-            this::getPoseEstimate,
-            this::setPose,
-            this::getRobotChassisSpeeds,
+            this::getPoseEstimate, this::setPose,this::getRobotChassisSpeeds,
             (speeds, ff) -> {
                 mDriveState = DriveState.AUTON;
-                mPPDesiredSpeeds = new ChassisSpeeds(
-                    speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+                mPPDesiredSpeeds = speeds;
                 mPathPlanningFF = ff;
             },
             new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID),
-            mRobotConfig,
-            () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-            this);
+            mRobotConfig, () -> AllianceFlipUtil.shouldFlip(), this);
 
-        Pathfinding.setPathfinder(new LocalADStarAK());
-        PathPlannerLogging.setLogActivePathCallback((activePath) ->
-                Telemetry.log("Drive/Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
-        PathPlannerLogging.setLogTargetPoseCallback(
-                (targetPose) -> Telemetry.log("Drive/Odometry/TrajectorySetpoint", targetPose));
-
+        SwerveUtils.setUpPathPlanner();
         SmartDashboard.putData(mField);
-
         mHeadingController.setHeadingGoal(mGoalRotationSup);
     }
 
     ///// ENTRY POINT TO THE DRIVE \\\\\
-    ////////////////////////////////////
-
     @Override
     public void periodic() {
         updateSensorsAndOdometry();
-        
         runSwerve(computeDesiredSpeeds());
     }
 
     private void updateSensorsAndOdometry() {
         try {
             kOdometryLock.lock();
-            if(mPrevStates == null || mPrevPositions == null) {
-                mPrevStates = SwerveUtils.zeroStates();
-                mPrevPositions = SwerveUtils.zeroPositions();
-            }
-
             for (Module module : mModules) module.periodic();
 
-            /* GYRO */
             mGyro.updateInputs(mGyroInputs);
             Logger.processInputs("Drive/Gyro", mGyroInputs);
         } catch (Exception e) {
@@ -225,13 +194,10 @@ public class Drive extends SubsystemBase {
                 // System.out.println("\n\n\n\n\n\n\n\n"+mModules[moduleIndex].getOdometryPositions().length+"\n\n\n\n\n\n\n\n\n\n");
                 modulePositions[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
                 moduleDeltas[moduleIndex] = new SwerveModulePosition(
-                    modulePositions[moduleIndex].distanceMeters
-                        - mPrevPositions[moduleIndex].distanceMeters,
+                    modulePositions[moduleIndex].distanceMeters - mPrevPositions[moduleIndex].distanceMeters,
                     modulePositions[moduleIndex].angle);
                 mPrevPositions[moduleIndex] = modulePositions[moduleIndex];
             }
-
-            Logger.recordOutput("Drive/ModulePositions250", modulePositions);
 
             Twist2d robotTwist = kKinematics.toTwist2d(moduleDeltas);
             if(kSkidRatioCap < SwerveUtils.skidRatio(GeomUtil.toChassisSpeeds(robotTwist, 1.0 / kOdometryFrequency))) skidCount++;
@@ -252,9 +218,7 @@ public class Drive extends SubsystemBase {
         mOdometry.update(mRobotRotation, getModulePositions());
 
         double skidFactor = skidCount * kSkidScalar;
-        double gyroFactor = (Math.hypot(
-            Math.hypot(mGyroInputs.iAccelerationXG, mGyroInputs.iAccelerationYG), 
-            mGyroInputs.iAccelerationZG) > kCollisionCapG) 
+        double gyroFactor = (GeomUtil.hypot(mGyroInputs.iAccXG, mGyroInputs.iAccYG, mGyroInputs.iAccZG) > kCollisionCapG) 
                 ? kCollisionScalar : 1.0;
         
         double visionFactor = skidFactor + gyroFactor;
@@ -268,18 +232,11 @@ public class Drive extends SubsystemBase {
         mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
         VisionObservation[] observations = mVision.getVisionObservations();
         for (VisionObservation observation : observations) {
-            if (observation.hasObserved())
-                mPoseEstimator.addVisionMeasurement(
-                    observation.pose(), observation.timeStamp(), 
-                    observation.stdDevs().times(1.0 / visionFactor));
+            if (observation.hasObserved()) mPoseEstimator.addVisionMeasurement(
+                observation.pose(), observation.timeStamp(), 
+                observation.stdDevs().times(1.0 / visionFactor));
 
-            Telemetry.log(
-                    observation.camName() + "/stdDevX", observation.stdDevs().get(0));
-            Telemetry.log(
-                    observation.camName() + "/stdDevY", observation.stdDevs().get(1));
-            Telemetry.log(
-                    observation.camName() + "/stdDevTheta",
-                    observation.stdDevs().get(2));
+            Telemetry.logVisionObservatinStdDevs(observation);
         }
 
         mField.setRobotPose(getPoseEstimate());
@@ -290,8 +247,8 @@ public class Drive extends SubsystemBase {
         mAutoAlignController.updateControllers();
         mLineAlignController.updateControllers();
 
-        ChassisSpeeds teleopSpeeds =
-                mTeleopController.computeChassisSpeeds(getPoseEstimate().getRotation(), false, true);
+        ChassisSpeeds teleopSpeeds = mTeleopController.computeChassisSpeeds(
+            getPoseEstimate().getRotation(), false, true);
         switch (mDriveState) {
             case TELEOP:
                 mDesiredSpeeds = teleopSpeeds;
@@ -326,11 +283,11 @@ public class Drive extends SubsystemBase {
             case DRIFT_TEST:
                 mDesiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(
                     tLinearTestSpeedMPS.get(), 0.0, Math.toRadians(tRotationDriftTestSpeedDeg.get())),
-                        mRobotRotation);
+                    mRobotRotation);
                 break;
             case LINEAR_TEST:
-                mDesiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                    new ChassisSpeeds(tLinearTestSpeedMPS.get(), 0.0, 0.0), mRobotRotation);
+                mDesiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(
+                    tLinearTestSpeedMPS.get(), 0.0, 0.0), mRobotRotation);
                 break;
                 /* Set by characterization commands in the CHARACTERIZATION header. Wheel characterization is currently unimplemented */
             case SYSID_CHARACTERIZATION:
@@ -364,20 +321,14 @@ public class Drive extends SubsystemBase {
 
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
 
-        if (DriverStation.isAutonomous()) {
-            mPreviousSetpoint =
-                mSetpointGenerator.generateSetpoint(mPreviousSetpoint, mDesiredSpeeds, kAutoDriveConstraints, 0.02);
-        } else {
-            mPreviousSetpoint =
-                mSetpointGenerator.generateSetpoint(mPreviousSetpoint, mDesiredSpeeds, mDriveConstraints, 0.02);
-        }
+        mPreviousSetpoint = mSetpointGenerator.generateSetpoint(
+            mPreviousSetpoint, mDesiredSpeeds, (DriverStation.isTeleop()) ? mDriveConstraints : kAutoConstraints, 0.02);
 
         /* Only for logging purposes */
         SwerveModuleState[] moduleTorques = SwerveUtils.zeroStates();
 
         // Telemetry.log("Drive/Odometry/generatedFieldSpeeds",
         // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
-
         for (int i = 0; i < 4; i++) {
             if (kUseGenerator) {
                 /* Logs the drive feedforward stuff */
@@ -395,11 +346,8 @@ public class Drive extends SubsystemBase {
                 /* Feedforward cases based on driveState */
                 /* 0 unless in auto or auto-align */
                 double driveAmps = calculateDriveFeedforward(
-                    mPreviousSetpoint,
-                    mModules[i].getCurrentState(),
-                    unOptimizedSetpointStates[i],
-                    setpointStates[i],
-                    i);
+                    mPreviousSetpoint, mModules[i].getCurrentState(),
+                    unOptimizedSetpointStates[i], setpointStates[i], i);
                 double desiredAzimuthVelocityRadPS = 
                     mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i];
 
@@ -410,11 +358,10 @@ public class Drive extends SubsystemBase {
 
                 Logger.recordOutput("Drive/DesiredAzimuthRotationSpeed"+mModules[i].getModuleName(), desiredAzimuthVelocityRadPS);
                 /* Normalized for logging */
-                moduleTorques[i] =
-                        new SwerveModuleState((driveAmps * kMaxLinearSpeedMPS / kDriveFOCAmpLimit), optimizedSetpointStates[i].angle);
+                moduleTorques[i] = new SwerveModuleState(
+                    (driveAmps * kMaxLinearSpeedMPS / kDriveFOCAmpLimit), optimizedSetpointStates[i].angle);
             } else {
-                setpointStates[i] = new SwerveModuleState(
-                    setpointStates[i].speedMetersPerSecond,
+                setpointStates[i] = new SwerveModuleState(setpointStates[i].speedMetersPerSecond,
                     SwerveUtils.removeAzimuthJitter(setpointStates[i], mModules[i].getCurrentState()));
 
                 setpointStates[i].optimize(mModules[i].getCurrentState().angle);
@@ -428,10 +375,8 @@ public class Drive extends SubsystemBase {
         Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(optimizedSetpointStates));
-        Telemetry.log(
-            "Drive/Odometry/FieldSetpointChassisSpeed",
-            ChassisSpeeds.fromRobotRelativeSpeeds(
-                kKinematics.toChassisSpeeds(optimizedSetpointStates), mRobotRotation));
+        Telemetry.log("Drive/Odometry/FieldSetpointChassisSpeed", ChassisSpeeds.fromRobotRelativeSpeeds(
+            kKinematics.toChassisSpeeds(optimizedSetpointStates), mRobotRotation));
         Telemetry.log("Drive/Swerve/ModuleTorqueFF", moduleTorques);
     }
 
@@ -441,32 +386,21 @@ public class Drive extends SubsystemBase {
             SwerveModuleState unoptimizedState, SwerveModuleState optimizedState, int i) {
         double driveAmps = 0.0;
         switch (mDriveState) {
+            /* No need to optimize for Choreo, as it handles it under the hood */
             case AUTON:
-                /* No need to optimize for Choreo, as it handles it under the hood */
                 driveAmps = SwerveUtils.convertChoreoNewtonsToAmps(currentState, mPathPlanningFF, i);
                 break;
             // TODO: Fix this.
             case AUTO_ALIGN:
-                driveAmps =  SwerveUtils.optimizeTorque(
-                    unoptimizedState, optimizedState,
-                    setpoint.feedforwards().torqueCurrentsAmps()[i],
-                    i);
-                break;
             default:
-                driveAmps = SwerveUtils.optimizeTorque(
-                    unoptimizedState, optimizedState,
-                    setpoint.feedforwards().torqueCurrentsAmps()[i],
-                    i);
+                driveAmps = SwerveUtils.optimizeTorque(unoptimizedState, optimizedState,
+                    setpoint.feedforwards().torqueCurrentsAmps()[i], i);
         }
 
-        double directionOfVelChange = Math.signum(
-            optimizedState.speedMetersPerSecond - mPrevSetpointStates[i].speedMetersPerSecond);
-        Telemetry.log("Drive/Module/Feedforward/" + i + "/dir", directionOfVelChange);
-        driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
+        driveAmps = SwerveUtils.correctAmpFFDirection(optimizedState, mPrevSetpointStates[i], driveAmps, i);
 
-        if(!(mDriveState.equals(DriveState.AUTON) || mDriveState.equals(DriveState.AUTO_ALIGN))) {
+        if(!mDriveState.equals(DriveState.AUTON) && !mDriveState.equals(DriveState.AUTO_ALIGN)) 
             driveAmps = SwerveUtils.lowPassFilter(mPrevDriveAmps[i], driveAmps, tDriveAggressiveness.get());
-        }
 
         mPrevDriveAmps[i] = driveAmps;
         return driveAmps;
@@ -511,16 +445,13 @@ public class Drive extends SubsystemBase {
 
     public Command customFollowPathCommand(PathPlannerPath path, PPHolonomicDriveController drivePID) {
         return new FollowPathCommand(
-            path, this::getPoseEstimate,
-            this::getRobotChassisSpeeds,
+            path, this::getPoseEstimate, this::getRobotChassisSpeeds,
             (speeds, ff) -> {
                 setDriveState(DriveState.AUTON);
                 mPPDesiredSpeeds = speeds;
                 mPathPlanningFF = ff;
-            },
-            drivePID, mRobotConfig,
-            () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red),
-            this);
+            }, drivePID, 
+            mRobotConfig, () -> AllianceFlipUtil.shouldFlip(), this);
     }
 
     public Command getGameDriveCommand(GameDriveStates pGameDriveStates) {
@@ -537,13 +468,18 @@ public class Drive extends SubsystemBase {
             mGoalPoseSup = pGoalPoseSup;
             mAutoAlignController.setConstraintType(pConstraintType);
             mAutoAlignController.reset(
-                getPoseEstimate(), 
-                ChassisSpeeds.fromRobotRelativeSpeeds(
-                    getRobotChassisSpeeds(), 
-                    getPoseEstimate().getRotation()),
+                getPoseEstimate(), ChassisSpeeds.fromRobotRelativeSpeeds(
+                    getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
                 mGoalPoseSup.get());
-            })
-            .andThen(setDriveStateCommandContinued(DriveState.AUTO_ALIGN));
+            }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
+    }
+
+    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pLineAngle, DoubleSupplier pTeleopScalar, BooleanSupplier pTeleopInvert) {
+        return new InstantCommand(() -> {
+            mGoalPoseSup = pGoalPoseSup;
+            mLineAlignController.setControllerGoalSettings(pTeleopScalar, () -> pLineAngle.get().getTan(), pTeleopInvert);
+            mLineAlignController.reset(getPoseEstimate(), mGoalPoseSup.get());
+        }).andThen( setDriveStateCommandContinued( DriveState.LINE_ALIGN ) );
     }
 
     /*
@@ -552,24 +488,12 @@ public class Drive extends SubsystemBase {
      * @param Turn feedforward
      */
     public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation, TurnPointFeedforward pTurnPointFeedforward) {
-        return new InstantCommand(() -> {
-                mGoalRotationSup = pGoalRotation;
-                mHeadingController.setHeadingGoal(mGoalRotationSup);
-                mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.iYawVelocityPS);
-                mHeadingController.setTurnPointFF(pTurnPointFeedforward);
-            })
-            .andThen(setDriveStateCommandContinued(DriveState.HEADING_ALIGN));
+        return setToGenericHeadingAlign( pGoalRotation, pTurnPointFeedforward, DriveState.HEADING_ALIGN );
     }
 
     /* Accounts for velocity of drive when turning */
     public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation) {
-        return setToGenericHeadingAlign(
-            pGoalRotation, 
-            new TurnPointFeedforward(
-                mPoseEstimator::getEstimatedPosition, 
-                () -> getDesiredChassisSpeeds(), 
-                mGoalPoseSup, 
-                () -> new ChassisSpeeds()));
+        return setToGenericHeadingAlign( pGoalRotation, getDefaultTurnPointFF() );
     }
 
     /*
@@ -578,32 +502,27 @@ public class Drive extends SubsystemBase {
      * @param Turn feedforward
      */
     public Command setToGenericHeadingAlignAuton(Supplier<Rotation2d> pGoalRotation, TurnPointFeedforward pTurnPointFeedforward) {
+        return setToGenericHeadingAlign( pGoalRotation, pTurnPointFeedforward, DriveState.AUTON_HEADING_ALIGN );
+    }
+
+    /* Accounts for velocity of drive when turning */
+    public Command setToGenericHeadingAlignAuton(Supplier<Rotation2d> pGoalRotation) {
+        return setToGenericHeadingAlignAuton( pGoalRotation, getDefaultTurnPointFF() );
+    }
+
+    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation, TurnPointFeedforward pTurnPointFeedforward, DriveState headingState) {
         return new InstantCommand(() -> {
             mGoalRotationSup = pGoalRotation;
             mHeadingController.setHeadingGoal(mGoalRotationSup);
             mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.iYawVelocityPS);
             mHeadingController.setTurnPointFF(pTurnPointFeedforward);
-        })
-        .andThen(setDriveStateCommandContinued(DriveState.AUTON_HEADING_ALIGN));
+        }).andThen( setDriveStateCommandContinued( headingState ) );
     }
 
-    /* Accoutns for velocity of drive when turning */
-    public Command setToGenericHeadingAlignAuton(Supplier<Rotation2d> pGoalRotation) {
-        return setToGenericHeadingAlignAuton(
-            pGoalRotation, 
-            new TurnPointFeedforward(
-                mPoseEstimator::getEstimatedPosition, 
-                () -> getDesiredChassisSpeeds(), 
-                mGoalPoseSup, 
-                () -> new ChassisSpeeds()));
-    }
-
-    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSupplier, Supplier<Rotation2d> pLineAngle, DoubleSupplier pTeleopScalar, BooleanSupplier pTeleopInvert) {
-        return new InstantCommand(() -> {
-            mGoalPoseSup = pGoalPoseSupplier;
-            mLineAlignController.setControllerGoalSettings(pTeleopScalar, () -> pLineAngle.get().getTan(), pTeleopInvert);
-            mLineAlignController.reset(getPoseEstimate(), mGoalPoseSup.get());
-        }).andThen(setDriveStateCommandContinued(DriveState.LINE_ALIGN));
+    public TurnPointFeedforward getDefaultTurnPointFF() {
+        return new TurnPointFeedforward(
+            mPoseEstimator::getEstimatedPosition, this::getDesiredChassisSpeeds, 
+            mGoalPoseSup, () -> new ChassisSpeeds());
     }
 
     ////// BASE STATES \\\\\\
@@ -624,10 +543,7 @@ public class Drive extends SubsystemBase {
     ////////////// LOCALIZATION(MAINLY RESETING LOGIC) \\\\\\\\\\\\\\\\
     public void resetGyro() {
         /* Robot is usually facing the other way(relative to field) when doing cycles on red side, so gyro is reset to 180 */
-        mRobotRotation = DriverStation.getAlliance().isPresent()
-                        && DriverStation.getAlliance().get().equals(Alliance.Red)
-                ? Rotation2d.fromDegrees(180.0)
-                : Rotation2d.fromDegrees(0.0);
+        mRobotRotation = AllianceFlipUtil.shouldFlip() ? Rotation2d.fromDegrees(180.0) : Rotation2d.fromDegrees(0.0);
         mGyro.resetGyro(mRobotRotation);
         setPose(new Pose2d(new Translation2d(), mRobotRotation));
     }
@@ -641,12 +557,19 @@ public class Drive extends SubsystemBase {
         mGyro.resetGyro(mRobotRotation);
         // Safe to pass in odometry poses because of the syncing
         // between gyro and pose estimator in reset gyro function
-        mPoseEstimator.resetPosition(getmRobotRotation(), getModulePositions(), estimatorPose);
-        mOdometry.resetPosition(getmRobotRotation(), getModulePositions(), odometryPose);
+        mPoseEstimator.resetPosition(getRobotRotation(), getModulePositions(), estimatorPose);
+        mOdometry.resetPosition(getRobotRotation(), getModulePositions(), odometryPose);
     }
 
     public void resetModulesEncoders() {
         for (int i = 0; i < 4; i++) mModules[i].resetAzimuthEncoder();
+    }
+
+    /* Drive setters */
+    public void acceptJoystickInputs(
+            DoubleSupplier pXSupplier, DoubleSupplier pYSupplier,
+            DoubleSupplier pThetaSupplier, Supplier<Rotation2d> pPOVSupplier) {
+        mTeleopController.acceptJoystickInputs(pXSupplier, pYSupplier, pThetaSupplier, pPOVSupplier);
     }
 
     public Command setDriveProfile(DriverProfiles profile) {
@@ -679,7 +602,7 @@ public class Drive extends SubsystemBase {
     }
 
     @AutoLogOutput(key = "Drive/Odometry/RobotRotation")
-    public Rotation2d getmRobotRotation() {
+    public Rotation2d getRobotRotation() {
         return mRobotRotation;
     }
 
@@ -702,12 +625,6 @@ public class Drive extends SubsystemBase {
 
     public Module[] getModules() {
         return this.mModules;
-    }
-
-    public void acceptJoystickInputs(
-            DoubleSupplier pXSupplier, DoubleSupplier pYSupplier,
-            DoubleSupplier pThetaSupplier, Supplier<Rotation2d> pPOVSupplier) {
-        mTeleopController.acceptJoystickInputs(pXSupplier, pYSupplier, pThetaSupplier, pPOVSupplier);
     }
 
     public boolean atGoal() {
