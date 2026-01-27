@@ -149,13 +149,4 @@ public class AutonCommands extends SubsystemBase {
             return Optional.empty();
         }
     }
-
-    // public SIDE getSide(String name){
-    //     String n = name.substring(6, 7);
-    //     return (n.equals("L")) ? SIDE.LEFT : SIDE.RIGHT;
-    // }
-
-    public FunctionalCommand autoPlaceholder() {
-        return new FunctionalCommand(() -> {}, () -> {}, (interrupted) -> {}, () -> false, this);
-    }
 }
