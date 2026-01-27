@@ -250,9 +250,9 @@ public class Drive extends SubsystemBase {
 
         ChassisSpeeds teleopSpeeds = mTeleopController.computeChassisSpeeds(
             getPoseEstimate().getRotation(), false, true);
+        mDesiredSpeeds = teleopSpeeds;
         switch (mDriveState) {
             case TELEOP:
-                mDesiredSpeeds = teleopSpeeds;
                 break;
             case TELEOP_SNIPER:
                 mDesiredSpeeds = mTeleopController.computeChassisSpeeds(
