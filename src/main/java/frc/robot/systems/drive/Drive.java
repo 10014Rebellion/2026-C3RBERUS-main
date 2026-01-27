@@ -116,6 +116,7 @@ public class Drive extends SubsystemBase {
     private final HeadingController mHeadingController = new HeadingController(TurnPointFeedforward.zeroTurnPointFF());
 
     private Supplier<Rotation2d> mGoalRotationSup = () -> new Rotation2d();
+    private final Debouncer mHeadingAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
 
     private final HolonomicController mAutoAlignController = new HolonomicController();
     private final LineController mLineAlignController = new LineController(
@@ -475,10 +476,10 @@ public class Drive extends SubsystemBase {
             }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
     }
 
-    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pLineAngle, DoubleSupplier pTeleopScalar, BooleanSupplier pTeleopInvert) {
+    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pAngle, DoubleSupplier pTelScal, BooleanSupplier pTelInv) {
         return new InstantCommand(() -> {
             mGoalPoseSup = pGoalPoseSup;
-            mLineAlignController.setControllerGoalSettings(pTeleopScalar, () -> pLineAngle.get().getTan(), pTeleopInvert);
+            mLineAlignController.setControllerGoalSettings(pTelScal, () -> pAngle.get().getTan(), pTelInv);
             mLineAlignController.reset(getPoseEstimate(), mGoalPoseSup.get());
         }).andThen( setDriveStateCommandContinued( DriveState.LINE_ALIGN ) );
     }
@@ -617,6 +618,14 @@ public class Drive extends SubsystemBase {
         return mDesiredSpeeds;
     }
 
+    public BooleanSupplier waitUntilHeadingAlignFinishes() {
+        return () -> mHeadingAlignTimeout.calculate(inHeadingTolerance());
+    }
+
+    public BooleanSupplier waitUntilAutoAlignFinishes() {
+        return () -> mAutoAlignTimeout.calculate(mAutoAlignController.atGoal());
+    }
+
     @AutoLogOutput(key = "Drive/Tolerance/HeadingController")
     public boolean inHeadingTolerance() {
         /* Accounts for angle wrapping issues with rotation 2D error */
@@ -626,25 +635,5 @@ public class Drive extends SubsystemBase {
 
     public Module[] getModules() {
         return this.mModules;
-    }
-
-    public boolean atGoal() {
-        return mDriveState == DriveState.AUTO_ALIGN && mAutoAlignController.atGoal();
-    }
-
-    public boolean notAtGoal() {
-        return mDriveState != DriveState.AUTO_ALIGN || !mAutoAlignController.atGoal();
-    }
-
-    public boolean getDriveToPoseTolerance() {
-        return mAutoAlignController.atGoal();
-    }
-
-    public Command waitUnitllAutoAlignFinishes() {
-        return new WaitUntilCommand(() -> mAutoAlignTimeout.calculate(mAutoAlignController.atGoal()));
-    }
-
-    public BooleanSupplier waitUnitllAutoAlignFinishesSupplier() {
-        return () -> mAutoAlignController.atGoal();
     }
 }
