@@ -188,8 +188,8 @@ public class Drive extends SubsystemBase {
     @Override
     public void periodic() {
         updateSensorsAndOdometry();
-
-        if (mDesiredSpeeds != null) runSwerve(computeDesiredSpeeds());
+        
+        runSwerve(computeDesiredSpeeds());
     }
 
     private void updateSensorsAndOdometry() {
@@ -351,6 +351,7 @@ public class Drive extends SubsystemBase {
         ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
     /* Sets the desired swerve module states to the robot */
     public void runSwerve(ChassisSpeeds speeds) {
+        if(speeds == null) return;
         mDesiredSpeeds = SwerveUtils.discretize(speeds, tDriftRate.get());
 
         /* Logs all the possible drive states, great for debugging */
