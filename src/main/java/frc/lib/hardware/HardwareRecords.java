@@ -35,26 +35,6 @@ public class HardwareRecords {
         CurrentLimits currentLimit
     ) {}
 
-    public static record PositionLimitMotorHardware(
-        int motorID, 
-        CANBus canBus, 
-        double rotorToMechanismRatio, 
-        InvertedValue direction,
-        NeutralModeValue neutralMode,
-        CurrentLimits currentLimit,
-        PositionSoftLimits positionLimit
-    ) {}
-
-    public static record RotationLimitMotorHardware(
-        int motorID, 
-        CANBus canBus, 
-        double rotorToMechanismRatio, 
-        InvertedValue direction,
-        NeutralModeValue neutralMode,
-        CurrentLimits currentLimit,
-        RotationSoftLimits rotationLimit 
-    ) {}
-
     public static record FollowerMotorHardware(
         int motorID,
         BasicMotorHardware leaderConfig,

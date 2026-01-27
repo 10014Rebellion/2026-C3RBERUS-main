@@ -16,7 +16,9 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.lib.hardware.HardwareRecords.RotationLimitMotorHardware;
+import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
+import frc.lib.hardware.HardwareRecords.CANCoderHardware;
+import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 
 public class HoodIOKrakenx44 implements HoodIO{
     private final TalonFX mHoodMotor;
@@ -31,21 +33,26 @@ public class HoodIOKrakenx44 implements HoodIO{
     private final StatusSignal<Current> mHoodStatorCurrent;
     private final StatusSignal<Temperature> mHoodTempCelsius;
 
-    public HoodIOKrakenx44(RotationLimitMotorHardware pHardware) {
-        this.mHoodMotor = new TalonFX(pHardware.motorID(), pHardware.canBus());
+    public HoodIOKrakenx44(BasicMotorHardware pMotorHardware, CANCoderHardware pCANCoderHardware, RotationSoftLimits pSoftLimits) {
+        this.mHoodMotor = new TalonFX(pMotorHardware.motorID(), pMotorHardware.canBus());
 
         TalonFXConfiguration HoodConfig = new TalonFXConfiguration();
 
         HoodConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-        HoodConfig.CurrentLimits.SupplyCurrentLimit = pHardware.currentLimit().supplyCurrentLimit();
+        HoodConfig.CurrentLimits.SupplyCurrentLimit = pMotorHardware.currentLimit().supplyCurrentLimit();
         HoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        HoodConfig.CurrentLimits.StatorCurrentLimit = pHardware.currentLimit().statorCurrentLimit();
+        HoodConfig.CurrentLimits.StatorCurrentLimit = pMotorHardware.currentLimit().statorCurrentLimit();
 
-        HoodConfig.MotorOutput.NeutralMode = pHardware.neutralMode();
-        HoodConfig.MotorOutput.Inverted = pHardware.direction();
+        HoodConfig.Feedback.FeedbackRemoteSensorID = pCANCoderHardware.cancoderID();
+        HoodConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        HoodConfig.Feedback.SensorToMechanismRatio = pCANCoderHardware.cancoderToMechanismRatio();
+        HoodConfig.Feedback.RotorToSensorRatio = pMotorHardware.rotorToMechanismRatio();
+
+        HoodConfig.MotorOutput.NeutralMode = pMotorHardware.neutralMode();
+        HoodConfig.MotorOutput.Inverted = pMotorHardware.direction();
 
         HoodConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        HoodConfig.Feedback.SensorToMechanismRatio = pHardware.rotorToMechanismRatio();
+        HoodConfig.Feedback.SensorToMechanismRatio = pMotorHardware.rotorToMechanismRatio();
 
         mHoodMotor.getConfigurator().apply(HoodConfig);
 
