@@ -395,8 +395,7 @@ public class Drive extends SubsystemBase {
                 driveAmps = setpoint.feedforwards().torqueCurrentsAmps()[i];
         }
 
-        driveAmps = SwerveUtils.optimizeTorque(unoptimizedState, optimizedState,
-            setpoint.feedforwards().torqueCurrentsAmps()[i], currentState, i);
+        driveAmps = SwerveUtils.optimizeTorque(unoptimizedState, optimizedState,driveAmps, currentState, i);
 
         if(!mDriveState.equals(DriveState.AUTON) && !mDriveState.equals(DriveState.AUTO_ALIGN)) 
             driveAmps = SwerveUtils.lowPassFilter(mPrevDriveAmps[i], driveAmps, tDriveFFAggressiveness.get());
