@@ -56,8 +56,8 @@ public class GyroIOPigeon2 implements GyroIO {
         pInputs.iYawPosition = Rotation2d.fromDegrees(mYaw.getValueAsDouble());
         pInputs.iYawVelocityPS = Rotation2d.fromDegrees(mYawVelocity.getValueAsDouble());
         pInputs.iAccXG = mYawAccelerationX.getValueAsDouble();
-        pInputs.iAccZG = mYawAccelerationY.getValueAsDouble();
-        pInputs.iAccYG = mYawAccelerationZ.getValueAsDouble();
+        pInputs.iAccYG = mYawAccelerationY.getValueAsDouble();
+        pInputs.iAccZG = mYawAccelerationZ.getValueAsDouble();
 
         mYawAccX = pInputs.iAccXG;
         mYawAccY = pInputs.iAccYG;
