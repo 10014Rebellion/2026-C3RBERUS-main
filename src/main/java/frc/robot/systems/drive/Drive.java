@@ -308,6 +308,7 @@ public class Drive extends SubsystemBase {
                 mDesiredSpeeds = new ChassisSpeeds(
                     mPPDesiredSpeeds.vxMetersPerSecond, mPPDesiredSpeeds.vyMetersPerSecond,
                     mHeadingController.getSnapOutputRadians(getPoseEstimate().getRotation()));
+                break;
             case HEADING_ALIGN:
                 mDesiredSpeeds = new ChassisSpeeds(
                     teleopSpeeds.vxMetersPerSecond, teleopSpeeds.vyMetersPerSecond,
