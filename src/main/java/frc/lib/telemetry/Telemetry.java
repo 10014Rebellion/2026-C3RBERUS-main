@@ -14,7 +14,7 @@ public class Telemetry extends TelemetryRecordOutput {
 
     private Telemetry() {}
 
-    public static void logVisionObservatinStdDevs(VisionObservation observation) {
+    public static void logVisionObservationStdDevs(VisionObservation observation) {
         Telemetry.log(
             observation.camName() + "/stdDevX", observation.stdDevs().get(0));
         Telemetry.log(
