@@ -101,7 +101,7 @@ public class Drive extends SubsystemBase {
     private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
     private final PathConstraints mDriveConstraints = DriveConstants.kAutoConstraints;
 
-    private SwerveModuleState[] mPrevSetpointStates = SwerveUtils.zeroStates();
+    // private SwerveModuleState[] mPrevSetpointStates = SwerveUtils.zeroStates();
     private SwerveModulePosition[] mPrevPositions = SwerveUtils.zeroPositions();
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
@@ -130,7 +130,7 @@ public class Drive extends SubsystemBase {
     public static final LoggedTunableNumber tRotationDriftTestSpeedDeg = new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
     public static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
     public static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
-    public static final LoggedTunableNumber tDriveFFAggressiveness = new LoggedTunableNumber("Drive/Teleop/DriveFFAggressiveness", kDriveFFAggressivness);
+    public static final LoggedTunableNumber tDriveFFAggressiveness = new LoggedTunableNumber("Drive/Teleop/DriveFFAggressiveness", kDriveFFAggressiveness);
     
     public Drive(Module[] modules, GyroIO gyro, AprilTag vision) {
         this.mModules = modules;
@@ -370,7 +370,7 @@ public class Drive extends SubsystemBase {
             }
         }
 
-        mPrevSetpointStates = optimizedSetpointStates;
+        // mPrevSetpointStates = optimizedSetpointStates;
 
         Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
