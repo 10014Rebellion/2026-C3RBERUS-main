@@ -4,7 +4,9 @@ package frc.robot.bindings;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.Drive;
@@ -19,6 +21,9 @@ public class ButtonBindings {
     }
 
     public void initDriverButtonBindings() {
+        new Trigger(() -> DriverStation.isTeleopEnabled())
+            .onTrue(mDriveSS.setToTeleop());
+
         mDriveSS.acceptJoystickInputs(
                 () -> -mDriverController.getLeftY(),
                 () -> -mDriverController.getLeftX(),
