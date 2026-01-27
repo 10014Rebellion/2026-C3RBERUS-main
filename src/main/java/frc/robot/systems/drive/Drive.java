@@ -130,7 +130,7 @@ public class Drive extends SubsystemBase {
     public static final LoggedTunableNumber tRotationDriftTestSpeedDeg = new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
     public static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
     public static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
-    public static final LoggedTunableNumber tDriveAggressiveness = new LoggedTunableNumber("Drive/Teleop/DriveAggresiveness", 0.0001);
+    public static final LoggedTunableNumber tDriveFFAggressiveness = new LoggedTunableNumber("Drive/Teleop/DriveFFAggresiveness", kDriveFFAggresivness);
     
     public Drive(Module[] modules, GyroIO gyro, AprilTag vision) {
         this.mModules = modules;
@@ -391,17 +391,16 @@ public class Drive extends SubsystemBase {
             case AUTON:
                 driveAmps = SwerveUtils.convertChoreoNewtonsToAmps(currentState, mPathPlanningFF, i);
                 break;
-            // TODO: Fix this.
             case AUTO_ALIGN:
             default:
-                driveAmps = SwerveUtils.optimizeTorque(unoptimizedState, optimizedState,
-                    setpoint.feedforwards().torqueCurrentsAmps()[i], i);
+                driveAmps = setpoint.feedforwards().torqueCurrentsAmps()[i];
         }
 
-        driveAmps = SwerveUtils.correctAmpFFDirection(optimizedState, mPrevSetpointStates[i], driveAmps, i);
+        driveAmps = SwerveUtils.optimizeTorque(unoptimizedState, optimizedState,
+                    setpoint.feedforwards().torqueCurrentsAmps()[i], i);
 
         if(!mDriveState.equals(DriveState.AUTON) && !mDriveState.equals(DriveState.AUTO_ALIGN)) 
-            driveAmps = SwerveUtils.lowPassFilter(mPrevDriveAmps[i], driveAmps, tDriveAggressiveness.get());
+            driveAmps = SwerveUtils.lowPassFilter(mPrevDriveAmps[i], driveAmps, tDriveFFAggressiveness.get());
 
         mPrevDriveAmps[i] = driveAmps;
         return driveAmps;

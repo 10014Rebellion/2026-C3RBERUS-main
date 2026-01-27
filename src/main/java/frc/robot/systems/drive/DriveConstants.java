@@ -47,6 +47,7 @@ public class DriveConstants {
 
     /* MISC */
     public static final double kDriftRate = RobotBase.isReal() ? 2.5 : 5.57; // TODO: TUNE ME
+    public static final double kDriveFFAggresivness = RobotBase.isReal() ? 0.0001 : 0.5;
     public static final double kAzimuthDriveScalar = RobotBase.isReal() ? 0.0 : 0.0;
     public static final double kSkidRatioCap = 1000.0; // TODO: TUNE ME
     public static final double kSkidScalar = 0.0; // TODO: TUNE ME
