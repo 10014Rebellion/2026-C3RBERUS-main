@@ -6,12 +6,11 @@ package frc.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.telemetry.Telemetry;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoEvent extends Command {
@@ -67,7 +66,7 @@ public class AutoEvent extends Command {
 
     public Trigger loggedCondition(String key, BooleanSupplier condition) {
         return new Trigger(autoEventLoop, () -> {
-            Logger.recordOutput("Auton/"+mAutoName+"/"+key, condition.getAsBoolean());
+            Telemetry.log("Auton/"+mAutoName+"/"+key, condition.getAsBoolean());
             return condition.getAsBoolean();
         });
     }
