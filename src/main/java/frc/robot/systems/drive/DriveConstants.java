@@ -72,6 +72,7 @@ public class DriveConstants {
     public static final double kDriveMotorGearing = 4.50 / 1.0; // TODO: TUNE ME
     public static final double kWheelRadiusMeters = Units.inchesToMeters(1.4175); // TODO: TUNE ME
     public static final double kWheelCircumferenceMeters = 2 * Math.PI * kWheelRadiusMeters;
+    public static final double kWheelMOI = 125.0 / 4.0;
 
     public static final boolean kUseVoltageFeedforward = RobotBase.isSimulation();
 

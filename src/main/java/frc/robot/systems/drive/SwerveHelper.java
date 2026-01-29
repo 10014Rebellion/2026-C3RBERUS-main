@@ -150,6 +150,12 @@ public class SwerveHelper {
         };
     }
 
+    public static Rotation2d[] zeroRotations() {
+        return new Rotation2d[] {
+            new Rotation2d(), new Rotation2d(), new Rotation2d(), new Rotation2d()
+        };
+    }
+
     public static double getTorqueOfKrakenDriveMotor(double amps) {
         return kKrakenFOCModel.getTorque(amps);
     }
@@ -225,5 +231,16 @@ public class SwerveHelper {
             Telemetry.log("Drive/Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
         PathPlannerLogging.setLogTargetPoseCallback(
             (targetPose) -> Telemetry.log("Drive/Odometry/TrajectorySetpoint", targetPose));
+    }
+
+    public static double deadReckoningTurnToDriveConv(Rotation2d angleDelta, double gearing, double wheelRadius) {
+        return angleDelta.getRadians() * gearing * wheelRadius;
+    }
+
+    public static double deadReckoningFeedforward(Rotation2d angleDelta, double gearing, double wheelRadiusM, double MOI) {
+        double distM = deadReckoningTurnToDriveConv(angleDelta, gearing, wheelRadiusM);
+        double accelerationRad = (2 * distM) / (dt * dt);
+
+        return kKrakenFOCModel.getCurrent(accelerationRad * MOI);
     }
 }

@@ -2,6 +2,7 @@
 
 package frc.robot.systems.drive;
 
+import static edu.wpi.first.units.Units.Rotation;
 import static frc.robot.systems.drive.DriveConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
@@ -102,6 +103,7 @@ public class Drive extends SubsystemBase {
 
     // private SwerveModuleState[] mPrevSetpointStates = SwerveUtils.zeroStates();
     private SwerveModulePosition[] mPrevPositions = SwerveHelper.zeroPositions();
+    private Rotation2d[] mAngleDeltas = new Rotation2d[4];
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
     private final boolean kUseGenerator = true;
@@ -185,6 +187,7 @@ public class Drive extends SubsystemBase {
         double[] sampleTimestamps =
             mModules[0].getOdometryTimeStamps(); // All signals are sampled together
         int sampleCount = sampleTimestamps.length;
+        mAngleDeltas = SwerveHelper.zeroRotations();
         // System.out.println("\n\n\n\n\n\n\n\n"+sampleCount+"\n\n\n\n\n\n\n\n\n\n");
         // Telemetry.reportException(new Exception("SAMPLE COUNT:" + sampleCount));
         for (int i = 0; i < sampleCount; i++) {
@@ -194,6 +197,7 @@ public class Drive extends SubsystemBase {
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
                 // System.out.println("\n\n\n\n\n\n\n\n"+mModules[moduleIndex].getOdometryPositions().length+"\n\n\n\n\n\n\n\n\n\n");
                 modulePositions[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
+                mAngleDeltas[i].plus(GeomUtil.getSmallestChangeInRotation(modulePositions[i].angle, mPrevPositions[i].angle));
                 moduleDeltas[moduleIndex] = new SwerveModulePosition(
                     modulePositions[moduleIndex].distanceMeters - mPrevPositions[moduleIndex].distanceMeters,
                     modulePositions[moduleIndex].angle);
@@ -325,6 +329,7 @@ public class Drive extends SubsystemBase {
 
         // Telemetry.log("Drive/Odometry/generatedFieldSpeeds",
         // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
+
         for (int i = 0; i < 4; i++) {
             if (kUseGenerator) {
                 /* Logs the drive feedforward stuff */
@@ -343,6 +348,9 @@ public class Drive extends SubsystemBase {
                 double driveAmps = calculateDriveFeedforward(
                     mPreviousSetpoint, mModules[i].getCurrentState(),
                     unOptimizedSetpointStates[i], setpointStates[i], i);
+                driveAmps += SwerveHelper.deadReckoningFeedforward(
+                    mAngleDeltas[i], kDriveMotorGearing, kWheelRadiusMeters, DriveConstants.kWheelMOI)
+                        * kAzimuthDriveScalar;
                 double desiredAzimuthVelocityRadPS = 
                     mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i];
 
