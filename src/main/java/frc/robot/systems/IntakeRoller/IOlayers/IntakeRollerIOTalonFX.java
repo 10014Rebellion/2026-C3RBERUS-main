@@ -4,62 +4,70 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
-import edu.wpi.first.math.MathUtil;
-import frc.robot.systems.IntakeRoller.IntakeRollerConstants.IntakeRollerConfiguration;
-import frc.robot.systems.IntakeRoller.IntakeRollerConstants.IntakeRollerHardware;
-import frc.robot.systems.IntakeRoller.IOlayers.IntakeRollerIO.IntakeRollerIO.IntakeRollerIOInputs;
+import edu.wpi.first.wpilibj.DigitalInput;
+import frc.robot.systems.IntakeRoller.IntakeRollerConstants;
 
-public class IntakeRollerIOTalonFX implements IntakeRollerIO{
-    private final TalonFX kOuterMotor;
-    private final TalonFX kInnerMotor;
-    private TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
+public class IntakeRollerIOTalonFX implements IntakeRollerIO {
     
-    private IntakeRollerConfiguration indexerConfiguration;
-
-    public IntakeRollerIOTalonFX(IntakeRollerHardware hardware, IntakeRollerConfiguration indexerConfiguration){
-        kOuterMotor = new TalonFX(hardware.kMotorPort(), hardware.kCanBus());
-        this.indexerConfiguration = indexerConfiguration;
-
-        motorConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
-        motorConfiguration.CurrentLimits.SupplyCurrentLimit = indexerConfiguration.kSmartLimit();
-        motorConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
-        motorConfiguration.CurrentLimits.StatorCurrentLimit = indexerConfiguration.kSmartLimit();
-        motorConfiguration.Voltage.PeakForwardVoltage = 12;
-        motorConfiguration.Voltage.PeakReverseVoltage = -12;
-
-        motorConfiguration.MotorOutput.NeutralMode = indexerConfiguration.kIdleMode();
-        motorConfiguration.MotorOutput.Inverted =  indexerConfiguration.kInverted() 
-            ? InvertedValue.CounterClockwise_Positive 
+    private final TalonFX innerRoller;
+    private final TalonFX outerRoller;
+    private final DigitalInput fuelSensor;
+    
+    public IntakeRollerIOTalonFX() {
+        innerRoller = new TalonFX(
+            IntakeRollerConstants.kInnerIntakeRollerMotorID, 
+            "drivetrain"
+        );
+        outerRoller = new TalonFX(
+            IntakeRollerConstants.kOuterIntakeRollerMotorID, 
+            "drivetrain"
+        );
+        
+        TalonFXConfiguration config = new TalonFXConfiguration();
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        config.CurrentLimits.SupplyCurrentLimit = IntakeRollerConstants.kSmartCurrentLimit;
+        
+        config.MotorOutput.Inverted = IntakeRollerConstants.kInnerInverted
+            ? InvertedValue.CounterClockwise_Positive
             : InvertedValue.Clockwise_Positive;
-
-        kMotor.getConfigurator().apply(motorConfiguration, 1.0);
-
+        innerRoller.getConfigurator().apply(config, 1);
+        
+        config.MotorOutput.Inverted = IntakeRollerConstants.kOuterInverted
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+        outerRoller.getConfigurator().apply(config, 1);
+        
+        fuelSensor = new DigitalInput(IntakeRollerConstants.kOuterSensorDIOPort);
     }
-
-    @Override
-    public void updateInputs(IntakeRollerIOInputs inputs){
-  
-        inputs.isMotorConnected = true;
-
-        inputs.appliedVoltage = kMotor.getMotorVoltage().getValueAsDouble();
-        inputs.supplyCurrentAmps = 0.0;
-        inputs.statorCurrentAmps = 0.0;
-        inputs.temperatureCelsius = kMotor.getDeviceTemp().getValueAsDouble();
-        inputs.motorOutput = 0.0;
-    }
-
-    @Override
-    public void setVoltage(double pVolts){
-        pVolts = MathUtil.clamp(pVolts, -12.0, 12.0);
-        kMotor.setVoltage(pVolts);
-    }
-
-    @Override
-    public void stop(){
-        kMotor.stopMotor();
-    }
-
     
+    @Override
+    public void updateInputs(IntakeRollerIOInputs inputs) {
+        inputs.innerRollerVoltage = innerRoller.getMotorVoltage().getValueAsDouble();
+        inputs.innerRollerCurrent = innerRoller.getSupplyCurrent().getValueAsDouble();
+        inputs.innerRollerVelocity = innerRoller.getVelocity().getValueAsDouble();
+        inputs.innerRollerTemperature = innerRoller.getDeviceTemp().getValueAsDouble();
+        
+        inputs.outerRollerVoltage = outerRoller.getMotorVoltage().getValueAsDouble();
+        inputs.outerRollerCurrent = outerRoller.getSupplyCurrent().getValueAsDouble();
+        inputs.outerRollerVelocity = outerRoller.getVelocity().getValueAsDouble();
+        inputs.outerRollerTemperature = outerRoller.getDeviceTemp().getValueAsDouble();
+        
+        inputs.fuelDetected = !fuelSensor.get();
+    }
+    
+    @Override
+    public void setInnerVoltage(double volts) {
+        innerRoller.setVoltage(volts);
+    }
+    
+    @Override
+    public void setOuterVoltage(double volts) {
+        outerRoller.setVoltage(volts);
+    }
+    
+    @Override
+    public void stop() {
+        innerRoller.setVoltage(0);
+        outerRoller.setVoltage(0);
+    }
 }
-    
-
