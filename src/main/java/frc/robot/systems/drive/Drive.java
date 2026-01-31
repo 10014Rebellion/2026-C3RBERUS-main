@@ -2,7 +2,6 @@
 
 package frc.robot.systems.drive;
 
-import static edu.wpi.first.units.Units.Rotation;
 import static frc.robot.systems.drive.DriveConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
