@@ -196,7 +196,8 @@ public class Drive extends SubsystemBase {
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
                 // System.out.println("\n\n\n\n\n\n\n\n"+mModules[moduleIndex].getOdometryPositions().length+"\n\n\n\n\n\n\n\n\n\n");
                 modulePositions[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
-                mAngleDeltas[i].plus(GeomUtil.getSmallestChangeInRotation(modulePositions[i].angle, mPrevPositions[i].angle));
+                mAngleDeltas[moduleIndex] = mAngleDeltas[moduleIndex].plus(
+                    GeomUtil.getSmallestChangeInRotation(modulePositions[moduleIndex].angle, mPrevPositions[moduleIndex].angle));
                 moduleDeltas[moduleIndex] = new SwerveModulePosition(
                     modulePositions[moduleIndex].distanceMeters - mPrevPositions[moduleIndex].distanceMeters,
                     modulePositions[moduleIndex].angle);
