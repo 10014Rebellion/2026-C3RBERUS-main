@@ -213,7 +213,7 @@ public class SwerveHelper {
         if(moduleTranslationMagnitudes[0] == 0.0 || moduleTranslationMagnitudes[3] == 0.0) return 0.0;
         if(Double.isNaN(ratio) || Double.isInfinite(ratio)) return kSkidRatioCap+1.0;
 
-        return moduleTranslationMagnitudes[0] / moduleTranslationMagnitudes[3];
+        return ratio;
     }
 
     /* Intended as a brute force sign conversion, not technically correct if  if velocity change is zero as FF can occure even if vel = 0 */
