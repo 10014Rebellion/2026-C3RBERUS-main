@@ -80,8 +80,8 @@ public class FlywheelIOSim implements FlywheelIO{
     }
 
     @Override
-    public void setLeftFlywheelPID(double kP, double kI, double kD, double kV, double kA) {
-        mLeftController.setPID(kP, kI, kD);
+    public void setLeftFlywheelPID(double kP, double kD, double kV, double kA) {
+        mLeftController.setPID(kP, 0, kD);
         mLeftController.setConstraints(new Constraints(kV, kA));
     }
 
@@ -97,8 +97,8 @@ public class FlywheelIOSim implements FlywheelIO{
     }
 
     @Override
-    public void setRightFlywheelPID(double kP, double kI, double kD, double kV, double kA) {
-        mRightController.setPID(kP, kI, kD);
+    public void setRightFlywheelPID(double kP, double kD, double kV, double kA) {
+        mRightController.setPID(kP, 0, kD);
         mRightController.setConstraints(new Constraints(kV, kA));
     }
 

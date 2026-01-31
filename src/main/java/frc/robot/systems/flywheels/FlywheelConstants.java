@@ -2,6 +2,7 @@ package frc.robot.systems.flywheels;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 
@@ -24,6 +25,7 @@ public class FlywheelConstants {
     public static String kCanBus = "drive";
     public static double kSecondaryCurrentLimit = 75;
     public static double kPeakVoltage = 12;
+    public static MotorAlignmentValue mFollowerAlignment = MotorAlignmentValue.Opposed;
 
     //TODO: tune me!
     public static double kP = 0.1;

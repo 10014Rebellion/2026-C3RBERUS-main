@@ -22,7 +22,6 @@ public class Flywheel extends SubsystemBase{
     /* LEFT MOTOR LOGGING */
         /*ProfiledPIDController logging */
         public static final LoggedTunableNumber leftFlywheelMotorP = new LoggedTunableNumber("Flywheel/Left/kP", FlywheelConstants.LeftControlConfig.motorController().getP());
-        public static final LoggedTunableNumber leftFlywheelMotorI = new LoggedTunableNumber("Flywheel/Left/kP", FlywheelConstants.LeftControlConfig.motorController().getI());
         public static final LoggedTunableNumber leftFlywheelMotorD = new LoggedTunableNumber("Flywheel/Left/kD", FlywheelConstants.LeftControlConfig.motorController().getD());
         public static final LoggedTunableNumber leftFlywheelMotorVMax = new LoggedTunableNumber("Flywheel/Left/kVMax", FlywheelConstants.LeftControlConfig.motorController().getConstraints().maxVelocity);
         public static final LoggedTunableNumber leftFlywheelMotorAMax = new LoggedTunableNumber("Flywheel/Left/kAMax", FlywheelConstants.LeftControlConfig.motorController().getConstraints().maxAcceleration);
@@ -34,7 +33,6 @@ public class Flywheel extends SubsystemBase{
     /* RIGHT MOTORLOGGING */
         /*ProfiledPIDController logging */
         public static final LoggedTunableNumber rightFlywheelMotorP = new LoggedTunableNumber("Flywheel/Right/kP", FlywheelConstants.RightControlConfig.motorController().getP());
-        public static final LoggedTunableNumber rightFlywheelMotorI = new LoggedTunableNumber("Flywheel/Right/kP", FlywheelConstants.RightControlConfig.motorController().getI());
         public static final LoggedTunableNumber rightFlywheelMotorD = new LoggedTunableNumber("Flywheel/Right/kD", FlywheelConstants.RightControlConfig.motorController().getD());
         public static final LoggedTunableNumber rightFlywheelMotorVMax = new LoggedTunableNumber("Flywheel/Right/kVMax", FlywheelConstants.RightControlConfig.motorController().getConstraints().maxVelocity);
         public static final LoggedTunableNumber rightFlywheelMotorAMax = new LoggedTunableNumber("Flywheel/Right/kAMax", FlywheelConstants.RightControlConfig.motorController().getConstraints().maxAcceleration);
@@ -51,7 +49,6 @@ public class Flywheel extends SubsystemBase{
     LoggedMechanismRoot2d rootMiddle = mechanism2dCanvas.getRoot("middleRoot", 1.5, 1.5);
     LoggedMechanismRoot2d rootRight = mechanism2dCanvas.getRoot("rightRoot", 2.5, 1.5);
     
-
         /* LEFT FLYWHEEL*/
             LoggedMechanismLigament2d mVelocityTrackerLeft = rootLeft.append(new LoggedMechanismLigament2d(
                 "velocityPositionLeft", 
@@ -136,7 +133,7 @@ public class Flywheel extends SubsystemBase{
         LoggedTunableNumber.ifChanged(
             hashCode(),
             () -> {
-                io.setLeftFlywheelPID(leftFlywheelMotorP.get(), 0.0, leftFlywheelMotorD.get(), leftFlywheelMotorVMax.get(), leftFlywheelMotorAMax.get());
+                io.setLeftFlywheelPID(leftFlywheelMotorP.get(), leftFlywheelMotorD.get(), leftFlywheelMotorVMax.get(), leftFlywheelMotorAMax.get());
             },
             leftFlywheelMotorP,
             leftFlywheelMotorD,
@@ -157,7 +154,7 @@ public class Flywheel extends SubsystemBase{
         LoggedTunableNumber.ifChanged(
             hashCode(),
             () -> {
-                io.setRightFlywheelPID(rightFlywheelMotorP.get(), 0.0, rightFlywheelMotorD.get(), rightFlywheelMotorVMax.get(), rightFlywheelMotorAMax.get());
+                io.setRightFlywheelPID(rightFlywheelMotorP.get(), rightFlywheelMotorD.get(), rightFlywheelMotorVMax.get(), rightFlywheelMotorAMax.get());
             },
             rightFlywheelMotorP,
             rightFlywheelMotorD,
@@ -180,8 +177,8 @@ public class Flywheel extends SubsystemBase{
         io.setLeftFlywheelVolts(pVolts);
     }
 
-    public void setLeftPID(double kP, double kI, double kD, double kV, double kA){
-        io.setLeftFlywheelPID(kP, kI, kD, kV, kA);
+    public void setLeftPID(double kP, double kD, double kV, double kA){
+        io.setLeftFlywheelPID(kP, kD, kV, kA);
     }
 
     public void setLeftVelocity(AngularVelocity setpointRPS, double ff){
@@ -192,8 +189,8 @@ public class Flywheel extends SubsystemBase{
         io.setRightFlywheelVolts(pVolts);
     }
 
-    public void setRightPID(double kP, double kI, double kD, double kV, double kA){
-        io.setRightFlywheelPID(kP, kI, kD, kV, kA);
+    public void setRightPID(double kP, double kD, double kV, double kA){
+        io.setRightFlywheelPID(kP, kD, kV, kA);
     }
 
     public void setRightVelocity(AngularVelocity setpointRPS, double ff){
@@ -208,7 +205,6 @@ public class Flywheel extends SubsystemBase{
             () -> {
                 setLeftPID(
                     leftFlywheelMotorP.get(),
-                    leftFlywheelMotorI.get(),
                     leftFlywheelMotorD.get(),
                     leftFlywheelMotorVMax.get(),
                     leftFlywheelMotorAMax.get());
@@ -220,7 +216,6 @@ public class Flywheel extends SubsystemBase{
 
                 setRightPID(
                     rightFlywheelMotorP.get(), 
-                    rightFlywheelMotorI.get(), 
                     rightFlywheelMotorD.get(), 
                     rightFlywheelMotorVMax.get(), 
                     rightFlywheelMotorAMax.get());
