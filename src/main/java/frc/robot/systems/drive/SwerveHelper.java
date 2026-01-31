@@ -187,7 +187,7 @@ public class SwerveHelper {
         if(moduleTranslationMagnitudes[0] == 0.0 || moduleTranslationMagnitudes[3] == 0.0) return 0.0;
         if(Double.isNaN(ratio) || Double.isInfinite(ratio)) return kSkidRatioCap+1.0;
 
-        return moduleTranslationMagnitudes[0] / moduleTranslationMagnitudes[3];
+        return ratio;
     }
 
     public static double skidRatio(ChassisSpeeds speeds) {
