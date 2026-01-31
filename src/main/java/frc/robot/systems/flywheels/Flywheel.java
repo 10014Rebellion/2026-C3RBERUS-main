@@ -7,6 +7,11 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.util.Color;
@@ -110,9 +115,25 @@ public class Flywheel extends SubsystemBase{
     private FlywheelInputsAutoLogged inputs = new FlywheelInputsAutoLogged();
     private SimpleMotorFeedforward mLeftFF = FlywheelConstants.LeftControlConfig.motorFF();
     private SimpleMotorFeedforward mRightFF = FlywheelConstants.RightControlConfig.motorFF();
+
+    private TalonFX indexerMotor = new TalonFX(55, FlywheelConstants.kCanBus);
+    private boolean indexerInvert = false;
+
+    private LoggedTunableNumber tindexerVolt = new LoggedTunableNumber("Indexer/Volts", 0.0);
     
     public Flywheel(FlywheelIO pIo) {
         this.io = pIo;
+
+        TalonFXConfiguration motorConfig = new TalonFXConfiguration();
+        motorConfig.CurrentLimits.StatorCurrentLimit = FlywheelConstants.kSmartCurrentLimit;
+        motorConfig.Voltage.PeakForwardVoltage = FlywheelConstants.kPeakVoltage;
+        motorConfig.Voltage.PeakReverseVoltage = -FlywheelConstants.kPeakVoltage;
+        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        motorConfig.MotorOutput.Inverted = (indexerInvert) ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        // motorConfig.Slot0.kP = FlywheelConstants.LeftControlConfig.motorController().getP();
+        // motorConfig.Slot0.kI = FlywheelConstants.LeftControlConfig.motorController().getI();
+        // motorConfig.Slot0.kD = FlywheelConstants.LeftControlConfig.motorController().getD();
+        indexerMotor.getConfigurator().apply(motorConfig);
     }
 
     @Override
@@ -172,13 +193,6 @@ public class Flywheel extends SubsystemBase{
             rightFlywheelMotorS,
             rightFlywheelMotorV,
             rightFlywheelMotorA
-        );
-        LoggedTunableNumber.ifChanged(
-            hashCode(),
-            () -> {
-                io.setLeftFlywheelVolts(motorVolts.get());
-            },
-            motorVolts
         );
     }
 
@@ -251,11 +265,30 @@ public class Flywheel extends SubsystemBase{
             () -> {
                 setLeftFlyWheelVolts(motorVolts.get());
                 setRightFlyWheelVolts(motorVolts.get());
+                indexerMotor.setVoltage(tindexerVolt.get());
             }, 
             () -> {}, 
             (interrupted) -> {
                 setLeftFlyWheelVolts(0);
                 setRightFlyWheelVolts(0);
+                indexerMotor.setVoltage(0);
+            }, 
+            () -> false,
+            this);
+    }
+
+    public Command stop(){
+        return new FunctionalCommand(
+            () -> {
+                setLeftFlyWheelVolts(0);
+                setRightFlyWheelVolts(0);
+                indexerMotor.setVoltage(0);
+            }, 
+            () -> {}, 
+            (interrupted) -> {
+                setLeftFlyWheelVolts(0);
+                setRightFlyWheelVolts(0);
+                indexerMotor.setVoltage(0);
             }, 
             () -> false,
             this);

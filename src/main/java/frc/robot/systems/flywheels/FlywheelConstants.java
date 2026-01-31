@@ -15,14 +15,14 @@ import edu.wpi.first.units.measure.AngularVelocity;
 
 public class FlywheelConstants {
 
-    public static int kLeftFlywheelMotorID = 21;
-    public static int kRightFlywheelMotorID = 53;
-    public static boolean kInverted = false;
+    public static int kLeftFlywheelMotorID = 53;
+    public static int kRightFlywheelMotorID = 54;
+    public static boolean kInverted = true;
 
     //TODO: check if I need to add more constants
     /*not sure if these are correct; check later! */
     public static double kSmartCurrentLimit = 60;
-    public static String kCanBus = "drive";
+    public static String kCanBus = "rebeldrive";
     public static double kSecondaryCurrentLimit = 75;
     public static double kPeakVoltage = 12;
     public static MotorAlignmentValue mFollowerAlignment = MotorAlignmentValue.Opposed;

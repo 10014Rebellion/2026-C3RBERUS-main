@@ -41,22 +41,32 @@ public class RobotContainer {
             case REAL:
                 mFlywheel = new Flywheel(new FlywheelKrakenIO(FlywheelConstants.LeftMotorConfiguration, FlywheelConstants.RightMotorConfiguration));
 
+                // mDrive = new Drive(
+                //         new Module[] {
+                //             new Module("FL", new ModuleIOKraken(kFrontLeftHardware)),
+                //             new Module("FR", new ModuleIOKraken(kFrontRightHardware)),
+                //             new Module("BL", new ModuleIOKraken(kBackLeftHardware)),
+                //             new Module("BR", new ModuleIOKraken(kBackRightHardware))
+                //         },
+                //         new GyroIOPigeon2(),
+                //         new Vision(new CameraIO[] {
+                //             new CameraIOPVTag(
+                //                     VisionConstants.kRightCamName,
+                //                     VisionConstants.kRightCamTransform,
+                //                     Orientation.BACK),
+                //             new CameraIOPVTag(
+                //                     VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
+                //         }));
+
                 mDrive = new Drive(
                         new Module[] {
-                            new Module("FL", new ModuleIOKraken(kFrontLeftHardware)),
-                            new Module("FR", new ModuleIOKraken(kFrontRightHardware)),
-                            new Module("BL", new ModuleIOKraken(kBackLeftHardware)),
-                            new Module("BR", new ModuleIOKraken(kBackRightHardware))
+                            new Module("FL", new ModuleIO() {}),
+                            new Module("FR", new ModuleIO() {}),
+                            new Module("BL", new ModuleIO() {}),
+                            new Module("BR", new ModuleIO() {})
                         },
-                        new GyroIOPigeon2(),
-                        new Vision(new CameraIO[] {
-                            new CameraIOPVTag(
-                                    VisionConstants.kRightCamName,
-                                    VisionConstants.kRightCamTransform,
-                                    Orientation.BACK),
-                            new CameraIOPVTag(
-                                    VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
-                        }));
+                        new GyroIO() {},
+                        new Vision(new CameraIO[] {new CameraIO() {}, new CameraIO() {}}));
                 break;
 
             case SIM:

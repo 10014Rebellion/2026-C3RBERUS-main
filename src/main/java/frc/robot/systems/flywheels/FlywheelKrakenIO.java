@@ -1,5 +1,6 @@
 package frc.robot.systems.flywheels;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -97,6 +98,22 @@ public class FlywheelKrakenIO implements FlywheelIO{
     @Override
     public void updateInputs(FlywheelInputs inputs) {
         /*LEFT MOTOR LOGERS*/
+        BaseStatusSignal.refreshAll(
+            mFlywheelLeftMotorVoltage, 
+            mFlywheelLeftMotorVelocity, 
+            mFlywheelLeftMotorSupplyCurrent,
+            mFlywheelLeftMotorStatorCurrent,
+            mFlywheelLeftMotorTorqueCurrent,
+            mFlywheelLeftMotorTempCelsius,
+            mFlywheelLeftMotorAccelerationMPSS,
+            mFlywheelRightMotorVoltage, 
+            mFlywheelRightMotorVelocity, 
+            mFlywheelRightMotorSupplyCurrent,
+            mFlywheelRightMotorStatorCurrent,
+            mFlywheelRightMotorTorqueCurrent,
+            mFlywheelRightMotorTempCelsius,
+            mFlywheelRightMotorAccelerationMPSS
+        );
         inputs.iFlywheelLeftMotorVolts = mFlywheelLeftMotorVoltage.getValueAsDouble();
         inputs.iFlywheelLeftVelocityMPS = mFlywheelLeftMotorVelocity.getValueAsDouble();
         inputs.iFlywheelLeftSupplyCurrentAmps = mFlywheelLeftMotorSupplyCurrent.getValueAsDouble();
