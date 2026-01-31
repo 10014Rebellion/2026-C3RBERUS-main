@@ -41,9 +41,6 @@ public class FlywheelIOSim implements FlywheelIO{
     private ProfiledPIDController mLeftController = FlywheelConstants.LeftControlConfig.motorController();
     private ProfiledPIDController mRightController = FlywheelConstants.RightControlConfig.motorController();
 
-    private SimpleMotorFeedforward mLeftFF = FlywheelConstants.LeftControlConfig.motorFF();
-    private SimpleMotorFeedforward mRightFF = FlywheelConstants.RightControlConfig.motorFF();
-   
     private double mLeftMotorVolts = 0.0;
     private double mRightMotorVolts = 0.0;
 

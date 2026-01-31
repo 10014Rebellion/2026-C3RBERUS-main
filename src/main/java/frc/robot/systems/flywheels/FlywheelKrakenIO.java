@@ -67,7 +67,6 @@ public class FlywheelKrakenIO implements FlywheelIO{
         mFlywheelLeftMotorAccelerationMPSS = mFlywheelLeftMotor.getAcceleration();
         mFlywheelLeftMotorPosition = Rotation2d.fromRotations(mFlywheelLeftMotor.getPosition().getValueAsDouble());
 
-
         /*RIGHT MOTOR CONFIGS*/
         mFlywheelRightMotor = new TalonFX(pRightFlywheelHardwareConfiguration.kMotorID(), pRightFlywheelHardwareConfiguration.kCanBus());
         mFlywheelRightMotor.setControl(new Follower(mFlywheelLeftMotor.getDeviceID(), FlywheelConstants.mFollowerAlignment));
@@ -116,7 +115,6 @@ public class FlywheelKrakenIO implements FlywheelIO{
         inputs.iFlywheelRightTemperatureCelsius = mFlywheelRightMotorTempCelsius.getValueAsDouble();
         inputs.iFlywheelRightAccelerationMPSS = mFlywheelRightMotorAccelerationMPSS.getValueAsDouble();
         inputs.iFlywheelRightPosition = mFlywheelRightMotorPosition;
-
 
     }
 
