@@ -30,12 +30,10 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
     private final StatusSignal<Temperature> mFlywheelTempCelsius;
     private final StatusSignal<AngularAcceleration> mFlywheelAccelerationRPSS;
     private Follower mFollowerController = null;
-    private FlywheelIOKrakenx44 mLeaderClass = null;
 
     // FOLLOWER CONSTRUCTOR
-    public FlywheelIOKrakenx44(FollowerMotorHardware pFollowerConfig, FlywheelIOKrakenx44 pLeaderFlywheel) {
+    public FlywheelIOKrakenx44(FollowerMotorHardware pFollowerConfig) {
         this(pFollowerConfig.motorID(), pFollowerConfig.leaderConfig());
-        this.mLeaderClass = pLeaderFlywheel;
         this.mFollowerController = new Follower(pFollowerConfig.leaderConfig().motorID(), pFollowerConfig.alignmentValue()); 
     }
     
@@ -105,33 +103,49 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
     }
 
     public boolean isLeader() {
-        return (mFollowerController == null) || (mLeaderClass == null);
+        return (mFollowerController == null);
     }
 
+    
+    /**
+     * Sets the motor velocity and acceleration using Motion Magic control.
+     * If this motor is configured as a follower, it will ignore the velocity/acceleration
+     * parameters and instead follow its leader motor. Control commands should be sent
+     * to the leader motor instance, not to followers.
+     * 
+     * @param pVelocityRPS Target velocity in rotations per second
+     * @param pAccelerationRPSS Target acceleration in rotations per second squared
+     * @param pFeedforward Feedforward voltage to apply
+     */
     @Override
     public void setMotorVelAndAccel(double pVelocityRPS, double pAccelerationRPSS, double pFeedforward) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVelocityControl.withVelocity(pVelocityRPS).withAcceleration(pAccelerationRPSS).withFeedForward(pFeedforward));
-        else {
-            mLeaderClass.setMotorVelAndAccel(pVelocityRPS, pAccelerationRPSS, pFeedforward);
-            mFlywheelMotor.setControl(mFollowerController);
-        }
+        else mFlywheelMotor.setControl(mFollowerController);
     }
 
+    /**
+     * Sets the motor voltage output.
+     * If this motor is configured as a follower, it will ignore the voltage parameter
+     * and instead follow its leader motor. Control commands should be sent to the
+     * leader motor instance, not to followers.
+     * 
+     * @param pVolts Target voltage to apply
+     */
     @Override
     public void setMotorVolts(double pVolts) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVoltageControl.withOutput(pVolts));
-        else {
-            mLeaderClass.setMotorVolts(pVolts);
-            mFlywheelMotor.setControl(mFollowerController);
-        }
+        else mFlywheelMotor.setControl(mFollowerController);
     }
 
+     /**
+     * Stops the motor.
+     * If this motor is configured as a follower, it will continue following its leader
+     * motor rather than stopping independently. To stop a follower motor, send the stop
+     * command to the leader motor instance.
+     */
     @Override
     public void stopMotor() {
         if(isLeader()) mFlywheelMotor.stopMotor();
-        else {
-            mLeaderClass.stopMotor();
-            mFlywheelMotor.setControl(mFollowerController); 
-        }
+        else mFlywheelMotor.setControl(mFollowerController); 
     }
 }
