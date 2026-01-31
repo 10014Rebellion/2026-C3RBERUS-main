@@ -237,10 +237,10 @@ public class SwerveHelper {
         return angleDelta.getRadians() * gearing * wheelRadius;
     }
 
-    public static double deadReckoningFeedforward(Rotation2d angleDelta, double gearing, double wheelRadiusM, double MOI) {
+    public static double deadReckoningFeedforward(Rotation2d angleDelta, double gearing, double wheelRadiusM, double inertia) {
         double distM = deadReckoningTurnToDriveConv(angleDelta, gearing, wheelRadiusM);
-        double accelerationRad = (2 * distM) / (dt * dt);
+        double accelerationM = (2 * distM) / (dt * dt);
 
-        return -kKrakenFOCModel.getCurrent(accelerationRad * MOI);
+        return -kKrakenFOCModel.getCurrent(wheelRadiusM * accelerationM * inertia);
     }
 }
