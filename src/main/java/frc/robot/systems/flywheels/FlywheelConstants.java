@@ -36,6 +36,7 @@ public class FlywheelConstants {
     public static double kS = 0.1;
     public static double kV = 0.1;
     public static double kA = 0.1;
+    public static double kVolts = 0;
     
     public enum FlywheelSetpoint {
         Outtake(RotationsPerSecond.of(80));

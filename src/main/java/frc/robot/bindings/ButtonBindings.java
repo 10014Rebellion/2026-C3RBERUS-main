@@ -41,7 +41,7 @@ public class ButtonBindings {
             .onFalse(mDriveSS.setToTeleop());
         
         mDriverController.b()
-            .whileTrue(mFlywheel.shootCmd());
+            .whileTrue(mFlywheel.runVolts());
 
         
     }

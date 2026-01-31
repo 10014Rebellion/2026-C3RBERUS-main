@@ -20,6 +20,8 @@ import frc.lib.tuning.LoggedTunableNumber;
 public class Flywheel extends SubsystemBase{
 
     /* LEFT MOTOR LOGGING */
+        public static final LoggedTunableNumber motorVolts = new LoggedTunableNumber("Flywheel/Volts", FlywheelConstants.kVolts);
+
         /*ProfiledPIDController logging */
         public static final LoggedTunableNumber leftFlywheelMotorP = new LoggedTunableNumber("Flywheel/Left/kP", FlywheelConstants.LeftControlConfig.motorController().getP());
         public static final LoggedTunableNumber leftFlywheelMotorD = new LoggedTunableNumber("Flywheel/Left/kD", FlywheelConstants.LeftControlConfig.motorController().getD());
@@ -171,6 +173,13 @@ public class Flywheel extends SubsystemBase{
             rightFlywheelMotorV,
             rightFlywheelMotorA
         );
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                io.setLeftFlywheelVolts(motorVolts.get());
+            },
+            motorVolts
+        );
     }
 
     public void setLeftFlyWheelVolts(double pVolts){
@@ -234,6 +243,21 @@ public class Flywheel extends SubsystemBase{
 
             () -> false,
             
+            this);
+    }
+
+    public Command runVolts(){
+        return new FunctionalCommand(
+            () -> {
+                setLeftFlyWheelVolts(motorVolts.get());
+                setRightFlyWheelVolts(motorVolts.get());
+            }, 
+            () -> {}, 
+            (interrupted) -> {
+                setLeftFlyWheelVolts(0);
+                setRightFlyWheelVolts(0);
+            }, 
+            () -> false,
             this);
     }
 }

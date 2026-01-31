@@ -75,7 +75,7 @@ public class FlywheelKrakenIO implements FlywheelIO{
         mRightMotorConfig.Voltage.PeakForwardVoltage = FlywheelConstants.kPeakVoltage;
         mRightMotorConfig.Voltage.PeakReverseVoltage = -FlywheelConstants.kPeakVoltage;
         mRightMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        mRightMotorConfig.MotorOutput.Inverted = FlywheelConstants.kInverted ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        mRightMotorConfig.MotorOutput.Inverted = !FlywheelConstants.kInverted ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
         mRightMotorConfig.Slot0.kP = FlywheelConstants.RightControlConfig.motorController().getP();
         mRightMotorConfig.Slot0.kI = FlywheelConstants.RightControlConfig.motorController().getI();
         mRightMotorConfig.Slot0.kD = FlywheelConstants.RightControlConfig.motorController().getD();
@@ -166,9 +166,4 @@ public class FlywheelKrakenIO implements FlywheelIO{
             .withSlot(0);
         mFlywheelRightMotor.setControl(motorSetpointRequestLeft);
     }
-
-
-    
-
-
 }
