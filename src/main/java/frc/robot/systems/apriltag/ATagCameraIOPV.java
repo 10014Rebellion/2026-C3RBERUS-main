@@ -78,7 +78,7 @@ public class ATagCameraIOPV implements ATagCameraIO {
         pInputs.iCameraToRobot = mCameraTransform;
 
         try {
-            if (Constants.kCurrentMode == Mode.SIM) mVisionSim.update(pSimOdomPose);
+            if (Constants.isSim()) mVisionSim.update(pSimOdomPose);
             
             pInputs.iIsConnected = mPhotonCam.isConnected();
             List<PhotonPipelineResult> unreadResults = mPhotonCam.getAllUnreadResults();
@@ -93,7 +93,7 @@ public class ATagCameraIOPV implements ATagCameraIO {
                 DriverStation.reportWarning("Multi Tag CoProcessor Failed for: " + mCamName, true);
 
                 latestEstimatedRobotPose = mPoseEstimator.estimateClosestToReferencePose(
-                    latestValidResult, GeomUtil.toPose3d((Constants.kCurrentMode == Mode.REAL) ? pLastRobotPose : pSimOdomPose));
+                    latestValidResult, GeomUtil.toPose3d(pLastRobotPose));
             }
 
             if (latestValidResult == null || !latestValidResult.hasTargets()) {

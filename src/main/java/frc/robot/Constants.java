@@ -11,9 +11,12 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
-    public static final Mode kSimMode = Mode.SIM;
-    public static final Mode kCurrentMode = RobotBase.isReal() ? Mode.REAL : kSimMode;
+    public static final Mode kCurrentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
     public static final boolean kTuningMode = !DriverStation.isFMSAttached();
+
+    public static final boolean isSim() {
+        return !(kCurrentMode.equals(Mode.REAL) || kCurrentMode.equals(Mode.REAL)); 
+    }
 
     public static enum Mode {
         /** Running on a real robot. */

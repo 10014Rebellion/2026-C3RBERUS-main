@@ -12,11 +12,10 @@ public class DriveCharacterizationCommands {
         /* LINEAR CHARACTERIZATION: The x-y movement of the drivetrain(basically drive motor feedforward) */
     public Command characterizeLinearMotion(Drive pDrive) {
         return pDrive.setToSysIDCharacterization()
-                .andThen(SysIDCharacterization.runDriveSysIDTests(
-                        (voltage) -> {
-                            runLinearCharacterization(voltage, pDrive);
-                        },
-                        pDrive));
+            .andThen(SysIDCharacterization.runDriveSysIDTests(
+                (voltage) -> {
+                    runLinearCharacterization(voltage, pDrive);
+                }, pDrive));
     }
 
     /* Runs the robot forward at a voltage */
@@ -39,8 +38,8 @@ public class DriveCharacterizationCommands {
      */
     public Command characterizeAngularMotion(Drive pDrive) {
         return pDrive.setToSysIDCharacterization()
-                .andThen(SysIDCharacterization.runDriveSysIDTests(
-                        (voltage) -> runAngularCharacterization(voltage, pDrive), pDrive));
+            .andThen(SysIDCharacterization.runDriveSysIDTests(
+                (voltage) -> runAngularCharacterization(voltage, pDrive), pDrive));
     }
 
     /* Runs the rotate's robot at a voltage */
