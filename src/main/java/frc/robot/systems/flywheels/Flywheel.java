@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -116,24 +117,35 @@ public class Flywheel extends SubsystemBase{
     private SimpleMotorFeedforward mLeftFF = FlywheelConstants.LeftControlConfig.motorFF();
     private SimpleMotorFeedforward mRightFF = FlywheelConstants.RightControlConfig.motorFF();
 
-    private TalonFX indexerMotor = new TalonFX(55, FlywheelConstants.kCanBus);
+    private TalonFX indexerMotor1 = new TalonFX(55, FlywheelConstants.kCanBus);
+    private TalonFX indexerMotor2 = new TalonFX(51, FlywheelConstants.kCanBus);
+    
     private boolean indexerInvert = false;
 
-    private LoggedTunableNumber tindexerVolt = new LoggedTunableNumber("Indexer/Volts", 0.0);
+    private LoggedTunableNumber tindexerVolt = new LoggedTunableNumber("Indexer/Volts", 12.0);
     
     public Flywheel(FlywheelIO pIo) {
         this.io = pIo;
-
         TalonFXConfiguration motorConfig = new TalonFXConfiguration();
         motorConfig.CurrentLimits.StatorCurrentLimit = FlywheelConstants.kSmartCurrentLimit;
         motorConfig.Voltage.PeakForwardVoltage = FlywheelConstants.kPeakVoltage;
         motorConfig.Voltage.PeakReverseVoltage = -FlywheelConstants.kPeakVoltage;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.MotorOutput.Inverted = (indexerInvert) ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        
+        TalonFXConfiguration motorConfig2 = new TalonFXConfiguration();
+        motorConfig2.CurrentLimits.StatorCurrentLimit = FlywheelConstants.kSmartCurrentLimit;
+        motorConfig2.Voltage.PeakForwardVoltage = FlywheelConstants.kPeakVoltage;
+        motorConfig2.Voltage.PeakReverseVoltage = -FlywheelConstants.kPeakVoltage;
+        motorConfig2.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        motorConfig2.MotorOutput.Inverted = !(indexerInvert) ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
         // motorConfig.Slot0.kP = FlywheelConstants.LeftControlConfig.motorController().getP();
         // motorConfig.Slot0.kI = FlywheelConstants.LeftControlConfig.motorController().getI();
         // motorConfig.Slot0.kD = FlywheelConstants.LeftControlConfig.motorController().getD();
-        indexerMotor.getConfigurator().apply(motorConfig);
+        indexerMotor1.getConfigurator().apply(motorConfig);
+        indexerMotor2.getConfigurator().apply(motorConfig2);
+        
+        indexerMotor2.setControl(new Follower(indexerMotor1.getDeviceID(), FlywheelConstants.mFollowerAlignment));
     }
 
     @Override
@@ -265,13 +277,17 @@ public class Flywheel extends SubsystemBase{
             () -> {
                 setLeftFlyWheelVolts(motorVolts.get());
                 setRightFlyWheelVolts(motorVolts.get());
-                indexerMotor.setVoltage(tindexerVolt.get());
+                indexerMotor1.setVoltage(tindexerVolt.get());
+                indexerMotor2.setVoltage(tindexerVolt.get());
+
             }, 
             () -> {}, 
             (interrupted) -> {
                 setLeftFlyWheelVolts(0);
                 setRightFlyWheelVolts(0);
-                indexerMotor.setVoltage(0);
+                indexerMotor1.setVoltage(0);
+                indexerMotor2.setVoltage(0);
+
             }, 
             () -> false,
             this);
@@ -282,13 +298,18 @@ public class Flywheel extends SubsystemBase{
             () -> {
                 setLeftFlyWheelVolts(0);
                 setRightFlyWheelVolts(0);
-                indexerMotor.setVoltage(0);
+                indexerMotor1.setVoltage(0);
+                indexerMotor2.setVoltage(0);
+
+                
             }, 
             () -> {}, 
             (interrupted) -> {
                 setLeftFlyWheelVolts(0);
                 setRightFlyWheelVolts(0);
-                indexerMotor.setVoltage(0);
+                indexerMotor1.setVoltage(0);
+                indexerMotor2.setVoltage(0);
+
             }, 
             () -> false,
             this);
