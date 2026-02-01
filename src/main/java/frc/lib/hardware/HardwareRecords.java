@@ -65,7 +65,7 @@ public class HardwareRecords {
         ArmFeedforward kFeedforward
     ) {}
 
-    public static record SimpleController(
+    public static record SimpleController (
         int slot,
         PDConstants pdController,
         SimpleMotorFeedforward kFeedforward

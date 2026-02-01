@@ -18,6 +18,19 @@ import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.tuning.LoggedTunableNumber;
 
 public class Climb extends SubsystemBase {
+
+  @AutoLogOutput(key = "Elevator/CurrentSlot")
+  public static int mSlot = 0;
+
+  // private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/P", kControllers.getSlot(mSlot, ElevatorController.class).pdController().kP());
+  // private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/D", kControllers.getSlot(mSlot, ElevatorController.class).pdController().kD());
+  // private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/S", kControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKs());
+  // private static final LoggedTunableNumber kMaxV = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/V", kControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKg());
+  // private static final LoggedTunableNumber kMaxA = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/G", kControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKa());
+  // private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxVelo", kControllers.getSlot(mSlot, ElevatorController.class).constraints().maxVelocity());
+  // private static final LoggedTunableNumber kV = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxAccel", kControllers.getSlot(mSlot, ElevatorController.class).constraints().maxAcceleration());
+  // private static final LoggedTunableNumber kA = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxJerk", kControllers.getSlot(mSlot, ElevatorController.class).constraints().maxJerk());
+
   public enum ClimbGoal {
     kStow(() -> Units.inchesToMeters(60.0)),
     kLc1(() -> Units.inchesToMeters(0)),
@@ -44,10 +57,10 @@ public class Climb extends SubsystemBase {
   private double mCurrentClimbGoalPositionMeters = 0.0;
   private ElevatorFeedforward mFeedforward;
 
-  public Climb(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits, ElevatorController pController) {
+  public Climb(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits) {
     this.mClimbIO = pClimbIO;
     this.mSoftLimits = pSoftLimits;
-    this.mFeedforward = pController.feedforward();
+    // this.mFeedforward = kControllers.getSlot(mSlot, ElevatorFeedforward.class);
   }
   
   @Override
@@ -62,7 +75,7 @@ public class Climb extends SubsystemBase {
     if (mCurrentGoal != null) {
       mCurrentClimbGoalPositionMeters = mCurrentGoal.getGoalMeters();
 
-      setPosition(mCurrentClimbGoalPositionMeters);
+      setPosition(mSlot, mCurrentClimbGoalPositionMeters);
     }
   }
 
@@ -83,8 +96,12 @@ public class Climb extends SubsystemBase {
     mCurrentGoal = pGoal;
   }
 
-  public void setPosition(double meters){
-    mClimbIO.setMotorPosition(meters, mFeedforward.calculate(mClimbInputs.iClimbVelocityMPS, mClimbInputs.iClimbAccelerationMPSS));
+  public void setPosition(int pSlot, double pMeters){
+    mClimbIO.setMotorPosition(pSlot, pMeters, mFeedforward.calculate(mClimbInputs.iClimbVelocityMPS, mClimbInputs.iClimbAccelerationMPSS));
+  }
+
+  public void setFeedForwardConstants(int pSlot, double pKS, double pKV, double pKG){
+
   }
 
   @AutoLogOutput(key = "Climb/Goal")

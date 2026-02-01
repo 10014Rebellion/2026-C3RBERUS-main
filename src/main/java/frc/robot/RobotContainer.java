@@ -12,6 +12,11 @@ import frc.robot.systems.apriltag.AprilTag;
 import frc.robot.systems.apriltag.AprilTagConstants;
 import frc.robot.systems.apriltag.AprilTagIO;
 import frc.robot.systems.apriltag.AprilTagIOPVTag;
+import frc.robot.systems.climb.Climb;
+import frc.robot.systems.climb.ClimbConstants;
+import frc.robot.systems.climb.ClimbIO;
+import frc.robot.systems.climb.ClimbIOKrakenx44;
+import frc.robot.systems.climb.ClimbIOSim;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 import frc.robot.systems.drive.gyro.GyroIO;
@@ -24,6 +29,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     private final Drive mDrive;
+    // private final Climb mClimb;
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
 
@@ -52,6 +58,13 @@ public class RobotContainer {
                                 AprilTagConstants.kLeftCamOrientation
                             )
                         }));
+
+                // mClimb = new Climb(
+                //     new ClimbIOKrakenx44(
+                //         ClimbConstants.kClimbMotorConstants, 
+                //         ClimbConstants.kSoftLimits), 
+                //     ClimbConstants.kSoftLimits);
+
                 break;
 
             case SIM:
@@ -75,6 +88,9 @@ public class RobotContainer {
                                 AprilTagConstants.kLeftCamOrientation
                             )
                         }));
+
+
+                // mClimb = new Climb(new ClimbIOSim(ClimbConstants.kClimbMotorConstants, ClimbConstants.kControllers), ClimbConstants.kSoftLimits);
                 break;
 
             default:
@@ -87,6 +103,7 @@ public class RobotContainer {
                         },
                         new GyroIO() {},
                         new AprilTag(new AprilTagIO[] {new AprilTagIO() {}, new AprilTagIO() {}}));
+                // mClimb = new Climb(new ClimbIO() {}, ClimbConstants.kSoftLimits) {};
                 break;
         }
 

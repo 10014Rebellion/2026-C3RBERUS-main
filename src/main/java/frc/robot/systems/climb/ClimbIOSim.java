@@ -2,73 +2,70 @@ package frc.robot.systems.climb;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import frc.lib.controls.SlottedController;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.ElevatorController;
 
 public class ClimbIOSim implements ClimbIO{
-
-    private final DCMotorSim mClimbMotor;
-    private final ElevatorSim mElevatorSim;
+    // private final ElevatorSim mElevatorSim;
     private double mAppliedVolts;
     private PIDController mClimbPID;
 
     private final BasicMotorHardware mConfig;
-    private final ElevatorController mController;
+    private final SlottedController mController;
+
+    private final ElevatorSim mElevatorSim;
 
 
-    public ClimbIOSim(BasicMotorHardware pConfig, ElevatorController pController) {
+    public ClimbIOSim(BasicMotorHardware pConfig, SlottedController pController) {
 
         this.mConfig = pConfig;
         this.mController = pController;
 
-        mClimbMotor = new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX44(1), 
-                0.004, 
-                mConfig.rotorToMechanismRatio()),
-            DCMotor.getKrakenX60Foc(1),
-            0.0,
-            0.0
-        );
-
-        mElevatorSim = new ElevatorSim()
-
         mClimbPID = new PIDController(0.0, 0.0, 0.0);
+
+        mElevatorSim = new ElevatorSim(
+            ClimbConstants.kSimElevator.kMotor(),
+            ClimbConstants.kClimbMotorConstants.rotorToMechanismRatio(), 
+            ClimbConstants.kSimElevator.kCarriageMassKg(), 
+            ClimbConstants.kSimElevator.kDrumRadiusMeters(), 
+            ClimbConstants.kSimElevator.kMinHeightMeters(),
+            ClimbConstants.kSimElevator.kMaxHeightMeters(),
+            ClimbConstants.kSimElevator.kSimulateGravity(), 
+            ClimbConstants.kSimElevator.kStartingHeightMeters(), 
+            ClimbConstants.kSimElevator.kMeasurementStdDevs());
 
         mAppliedVolts = 0.0;
     }
 
     @Override
     public void updateInputs(ClimbInputs pInputs){
-        mClimbMotor.update(0.02);
+        mElevatorSim.update(0.02);
         pInputs.iIsClimbConnected = true;
-        pInputs.iClimbVelocityMPS = (mClimbMotor.getAngularVelocityRPM() * mConfig.rotorToMechanismRatio()) / 60.0;
-        pInputs.iClimbAccelerationMPSS = mClimbMotor.getAngularAccelerationRadPerSecSq() * mConfig.rotorToMechanismRatio();
+        pInputs.iClimbVelocityMPS = mElevatorSim.getVelocityMetersPerSecond();
+        pInputs.iClimbAccelerationMPSS = 0.0;
         pInputs.iClimbMotorVolts = mAppliedVolts;
         pInputs.iClimbSupplyCurrentAmps = 0.0;
-        pInputs.iClimbStatorCurrentAmps = Math.abs(mClimbMotor.getCurrentDrawAmps());
+        pInputs.iClimbStatorCurrentAmps = Math.abs(mElevatorSim.getCurrentDrawAmps());
         pInputs.iClimbTempCelsius = 0.0;
-        pInputs.iClimbPositionMeters = mClimbMotor.getAngularPositionRotations() * mConfig.rotorToMechanismRatio();
+        pInputs.iClimbPositionMeters = mElevatorSim.getPositionMeters();
     }
 
     @Override
     public void setMotorVolts(double pVolts){
         mAppliedVolts = MathUtil.clamp(12.0, -12.0, pVolts);
-        mClimbMotor.setInputVoltage(mAppliedVolts);
+        mElevatorSim.setInputVoltage(mAppliedVolts);
     }
 
     @Override
-    public void setMotorPosition(double pPositionM, double pFeedforward){
-        setMotorVolts(mClimbPID.calculate(mClimbMotor.getAngularPositionRad(), pPositionM) + pFeedforward);
+    public void setMotorPosition(int pSlot, double pPositionM, double pFeedforward){
+        setMotorVolts(mClimbPID.calculate(mElevatorSim.getPositionMeters(), pPositionM) + pFeedforward);
     }
 
     @Override
     public void setPIDConstants(int pSlot, double pKP, double pKI, double pKD){
+
     }
 
     @Override

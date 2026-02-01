@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicExpoDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -20,6 +21,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.lib.controls.SlottedController;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.hardware.HardwareRecords.ElevatorController;
@@ -27,9 +29,7 @@ import frc.lib.hardware.HardwareRecords.ElevatorController;
 public class ClimbIOKrakenx44 implements ClimbIO {
     private final TalonFX mClimbMotor;
     private final VoltageOut mClimbVoltageControl = new VoltageOut(0.0);
-    private final MotionMagicExpoDutyCycle mClimbPositionControl = new MotionMagicExpoDutyCycle(0.0);
-
-    private final ElevatorController mController;
+    private final MotionMagicVoltage mClimbPositionControl = new MotionMagicVoltage(0.0);
 
     private final StatusSignal<AngularVelocity> mClimbVelocityMPS;
     private final StatusSignal<Voltage> mClimbVoltage;
@@ -39,7 +39,7 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     private final StatusSignal<AngularAcceleration> mClimbAccelerationMPSS;
     private final StatusSignal<Angle> mClimbPosition;
 
-    public ClimbIOKrakenx44(BasicMotorHardware pConfig, PositionSoftLimits pSoftLimits, ElevatorController pController) {
+    public ClimbIOKrakenx44(BasicMotorHardware pConfig, PositionSoftLimits pSoftLimits) {
         mClimbMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
         var ClimbConfig = new TalonFXConfiguration();
 
@@ -77,8 +77,6 @@ public class ClimbIOKrakenx44 implements ClimbIO {
             mClimbTempCelsius,
             mClimbPosition);
         mClimbMotor.optimizeBusUtilization();
-
-        this.mController = pController;
     }
 
     @Override
@@ -106,8 +104,8 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     }
 
     @Override
-    public void setMotorPosition(double pPositionM, double pFeedforward) {
-        mClimbMotor.setControl(mClimbPositionControl.withPosition(pPositionM).withFeedForward(pFeedforward));
+    public void setMotorPosition(int pSlot, double pPositionM, double pFeedforward) {
+        mClimbMotor.setControl(mClimbPositionControl.withPosition(pPositionM).withFeedForward(pFeedforward).withSlot(pSlot));
     }
 
     @Override
@@ -117,8 +115,6 @@ public class ClimbIOKrakenx44 implements ClimbIO {
         slotConfigs.kP = pKP;
         slotConfigs.kI = pKI;
         slotConfigs.kD = pKD;
-        slotConfigs.GravityType = GravityTypeValue.Elevator_Static;
-
         mClimbMotor.getConfigurator().apply(slotConfigs);
     }
 
