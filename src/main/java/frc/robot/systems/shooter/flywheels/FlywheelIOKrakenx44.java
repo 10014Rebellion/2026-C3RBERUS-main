@@ -78,7 +78,8 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
             mFlywheelVoltage,
             mFlywheelSupplyCurrent,
             mFlywheelStatorCurrent,
-            mFlywheelTempCelsius);
+            mFlywheelTempCelsius
+        );
 
         mFlywheelMotor.optimizeBusUtilization();
     }

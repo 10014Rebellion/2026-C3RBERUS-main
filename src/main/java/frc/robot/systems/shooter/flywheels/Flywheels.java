@@ -2,7 +2,9 @@ package frc.robot.systems.shooter.flywheels;
 
 import org.littletonrobotics.junction.Logger;
 
-public class Flywheels {
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class Flywheels extends SubsystemBase {
   private final FlywheelIO mLeaderFlywheelIO;
   private final FlywheelIO mFollowerFlywheelIO;
 
@@ -22,6 +24,7 @@ public class Flywheels {
     mLeaderFlywheelIO.stopMotor();
   }
   
+  @Override
   public void periodic() {
     mLeaderFlywheelIO.updateInputs(mLeaderFlywheelInputs);
     mFollowerFlywheelIO.updateInputs(mFollowerFlywheelInputs);

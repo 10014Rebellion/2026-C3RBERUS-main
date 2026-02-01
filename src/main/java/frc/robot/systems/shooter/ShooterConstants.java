@@ -12,15 +12,8 @@ import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.SimpleController;
 
 public class ShooterConstants {
-    public static class Indexers {
-    }
-
-    public static class Hood {
-
-    }
-
-    public static class Flywheels {
-        public static final BasicMotorHardware kFlywheelLeaderConfig = new BasicMotorHardware(
+    public static class IndexerConstants {
+        public static final BasicMotorHardware kIndexerLeaderConfig = new BasicMotorHardware(
             54,
             Constants.kSubsystemsCANBus,
             1,
@@ -29,8 +22,29 @@ public class ShooterConstants {
             new CurrentLimits(40, 50)
         );
 
-        public static final FollowerMotorHardware kFlywheelFollowerConfig = new FollowerMotorHardware(
+        public static final FollowerMotorHardware kIndexerFollowerConfig = new FollowerMotorHardware(
             55,
+            kIndexerLeaderConfig,
+            MotorAlignmentValue.Opposed
+        );
+    }
+
+    public static class Hood {
+
+    }
+
+    public static class FlywheelConstants {
+        public static final BasicMotorHardware kFlywheelLeaderConfig = new BasicMotorHardware(
+            53,
+            Constants.kSubsystemsCANBus,
+            1,
+            InvertedValue.CounterClockwise_Positive,
+            NeutralModeValue.Coast,
+            new CurrentLimits(40, 50)
+        );
+
+        public static final FollowerMotorHardware kFlywheelFollowerConfig = new FollowerMotorHardware(
+            54,
             kFlywheelLeaderConfig,
             MotorAlignmentValue.Opposed
         );
