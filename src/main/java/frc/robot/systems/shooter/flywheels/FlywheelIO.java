@@ -8,6 +8,7 @@ public interface FlywheelIO {
     @AutoLog
     public static class FlywheelInputs {
       public boolean iIsFlywheelConnected = false;
+      public boolean iIsLeader = true;
       public String iFlywheelControlMode = "";
       public double iFlywheelVelocityRPS = 0.0;
       public double iFlywheelAccelerationRPSS = 0.0;
@@ -19,7 +20,7 @@ public interface FlywheelIO {
 
     public default void updateInputs(FlywheelInputs pInputs) {}
 
-    public default void setMotorVelocity(double pVelocityRPS, double pFeedforward) {}
+    public default void setMotorVelAndAccel(double pVelocityRPS, double pAccelerationRPSS, double pFeedforward) {}
 
     public default void setMotorVolts(double pVolts) {}
 

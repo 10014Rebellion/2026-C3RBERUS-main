@@ -13,8 +13,6 @@ import frc.lib.hardware.HardwareRecords.MotionConstraints;
 import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.simulation.SimulationRecords.SimulatedElevator;
-import frc.lib.controls.SlottedController;
-import frc.lib.controls.SlottedController.Mechanism;
 
 public class ClimbConstants {
     
@@ -51,16 +49,16 @@ public class ClimbConstants {
                     new PDConstants(0, 0), 
                     new ElevatorFeedforward(0, 0, 0),
                     new MotionConstraints(0, 0, 0));
-            
-                    
+                        
+                        
             case SIM -> 
                 new ElevatorController(
                     0, 
                     new PDConstants(0, 0), 
                     new ElevatorFeedforward(0, 0, 0),
                     new MotionConstraints(0, 0, 0));
-                    
-                    
+                
+                        
             default -> 
                 new ElevatorController(
                     0, 
@@ -73,14 +71,13 @@ public class ClimbConstants {
     public static final ElevatorController kController1 = 
     
         switch(Constants.kCurrentMode){
-            
             case REAL -> 
                 new ElevatorController(
                     1, 
                     new PDConstants(0, 0), 
                     new ElevatorFeedforward(0, 0, 0),
                     new MotionConstraints(0, 0, 0));
-                
+                        
                         
             case SIM -> 
                 new ElevatorController(
@@ -89,7 +86,7 @@ public class ClimbConstants {
                     new ElevatorFeedforward(0, 0, 0),
                     new MotionConstraints(0, 0, 0));
                 
-
+                        
             default -> 
                 new ElevatorController(
                     1, 
@@ -128,33 +125,4 @@ public class ClimbConstants {
                     new MotionConstraints(0, 0, 0));                        
         };
 
-    public static final ElevatorController kController3 = 
-    
-        switch(Constants.kCurrentMode){
-        
-            case REAL -> 
-                new ElevatorController(
-                    3, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-            
-                    
-            case SIM -> 
-                new ElevatorController(
-                    3, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-            
-                    
-            default -> 
-                new ElevatorController(
-                    3, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                    
-        };
     }
-    

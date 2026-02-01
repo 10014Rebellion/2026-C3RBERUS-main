@@ -13,11 +13,11 @@ public class SlottedController {
         SIMPLE
     }
     
-    public static SimpleController[] mSimpleControllers;
-    public static ArmController[] mArmControllers;
-    public static ElevatorController[] mElevatorControllers;
+    private SimpleController[] mSimpleControllers;
+    private ArmController[] mArmControllers;
+    private ElevatorController[] mElevatorControllers;
 
-    public Mechanism mMechanism;
+    private Mechanism mMechanism;
     
 
     public SlottedController(Mechanism pMechanism){
@@ -50,6 +50,7 @@ public class SlottedController {
 
     }
 
+    @SuppressWarnings("unchecked")
     public <T> void setSlot(int slot, T controller) {
         switch (mMechanism) {
             case SIMPLE -> mSimpleControllers[slot] = (SimpleController) controller;
