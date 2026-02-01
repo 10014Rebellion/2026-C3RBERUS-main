@@ -86,6 +86,7 @@ public class DriveConstants {
     public static final double kDriveSupplyAmpLowerLimitTime = 0.25;
 
     public static final double kAzimuthStatorAmpLimit = 40.0;
+    public static final double kAzimuthSupplyAmpLimit = 40.0;
     public static final double kAzimuthFOCAmpLimit = 40.0;
 
     public static final ModuleControlConfig kModuleControllerConfigs = !Constants.isSim()
