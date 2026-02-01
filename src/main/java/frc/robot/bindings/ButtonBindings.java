@@ -4,17 +4,24 @@ package frc.robot.bindings;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.Drive;
+import frc.robot.systems.shooter.flywheels.Flywheels;
+import frc.robot.systems.shooter.indexers.Indexers;
 import frc.robot.commands.DriveCharacterizationCommands;
 
 public class ButtonBindings {
     private final Drive mDriveSS;
+    private final Flywheels mFlywheelsSS;
+    private final Indexers mIndexers;
     private final FlydigiApex4 mDriverController = new FlydigiApex4(BindingsConstants.kDriverControllerPort);
 
-    public ButtonBindings(Drive pDriveSS) {
+    public ButtonBindings(Drive pDriveSS, Flywheels pFlywheelsSS, Indexers pIndexersSS) {
+        this.mFlywheelsSS = pFlywheelsSS;
+        this.mIndexers = pIndexersSS;
         this.mDriveSS = pDriveSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.setToTeleop());
     }
@@ -58,5 +65,14 @@ public class ButtonBindings {
         // mDriverController.a()
         //     .onTrue(Commands.runOnce(() -> mDriveSS.setPose(new Pose2d()), mDriveSS)
         //             .andThen(mDriveSS.setToGenericLineAlign(() -> new Pose2d(2.5, 2.5, Rotation2d.fromDegrees(45.0)), () -> Rotation2d.fromDegrees(45.0))));
+    
+        mDriverController.rightTrigger()
+            .onTrue(new InstantCommand(() -> mFlywheelsSS.setFlywheelVolts(mDriverController.getRightTriggerAxis() * 12)))
+            .onFalse(new InstantCommand(() -> mFlywheelsSS.setFlywheelVolts(0)));
+
+        mDriverController.leftTrigger()
+            .onTrue(new InstantCommand(() -> mIndexers.setIndexerVolts(12)))
+            .onFalse(new InstantCommand(() -> mIndexers.setIndexerVolts(0)));
+
     }
 }

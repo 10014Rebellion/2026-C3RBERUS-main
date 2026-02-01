@@ -14,7 +14,7 @@ import frc.lib.hardware.HardwareRecords.SimpleController;
 public class ShooterConstants {
     public static class IndexerConstants {
         public static final BasicMotorHardware kIndexerLeaderConfig = new BasicMotorHardware(
-            54,
+            51,
             Constants.kSubsystemsCANBus,
             1,
             InvertedValue.CounterClockwise_Positive,
@@ -23,7 +23,7 @@ public class ShooterConstants {
         );
 
         public static final FollowerMotorHardware kIndexerFollowerConfig = new FollowerMotorHardware(
-            55,
+            52,
             kIndexerLeaderConfig,
             MotorAlignmentValue.Opposed
         );
