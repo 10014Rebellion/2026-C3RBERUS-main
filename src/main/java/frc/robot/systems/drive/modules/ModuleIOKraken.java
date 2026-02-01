@@ -13,6 +13,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -50,8 +51,10 @@ public class ModuleIOKraken implements ModuleIO {
     private final StatusSignal<AngularAcceleration> mDriveAccelerationMPSS;
 
     private final TalonFX mAzimuthMotor;
-    private final PositionDutyCycle mAzimuthPositionControl = new PositionDutyCycle(0.0);
+    // private final PositionDutyCycle mAzimuthPositionControl = new PositionDutyCycle(0.0);
+    private final PositionTorqueCurrentFOC mAzimuthPositionControl = new PositionTorqueCurrentFOC(0.0);
     private final VoltageOut mAzimuthVoltageControl = new VoltageOut(0.0);
+    private final TorqueCurrentFOC mAzimuthAmpControl = new TorqueCurrentFOC(0.0);
     private final double mAzimuthAppliedVolts = 0.0;
 
     private final StatusSignal<Angle> mAzimuthPosition;
@@ -273,6 +276,11 @@ public class ModuleIOKraken implements ModuleIO {
                 .withPosition(pRotation.getRotations())
                 .withFeedForward(pFeedforward)
                 .withSlot(0));
+    }
+
+    @Override
+    public void setAzimuthAmps(double amps) {
+        mAzimuthMotor.setControl(mAzimuthAmpControl.withOutput(amps));
     }
 
     /* Sets azimuth PID values on slot 0, used for tunable numbers */

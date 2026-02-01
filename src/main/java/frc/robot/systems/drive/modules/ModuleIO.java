@@ -47,7 +47,9 @@ public interface ModuleIO {
 
     public default void setDrivePID(double kP, double kI, double kD) {}
 
-    public default void setAzimuthVolts(double votls) {}
+    public default void setAzimuthVolts(double volts) {}
+
+    public default void setAzimuthAmps(double amps) {}
 
     public default void setAzimuthPosition(Rotation2d rotation, double feedforward) {}
 
