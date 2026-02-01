@@ -89,6 +89,7 @@ public class DriveConstants {
     public static final double kAzimuthFOCAmpLimit = 40.0;
 
     public static final ModuleControlConfig kModuleControllerConfigs = !Constants.isSim()
+        // kV is generally 0 for FOC control, so double check in ModuleIOKraken to see whether kV should be applied
         ? new ModuleControlConfig(
             new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(1.0, 0.0, 1.0), // DRIVE // TODO: TUNE ME
             new PIDController(4000, 0.0, 0.0), new SimpleMotorFeedforward(0.03, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
