@@ -60,14 +60,15 @@ public class SlottedController {
     }
 
 
-    @SuppressWarnings("unchecked")
-    public <T> T getSlot(int slot) {
-        return (T) switch (mMechanism) {
-            case SIMPLE   -> mSimpleControllers[slot];
+    public <T> T getSlot(int slot, Class<T> type) {
+        Object value = switch (mMechanism) {
+            case SIMPLE -> mSimpleControllers[slot];
             case ELEVATOR -> mElevatorControllers[slot];
-            case ARM      -> mArmControllers[slot];
+            case ARM -> mArmControllers[slot];
         };
+        return type.cast(value);
     }
+
 
 
     
