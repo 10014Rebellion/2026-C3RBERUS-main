@@ -1,14 +1,19 @@
-package frc.lib.swerve;
+package frc.robot.systems.drive;
 
 import edu.wpi.first.math.Vector;
 
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
-// TODO: Sever this. Do not use imports, we have to pass these in. 
 import static frc.robot.systems.drive.DriveConstants.kDriveMotorGearing;
 import static frc.robot.systems.drive.DriveConstants.kKinematics;
 import static frc.robot.systems.drive.DriveConstants.kMaxLinearSpeedMPS;
+import static frc.robot.systems.drive.DriveConstants.kSkidRatioCap;
 import static frc.robot.systems.drive.DriveConstants.kWheelRadiusMeters;
+
+import java.util.Arrays;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,9 +25,10 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.math.EqualsUtil;
 import frc.lib.pathplanner.SwerveSetpoint;
+import frc.lib.swerve.LocalADStarAK;
 import frc.lib.telemetry.Telemetry;
 
-public class SwerveUtils {
+public class SwerveHelper {
     private static final double dt = 0.02;
     private static final DCMotor kKrakenFOCModel = DCMotor.getKrakenX60Foc(1);
     private static final double kJitterThreshold = 0.01;
@@ -60,8 +66,8 @@ public class SwerveUtils {
 
     // PATHPLANNER TORQUE UTILS \\ 
     /* Torque isn't directionally changed when the velocity flip case happen SwerveModuleState.optimize() */
-    public static double optimizeTorque(SwerveModuleState unOptimized, SwerveModuleState optimized, double motorAmperage, int i) {
-        return isSpeedOptimized(unOptimized, optimized, i) ? - motorAmperage : motorAmperage;
+    public static double optimizeTorque(SwerveModuleState unOptimized, SwerveModuleState optimized, double motorAmperage, SwerveModuleState current, int i) {
+        return (isSpeedOptimized(unOptimized, optimized, i) ? -motorAmperage : motorAmperage) * Math.abs(optimized.angle.minus(current.angle).getCos());
     }
 
     /* Check if optimize changed module velocity direction */
@@ -144,7 +150,97 @@ public class SwerveUtils {
         };
     }
 
+    public static Rotation2d[] zeroRotations() {
+        return new Rotation2d[] {
+            new Rotation2d(), new Rotation2d(), new Rotation2d(), new Rotation2d()
+        };
+    }
+
     public static double getTorqueOfKrakenDriveMotor(double amps) {
         return kKrakenFOCModel.getTorque(amps);
+    }
+
+    public static double lowPassFilter(double previous, double input, double alpha) {
+        return alpha * input + (1 - alpha) * previous;
+    }
+
+    public static double skidRatio(SwerveModuleState[] deltas) {
+        ChassisSpeeds speeds = kKinematics.toChassisSpeeds(deltas);
+        ChassisSpeeds rotationalSpeeds = new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond);
+        SwerveModuleState[] rotationalModuleStates = kKinematics.toSwerveModuleStates(rotationalSpeeds);
+
+        double[] moduleTranslationMagnitudes = new double[4];
+        for(int i = 0; i < 4; i++) {
+            moduleTranslationMagnitudes[i] = Math.hypot(
+                (deltas[i].speedMetersPerSecond * deltas[i].angle.getCos())
+                    -
+                (rotationalModuleStates[i].speedMetersPerSecond * rotationalModuleStates[i].angle.getCos()),
+                (deltas[i].speedMetersPerSecond * deltas[i].angle.getSin())
+                    -
+                (rotationalModuleStates[i].speedMetersPerSecond * rotationalModuleStates[i].angle.getSin()));
+        }
+
+        Arrays.sort(moduleTranslationMagnitudes);
+
+        double ratio = moduleTranslationMagnitudes[0] / moduleTranslationMagnitudes[3];
+
+        if(moduleTranslationMagnitudes[0] == 0.0 || moduleTranslationMagnitudes[3] == 0.0) return 0.0;
+        if(Double.isNaN(ratio) || Double.isInfinite(ratio)) return kSkidRatioCap+1.0;
+
+        return ratio;
+    }
+
+    public static double skidRatio(ChassisSpeeds speeds) {
+        SwerveModuleState[] deltas = kKinematics.toSwerveModuleStates(speeds);
+        ChassisSpeeds rotationalSpeeds = new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond);
+        SwerveModuleState[] rotationalModuleStates = kKinematics.toSwerveModuleStates(rotationalSpeeds);
+
+        double[] moduleTranslationMagnitudes = new double[4];
+        for(int i = 0; i < 4; i++) {
+            moduleTranslationMagnitudes[i] = Math.hypot(
+                (deltas[i].speedMetersPerSecond * deltas[i].angle.getCos())
+                    -
+                (rotationalModuleStates[i].speedMetersPerSecond * rotationalModuleStates[i].angle.getCos()),
+                (deltas[i].speedMetersPerSecond * deltas[i].angle.getSin())
+                    -
+                (rotationalModuleStates[i].speedMetersPerSecond * rotationalModuleStates[i].angle.getSin()));
+        }
+
+        Arrays.sort(moduleTranslationMagnitudes);
+
+        double ratio = moduleTranslationMagnitudes[0] / moduleTranslationMagnitudes[3];
+
+        if(moduleTranslationMagnitudes[0] == 0.0 || moduleTranslationMagnitudes[3] == 0.0) return 0.0;
+        if(Double.isNaN(ratio) || Double.isInfinite(ratio)) return kSkidRatioCap+1.0;
+
+        return ratio;
+    }
+
+    /* Intended as a brute force sign conversion, not technically correct if  if velocity change is zero as FF can occure even if vel = 0 */
+    public static double correctAmpFFDirection(SwerveModuleState optimizedState, SwerveModuleState prevOptimizedState, double driveAmps, int modNumber) {
+        double directionOfVelChange = Math.signum(
+            optimizedState.speedMetersPerSecond - prevOptimizedState.speedMetersPerSecond);
+        Telemetry.log("Drive/Module/Feedforward/" + modNumber + "/dir", directionOfVelChange);
+        driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
+        return driveAmps;
+    }
+
+    public static void setUpPathPlanner() {
+        Pathfinding.setPathfinder(new LocalADStarAK());
+        PathPlannerLogging.setLogActivePathCallback((activePath) ->
+            Telemetry.log("Drive/Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
+        PathPlannerLogging.setLogTargetPoseCallback(
+            (targetPose) -> Telemetry.log("Drive/Odometry/TrajectorySetpoint", targetPose));
+    }
+
+    public static double deadReckoningTurnToDriveConv(Rotation2d angleDelta, double gearing, double wheelRadius) {
+        return angleDelta.getRadians() * gearing * wheelRadius;
+    }
+
+    public static double deadReckoningFeedforward(Rotation2d angleDelta, double gearing, double wheelRadiusM, double inertia) {
+        double distM = deadReckoningTurnToDriveConv(angleDelta, gearing, wheelRadiusM);
+        double accelerationM = (2 * distM) / (dt * dt);
+
+        return -kKrakenFOCModel.getCurrent(wheelRadiusM * accelerationM * inertia);
     }
 }

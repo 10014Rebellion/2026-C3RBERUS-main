@@ -67,6 +67,19 @@ public class IndexerIOKrakenx44 implements IndexerIO{
         mIndexerSupplyCurrent = mIndexerMotor.getSupplyCurrent();
         mIndexerStatorCurrent = mIndexerMotor.getStatorCurrent();
         mIndexerTempCelsius = mIndexerMotor.getDeviceTemp();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0, 
+            mIndexerControlMode,
+            mIndexerVelocityRPS, 
+            mIndexerAccelerationRPSS,
+            mIndexerVoltage,
+            mIndexerSupplyCurrent,
+            mIndexerStatorCurrent,
+            mIndexerTempCelsius
+        );
+
+        mIndexerMotor.optimizeBusUtilization();
     }
 
     @Override

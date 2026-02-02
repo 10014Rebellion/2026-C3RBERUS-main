@@ -4,6 +4,8 @@ package frc.robot.systems.drive.modules;
 
 import static frc.robot.systems.drive.DriveConstants.*;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,14 +16,14 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ModuleIOSim implements ModuleIO {
     private final DCMotorSim mDriveMotor = new DCMotorSim(
         LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.004, kDriveMotorGearing),
-        DCMotor.getKrakenX60Foc(1),
+        DCMotor.getKrakenX60Foc(1).withReduction(kDriveMotorGearing),
         0.0,
         0.0
     );
 
     private final DCMotorSim mAzimuthMotor = new DCMotorSim(
-        LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.025, 52),
-        DCMotor.getKrakenX60Foc(1),
+        LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.025, kAzimuthMotorGearing),
+        DCMotor.getKrakenX60Foc(1).withReduction(kAzimuthMotorGearing),
         0.0,
         0.0
     );
@@ -53,6 +55,14 @@ public class ModuleIOSim implements ModuleIO {
         pInputs.iAzimuthStatorCurrentAmps = Math.abs(mAzimuthMotor.getCurrentDrawAmps());
         pInputs.iAzimuthTemperatureCelsius = 0.0;
         pInputs.iAzimuthMotorVolts = mAzimuthAppliedVolts;
+
+        pInputs.odometryTimestamps = new double[] {((double) Logger.getTimestamp()) / 1e6};
+        pInputs.odometryDrivePositionsM = new double[] {
+            mDriveMotor.getAngularPositionRotations() * kWheelCircumferenceMeters
+        };
+        pInputs.odometryTurnPositions = new Rotation2d[] {
+            new Rotation2d(mAzimuthMotor.getAngularPositionRad())
+        };
     }
 
     /////////// DRIVE MOTOR METHODS \\\\\\\\\\\

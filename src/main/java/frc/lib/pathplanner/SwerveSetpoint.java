@@ -17,4 +17,4 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  *     in FL, FR, BL, BR order.
  */
 public record SwerveSetpoint(
-        ChassisSpeeds robotRelativeSpeeds, SwerveModuleState[] moduleStates, DriveFeedforwards feedforwards) {}
+        ChassisSpeeds robotRelativeSpeeds, SwerveModuleState[] moduleStates, DriveFeedforwards feedforwards, AzimuthFeedForward azimuthFeedforwards) {}

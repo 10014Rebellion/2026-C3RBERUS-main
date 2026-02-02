@@ -24,6 +24,7 @@ public class Module {
     public static final LoggedTunableNumber tTurnP = new LoggedTunableNumber("Module/AzimuthP", kModuleControllerConfigs.azimuthController().getP());
     public static final LoggedTunableNumber tTurnD = new LoggedTunableNumber("Module/AzimuthD", kModuleControllerConfigs.azimuthController().getD());
     public static final LoggedTunableNumber tTurnS = new LoggedTunableNumber("Module/AzimuthS", kModuleControllerConfigs.azimuthFF().getKs());
+    public static final LoggedTunableNumber tTurnV = new LoggedTunableNumber("Module/AzimuthV", kModuleControllerConfigs.azimuthFF().getKv());
 
     private final ModuleIO mIO;
     private final ModuleInputsAutoLogged mInputs = new ModuleInputsAutoLogged();
@@ -35,10 +36,13 @@ public class Module {
     private SimpleMotorFeedforward mDriveFF = DriveConstants.kModuleControllerConfigs.driveFF();
 
     private Rotation2d mAzimuthSetpointAngle = null;
+    private double mAzimuthSetpointAngularVelocityRadPS = 0.0;
     private SimpleMotorFeedforward mAzimuthFF = DriveConstants.kModuleControllerConfigs.azimuthFF();
 
     private SwerveModuleState mCurrentState = new SwerveModuleState();
     private SwerveModulePosition mCurrentPosition = new SwerveModulePosition();
+
+    private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
     public Module(String pKey, ModuleIO pIO) {
         this.mIO = pIO;
@@ -52,62 +56,81 @@ public class Module {
         mCurrentState = new SwerveModuleState(mInputs.iDriveVelocityMPS, mInputs.iAzimuthPosition);
         mCurrentPosition = new SwerveModulePosition(mInputs.iDrivePositionM, mInputs.iAzimuthPosition);
 
+        /* Works because signals are sampled together */
+        int sampleCount = mInputs.odometryTimestamps.length;
+        odometryPositions = new SwerveModulePosition[sampleCount];
+        // System.out.println("\n\n\n\n\n\n\n\n"+sampleCount+"\n\n\n\n\n\n\n\n\n\n");
+        for (int i = 0; i < sampleCount; i++) {
+            odometryPositions[i] = 
+                new SwerveModulePosition(
+                    mInputs.odometryDrivePositionsM[i], 
+                    mInputs.odometryTurnPositions[i]);
+        }
+
         if (mVelocitySetpointMPS != null) {
-            if (mAmperageFeedforward != null) {
-                double ffOutput = mDriveFF.calculateWithVelocities(mVelocitySetpointMPS, mAmperageFeedforward);
-
-                Telemetry.log("Drive/" + kModuleName + "/AmperageFeedforward", mAmperageFeedforward);
-                Telemetry.log("Drive/" + kModuleName + "/ffOutput", ffOutput);
-
-                mIO.setDriveVelocity(mVelocitySetpointMPS, ffOutput);
+            if(DriveConstants.kUseVoltageFeedforward) {
+                    mIO.setDriveVelocity(mVelocitySetpointMPS, mDriveFF.calculate(mVelocitySetpointMPS));
             } else {
-                mIO.setDriveVelocity(mVelocitySetpointMPS, 0.0);
+                if (mAmperageFeedforward != null) {
+                    double ffOutput =
+                          mDriveFF.getKs() * Math.signum(mVelocitySetpointMPS)
+                        + mDriveFF.getKv() * mVelocitySetpointMPS
+                        + mDriveFF.getKa() * mAmperageFeedforward;
+
+                    Telemetry.log("Drive/" + kModuleName + "/AmperageFeedforward", mAmperageFeedforward);
+                    Telemetry.log("Drive/" + kModuleName + "/ffOutput", ffOutput);
+
+                    mIO.setDriveVelocity(mVelocitySetpointMPS, ffOutput);
+                } else {
+                    mIO.setDriveVelocity(mVelocitySetpointMPS, 0.0);
+                }
             }
         
             if (mAzimuthSetpointAngle != null) {
-                double ffOutput = mAzimuthFF.calculateWithVelocities(0, 0);
-                Telemetry.log("Drive/" + kModuleName + "/SimpleFeedforward", ffOutput);
+                double ffOutput = mAzimuthFF.calculate(mAzimuthSetpointAngularVelocityRadPS);
+                Telemetry.log("Drive/" + kModuleName + "/SimpleFeedforwardAzimuth", ffOutput);
                 mIO.setAzimuthPosition(mAzimuthSetpointAngle, ffOutput);
             }
-
-            if (DriverStation.isDisabled()) stop();
-
-            LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get());
-                },
-                tDriveP,
-                tDriveD
-            );
-
-            LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mDriveFF = new SimpleMotorFeedforward(tDriveS.get(), tDriveV.get(), tDriveA.get());
-                },
-                tDriveS,
-                tDriveV,
-                tDriveA
-            );
-
-            LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mIO.setAzimuthPID(tTurnP.get(), 0.0, tTurnD.get());
-                },
-                tTurnP,
-                tTurnD
-            );
-
-            LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mAzimuthFF = new SimpleMotorFeedforward(tTurnS.get(), 0.0, 0.0);
-                },
-                tTurnS
-            );
         }
+
+        if (DriverStation.isDisabled()) stop();
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get());
+            },
+            tDriveP,
+            tDriveD
+        );
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                mDriveFF = new SimpleMotorFeedforward(tDriveS.get(), tDriveV.get(), tDriveA.get());
+            },
+            tDriveS,
+            tDriveV,
+            tDriveA
+        );
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                mIO.setAzimuthPID(tTurnP.get(), 0.0, tTurnD.get());
+            },
+            tTurnP,
+            tTurnD
+        );
+
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> {
+                mAzimuthFF = new SimpleMotorFeedforward(tTurnS.get(), tTurnV.get(), 0.0);
+            },
+            tTurnS,
+            tTurnV
+        );
     }
 
     /* Sets the desired setpoint of the module with FF. Disables the all FF include velocity FF
@@ -122,11 +145,29 @@ public class Module {
      * @param state the desired velocity and rotation of the module
      * @param ampFeedforward The amperage added to the PID from FF, also enables the PID
      */
+    public SwerveModuleState setDesiredStateWithAmpFF(SwerveModuleState pState, Double pAmpFeedforward, double pAzimuthSetpointAngularVelocityRadPS) {
+        setAmpFeedforward(pAmpFeedforward);
+        setDesiredVelocity(pState.speedMetersPerSecond);
+        setDesiredRotation(pState.angle);
+        setDesiredAzimuthVelocityRadPS(pAzimuthSetpointAngularVelocityRadPS);
+        return getDesiredState();
+    }
+
+    /* Sets the desired setpoint of the module with FF
+     * @param state the desired velocity and rotation of the module
+     * @param ampFeedforward The amperage added to the PID from FF, also enables the PID
+     */
     public SwerveModuleState setDesiredStateWithAmpFF(SwerveModuleState pState, Double pAmpFeedforward) {
         setAmpFeedforward(pAmpFeedforward);
         setDesiredVelocity(pState.speedMetersPerSecond);
         setDesiredRotation(pState.angle);
+        setDesiredAzimuthVelocityRadPS(0.0);
         return getDesiredState();
+    }
+
+    public double setDesiredAzimuthVelocityRadPS(double pAzimuthSetpointAngularVelocityRadPS) {
+        mAzimuthSetpointAngularVelocityRadPS = pAzimuthSetpointAngularVelocityRadPS;
+        return mAzimuthSetpointAngularVelocityRadPS;
     }
 
     /* Runs characterization of by setting motor drive voltage and rotates the module forward
@@ -190,6 +231,13 @@ public class Module {
         mIO.setAzimuthVolts(pAzimuthVolts);
     }
 
+    /* Sets drive motor's voltage
+     * @param azimuthVolts: -kAzimuthFOCAmpLimit to kAzimuthFOCAmpLimit amps
+     */
+    public void setAzimuthAmps(double pAzimuthAmps) {
+        mIO.setAzimuthAmps(pAzimuthAmps);
+    }
+
     /* Stops modules by setting voltage to zero */
     public void stop() {
         setDriveVoltage(0.0);
@@ -219,5 +267,17 @@ public class Module {
     /* Resets azimuth encoder from CANCoder */
     public void resetAzimuthEncoder() {
         mIO.resetAzimuthEncoder();
+    }
+
+    public double[] getOdometryTimeStamps() {
+        return mInputs.odometryTimestamps;
+    }
+
+    public SwerveModulePosition[] getOdometryPositions() {
+        return odometryPositions;
+    }
+
+    public String getModuleName() {
+        return kModuleName;
     }
 }

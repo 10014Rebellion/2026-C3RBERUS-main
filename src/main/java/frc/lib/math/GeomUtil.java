@@ -12,9 +12,11 @@ package frc.lib.math;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
@@ -128,8 +130,18 @@ public class GeomUtil {
         return new Twist2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
     }
 
+    /**
+     * Converts a Twist2d to a ChassisSpeeds by extracting two dimensions (Y and Z). chain
+     *
+     * @param twist The original translation
+     * @return The resulting translation
+     */
+    public static ChassisSpeeds toChassisSpeeds(Twist2d twist, double dt) {
+        return new ChassisSpeeds(twist.dx / dt, twist.dy / dt, twist.dtheta / dt);
+    }
+
     public static Rotation2d getSmallestChangeInRotation(Rotation2d rotation1, Rotation2d rotation2) {
-        return Rotation2d.fromRadians(Math.min(
+        Rotation2d smallestRotMagnitude = Rotation2d.fromRadians(Math.min(
                 Math.min(
                         Math.abs(rotation2.minus(rotation1).getRadians()),
                         Math.abs(rotation2
@@ -139,5 +151,26 @@ public class GeomUtil {
                 Math.abs(rotation2
                         .minus(rotation1.minus(Rotation2d.k180deg))
                         .getRadians())));
+        
+        if(smallestRotMagnitude.equals( Rotation2d.fromRadians( Math.abs( rotation2.minus(rotation1).getRadians() ) ) ) ) {
+            return rotation2.minus(rotation1);
+        } else if(smallestRotMagnitude.equals( ( Rotation2d.fromRadians( Math.abs( rotation2.minus( Rotation2d.k180deg ).minus( rotation1 ).getRadians() ) ) ) ) ) {
+            return rotation2.minus(Rotation2d.k180deg).minus(rotation1);
+        } else {
+            return rotation2.minus(rotation1.minus(Rotation2d.k180deg));
+        }
     }
+
+    public static double hypot(double x, double y) {
+        return Math.hypot(x, y);
+    }
+
+    public static double hypot(double x, double y, double z) {
+        return Math.hypot(Math.hypot(x, y), z);
+    }
+
+    public static Pose3d toPose3d(Pose2d pose){
+        return new Pose3d(new Translation3d(pose.getTranslation()), new Rotation3d(pose.getRotation()));
+    }
+
 }

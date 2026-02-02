@@ -26,25 +26,25 @@ public class TuneableDriverProfile {
         mLinearScalar = new LoggedTunableNumber("Drive/Teleop/" + pKey + "/LinearScalar", pDefaultLinearScalar);
         mLinearDeadBand = new LoggedTunableNumber("Drive/Teleop/" + pKey + "/LinearDeadband", pDefaultLinearDeadband);
         mLinearInputsExponent =
-                new LoggedTunableNumber("Drive/Teleop/" + pKey + "/LinearInputsExponent", pDefaultLinearInputsExponent);
+            new LoggedTunableNumber("Drive/Teleop/" + pKey + "/LinearInputsExponent", pDefaultLinearInputsExponent);
         mRotationScalar = new LoggedTunableNumber("Drive/Teleop/" + pKey + "/RotationScalar", pDefaultRotationScalar);
         mRotationInputsExponent = new LoggedTunableNumber(
-                "Drive/Teleop/" + pKey + "/RotationInputsExponent", pDefaultRotationInputExponent);
+            "Drive/Teleop/" + pKey + "/RotationInputsExponent", pDefaultRotationInputExponent);
         mRotationDeadband =
-                new LoggedTunableNumber("Drive/Teleop/" + pKey + "/RotationDeadband", pDefaultRotationDeadband);
+            new LoggedTunableNumber("Drive/Teleop/" + pKey + "/RotationDeadband", pDefaultRotationDeadband);
         mSniperControl = new LoggedTunableNumber("Drive/Teleop/" + pKey + "/SniperControl", pDefaultSniperControl);
     }
 
     public TuneableDriverProfile(DriverProfiles pDefaults) {
         this(
-                pDefaults.linearScalar(),
-                pDefaults.linearDeadband(),
-                pDefaults.linearExponent(),
-                pDefaults.rotationalScalar(),
-                pDefaults.rotationalScalar(),
-                pDefaults.rotationDeadband(),
-                pDefaults.sniperScalar(),
-                pDefaults.key());
+            pDefaults.linearScalar(),
+            pDefaults.linearDeadband(),
+            pDefaults.linearExponent(),
+            pDefaults.rotationalScalar(),
+            pDefaults.rotationalScalar(),
+            pDefaults.rotationDeadband(),
+            pDefaults.sniperScalar(),
+            pDefaults.key());
     }
 
     public LoggedTunableNumber linearScalar() {

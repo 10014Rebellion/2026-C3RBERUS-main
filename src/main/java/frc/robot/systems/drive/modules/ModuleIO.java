@@ -15,8 +15,11 @@ public interface ModuleIO {
         public double iDriveSupplyCurrentAmps = 0.0;
         public double iDriveTorqueCurrentAmps = 0.0;
         public double iDriveTemperatureCelsius = 0.0;
+        public double iDriveAppliedVolts = 0.0;
         public double iDriveMotorVolts = 0.0;
         public double iDriveAccelerationMPSS = 0.0;
+
+        public double iAzimuthAppliedVolts = 0.0;
 
         public boolean iIsAzimuthConnected = false;
         public Rotation2d iAzimuthPosition = new Rotation2d();
@@ -29,6 +32,10 @@ public interface ModuleIO {
 
         public boolean iIsCancoderConnected = false;
         public Rotation2d iAzimuthAbsolutePosition = new Rotation2d();
+
+        public double[] odometryTimestamps = new double[] {};
+        public double[] odometryDrivePositionsM = new double[] {};
+        public Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
     }
 
     public default void updateInputs(ModuleInputs inputs) {}
@@ -41,7 +48,9 @@ public interface ModuleIO {
 
     public default void setDrivePID(double kP, double kI, double kD) {}
 
-    public default void setAzimuthVolts(double votls) {}
+    public default void setAzimuthVolts(double volts) {}
+
+    public default void setAzimuthAmps(double amps) {}
 
     public default void setAzimuthPosition(Rotation2d rotation, double feedforward) {}
 

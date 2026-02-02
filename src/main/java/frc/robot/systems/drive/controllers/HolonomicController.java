@@ -78,9 +78,8 @@ public class HolonomicController {
     private ConstraintType tType = ConstraintType.AXIS;
 
     public HolonomicController() {
-
         this.tXController = new ProfiledPIDController(
-                tXP.get(), tXI.get(), tXD.get(), new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
+            tXP.get(), tXI.get(), tXD.get(), new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
         tXController.setIntegratorRange(-tXIRange.get(), tXIRange.get());
         tXController.setIZone(tXIZone.get());
         tXController.setConstraints(new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
@@ -88,7 +87,7 @@ public class HolonomicController {
         this.tXFeedforward = new SimpleMotorFeedforward(tXS.get(), tXV.get());
 
         this.tYController = new ProfiledPIDController(
-                tYP.get(), tYI.get(), tYD.get(), new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
+            tYP.get(), tYI.get(), tYD.get(), new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
         tYController.setIntegratorRange(-tYIRange.get(), tYIRange.get());
         tYController.setIZone(tYIZone.get());
         tYController.setConstraints(new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
@@ -96,7 +95,7 @@ public class HolonomicController {
         this.tYFeedforward = new SimpleMotorFeedforward(tYS.get(), tYV.get());
 
         this.tOmegaController = new ProfiledPIDController(
-                tOmegaP.get(), tOmegaI.get(), tOmegaD.get(), new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
+            tOmegaP.get(), tOmegaI.get(), tOmegaD.get(), new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
         tOmegaController.enableContinuousInput(-180.0, 180.0);
         tOmegaController.setIntegratorRange(-tOmegaIRange.get(), tOmegaIRange.get());
         tOmegaController.setIZone(tOmegaIZone.get());
@@ -123,7 +122,7 @@ public class HolonomicController {
     public void reset(Pose2d pRobotPose, ChassisSpeeds pRobotChassisSpeeds, Pose2d pGoalPose) {
         if (tType.equals(ConstraintType.LINEAR)) {
             Rotation2d heading =
-                    new Rotation2d(pGoalPose.getX() - pRobotPose.getX(), pGoalPose.getY() - pRobotPose.getY());
+                new Rotation2d(pGoalPose.getX() - pRobotPose.getX(), pGoalPose.getY() - pRobotPose.getY());
 
             // Telemetry.log("AutoAlign/Linear/X/Vel", distanceMaxVMPS.get() *  heading.getCos());
             // Telemetry.log("AutoAlign/Linear/X/Accel", distanceMaxVMPS.get() *  heading.getCos());
@@ -132,21 +131,19 @@ public class HolonomicController {
             // Telemetry.log("AutoAlign/Linear/Y/Accel", distanceMaxVMPS.get() *  heading.getCos());
 
             tXController.setConstraints(new TrapezoidProfile.Constraints(
-                    tDistanceMaxVMPS.get() * Math.abs(heading.getCos()),
-                    tDistanceMaxAMPSS.get() * Math.abs(heading.getCos())));
+                tDistanceMaxVMPS.get() * Math.abs(heading.getCos()),
+                tDistanceMaxAMPSS.get() * Math.abs(heading.getCos())));
 
             tYController.setConstraints(new TrapezoidProfile.Constraints(
-                    tDistanceMaxVMPS.get() * Math.abs(heading.getSin()),
-                    tDistanceMaxAMPSS.get() * Math.abs(heading.getSin())));
+                tDistanceMaxVMPS.get() * Math.abs(heading.getSin()),
+                tDistanceMaxAMPSS.get() * Math.abs(heading.getSin())));
         } else {
             tXController.setConstraints(new TrapezoidProfile.Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
             tYController.setConstraints(new TrapezoidProfile.Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
         }
 
         tXController.reset(new State(pRobotPose.getX(), pRobotChassisSpeeds.vxMetersPerSecond));
-
         tYController.reset(new State(pRobotPose.getY(), pRobotChassisSpeeds.vyMetersPerSecond));
-
         tOmegaController.reset(new State(pRobotPose.getRotation().getDegrees(), 0.0));
     }
 
@@ -161,21 +158,21 @@ public class HolonomicController {
                 1.0);
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
-                (tXController.calculate(
-                                pCurrentPose.getX(),
-                                new TrapezoidProfile.State(pGoalPose.getX(), pGoalSpeed.vxMetersPerSecond))
-                        + ffScalar * tXFeedforward.calculate(tXController.getSetpoint().velocity)),
-                (tYController.calculate(
-                                pCurrentPose.getY(),
-                                new TrapezoidProfile.State(pGoalPose.getY(), pGoalSpeed.vyMetersPerSecond))
-                        + ffScalar * tYFeedforward.calculate(tYController.getSetpoint().velocity)),
-                (Math.toRadians(tOmegaController.calculate(
-                                pCurrentPose.getRotation().getDegrees(),
-                                new TrapezoidProfile.State(
-                                        pGoalPose.getRotation().getDegrees(),
-                                        Math.toDegrees(pGoalSpeed.omegaRadiansPerSecond)))
-                        + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity))),
-                pCurrentPose.getRotation());
+            (tXController.calculate(
+                pCurrentPose.getX(),
+                new TrapezoidProfile.State(pGoalPose.getX(), pGoalSpeed.vxMetersPerSecond))
+            + ffScalar * tXFeedforward.calculate(tXController.getSetpoint().velocity)),
+            (tYController.calculate(
+                pCurrentPose.getY(),
+                    new TrapezoidProfile.State(pGoalPose.getY(), pGoalSpeed.vyMetersPerSecond))
+            + ffScalar * tYFeedforward.calculate(tYController.getSetpoint().velocity)),
+            (Math.toRadians(tOmegaController.calculate(
+                pCurrentPose.getRotation().getDegrees(),
+                new TrapezoidProfile.State(
+                    pGoalPose.getRotation().getDegrees(),
+                    Math.toDegrees(pGoalSpeed.omegaRadiansPerSecond)))
+            + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity))),
+            pCurrentPose.getRotation());
     }
 
     ////////////////////////// GETTERS \\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -203,13 +200,13 @@ public class HolonomicController {
         return getPositionGoal().equals(getPositionSetpoint());
     }
 
-    // @AutoLogOutput(key = "Drive/HolonomicController/VelocityGoal")
-    // public ChassisSpeeds getVelocityGoal() {
-    //     return new ChassisSpeeds(
-    //         xController.getGoal().velocity,
-    //         yController.getGoal().velocity,
-    //         Math.toRadians( omegaController.getGoal().velocity ) );
-    // }
+    @AutoLogOutput(key = "Drive/HolonomicController/VelocityGoal")
+    public ChassisSpeeds getVelocityGoal() {
+        return new ChassisSpeeds(
+            tXController.getGoal().velocity,
+            tYController.getGoal().velocity,
+            Math.toRadians( tOmegaController.getGoal().velocity ) );
+    }
 
     @AutoLogOutput(key = "Drive/HolonomicController/VelocitySetpoint")
     public ChassisSpeeds getVelocitySetpoint() {
@@ -228,7 +225,7 @@ public class HolonomicController {
     }
 
     ////////////////////////// SETTERS \\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    public void updateAlignmentControllers() {
+    public void updateControllers() {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {

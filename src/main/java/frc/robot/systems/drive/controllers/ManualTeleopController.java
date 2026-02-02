@@ -43,30 +43,30 @@ public class ManualTeleopController {
     public ChassisSpeeds computeChassisSpeeds(
             Rotation2d pRobotAngle, boolean pIsJoystickSniper, boolean pIsJoystickFieldOriented) {
         double xAdjustedJoystickInput = shapeAxis(
-                mXSupplier.getAsDouble(),
-                mDriverProfile.linearDeadBand().get(),
-                mDriverProfile.linearInputsExponent().get(),
-                mDriverProfile.linearScalar().get());
+            mXSupplier.getAsDouble(),
+            mDriverProfile.linearDeadBand().get(),
+            mDriverProfile.linearInputsExponent().get(),
+            mDriverProfile.linearScalar().get());
 
         double yAdjustedJoystickInput = shapeAxis(
-                mYSupplier.getAsDouble(),
-                mDriverProfile.linearDeadBand().get(),
-                mDriverProfile.linearInputsExponent().get(),
-                mDriverProfile.linearScalar().get());
+            mYSupplier.getAsDouble(),
+            mDriverProfile.linearDeadBand().get(),
+            mDriverProfile.linearInputsExponent().get(),
+            mDriverProfile.linearScalar().get());
 
         double omegaAdjustedJoystickInput = shapeAxis(
-                mOmegaSupplier.getAsDouble(),
-                mDriverProfile.rotationDeadband().get(),
-                mDriverProfile.rotationInputsExponent().get(),
-                mDriverProfile.rotationScalar().get());
+            mOmegaSupplier.getAsDouble(),
+            mDriverProfile.rotationDeadband().get(),
+            mDriverProfile.rotationInputsExponent().get(),
+            mDriverProfile.rotationScalar().get());
 
         if (DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red))
             pRobotAngle = pRobotAngle.plus(Rotation2d.k180deg);
 
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
-                DriveConstants.kMaxLinearSpeedMPS * xAdjustedJoystickInput,
-                DriveConstants.kMaxLinearSpeedMPS * yAdjustedJoystickInput,
-                DriveConstants.kMaxRotationSpeedRadiansPS * omegaAdjustedJoystickInput);
+            DriveConstants.kMaxLinearSpeedMPS * xAdjustedJoystickInput,
+            DriveConstants.kMaxLinearSpeedMPS * yAdjustedJoystickInput,
+            DriveConstants.kMaxRotationSpeedRadiansPS * omegaAdjustedJoystickInput);
 
         if (pIsJoystickFieldOriented) {
             desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredSpeeds, pRobotAngle);
@@ -92,22 +92,22 @@ public class ManualTeleopController {
 
     public ChassisSpeeds computeSniperPOVChassisSpeeds(Rotation2d pRobotAngle, boolean pIsPOVFieldOriented) {
         double omegaAdjustedJoystickInput = shapeAxis(
-                mOmegaSupplier.getAsDouble(),
-                mDriverProfile.rotationDeadband().get(),
-                mDriverProfile.rotationInputsExponent().get(),
-                mDriverProfile.sniperControl().get()
-                        * mDriverProfile.linearScalar().get() // Assumes sniper is true for POV
-                );
+            mOmegaSupplier.getAsDouble(),
+            mDriverProfile.rotationDeadband().get(),
+            mDriverProfile.rotationInputsExponent().get(),
+            mDriverProfile.sniperControl().get()
+                * mDriverProfile.linearScalar().get() // Assumes sniper is true for POV
+        );
 
         /* Does polar to rectangular where POV degree is theta, kSniperControl * maxSpeed is r */
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
-                -mDriverProfile.sniperControl().get()
-                        * kMaxLinearSpeedMPS
-                        * Math.cos(mPOVSupplier.get().getRadians()),
-                mDriverProfile.sniperControl().get()
-                        * kMaxLinearSpeedMPS
-                        * Math.sin(mPOVSupplier.get().getRadians()),
-                DriveConstants.kMaxRotationSpeedRadiansPS * omegaAdjustedJoystickInput);
+            -mDriverProfile.sniperControl().get()
+                * kMaxLinearSpeedMPS
+                * Math.cos(mPOVSupplier.get().getRadians()),
+            mDriverProfile.sniperControl().get()
+                * kMaxLinearSpeedMPS
+                * Math.sin(mPOVSupplier.get().getRadians()),
+            DriveConstants.kMaxRotationSpeedRadiansPS * omegaAdjustedJoystickInput);
 
         if (pIsPOVFieldOriented) {
             desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredSpeeds, pRobotAngle);
@@ -129,13 +129,13 @@ public class ManualTeleopController {
     }
 
     public static record DriverProfiles(
-            double linearScalar,
-            double linearExponent,
-            double linearDeadband,
-            double rotationalScalar,
-            double rotationalExponent,
-            double rotationDeadband,
-            double sniperScalar,
-            boolean swapSides,
-            String key) {}
+        double linearScalar,
+        double linearExponent,
+        double linearDeadband,
+        double rotationalScalar,
+        double rotationalExponent,
+        double rotationDeadband,
+        double sniperScalar,
+        boolean swapSides,
+        String key) {}
 }

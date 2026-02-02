@@ -4,6 +4,7 @@ package frc.lib.telemetry;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.telemetry.TelemetryConstants.Severity;
+import frc.robot.systems.apriltag.ATagVision.VisionObservation;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +13,15 @@ public class Telemetry extends TelemetryRecordOutput {
     private static final Set<TelemetryError> activeErrors = new HashSet<>();
 
     private Telemetry() {}
+
+    public static void logVisionObservationStdDevs(VisionObservation observation) {
+        Telemetry.log(
+            observation.camName() + "/stdDevX", observation.stdDevs().get(0));
+        Telemetry.log(
+            observation.camName() + "/stdDevY", observation.stdDevs().get(1));
+        Telemetry.log(
+            observation.camName() + "/stdDevTheta", observation.stdDevs().get(2));
+    }
 
     // TODO: ADD PROPER TELEM LATER
     public static void log(String pMessage) {

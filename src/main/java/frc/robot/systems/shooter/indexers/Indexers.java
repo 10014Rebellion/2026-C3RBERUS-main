@@ -2,7 +2,9 @@ package frc.robot.systems.shooter.indexers;
 
 import org.littletonrobotics.junction.Logger;
 
-public class Indexers {
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class Indexers extends SubsystemBase {
   private final IndexerIO mLeaderIndexerIO;
   private final IndexerIO mFollowerIndexerIO;
 
@@ -22,6 +24,7 @@ public class Indexers {
     mLeaderIndexerIO.stopMotor();
   }
   
+  @Override
   public void periodic() {
     mLeaderIndexerIO.updateInputs(mLeaderIndexerInputs);
     mFollowerIndexerIO.updateInputs(mFollowerIndexerInputs);
