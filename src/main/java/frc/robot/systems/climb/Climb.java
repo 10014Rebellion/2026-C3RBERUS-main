@@ -21,18 +21,6 @@ import frc.lib.tuning.LoggedTunableNumber;
 
 public class Climb extends SubsystemBase {
 
-  @AutoLogOutput(key = "Elevator/CurrentSlot")
-  public static int mSlot = 0;
-
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/P", mControllers.getSlot(mSlot, ElevatorController.class).pdController().kP());
-  private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/D", mControllers.getSlot(mSlot, ElevatorController.class).pdController().kD());
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/S", mControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKs());
-  private static final LoggedTunableNumber kMaxV = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/V", mControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKg());
-  private static final LoggedTunableNumber kMaxA = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/G", mControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKa());
-  private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxVelo", mControllers.getSlot(mSlot, ElevatorController.class).constraints().maxVelocity());
-  private static final LoggedTunableNumber kV = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxAccel", mControllers.getSlot(mSlot, ElevatorController.class).constraints().maxAcceleration());
-  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxJerk", mControllers.getSlot(mSlot, ElevatorController.class).constraints().maxJerk());
-
   public enum ClimbGoal {
     kStow(() -> Units.inchesToMeters(60.0)),
     kLc1(() -> Units.inchesToMeters(0)),
@@ -60,7 +48,7 @@ public class Climb extends SubsystemBase {
   private ClimbGoal mCurrentGoal = null;
   private double mCurrentClimbGoalPositionMeters = 0.0;
 
-  private SlottedController mControllers;
+  private static SlottedController mControllers;
 
 
   public Climb(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits) {
@@ -72,6 +60,19 @@ public class Climb extends SubsystemBase {
     this.mControllers.setSlot(1, ClimbConstants.kController1);
     this.mControllers.setSlot(2, ClimbConstants.kController2);
   }
+
+  @AutoLogOutput(key = "Elevator/CurrentSlot")
+  public static int mSlot = 0;
+
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/P", mControllers.getSlot(mSlot, ElevatorController.class).pdController().kP());
+  private static final LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/D", mControllers.getSlot(mSlot, ElevatorController.class).pdController().kD());
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/S", mControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKs());
+  private static final LoggedTunableNumber kMaxV = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/V", mControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKg());
+  private static final LoggedTunableNumber kMaxA = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/G", mControllers.getSlot(mSlot, ElevatorController.class).feedforward().getKa());
+  private static final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxVelo", mControllers.getSlot(mSlot, ElevatorController.class).constraints().maxVelocity());
+  private static final LoggedTunableNumber kV = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxAccel", mControllers.getSlot(mSlot, ElevatorController.class).constraints().maxAcceleration());
+  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Elevator/" + mSlot + "/mSlot/MaxJerk", mControllers.getSlot(mSlot, ElevatorController.class).constraints().maxJerk());
+
   
   @Override
   public void periodic() {
