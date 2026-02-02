@@ -31,6 +31,8 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     private final VoltageOut mClimbVoltageControl = new VoltageOut(0.0);
     private final MotionMagicVoltage mClimbPositionControl = new MotionMagicVoltage(0.0);
 
+    private int mCurrentSlot;
+
     private final StatusSignal<AngularVelocity> mClimbVelocityMPS;
     private final StatusSignal<Voltage> mClimbVoltage;
     private final StatusSignal<Current> mClimbSupplyCurrent;
@@ -77,6 +79,7 @@ public class ClimbIOKrakenx44 implements ClimbIO {
             mClimbTempCelsius,
             mClimbPosition);
         mClimbMotor.optimizeBusUtilization();
+        mCurrentSlot = 0;
     }
 
     @Override
@@ -104,18 +107,24 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     }
 
     @Override
-    public void setMotorPosition(int pSlot, double pPositionM, double pFeedforward) {
-        mClimbMotor.setControl(mClimbPositionControl.withPosition(pPositionM).withFeedForward(pFeedforward).withSlot(pSlot));
+    public void setMotorPosition(double pPositionM, double pFeedforward) {
+        mClimbMotor.setControl(mClimbPositionControl.withPosition(pPositionM).withFeedForward(pFeedforward).withSlot(mCurrentSlot));
     }
 
     @Override
-    public void setPIDConstants(int pSlot, double pKP, double pKI, double pKD){
+    public void setPIDConstants(double pKP, double pKI, double pKD){
         var slotConfigs = new SlotConfigs();
-        slotConfigs.SlotNumber = pSlot;
+        slotConfigs.SlotNumber = mCurrentSlot;
         slotConfigs.kP = pKP;
         slotConfigs.kI = pKI;
         slotConfigs.kD = pKD;
+        slotConfigs.GravityType = GravityTypeValue.Elevator_Static;
         mClimbMotor.getConfigurator().apply(slotConfigs);
+    }
+
+    @Override   
+    public void setSlot(int pSlot){
+        mCurrentSlot = pSlot;
     }
 
     @Override

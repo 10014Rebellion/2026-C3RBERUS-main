@@ -2,6 +2,8 @@ package frc.robot.systems.climb;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.lib.controls.SlottedController;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
@@ -9,12 +11,14 @@ import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 public class ClimbIOSim implements ClimbIO{
     // private final ElevatorSim mElevatorSim;
     private double mAppliedVolts;
-    private PIDController mClimbPID;
+    private ProfiledPIDController mClimbPID;
 
     private final BasicMotorHardware mConfig;
     private final SlottedController mController;
 
     private final ElevatorSim mElevatorSim;
+
+    private int mCurrentSlot;
 
 
     public ClimbIOSim(BasicMotorHardware pConfig, SlottedController pController) {
@@ -24,7 +28,7 @@ public class ClimbIOSim implements ClimbIO{
 
         // mElevatorSim = new ElevatorSim()
 
-        mClimbPID = new PIDController(0.0, 0.0, 0.0);
+        mClimbPID = new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
 
         mElevatorSim = new ElevatorSim(
             ClimbConstants.kSimElevator.kMotor(),
@@ -38,6 +42,7 @@ public class ClimbIOSim implements ClimbIO{
             ClimbConstants.kSimElevator.kMeasurementStdDevs());
 
         mAppliedVolts = 0.0;
+        mCurrentSlot = 0;
     }
 
     @Override
@@ -60,13 +65,18 @@ public class ClimbIOSim implements ClimbIO{
     }
 
     @Override
-    public void setMotorPosition(int pSlot, double pPositionM, double pFeedforward){
+    public void setMotorPosition(double pPositionM, double pFeedforward){
         setMotorVolts(mClimbPID.calculate(mElevatorSim.getPositionMeters(), pPositionM) + pFeedforward);
     }
 
     @Override
-    public void setPIDConstants(int pSlot, double pKP, double pKI, double pKD){
+    public void setPIDConstants(double pKP, double pKI, double pKD){
 
+    }
+
+    @Override   
+    public void setSlot(int pSlot){
+        mCurrentSlot = pSlot;
     }
 
     @Override
