@@ -66,11 +66,11 @@ public class ButtonBindings {
         //     .onTrue(Commands.runOnce(() -> mDriveSS.setPose(new Pose2d()), mDriveSS)
         //             .andThen(mDriveSS.setToGenericLineAlign(() -> new Pose2d(2.5, 2.5, Rotation2d.fromDegrees(45.0)), () -> Rotation2d.fromDegrees(45.0))));
     
-        mDriverController.rightTrigger()
-            .onTrue(new InstantCommand(() -> mFlywheelsSS.setFlywheelVolts(mDriverController.getRightTriggerAxis() * 12)))
-            .onFalse(new InstantCommand(() -> mFlywheelsSS.setFlywheelVolts(0)));
-
         mDriverController.leftTrigger()
+            .onTrue(new InstantCommand(() -> mFlywheelsSS.setFlywheelSpeeds(80)))
+            .onFalse(new InstantCommand(() -> mFlywheelsSS.setFlywheelSpeeds(0)));
+
+        mDriverController.rightTrigger()
             .onTrue(new InstantCommand(() -> mIndexers.setIndexerVolts(12)))
             .onFalse(new InstantCommand(() -> mIndexers.setIndexerVolts(0)));
 

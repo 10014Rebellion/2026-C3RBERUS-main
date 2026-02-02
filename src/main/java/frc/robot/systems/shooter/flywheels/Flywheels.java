@@ -18,10 +18,17 @@ public class Flywheels extends SubsystemBase {
 
   public void setFlywheelVolts(double pVolts) {
     mLeaderFlywheelIO.setMotorVolts(pVolts);
+    mFollowerFlywheelIO.setMotorVolts(pVolts);
+  }
+
+  public void setFlywheelSpeeds(double pRPS) {
+    mLeaderFlywheelIO.setMotorVelAndAccel(pRPS, 0, 0);
+    mFollowerFlywheelIO.setMotorVelAndAccel(pRPS, 0, 0);
   }
 
   public void stopFlywheelMotor() {
     mLeaderFlywheelIO.stopMotor();
+    mFollowerFlywheelIO.stopMotor();
   }
   
   @Override

@@ -17,6 +17,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
+import frc.robot.systems.shooter.ShooterConstants.FlywheelConstants;
 
 public class FlywheelIOKrakenx44 implements FlywheelIO{
     private final TalonFX mFlywheelMotor;
@@ -30,12 +31,10 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
     private final StatusSignal<Temperature> mFlywheelTempCelsius;
     private final StatusSignal<AngularAcceleration> mFlywheelAccelerationRPSS;
     private Follower mFollowerController = null;
-    private FlywheelIOKrakenx44 mLeaderClass = null;
 
     // FOLLOWER CONSTRUCTOR
-    public FlywheelIOKrakenx44(FollowerMotorHardware pFollowerConfig, FlywheelIOKrakenx44 pLeaderFlywheel) {
+    public FlywheelIOKrakenx44(FollowerMotorHardware pFollowerConfig) {
         this(pFollowerConfig.motorID(), pFollowerConfig.leaderConfig());
-        this.mLeaderClass = pLeaderFlywheel;
         this.mFollowerController = new Follower(pFollowerConfig.leaderConfig().motorID(), pFollowerConfig.alignmentValue()); 
     }
     
@@ -48,6 +47,15 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
         this.mFlywheelMotor = new TalonFX(pMotorID, pHardware.canBus());
 
         TalonFXConfiguration FlywheelConfig = new TalonFXConfiguration();
+
+        FlywheelConfig.Voltage.PeakForwardVoltage = 12;
+        FlywheelConfig.Voltage.PeakReverseVoltage = -12;
+
+        FlywheelConfig.Slot0.kP = FlywheelConstants.kFlywheelControlConfig.pdController().kP();
+        FlywheelConfig.Slot0.kD = FlywheelConstants.kFlywheelControlConfig.pdController().kD();
+        FlywheelConfig.MotionMagic.MotionMagicCruiseVelocity = FlywheelConstants.kFlywheelControlConfig.motionMagicConstants().maxVelocity();
+        FlywheelConfig.MotionMagic.MotionMagicAcceleration = FlywheelConstants.kFlywheelControlConfig.motionMagicConstants().maxAcceleration();
+        FlywheelConfig.MotionMagic.MotionMagicJerk = FlywheelConstants.kFlywheelControlConfig.motionMagicConstants().maxJerk();
 
         FlywheelConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         FlywheelConfig.CurrentLimits.SupplyCurrentLimit = pHardware.currentLimit().supplyCurrentLimit();
@@ -106,33 +114,25 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
     }
 
     public boolean isLeader() {
-        return (mFollowerController == null) || (mLeaderClass == null);
+        return (mFollowerController == null);
     }
 
     @Override
     public void setMotorVelAndAccel(double pVelocityRPS, double pAccelerationRPSS, double pFeedforward) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVelocityControl.withVelocity(pVelocityRPS).withAcceleration(pAccelerationRPSS).withFeedForward(pFeedforward));
-        else {
-            mLeaderClass.setMotorVelAndAccel(pVelocityRPS, pAccelerationRPSS, pFeedforward);
-            mFlywheelMotor.setControl(mFollowerController);
-        }
+        else mFlywheelMotor.setControl(mFollowerController);
+        
     }
 
     @Override
     public void setMotorVolts(double pVolts) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVoltageControl.withOutput(pVolts));
-        else {
-            mLeaderClass.setMotorVolts(pVolts);
-            mFlywheelMotor.setControl(mFollowerController);
-        }
+        else mFlywheelMotor.setControl(mFollowerController);
     }
 
     @Override
     public void stopMotor() {
         if(isLeader()) mFlywheelMotor.stopMotor();
-        else {
-            mLeaderClass.stopMotor();
-            mFlywheelMotor.setControl(mFollowerController); 
-        }
+        else mFlywheelMotor.setControl(mFollowerController); 
     }
 }

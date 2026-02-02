@@ -91,10 +91,9 @@ public class RobotContainer {
                 break;
         }
         
-        FlywheelIOKrakenx44 flywheelLeader = new FlywheelIOKrakenx44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
         mFlywheels = new Flywheels(
-            flywheelLeader,
-            new FlywheelIOKrakenx44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig, flywheelLeader)
+            new FlywheelIOKrakenx44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
+            new FlywheelIOKrakenx44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
         );
 
         mIndexers = new Indexers(

@@ -65,10 +65,22 @@ public class HardwareRecords {
         ArmFeedforward kFeedforward
     ) {}
 
-    public static record SimpleController (
+    public static record SimpleController(
         int slot,
         PDConstants pdController,
         SimpleMotorFeedforward kFeedforward
+    ) {}
+
+    public static record MotionMagicFOCController(
+        int slot,
+        PDConstants pdController,
+        MotionMagicConstants motionMagicConstants
+    ) {}
+
+    public static record MotionMagicConstants(
+        double maxVelocity,
+        double maxAcceleration,
+        double maxJerk
     ) {}
 
     public static record PDConstants(
