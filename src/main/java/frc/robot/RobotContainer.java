@@ -26,6 +26,10 @@ import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
+import frc.robot.systems.conveyor.Conveyor;
+import frc.robot.systems.conveyor.ConveyorConstants;
+import frc.robot.systems.conveyor.ConveyorIOKrakenx44;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 
@@ -33,6 +37,7 @@ public class RobotContainer {
     private final Drive mDrive;
     private final Flywheels mFlywheels;
     private final Indexers mIndexers;
+    private final Conveyor mConveyor;
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
     private final AutonCommands autos;
@@ -96,11 +101,13 @@ public class RobotContainer {
             flywheelLeader,
             new FlywheelIOKrakenx44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig, flywheelLeader)
         );
+        
+        mConveyor = new Conveyor(new ConveyorIOKrakenx44(ConveyorConstants.kConveyorMotorConstants));
 
         mIndexers = new Indexers(
             new IndexerIOKrakenx44(IndexerConstants.kIndexerLeaderConfig), new IndexerIOKrakenx44(IndexerConstants.kIndexerFollowerConfig));
 
-        mButtonBindings = new ButtonBindings(mDrive, mFlywheels, mIndexers);
+        mButtonBindings = new ButtonBindings(mDrive, mFlywheels, mIndexers, mConveyor);
 
         initBindings();
 

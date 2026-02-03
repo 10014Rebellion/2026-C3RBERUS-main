@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.conveyor.Conveyor;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.shooter.flywheels.Flywheels;
 import frc.robot.systems.shooter.indexers.Indexers;
@@ -17,11 +18,13 @@ public class ButtonBindings {
     private final Drive mDriveSS;
     private final Flywheels mFlywheelsSS;
     private final Indexers mIndexers;
+    private final Conveyor mConveyor;
     private final FlydigiApex4 mDriverController = new FlydigiApex4(BindingsConstants.kDriverControllerPort);
 
-    public ButtonBindings(Drive pDriveSS, Flywheels pFlywheelsSS, Indexers pIndexersSS) {
+    public ButtonBindings(Drive pDriveSS, Flywheels pFlywheelsSS, Indexers pIndexersSS, Conveyor pConveyorSS) {
         this.mFlywheelsSS = pFlywheelsSS;
         this.mIndexers = pIndexersSS;
+        this.mConveyor = pConveyorSS;
         this.mDriveSS = pDriveSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.setToTeleop());
     }
@@ -73,6 +76,10 @@ public class ButtonBindings {
         mDriverController.leftTrigger()
             .onTrue(new InstantCommand(() -> mIndexers.setIndexerVolts(12)))
             .onFalse(new InstantCommand(() -> mIndexers.setIndexerVolts(0)));
+
+        mDriverController.b()
+            .onTrue(new InstantCommand(() -> mConveyor.setConveyorVolts(12)))
+            .onFalse(new InstantCommand(() -> mConveyor.setConveyorVolts(0)));
 
     }
 }
