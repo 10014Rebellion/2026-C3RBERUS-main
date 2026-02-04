@@ -27,4 +27,5 @@ public interface FlywheelIO {
 
     public default void stopMotor() {}
 
+    public default void enforceFollower() {}
 }

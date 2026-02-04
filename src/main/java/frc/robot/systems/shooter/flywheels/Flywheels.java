@@ -3,7 +3,6 @@ package frc.robot.systems.shooter.flywheels;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Flywheels extends SubsystemBase {
@@ -23,24 +22,27 @@ public class Flywheels extends SubsystemBase {
 
   public void setFlywheelVolts(double pVolts) {
     mLeaderFlywheelIO.setMotorVolts(pVolts);
-    mFollowerFlywheelIO.setMotorVolts(pVolts);
+    mFollowerFlywheelIO.enforceFollower();
   }
 
   public void setFlywheelSpeeds(double pRPS) {
     mLeaderFlywheelIO.setMotorVelAndAccel(pRPS, 0, mSimMotor.getCurrent(mLeaderFlywheelInputs.iFlywheelClosedLoopReference * Math.PI * 2, mLeaderFlywheelInputs.iFlywheelMotorVolts));
-    mFollowerFlywheelIO.setMotorVelAndAccel(0, 0, 0);
+    mFollowerFlywheelIO.enforceFollower();
   }
 
   public void stopFlywheelMotor() {
     mLeaderFlywheelIO.stopMotor();
-    mFollowerFlywheelIO.stopMotor();
+    mFollowerFlywheelIO.enforceFollower();
   }
   
   @Override
   public void periodic() {
     mLeaderFlywheelIO.updateInputs(mLeaderFlywheelInputs);
     mFollowerFlywheelIO.updateInputs(mFollowerFlywheelInputs);
+    
+    mFollowerFlywheelIO.enforceFollower(); // Sometimes during enable and disable it no longer follows briefly, this scares me, so this is a failsafe
+
     Logger.processInputs("Flywheel/Leader", mLeaderFlywheelInputs);
-    Logger.processInputs("Flywheel/Follower", mFollowerFlywheelInputs);
+    Logger.processInputs("Flywheel/Follower", mFollowerFlywheelInputs);    
   }
 }

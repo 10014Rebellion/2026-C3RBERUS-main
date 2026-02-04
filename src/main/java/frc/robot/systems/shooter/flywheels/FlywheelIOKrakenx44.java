@@ -122,22 +122,23 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
         return (mFollowerController == null);
     }
 
+    @Override 
+    public void enforceFollower() {
+        if(!isLeader()) mFlywheelMotor.setControl(mFollowerController);
+    }
+
     @Override
     public void setMotorVelAndAccel(double pVelocityRPS, double pAccelerationRPSS, double pFeedforward) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVelocityControl.withVelocity(pVelocityRPS).withAcceleration(pAccelerationRPSS).withFeedForward(pFeedforward));
-        else mFlywheelMotor.setControl(mFollowerController);
-        
     }
 
     @Override
     public void setMotorVolts(double pVolts) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVoltageControl.withOutput(pVolts));
-        else mFlywheelMotor.setControl(mFollowerController);
     }
 
     @Override
     public void stopMotor() {
-        if(isLeader()) mFlywheelMotor.stopMotor();
-        else mFlywheelMotor.setControl(mFollowerController); 
+        if(isLeader()) mFlywheelMotor.stopMotor(); 
     }
 }
