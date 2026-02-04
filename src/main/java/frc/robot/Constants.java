@@ -5,6 +5,8 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -14,7 +16,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
     public static final Mode kCurrentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
     public static final boolean kTuningMode = !DriverStation.isFMSAttached();
-    public static final CANBus kSubsystemsCANBus = new CANBus("rebeldrive");
+    public static final CANBus kSubsystemsCANBus = new CANBus("subsystems");
+    public static final double kPeriodSecs = 0.02;
 
     public static final boolean isSim() {
         return !(kCurrentMode.equals(Mode.REAL) || kCurrentMode.equals(Mode.REPLAY)); 
@@ -29,6 +32,12 @@ public final class Constants {
 
         /** Replaying from a log file. */
         REPLAY
+    }
+
+    public static class RobotConstants {
+        public static final Transform3d kLeftShooterOffset = new Transform3d(-0.0875919, 0.15875, 0.5551932, Rotation3d.kZero); // Z is height from ground
+        public static final Transform3d kMiddleShooterOffset = new Transform3d(-0.0875919, 0, 0.5551932, Rotation3d.kZero); // Z is height from ground
+        public static final Transform3d kRightShooterOffset = new Transform3d(-0.0875919, -0.15875, 0.5551932, Rotation3d.kZero); // Z is height from ground
     }
 
     public static class DashboardConstants {
