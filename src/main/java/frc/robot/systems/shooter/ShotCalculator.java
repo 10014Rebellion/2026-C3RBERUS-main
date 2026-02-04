@@ -51,12 +51,9 @@ public class ShotCalculator {
   private ShootingParameters mLatestParameters = null;
   private static final double mPhaseDelay = 0.03;
 
-  private static final InterpolatingTreeMap<Double, Rotation2d> mShotHoodAngleMap =
-      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
-  private static final InterpolatingDoubleTreeMap mShotFlywheelSpeedMap =
-      new InterpolatingDoubleTreeMap();
-  private static final InterpolatingDoubleTreeMap mTimeOfFlightMap =
-      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingTreeMap<Double, Rotation2d> mShotHoodAngleMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+  private static final InterpolatingDoubleTreeMap mShotFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap mTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
   static {
     for (HoodAngleSample sample : ShooterConstants.kHoodAngleSamples)
@@ -237,8 +234,8 @@ public class ShotCalculator {
     }
 
     private boolean isDistanceInValidRange(double pDistanceMeters) {
-    return pDistanceMeters >= ShooterConstants.kMinValidShotDistanceMeters
-        && pDistanceMeters <= ShooterConstants.kMaxValidShotDistanceMeters;
+        return pDistanceMeters >= ShooterConstants.kMinValidShotDistanceMeters
+            && pDistanceMeters <= ShooterConstants.kMaxValidShotDistanceMeters;
     }
 
     public void clearShootingParameters() {
