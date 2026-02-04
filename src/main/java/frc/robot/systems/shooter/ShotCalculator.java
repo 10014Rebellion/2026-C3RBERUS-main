@@ -32,8 +32,6 @@ public class ShotCalculator {
   private Rotation2d mDesiredHeadingField;
   private Rotation2d mHeadingError; // desired - current (wrapped)
   private double mDesiredHeadingRateRadPerSec;
-
-  private double mHoodAngleRad = Double.NaN;
   private double mHoodRateRadPerSec;
 
   public static ShotCalculator getInstance() {
@@ -77,113 +75,173 @@ public class ShotCalculator {
    * Example: shooter points left -> Rotation2d.fromDegrees(90)
    */
   public ShootingParameters getParameters(
-      Pose2d pEstimatedPose,
-      ChassisSpeeds pRobotVelocityRobotRelative,
-      ChassisSpeeds pFieldVelocityFieldRelative,
-      Rotation2d pShooterYawOffset) {
+    Pose2d pEstimatedPose,
+    ChassisSpeeds pRobotVelocityRobotRelative,
+    ChassisSpeeds pFieldVelocityFieldRelative,
+    Rotation2d pShooterYawOffset) {
+        if (mLatestParameters != null) return mLatestParameters;
 
-    if (mLatestParameters != null) return mLatestParameters;
+        Pose2d estimatedPose = predictPoseAfterDelay(pEstimatedPose, pRobotVelocityRobotRelative);
 
-    // Predict pose after phase delay
-    Pose2d estimatedPose =
-        pEstimatedPose.exp(
-            new Twist2d(
-                pRobotVelocityRobotRelative.vxMetersPerSecond * mPhaseDelay,
-                pRobotVelocityRobotRelative.vyMetersPerSecond * mPhaseDelay,
-                pRobotVelocityRobotRelative.omegaRadiansPerSecond * mPhaseDelay));
+        Translation2d target = getHubTargetTranslation();
 
-    // Target (field)
-    Translation2d target =
-        AllianceFlipUtil.apply(FieldConstants.kHubOuterPose.getTranslation().toTranslation2d());
+        Pose2d shooterPose = getShooterPoseField(estimatedPose);
 
-    // Shooter position (field): robot pose + fixed offset to shooter exit (or shooter pivot)
-    Pose2d shooterPose =
-        estimatedPose.transformBy(
-            GeomUtil.toTransform2d(Constants.RobotConstants.kMiddleShooterOffset));
+        ShooterFieldVelocity shooterVel = getShooterFieldVelocity(estimatedPose, pFieldVelocityFieldRelative);
 
-    double shooterToTargetDistance = target.getDistance(shooterPose.getTranslation());
+        LookaheadResult lookahead = solveLookahead(shooterPose, target, shooterVel);
 
-    // Compute shooter linear velocity in the field frame (robot translation + omega cross offset)
-    ChassisSpeeds robotFieldVel = pFieldVelocityFieldRelative;
-    double robotAngle = estimatedPose.getRotation().getRadians();
+        Rotation2d shooterAimField = computeAimFieldAngle(target, lookahead.lookaheadPose());
+        mDesiredHeadingField = computeDesiredRobotHeadingField(shooterAimField, pShooterYawOffset);
 
-    double offX = Constants.RobotConstants.kMiddleShooterOffset.getX();
-    double offY = Constants.RobotConstants.kMiddleShooterOffset.getY();
+        mHeadingError = computeHeadingError(mDesiredHeadingField, estimatedPose.getRotation());
 
-    double shooterVelX =
-        robotFieldVel.vxMetersPerSecond
-            + robotFieldVel.omegaRadiansPerSecond * (offY * Math.cos(robotAngle) - offX * Math.sin(robotAngle));
-    double shooterVelY =
-        robotFieldVel.vyMetersPerSecond
-            + robotFieldVel.omegaRadiansPerSecond * (offX * Math.cos(robotAngle) - offY * Math.sin(robotAngle));
+        ShotSetpoints shot = getShotSetpoints(lookahead.lookaheadDistance());
 
-    // Lookahead: iterate because time-of-flight depends on distance
-    Pose2d lookaheadPose = shooterPose;
-    double lookaheadDistance = shooterToTargetDistance;
+        updateRates(mDesiredHeadingField, shot.hoodAngleRad());
 
-    for (int i = 0; i < 20; i++) {
-      double dForLookup = MathUtil.clamp(lookaheadDistance, ShooterConstants.kMinValidShotDistanceMeters, ShooterConstants.kMaxValidShotDistanceMeters);
-      double tof = mTimeOfFlightMap.get(dForLookup);
+        boolean valid = isDistanceInValidRange(lookahead.lookaheadDistance());
 
-      Translation2d lookaheadTranslation =
-          shooterPose.getTranslation().plus(new Translation2d(shooterVelX * tof, shooterVelY * tof));
+        mLatestParameters =
+            new ShootingParameters(
+                valid,
+                mDesiredHeadingField,
+                mHeadingError,
+                mDesiredHeadingRateRadPerSec,
+                shot.hoodAngleRad(),
+                mHoodRateRadPerSec,
+                shot.flywheelSpeed());
 
-      lookaheadPose = new Pose2d(lookaheadTranslation, shooterPose.getRotation());
-      lookaheadDistance = target.getDistance(lookaheadPose.getTranslation());
+        Telemetry.log("ShotCalculator/LookaheadPose", lookahead.lookaheadPose());
+        Telemetry.log("ShotCalculator/LookaheadDistance", lookahead.lookaheadDistance());
+        Telemetry.log("ShotCalculator/DesiredHeadingField", mDesiredHeadingField);
+        Telemetry.log("ShotCalculator/HeadingError", mHeadingError);
+
+        return mLatestParameters;
     }
 
-    // This is the field angle the shooter must point at
-    Rotation2d shooterAimField = target.minus(lookaheadPose.getTranslation()).getAngle();
+    private record ShooterFieldVelocity(double vx, double vy) {}
 
-    // Convert to robot heading setpoint (because shooter is fixed on robot)
-    mDesiredHeadingField = shooterAimField.minus(pShooterYawOffset);
+    private record LookaheadResult(Pose2d lookaheadPose, double lookaheadDistance) {}
 
-    // Heading error (wrapped to [-pi, pi]) for convenience
-    double errorRad =
-        MathUtil.angleModulus(mDesiredHeadingField.minus(estimatedPose.getRotation()).getRadians());
-    mHeadingError = Rotation2d.fromRadians(errorRad);
+    private record ShotSetpoints(double hoodAngleRad, double flywheelSpeed) {}
 
-    // Hood and flywheel from distance
-    double dShot = MathUtil.clamp(lookaheadDistance, ShooterConstants.kMinValidShotDistanceMeters, ShooterConstants.kMaxValidShotDistanceMeters);
-    mHoodAngleRad = mShotHoodAngleMap.get(dShot).getRadians();
-    double flywheelSpeed = mShotFlywheelSpeedMap.get(dShot);
+    /** Predicts robot pose after phase delay using robot-relative chassis speeds. */
+    private Pose2d predictPoseAfterDelay(Pose2d pose, ChassisSpeeds robotRelativeVel) {
+        return pose.exp(
+            new Twist2d(
+                robotRelativeVel.vxMetersPerSecond * mPhaseDelay,
+                robotRelativeVel.vyMetersPerSecond * mPhaseDelay,
+                robotRelativeVel.omegaRadiansPerSecond * mPhaseDelay));
+    }
 
-    // Rates
-    if (mLastDesiredHeading == null) mLastDesiredHeading = mDesiredHeadingField;
-    if (Double.isNaN(mLastHoodAngleRad)) mLastHoodAngleRad = mHoodAngleRad;
+    /** Returns the hub target location in field coordinates (alliance-correct). */
+    private Translation2d getHubTargetTranslation() {
+        return AllianceFlipUtil.apply(FieldConstants.kHubOuterPose.getTranslation().toTranslation2d());
+    }
 
-    mDesiredHeadingRateRadPerSec =
-        mHeadingRateFilter.calculate(
-            MathUtil.angleModulus(mDesiredHeadingField.minus(mLastDesiredHeading).getRadians())
-                / Constants.kPeriodSecs);
+    /** Returns shooter origin pose in field coordinates (robot pose + fixed shooter offset). */
+    private Pose2d getShooterPoseField(Pose2d robotPoseField) {
+        return robotPoseField.transformBy(
+            GeomUtil.toTransform2d(Constants.RobotConstants.kMiddleShooterOffset));
+    }
 
-    mHoodRateRadPerSec =
-        mHoodRateFilter.calculate((mHoodAngleRad - mLastHoodAngleRad) / Constants.kPeriodSecs);
+    /**
+     * Computes shooter linear velocity in the field frame, including omega×r contribution
+     * from the shooter’s offset relative to robot center.
+     */
+    private ShooterFieldVelocity getShooterFieldVelocity(Pose2d robotPoseField, ChassisSpeeds fieldVel) {
+        double robotAngle = robotPoseField.getRotation().getRadians();
 
-    mLastDesiredHeading = mDesiredHeadingField;
-    mLastHoodAngleRad = mHoodAngleRad;
+        double offX = Constants.RobotConstants.kMiddleShooterOffset.getX();
+        double offY = Constants.RobotConstants.kMiddleShooterOffset.getY();
 
-    boolean valid = lookaheadDistance >= ShooterConstants.kMinValidShotDistanceMeters && lookaheadDistance <= ShooterConstants.kMaxValidShotDistanceMeters;
+        double shooterVelX =
+            fieldVel.vxMetersPerSecond
+                + fieldVel.omegaRadiansPerSecond * (offY * Math.cos(robotAngle) - offX * Math.sin(robotAngle));
 
-    mLatestParameters =
-        new ShootingParameters(
-            valid,
-            mDesiredHeadingField,
-            mHeadingError,
-            mDesiredHeadingRateRadPerSec,
-            mHoodAngleRad,
-            mHoodRateRadPerSec,
-            flywheelSpeed);
+        double shooterVelY =
+            fieldVel.vyMetersPerSecond
+                + fieldVel.omegaRadiansPerSecond * (offX * Math.cos(robotAngle) - offY * Math.sin(robotAngle));
 
-    Telemetry.log("ShotCalculator/LookaheadPose", lookaheadPose);
-    Telemetry.log("ShotCalculator/LookaheadDistance", lookaheadDistance);
-    Telemetry.log("ShotCalculator/DesiredHeadingField", mDesiredHeadingField);
-    Telemetry.log("ShotCalculator/HeadingError", mHeadingError);
+        return new ShooterFieldVelocity(shooterVelX, shooterVelY);
+    }
 
-    return mLatestParameters;
-  }
+    /**
+     * Iteratively solves the “lookahead” shooter translation used for aiming while moving.
+     * Uses time-of-flight(distance) to offset shooter position by shooterVelocity * TOF.
+     */
+    private LookaheadResult solveLookahead(Pose2d pShooterPose, Translation2d pTarget, ShooterFieldVelocity pShooterVel) {
+        Pose2d lookaheadPose = pShooterPose;
+        double lookaheadDistance = pTarget.getDistance(pShooterPose.getTranslation());
 
-  public void clearShootingParameters() {
-    mLatestParameters = null;
-  }
+        for (int i = 0; i < 20; i++) {
+            double dForLookup = MathUtil.clamp(lookaheadDistance, ShooterConstants.kMinTofDistanceMeters, ShooterConstants.kMaxTofDistanceMeters);
+
+            double tof = mTimeOfFlightMap.get(dForLookup);
+
+            Translation2d lookaheadTranslation = pShooterPose.getTranslation().plus(new Translation2d(pShooterVel.vx() * tof, pShooterVel.vy() * tof));
+
+            lookaheadPose = new Pose2d(lookaheadTranslation, pShooterPose.getRotation());
+            lookaheadDistance = pTarget.getDistance(lookaheadPose.getTranslation());
+        }
+
+        return new LookaheadResult(lookaheadPose, lookaheadDistance);
+    }
+
+    /** Field angle from lookahead shooter translation to the target. */
+    private Rotation2d computeAimFieldAngle(Translation2d pTarget, Pose2d pLookaheadPose) {
+        return pTarget.minus(pLookaheadPose.getTranslation()).getAngle();
+    }
+
+    /** Converts required shooter aim angle into required robot heading (fixed shooter). */
+    private Rotation2d computeDesiredRobotHeadingField(Rotation2d pShooterAimField, Rotation2d pShooterYawOffset) {
+        return pShooterAimField.minus(pShooterYawOffset);
+    }
+
+    /** Computes wrapped heading error (desired - current) in [-pi, pi]. */
+    private Rotation2d computeHeadingError(Rotation2d pDesiredHeading, Rotation2d pCurrentHeading) {
+        double errorRad = MathUtil.angleModulus(pDesiredHeading.minus(pCurrentHeading).getRadians());
+        return Rotation2d.fromRadians(errorRad);
+    }
+
+    /** Returns hood angle + flywheel setpoint from the tuned interpolation maps. */
+    private ShotSetpoints getShotSetpoints(double pLookaheadDistance) {
+        double dShot =
+            MathUtil.clamp(
+                pLookaheadDistance,
+                ShooterConstants.kMinValidShotDistanceMeters,
+                ShooterConstants.kMaxValidShotDistanceMeters);
+
+        double hoodAngleRad = mShotHoodAngleMap.get(dShot).getRadians();
+        double flywheelSpeed = mShotFlywheelSpeedMap.get(dShot);
+
+        return new ShotSetpoints(hoodAngleRad, flywheelSpeed);
+    }
+
+    /** Updates filtered rates for heading and hood. */
+    private void updateRates(Rotation2d pDesiredHeadingField, double pHoodAngleRad) {
+        if (mLastDesiredHeading == null) mLastDesiredHeading = pDesiredHeadingField;
+        if (Double.isNaN(mLastHoodAngleRad)) mLastHoodAngleRad = pHoodAngleRad;
+
+        mDesiredHeadingRateRadPerSec =
+            mHeadingRateFilter.calculate(
+                MathUtil.angleModulus(pDesiredHeadingField.minus(mLastDesiredHeading).getRadians())
+                    / Constants.kPeriodSecs);
+
+        mHoodRateRadPerSec =
+            mHoodRateFilter.calculate((pHoodAngleRad - mLastHoodAngleRad) / Constants.kPeriodSecs);
+
+        mLastDesiredHeading = pDesiredHeadingField;
+        mLastHoodAngleRad = pHoodAngleRad;
+    }
+
+    private boolean isDistanceInValidRange(double pDistanceMeters) {
+    return pDistanceMeters >= ShooterConstants.kMinValidShotDistanceMeters
+        && pDistanceMeters <= ShooterConstants.kMaxValidShotDistanceMeters;
+    }
+
+    public void clearShootingParameters() {
+        mLatestParameters = null;
+    }
 }

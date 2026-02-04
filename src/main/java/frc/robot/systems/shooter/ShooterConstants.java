@@ -34,6 +34,10 @@ public class ShooterConstants {
     public static final double kMinValidShotDistanceMeters = 1.34; // TODO: TUNE ME
     public static final double kMaxValidShotDistanceMeters = 5.60; // TODO: TUNE ME
 
+    public static final double kMinTofDistanceMeters = 1.38; // TODO: TUNE ME
+    public static final double kMaxTofDistanceMeters = 5.68; // TODO: TUNE ME
+
+
     // Hood angle tuning table (distance → hood pitch)
     public static final HoodAngleSample[] kHoodAngleSamples = {
         new HoodAngleSample(0.0, 0.0), // TODO: TUNE ME
