@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.systems.drive.Drive;
@@ -44,14 +45,19 @@ public class AutonCommands extends SubsystemBase {
         return new InstantCommand();
     }
 
-    public Command firstPathTest(String pAutoName, String pName, Rotation2d rot) {
+    public Command firstPathTest(String pAutoName, String pName, Rotation2d pInitRot) {
         AutoEvent auto = new AutoEvent(pAutoName, this);
-        SequentialEndingCommandGroup autoPath = followFirstChoreoPath(pName, rot);
+        SequentialEndingCommandGroup autoPath1 = followFirstChoreoPath(pName, pInitRot);
 
-        auto.getIsRunningTrigger()
-            .onTrue(autoPath);
-        
-        auto.loggedCondition(pName, () -> autoPath.hasEnded())
+        Trigger autoActivted = auto.getIsRunningTrigger();
+
+        Trigger isPath1Running = auto.loggedCondition(pName+"IsFinished", () -> autoPath1.isRunning(), true);
+        Trigger hasPath1Ended = auto.loggedCondition(pName+"IsFinished", () -> autoPath1.hasEnded(), true);
+
+        autoActivted
+            .onTrue(autoPath1);
+
+        hasPath1Ended
             .onTrue(Commands.runOnce(() -> auto.cancel()));
 
         return auto;
@@ -62,13 +68,21 @@ public class AutonCommands extends SubsystemBase {
         SequentialEndingCommandGroup autoPath1 = followFirstChoreoPath(pName1, pInitRot);
         SequentialEndingCommandGroup autoPath2 = followChoreoPath(pName2);
 
-        auto.getIsRunningTrigger()
+        Trigger autoActivted = auto.getIsRunningTrigger();
+
+        Trigger isPath1Running = auto.loggedCondition(pName1+"IsFinished", () -> autoPath1.isRunning(), true);
+        Trigger hasPath1Ended = auto.loggedCondition(pName1+"IsFinished", () -> autoPath1.hasEnded(), true);
+
+        Trigger isPath2Running = auto.loggedCondition(pName2+"IsFinished", () -> autoPath2.isRunning(), true);
+        Trigger hasPath2Ended = auto.loggedCondition(pName2+"IsFinished", () -> autoPath2.hasEnded(), true);
+
+        autoActivted
             .onTrue(autoPath1);
         
-        auto.loggedCondition(pName1+"IsFinished", () -> autoPath1.hasEnded())
+        hasPath1Ended
             .onTrue(autoPath2);
 
-        auto.loggedCondition(pName2+"IsFinished", () -> autoPath2.hasEnded())
+        hasPath2Ended
             .onTrue(Commands.runOnce(() -> auto.cancel()));
 
         return auto;

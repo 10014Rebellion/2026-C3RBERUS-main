@@ -18,12 +18,15 @@ import frc.lib.telemetry.Telemetry;
 public class AutoEvent extends Command {
     private final EventLoop mAutoEventLoop = new EventLoop();
     private boolean mIsRunning = false; 
-    private final Trigger mIsRunningTrigger = new Trigger(mAutoEventLoop, () -> mIsRunning);
+    private final Trigger mIsRunningTrigger;
     private String mAutoName;
   
     /** Creates a new AutoEvent. */
     public AutoEvent(String pAutoName, Subsystem subsystem) {
         mAutoName = pAutoName;
+
+        mIsRunningTrigger = loggedCondition("IsRunning", () -> mIsRunning, false);
+
         addRequirements(subsystem);
         // Use addRequirements() here to declare subsystem dependencies.
     }
@@ -66,12 +69,20 @@ public class AutoEvent extends Command {
         return new Trigger(mAutoEventLoop, condition);
     }
 
-    public Trigger loggedCondition(String key, BooleanSupplier condition) {
-        LoggedNetworkBoolean override = new LoggedNetworkBoolean(mAutoName+"/"+key, false);
-        return new Trigger(mAutoEventLoop, () -> {
-            boolean cond = condition.getAsBoolean();
-            Telemetry.log("Auton/"+mAutoName+"/"+key, cond);
-            return override.get() || cond;
-        });
+    public Trigger loggedCondition(String key, BooleanSupplier condition, boolean useTuneableOverride) {
+        if(useTuneableOverride) {
+            LoggedNetworkBoolean override = new LoggedNetworkBoolean(mAutoName+"/"+key, false);
+            return new Trigger(mAutoEventLoop, () -> {
+                boolean cond = condition.getAsBoolean();
+                Telemetry.log("Auton/"+mAutoName+"/"+key, cond);
+                return override.get() || cond;
+            });
+        } else {
+            return new Trigger(mAutoEventLoop, () -> {
+                boolean cond = condition.getAsBoolean();
+                Telemetry.log("Auton/"+mAutoName+"/"+key, cond);
+                return cond;
+            });
+        }
     }
 }

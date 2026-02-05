@@ -25,6 +25,7 @@ public class SequentialEndingCommandGroup extends Command {
   private boolean m_runWhenDisabled = true;
   private InterruptionBehavior m_interruptBehavior = InterruptionBehavior.kCancelIncoming;
   private boolean mHasEnded = false;
+  private boolean mIsRunning = false;
 
   /**
    * Creates a new SequentialCommandGroup. The given commands will be run sequentially, with the
@@ -64,6 +65,7 @@ public class SequentialEndingCommandGroup extends Command {
   @Override
   public final void initialize() {
     mHasEnded = false;
+    mIsRunning = true;
     m_currentCommandIndex = 0;
 
     if (!m_commands.isEmpty()) {
@@ -99,6 +101,7 @@ public class SequentialEndingCommandGroup extends Command {
     }
     m_currentCommandIndex = -1;
     mHasEnded = true;
+    mIsRunning = false;
   }
 
   @Override
@@ -108,6 +111,10 @@ public class SequentialEndingCommandGroup extends Command {
 
   public final boolean hasEnded() {
     return mHasEnded;
+  }
+
+  public final boolean isRunning() {
+    return mIsRunning;
   }
 
   @Override
