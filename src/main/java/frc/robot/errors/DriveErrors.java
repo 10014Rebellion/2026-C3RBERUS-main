@@ -89,4 +89,16 @@ public class DriveErrors {
             return Severity.FATAL;
         }
     }
+
+    public record WrongHeadingState() implements TelemetryError {
+        @Override
+        public String message() {
+            return "HEADING STATE NOT APPLIED, WILL NOT HEADING ALIGN";
+        }
+
+        @Override
+        public Severity severity() {
+            return Severity.ERROR;
+        }
+    }
 }

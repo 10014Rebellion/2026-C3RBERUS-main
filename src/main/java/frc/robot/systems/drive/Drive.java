@@ -39,6 +39,7 @@ import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.errors.DriveErrors;
 import frc.robot.game.GameDriveManager;
 import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.systems.apriltag.ATagVision;
@@ -514,6 +515,9 @@ public class Drive extends SubsystemBase {
 
     public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation, TurnPointFeedforward pTurnPointFeedforward, DriveState headingState) {
         return new InstantCommand(() -> {
+            if(!(headingState.equals(DriveState.AUTON_HEADING_ALIGN) || headingState.equals(DriveState.HEADING_ALIGN))) {
+                Telemetry.reportIssue(new DriveErrors.WrongHeadingState());
+            }
             mGoalRotationSup = pGoalRotation;
             mHeadingController.setHeadingGoal(mGoalRotationSup);
             mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.iYawVelocityPS);

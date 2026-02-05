@@ -16,8 +16,8 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.telemetry.Telemetry;
+import frc.robot.Constants;
 import frc.robot.errors.DriveErrors.PPCacheSaveFailed;
 import frc.robot.errors.DriveErrors.PPConfigCacheLoadFailed;
 import frc.robot.errors.DriveErrors.PPConfigDefaultLoadFailed;
@@ -42,7 +42,7 @@ public class PPRobotConfigLoader {
 
       try {
         cacheGuiToDeployConfig();
-        if(RobotBase.isReal()) {
+        if(!Constants.isSim()) {
           try {
             cacheGuiToRioConfig();
           } catch (Exception pFailedtoSavetoCache) {
@@ -69,7 +69,7 @@ public class PPRobotConfigLoader {
       Telemetry.reportException(pGUIFail);
     }
 
-    if(RobotBase.isReal()) {
+    if(!Constants.isSim()) {
       // If GUI loading failed, load the cache
       try {
         RobotConfig config = fromSettingsFile(kRioCacheConfig);
