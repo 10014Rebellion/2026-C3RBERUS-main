@@ -6,6 +6,8 @@ package frc.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -65,10 +67,11 @@ public class AutoEvent extends Command {
     }
 
     public Trigger loggedCondition(String key, BooleanSupplier condition) {
+        LoggedNetworkBoolean override = new LoggedNetworkBoolean(mAutoName+"/"+key, false);
         return new Trigger(mAutoEventLoop, () -> {
             boolean cond = condition.getAsBoolean();
             Telemetry.log("Auton/"+mAutoName+"/"+key, cond);
-            return cond;
+            return override.get() || cond;
         });
     }
 }

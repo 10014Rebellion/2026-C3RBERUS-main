@@ -24,15 +24,15 @@ import frc.lib.math.AllianceFlipUtil;
 public class AutonCommands extends SubsystemBase {
     private final Drive mRobotDrive;
 
-    private final SendableChooser<Command> mAutoChooser;
-    private final LoggedDashboardChooser<Command> mAutoChooserLogged;
+    private final SendableChooser<Supplier<Command>> mAutoChooser;
+    private final LoggedDashboardChooser<Supplier<Command>> mAutoChooserLogged;
 
     public AutonCommands(Drive pRobotDrive) {
         this.mRobotDrive = pRobotDrive;
 
         mAutoChooser = new SendableChooser<>();
 
-        mAutoChooser.setDefaultOption("Stationary", backUpAuton());
+        mAutoChooser.setDefaultOption("Stationary", () -> backUpAuton());
         tryToAddPathToChooser("FirstTestPath", () -> firstPathTest("FirstPathTest", "FirstPath", Rotation2d.kZero));
         tryToAddPathToChooser("FirstAuto", () -> autoTest("FirstAuto","FirstPath", Rotation2d.kZero, "SecondPath"));
         
@@ -139,11 +139,11 @@ public class AutonCommands extends SubsystemBase {
     }
 
     ///////////////// PATH CHOOSING LOGIC \\\\\\\\\\\\\\\\\\\\\\
-    public Command getAuto() {
+    public Supplier<Command> getAuto() {
         return getAutoChooser().get();
     }
 
-    public LoggedDashboardChooser<Command> getAutoChooser() {
+    public LoggedDashboardChooser<Supplier<Command>> getAutoChooser() {
         return mAutoChooserLogged;
     }
 
@@ -151,7 +151,7 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser(pPathName, new Runnable() {
             @Override
             public void run() {
-                mAutoChooser.addOption(pPathName, pAuto.get());
+                mAutoChooser.addOption(pPathName, pAuto);
             }
         });
     }  
@@ -161,7 +161,7 @@ public class AutonCommands extends SubsystemBase {
         try {
             pPathAdding.run();
         } catch(Exception e) {
-            mAutoChooser.addOption("Failed: "+pPathName, backUpAuton());
+            mAutoChooser.addOption("Failed: "+pPathName, () -> backUpAuton());
             Telemetry.reportException(e);
         }
     }
