@@ -1,6 +1,7 @@
-package frc.robot.auton;
+package frc.robot.systems.auton;
 
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -70,17 +71,26 @@ public class AutonCommands extends SubsystemBase {
 
         Trigger autoActivted = auto.getIsRunningTrigger();
 
-        Trigger isPath1Running = auto.loggedCondition(pName1+"IsFinished", () -> autoPath1.isRunning(), true);
-        Trigger hasPath1Ended = auto.loggedCondition(pName1+"IsFinished", () -> autoPath1.hasEnded(), true);
+        Trigger isPath1Running = auto.loggedCondition(pName1+"IsRunning", () -> autoPath1.isRunning(), true);
+        Trigger hasPath1Ended = auto.loggedCondition(pName1+"HasEnded", () -> autoPath1.hasEnded(), true);
 
-        Trigger isPath2Running = auto.loggedCondition(pName2+"IsFinished", () -> autoPath2.isRunning(), true);
-        Trigger hasPath2Ended = auto.loggedCondition(pName2+"IsFinished", () -> autoPath2.hasEnded(), true);
+        Trigger isPath2Running = auto.loggedCondition(pName2+"IsRunning", () -> autoPath2.isRunning(), true);
+        Trigger hasPath2Ended = auto.loggedCondition(pName2+"HasEnded", () -> autoPath2.hasEnded(), true);
+
+        Trigger inScoringRange = auto.loggedCondition("InScoringRange", inScoringRange(), true);
+        Trigger inIntakeRange = auto.loggedCondition("InIntakeRange", inIntakeRange(), true);
+        Trigger flywheelsReady = auto.loggedCondition("FlywheelsReady", flywheelsReady(), true);
+        Trigger hoodReady = auto.loggedCondition("HoodReady", flywheelsReady(), true);
 
         autoActivted
             .onTrue(autoPath1);
         
         hasPath1Ended
             .onTrue(autoPath2);
+
+        auto.loggedCondition(pName2+"isIntaking", isPath2Running.and(inIntakeRange), true)
+            .onTrue(bindexCommand())
+            .onTrue(intakeCommand());
 
         hasPath2Ended
             .onTrue(Commands.runOnce(() -> auto.cancel()));
@@ -101,12 +111,28 @@ public class AutonCommands extends SubsystemBase {
         return new InstantCommand();
     }
     
-    public Command shootCommand() {
+    public Command spinFlywheelsommand() {
         return new InstantCommand();
     }
 
     public Command turnToHubCommand() {
         return new InstantCommand();
+    }
+
+    public BooleanSupplier inScoringRange() {
+        return () -> false;
+    }
+
+    public BooleanSupplier flywheelsReady() {
+        return () -> false;
+    }
+
+    public BooleanSupplier hoodReady() {
+        return () -> false;
+    }
+
+    public BooleanSupplier inIntakeRange() {
+        return () -> false;
     }
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\

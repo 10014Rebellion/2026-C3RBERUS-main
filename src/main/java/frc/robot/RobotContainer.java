@@ -7,7 +7,6 @@ import static frc.robot.systems.drive.DriveConstants.*;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.auton.AutonCommands;
 import frc.robot.bindings.BindingsConstants;
 import frc.robot.bindings.ButtonBindings;
 import frc.robot.systems.drive.Drive;
@@ -22,6 +21,8 @@ import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
+import frc.robot.systems.auton.AutonCommands;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 
