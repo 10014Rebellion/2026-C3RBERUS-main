@@ -20,11 +20,17 @@ import frc.robot.systems.shooter.Shooter;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 import frc.robot.systems.shooter.ShooterConstants.IndexerConstants;
+import frc.robot.systems.shooter.flywheels.FlywheelIO;
 import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
+import frc.robot.systems.shooter.flywheels.FlywheelIOSim;
 import frc.robot.systems.shooter.flywheels.Flywheels;
 import frc.robot.systems.shooter.hood.Hood;
+import frc.robot.systems.shooter.hood.HoodIO;
 import frc.robot.systems.shooter.hood.HoodIOKrakenX44;
+import frc.robot.systems.shooter.hood.HoodIOSim;
+import frc.robot.systems.shooter.indexers.IndexerIO;
 import frc.robot.systems.shooter.indexers.IndexerIOKrakenX44;
+import frc.robot.systems.shooter.indexers.IndexerIOSim;
 import frc.robot.systems.shooter.indexers.Indexers;
 import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
@@ -86,6 +92,18 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
                     }));
+
+                mShooter = new Shooter(
+                    new Indexers(
+                        new IndexerIOSim(IndexerConstants.kIndexerLeaderConfig), 
+                        new IndexerIOSim(IndexerConstants.kIndexerFollowerConfig)
+                    ),
+                    new Hood(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
+                    new Flywheels(
+                        new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
+                        new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
+                    )
+                );
                 break;
 
             default:
@@ -106,22 +124,20 @@ public class RobotContainer {
 
                  mShooter = new Shooter(
                     new Indexers(
-                        new IndexerIO(), 
-                        new IndexerIO()
+                        new IndexerIO() {}, 
+                        new IndexerIO() {}
                     ),
-                    new Hood(new HoodIO()),
+                    new Hood(new HoodIO() {}),
                     new Flywheels(
-                        new FlywheelIO(),
-                        new FlywheelIO()
+                        new FlywheelIO() {},
+                        new FlywheelIO() {}
                     )
                 );
                 break;
         }
         
-        mIndexers = new Indexers(
-            new IndexerIOKrakenX44(IndexerConstants.kIndexerLeaderConfig), new IndexerIOKrakenX44(IndexerConstants.kIndexerFollowerConfig));
-
-        mButtonBindings = new ButtonBindings(mDrive, mFlywheels, mIndexers);
+    
+        mButtonBindings = new ButtonBindings(mDrive, mShooter);
 
         initBindings();
 

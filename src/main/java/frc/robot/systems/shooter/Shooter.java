@@ -1,5 +1,7 @@
 package frc.robot.systems.shooter;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.systems.shooter.flywheels.Flywheels;
 import frc.robot.systems.shooter.hood.Hood;
@@ -12,6 +14,18 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(Indexers pIndexerSS, Hood pHoodSS, Flywheels pFlywheelSS) {
     this.mIndexersSS = pIndexerSS; this.mHoodSS = pHoodSS; this.mFlywheelSS = pFlywheelSS; // I miss my C++ initializer lists :'(
+  }
+
+  public Command setFlywheelsRPSCmd(double pRPS) {
+    return new InstantCommand(() -> mFlywheelSS.setFlywheelSpeeds(pRPS));
+  }
+
+  public Command setIndexersVoltsCmd(double pVolts) {
+    return new InstantCommand(() -> mIndexersSS.setIndexerVolts(pVolts));
+  }
+
+  public Command setHoodVoltsCmd(double pVolts) {
+    return new InstantCommand(() -> mHoodSS.setHoodVolts(pVolts));
   }
 
   @Override
