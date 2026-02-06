@@ -3,7 +3,7 @@ package frc.robot.systems.shooter.hood;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
@@ -17,13 +17,12 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.CANCoderHardware;
 import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 
-public class HoodIOKrakenx44 implements HoodIO{
+public class HoodIOKrakenX44 implements HoodIO{
     private final TalonFX mHoodMotor;
     private final VoltageOut mHoodVoltageControl = new VoltageOut(0.0);
-    private final PositionDutyCycle mHoodPositionControl = new PositionDutyCycle(0.0);
+    private final MotionMagicTorqueCurrentFOC mHoodPositionControl = new MotionMagicTorqueCurrentFOC(0.0);
     private final StatusSignal<ControlModeValue> mHoodControlMode;
     private final StatusSignal<Angle> mHoodPosition;
     private final StatusSignal<AngularVelocity> mHoodVelocityRPS;
@@ -33,7 +32,7 @@ public class HoodIOKrakenx44 implements HoodIO{
     private final StatusSignal<Current> mHoodStatorCurrent;
     private final StatusSignal<Temperature> mHoodTempCelsius;
 
-    public HoodIOKrakenx44(BasicMotorHardware pMotorHardware, CANCoderHardware pCANCoderHardware, RotationSoftLimits pSoftLimits) {
+    public HoodIOKrakenX44(BasicMotorHardware pMotorHardware, RotationSoftLimits pSoftLimits) {
         this.mHoodMotor = new TalonFX(pMotorHardware.motorID(), pMotorHardware.canBus());
 
         TalonFXConfiguration HoodConfig = new TalonFXConfiguration();
@@ -42,11 +41,6 @@ public class HoodIOKrakenx44 implements HoodIO{
         HoodConfig.CurrentLimits.SupplyCurrentLimit = pMotorHardware.currentLimit().supplyCurrentLimit();
         HoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         HoodConfig.CurrentLimits.StatorCurrentLimit = pMotorHardware.currentLimit().statorCurrentLimit();
-
-        HoodConfig.Feedback.FeedbackRemoteSensorID = pCANCoderHardware.cancoderID();
-        HoodConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-        HoodConfig.Feedback.SensorToMechanismRatio = pCANCoderHardware.cancoderToMechanismRatio();
-        HoodConfig.Feedback.RotorToSensorRatio = pMotorHardware.rotorToMechanismRatio();
 
         HoodConfig.MotorOutput.NeutralMode = pMotorHardware.neutralMode();
         HoodConfig.MotorOutput.Inverted = pMotorHardware.direction();
@@ -64,6 +58,20 @@ public class HoodIOKrakenx44 implements HoodIO{
         mHoodSupplyCurrent = mHoodMotor.getSupplyCurrent();
         mHoodStatorCurrent = mHoodMotor.getStatorCurrent();
         mHoodTempCelsius = mHoodMotor.getDeviceTemp();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0, 
+            mHoodControlMode,
+            mHoodPosition, 
+            mHoodVelocityRPS,
+            mHoodAccelerationRPSS,
+            mHoodVoltage,
+            mHoodSupplyCurrent,
+            mHoodStatorCurrent,
+            mHoodTempCelsius
+        );
+
+        mHoodMotor.optimizeBusUtilization();
     }
 
 

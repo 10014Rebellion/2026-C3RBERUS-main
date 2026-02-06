@@ -17,13 +17,13 @@ public class HardwareRecords {
     ) {}
 
     public static record PositionSoftLimits(
-        double forwardLimitM,
-        double backwardLimitM
+        double backwardLimitM,
+        double forwardLimitM
     ) {}
 
     public static record RotationSoftLimits(
-        Rotation2d forwardLimit,
-        Rotation2d backwardLimit
+        Rotation2d backwardLimit,
+        Rotation2d forwardLimit
     ) {}
 
     public static record MotionConstraints(
@@ -62,13 +62,13 @@ public class HardwareRecords {
     public static record ArmController(
         int slot,
         PDConstants pdController,
-        ArmFeedforward kFeedforward
+        ArmFeedforward feedforward
     ) {}
 
     public static record SimpleController(
         int slot,
         PDConstants pdController,
-        SimpleMotorFeedforward kFeedforward
+        SimpleMotorFeedforward feedforward
     ) {}
 
     public static record MotionMagicFOCController(

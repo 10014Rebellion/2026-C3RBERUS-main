@@ -16,11 +16,15 @@ import frc.robot.systems.drive.modules.Module;
 import frc.robot.systems.drive.modules.ModuleIO;
 import frc.robot.systems.drive.modules.ModuleIOKraken;
 import frc.robot.systems.drive.modules.ModuleIOSim;
+import frc.robot.systems.shooter.Shooter;
 import frc.robot.systems.shooter.ShooterConstants;
+import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 import frc.robot.systems.shooter.ShooterConstants.IndexerConstants;
-import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenx44;
+import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
 import frc.robot.systems.shooter.flywheels.Flywheels;
-import frc.robot.systems.shooter.indexers.IndexerIOKrakenx44;
+import frc.robot.systems.shooter.hood.Hood;
+import frc.robot.systems.shooter.hood.HoodIOKrakenX44;
+import frc.robot.systems.shooter.indexers.IndexerIOKrakenX44;
 import frc.robot.systems.shooter.indexers.Indexers;
 import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
@@ -31,8 +35,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     private final Drive mDrive;
-    private final Flywheels mFlywheels;
-    private final Indexers mIndexers;
+    private final Shooter mShooter;
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
     private final AutonCommands autos;
@@ -54,6 +57,18 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
                     }));
+
+                mShooter = new Shooter(
+                    new Indexers(
+                        new IndexerIOKrakenX44(IndexerConstants.kIndexerLeaderConfig), 
+                        new IndexerIOKrakenX44(IndexerConstants.kIndexerFollowerConfig)
+                    ),
+                    new Hood(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
+                    new Flywheels(
+                        new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
+                        new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
+                    )
+                );
                 break;
 
             case SIM:
@@ -88,16 +103,23 @@ public class RobotContainer {
                         new ATagCameraIO() {}, 
                         new ATagCameraIO() {}
                     }));
+
+                 mShooter = new Shooter(
+                    new Indexers(
+                        new IndexerIO(), 
+                        new IndexerIO()
+                    ),
+                    new Hood(new HoodIO()),
+                    new Flywheels(
+                        new FlywheelIO(),
+                        new FlywheelIO()
+                    )
+                );
                 break;
         }
         
-        mFlywheels = new Flywheels(
-            new FlywheelIOKrakenx44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
-            new FlywheelIOKrakenx44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
-        );
-
         mIndexers = new Indexers(
-            new IndexerIOKrakenx44(IndexerConstants.kIndexerLeaderConfig), new IndexerIOKrakenx44(IndexerConstants.kIndexerFollowerConfig));
+            new IndexerIOKrakenX44(IndexerConstants.kIndexerLeaderConfig), new IndexerIOKrakenX44(IndexerConstants.kIndexerFollowerConfig));
 
         mButtonBindings = new ButtonBindings(mDrive, mFlywheels, mIndexers);
 

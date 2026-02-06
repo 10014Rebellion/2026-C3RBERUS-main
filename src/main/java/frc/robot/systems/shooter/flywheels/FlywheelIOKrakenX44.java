@@ -19,9 +19,11 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
+import frc.lib.telemetry.Telemetry;
+import frc.robot.errors.MotorErrors;
 import frc.robot.systems.shooter.ShooterConstants.FlywheelConstants;
 
-public class FlywheelIOKrakenx44 implements FlywheelIO{
+public class FlywheelIOKrakenX44 implements FlywheelIO{
     private final TalonFX mFlywheelMotor;
     private final VoltageOut mFlywheelVoltageControl = new VoltageOut(0.0);
     private final MotionMagicVelocityTorqueCurrentFOC mFlywheelVelocityControl = new MotionMagicVelocityTorqueCurrentFOC(0.0);
@@ -36,18 +38,18 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
     private Follower mFollowerController = null;
 
     // FOLLOWER CONSTRUCTOR
-    public FlywheelIOKrakenx44(FollowerMotorHardware pFollowerConfig) {
+    public FlywheelIOKrakenX44(FollowerMotorHardware pFollowerConfig) {
         this(pFollowerConfig.motorID(), pFollowerConfig.leaderConfig());
         this.mFollowerController = new Follower(pFollowerConfig.leaderConfig().motorID(), pFollowerConfig.alignmentValue()); 
         enforceFollower();
     }
     
     // LEADER CONSTRUCTOR
-    public FlywheelIOKrakenx44(BasicMotorHardware pLeaderConfig) {
+    public FlywheelIOKrakenX44(BasicMotorHardware pLeaderConfig) {
         this(pLeaderConfig.motorID(), pLeaderConfig);
     }
 
-    private FlywheelIOKrakenx44(int pMotorID, BasicMotorHardware pHardware) {
+    private FlywheelIOKrakenX44(int pMotorID, BasicMotorHardware pHardware) {
         this.mFlywheelMotor = new TalonFX(pMotorID, pHardware.canBus());
 
         TalonFXConfiguration FlywheelConfig = new TalonFXConfiguration();
@@ -122,7 +124,7 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
     }
 
     public boolean isLeader() {
-        return (mFollowerController == null);
+        return mFollowerController == null;
     }
 
     @Override 
@@ -145,20 +147,24 @@ public class FlywheelIOKrakenx44 implements FlywheelIO{
     @Override 
     public void enforceFollower() {
         if(!isLeader()) mFlywheelMotor.setControl(mFollowerController);
+        else Telemetry.reportIssue(new MotorErrors.EnforcingLeaderAsFollower(this));
     }
 
     @Override
     public void setMotorVelAndAccel(double pVelocityRPS, double pAccelerationRPSS, double pFeedforward) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVelocityControl.withVelocity(pVelocityRPS).withAcceleration(pAccelerationRPSS).withFeedForward(pFeedforward));
+        else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 
     @Override
     public void setMotorVolts(double pVolts) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVoltageControl.withOutput(pVolts));
+        else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 
     @Override
     public void stopMotor() {
         if(isLeader()) mFlywheelMotor.stopMotor(); 
+        else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 }

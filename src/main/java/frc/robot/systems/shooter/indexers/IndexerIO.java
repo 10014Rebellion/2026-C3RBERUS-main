@@ -15,6 +15,10 @@ public interface IndexerIO {
       public double iIndexerTempCelsius = 0.0;
     }
 
+    public default void setPDConstants(double pKP, double pKD) {}
+
+    public default void enforceFollower() {}
+
     public default void updateInputs(IndexerInputs pInputs) {}
 
     public default void setMotorVelocity(double pVelocityRPS, double pFeedforward) {}

@@ -2,6 +2,7 @@ package frc.robot.systems.shooter.indexers;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -15,9 +16,11 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
+import frc.lib.telemetry.Telemetry;
+import frc.robot.errors.MotorErrors;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 
-public class IndexerIOKrakenx44 implements IndexerIO{
+public class IndexerIOKrakenX44 implements IndexerIO{
     private final TalonFX mIndexerMotor;
     private final VoltageOut mIndexerVoltageControl = new VoltageOut(0.0);
     private final VelocityDutyCycle mIndexerVelocityControl = new VelocityDutyCycle(0.0);
@@ -28,22 +31,21 @@ public class IndexerIOKrakenx44 implements IndexerIO{
     private final StatusSignal<Current> mIndexerStatorCurrent;
     private final StatusSignal<Temperature> mIndexerTempCelsius;
     private final StatusSignal<AngularAcceleration> mIndexerAccelerationRPSS;
-    private final boolean mIsLeader;
+    private Follower mFollowerController = null;
 
     // FOLLOWER CONSTRUCTOR
-    public IndexerIOKrakenx44(FollowerMotorHardware pFollowerConfig) {
-        this(pFollowerConfig.motorID(), pFollowerConfig.leaderConfig(), false);
-        mIndexerMotor.setControl(new Follower(pFollowerConfig.leaderConfig().motorID(), pFollowerConfig.alignmentValue()));
+    public IndexerIOKrakenX44(FollowerMotorHardware pFollowerConfig) {
+        this(pFollowerConfig.motorID(), pFollowerConfig.leaderConfig());
+        this.mFollowerController = new Follower(pFollowerConfig.leaderConfig().motorID(), pFollowerConfig.alignmentValue());
     }
     
     // LEADER CONSTRUCTOR
-    public IndexerIOKrakenx44(BasicMotorHardware pLeaderConfig) {
-        this(pLeaderConfig.motorID(), pLeaderConfig, true);
+    public IndexerIOKrakenX44(BasicMotorHardware pLeaderConfig) {
+        this(pLeaderConfig.motorID(), pLeaderConfig);
     }
 
-    private IndexerIOKrakenx44(int pMotorID, BasicMotorHardware pHardware, boolean pIsLeader) {
+    private IndexerIOKrakenX44(int pMotorID, BasicMotorHardware pHardware) {
         this.mIndexerMotor = new TalonFX(pMotorID, pHardware.canBus());
-        this.mIsLeader = pIsLeader;
 
         TalonFXConfiguration IndexerConfig = new TalonFXConfiguration();
 
@@ -102,18 +104,39 @@ public class IndexerIOKrakenx44 implements IndexerIO{
         pInputs.iIndexerTempCelsius = mIndexerTempCelsius.getValueAsDouble();
     }
 
+    private boolean isLeader() {
+        return mFollowerController == null;
+    }
+
+    @Override 
+    public void setPDConstants(double pKP, double pKD) {
+        Slot0Configs slotConfig = new Slot0Configs();
+        slotConfig.kP = pKP;
+        slotConfig.kD = pKD;
+        mIndexerMotor.getConfigurator().apply(slotConfig);
+    }
+
+    @Override 
+    public void enforceFollower() {
+        if(!isLeader()) mIndexerMotor.setControl(mFollowerController);
+        else Telemetry.reportIssue(new MotorErrors.EnforcingLeaderAsFollower(this));
+    }
+
     @Override
     public void setMotorVelocity(double pVelocityRPS, double pFeedforward) {
-        if(mIsLeader) mIndexerMotor.setControl(mIndexerVelocityControl.withVelocity(pVelocityRPS).withFeedForward(pFeedforward));
+        if(isLeader()) mIndexerMotor.setControl(mIndexerVelocityControl.withVelocity(pVelocityRPS).withFeedForward(pFeedforward));
+        else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 
     @Override
     public void setMotorVolts(double pVolts) {
-        if(mIsLeader) mIndexerMotor.setControl(mIndexerVoltageControl.withOutput(pVolts));
+        if(isLeader()) mIndexerMotor.setControl(mIndexerVoltageControl.withOutput(pVolts));
+        else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 
     @Override
     public void stopMotor() {
-        if(mIsLeader) mIndexerMotor.stopMotor();
+        if(isLeader()) mIndexerMotor.stopMotor();
+        else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 }

@@ -23,8 +23,8 @@ public class ShotCalculator {
   private static ShotCalculator mInstance;
 
   // Smoothing for setpoint rates
-  private final LinearFilter mHeadingRateFilter = LinearFilter.movingAverage((int) (0.1 / Constants.kPeriodSecs));
-  private final LinearFilter mHoodRateFilter = LinearFilter.movingAverage((int) (0.1 / Constants.kPeriodSecs));
+  private final LinearFilter mHeadingRateFilter = LinearFilter.movingAverage((int) (0.1 / Constants.kPeriodicSec));
+  private final LinearFilter mHoodRateFilter = LinearFilter.movingAverage((int) (0.1 / Constants.kPeriodicSec));
 
   private Rotation2d mLastDesiredHeading;
   private double mLastHoodAngleRad = Double.NaN;
@@ -224,10 +224,10 @@ public class ShotCalculator {
         mDesiredHeadingRateRadPerSec =
             mHeadingRateFilter.calculate(
                 MathUtil.angleModulus(pDesiredHeadingField.minus(mLastDesiredHeading).getRadians())
-                    / Constants.kPeriodSecs);
+                    / Constants.kPeriodicSec);
 
         mHoodRateRadPerSec =
-            mHoodRateFilter.calculate((pHoodAngleRad - mLastHoodAngleRad) / Constants.kPeriodSecs);
+            mHoodRateFilter.calculate((pHoodAngleRad - mLastHoodAngleRad) / Constants.kPeriodicSec);
 
         mLastDesiredHeading = pDesiredHeadingField;
         mLastHoodAngleRad = pHoodAngleRad;
