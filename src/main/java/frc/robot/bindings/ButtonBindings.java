@@ -27,7 +27,7 @@ public class ButtonBindings {
             .onTrue(mDriveSS.setToTeleop());
 
         mDriveSS.acceptJoystickInputs(
-                () -> -mDriverController.getLeftY(),
+                () -> -mDriverController.getLeftY(), // TODO: interrogate Anshul on why theses are flipped and why on earth it works
                 () -> -mDriverController.getLeftX(),
                 () -> -mDriverController.getRightX(),
                 () -> mDriverController.getPOVAngle());
@@ -77,6 +77,5 @@ public class ButtonBindings {
         mDriverController.rightBumper()
             .onTrue(mShooterSS.setHoodVoltsCmd(-4))
             .onFalse(mShooterSS.setHoodVoltsCmd(0));
-
     }
 }
