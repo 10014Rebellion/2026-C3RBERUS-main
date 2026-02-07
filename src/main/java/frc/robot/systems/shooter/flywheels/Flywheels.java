@@ -35,10 +35,11 @@ public class Flywheels extends SubsystemBase {
   }
 
   public void setFlywheelSpeeds(double pRPS) {
-    double feedforward = mSimMotor.getCurrent(
-      mLeaderFlywheelInputs.iFlywheelClosedLoopReference * Math.PI * 2, 
-      mLeaderFlywheelInputs.iFlywheelMotorVolts
-    );
+    double feedforward = 0;
+    // mSimMotor.getCurrent(
+    //   mLeaderFlywheelInputs.iFlywheelClosedLoopReference * Math.PI * 2, 
+    //   mLeaderFlywheelInputs.iFlywheelMotorVolts
+    // );
     
     mLeaderFlywheelIO.setMotorVelAndAccel(pRPS, 0, feedforward);
     mFollowerFlywheelIO.enforceFollower();

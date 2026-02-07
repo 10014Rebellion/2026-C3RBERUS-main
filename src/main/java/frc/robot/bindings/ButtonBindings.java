@@ -4,6 +4,7 @@ package frc.robot.bindings;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.robot.game.GameGoalPoseChooser;
@@ -40,10 +41,10 @@ public class ButtonBindings {
         //             .andThen(mDriveSS.setToGenericAutoAlign(() -> new Pose2d(0.5, 0, Rotation2d.kCCW_Pi_2), ConstraintType.LINEAR)))
         //     .onFalse(mDriveSS.setToTeleop());
 
-        mDriverController.a()
-            .onTrue(
-                mDriveSS.setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate())))
-            .onFalse(mDriveSS.setToTeleop());
+        // mDriverController.a()
+        //     .onTrue(
+        //         mDriveSS.setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate())))
+        //     .onFalse(mDriveSS.setToTeleop());
             
     //    mDriverController.b()
     //         .onTrue(mDriveSS.setToGenericLineAlign(
@@ -62,20 +63,24 @@ public class ButtonBindings {
         //     .onTrue(Commands.runOnce(() -> mDriveSS.setPose(new Pose2d()), mDriveSS)
         //             .andThen(mDriveSS.setToGenericLineAlign(() -> new Pose2d(2.5, 2.5, Rotation2d.fromDegrees(45.0)), () -> Rotation2d.fromDegrees(45.0))));
     
+        mDriverController.a()
+            .onTrue(new InstantCommand())
+            .onFalse(new InstantCommand());
+
         mDriverController.leftTrigger()
-            .onTrue(mShooterSS.setFlywheelsRPSCmd(60))
-            .onFalse(mShooterSS.setFlywheelsRPSCmd(0));
+            .onTrue(mShooterSS.setFlywheelsVoltsCmd(11))
+            .onFalse(mShooterSS.setFlywheelsVoltsCmd(0));
 
         mDriverController.rightTrigger()
             .onTrue(mShooterSS.setIndexersVoltsCmd(12))
             .onFalse(mShooterSS.setIndexersVoltsCmd(0));
 
         mDriverController.leftBumper()
-            .onTrue(mShooterSS.setHoodVoltsCmd(4))
+            .onTrue(mShooterSS.setHoodVoltsCmd(1))
             .onFalse(mShooterSS.setHoodVoltsCmd(0));
 
         mDriverController.rightBumper()
-            .onTrue(mShooterSS.setHoodVoltsCmd(-4))
+            .onTrue(mShooterSS.setHoodVoltsCmd(-1))
             .onFalse(mShooterSS.setHoodVoltsCmd(0));
     }
 }

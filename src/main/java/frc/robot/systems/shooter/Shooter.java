@@ -20,6 +20,10 @@ public class Shooter extends SubsystemBase {
     return new InstantCommand(() -> mFlywheelSS.setFlywheelSpeeds(pRPS));
   }
 
+  public Command setFlywheelsVoltsCmd(double pVolts) {
+    return new InstantCommand(() -> mFlywheelSS.setFlywheelVolts(pVolts));
+  }
+
   public Command setIndexersVoltsCmd(double pVolts) {
     return new InstantCommand(() -> mIndexersSS.setIndexerVolts(pVolts));
   }

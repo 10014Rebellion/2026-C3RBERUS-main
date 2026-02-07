@@ -5,6 +5,7 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.systems.drive.DriveConstants;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
@@ -16,7 +17,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 public final class Constants {
     public static final Mode kCurrentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
     public static final boolean kTuningMode = !DriverStation.isFMSAttached();
-    public static final CANBus kSubsystemsCANBus = new CANBus("subsystems");
+    public static final CANBus kSubsystemsCANBus = DriveConstants.kCANBus;
     public static final double kPeriodicSec = 0.02;
 
     public static final boolean isSim() {

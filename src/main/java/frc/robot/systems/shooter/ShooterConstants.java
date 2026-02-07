@@ -91,7 +91,7 @@ public class ShooterConstants {
 
     public static class HoodConstants {
         public static final BasicMotorHardware kHoodConfig = new BasicMotorHardware(
-            56,
+            55,
             Constants.kSubsystemsCANBus,
             1, // TODO: TUNE ME
             InvertedValue.CounterClockwise_Positive, 
