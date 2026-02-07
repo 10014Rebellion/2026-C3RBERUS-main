@@ -234,7 +234,8 @@ public class DriveManager {
             mAutoAlignController.reset(
                 mDrive.getPoseEstimate(), 
                 ChassisSpeeds.fromRobotRelativeSpeeds(
-                    mDrive.getRobotChassisSpeeds(), mDrive.getPoseEstimate().getRotation()),
+                    mDrive.getRobotChassisSpeeds(), 
+                    mDrive.getPoseEstimate().getRotation()),
                 mGoalPoseSup.get());
             }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
     }
@@ -242,8 +243,13 @@ public class DriveManager {
     public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pAngle, DoubleSupplier pTelScal, BooleanSupplier pTelInv) {
         return new InstantCommand(() -> {
             mGoalPoseSup = pGoalPoseSup;
-            mLineAlignController.setControllerGoalSettings(pTelScal, () -> pAngle.get().getTan(), pTelInv);
-            mLineAlignController.reset(mDrive.getPoseEstimate(), mGoalPoseSup.get());
+            mLineAlignController.setControllerGoalSettings(
+                pTelScal, 
+                () -> pAngle.get().getTan(), 
+                pTelInv);
+            mLineAlignController.reset(
+                mDrive.getPoseEstimate(), 
+                mGoalPoseSup.get());
         }).andThen( setDriveStateCommandContinued( DriveState.LINE_ALIGN ) );
     }
 
