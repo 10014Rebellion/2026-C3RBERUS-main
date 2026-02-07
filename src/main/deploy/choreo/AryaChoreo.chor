@@ -3,28 +3,36 @@
  "version":2,
  "type":"Swerve",
  "variables":{
-  "expressions":{},
+  "expressions":{
+   "MaxV":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"3.5 m / s",
+     "val":3.5
+    }
+   }
+  },
   "poses":{}
  },
  "config":{
   "frontLeft":{
    "x":{
-    "exp":"12.43 in",
-    "val":0.315722
+    "exp":"9.7747687 in",
+    "val":0.24827912497999996
    },
    "y":{
-    "exp":"9.778 in",
-    "val":0.2483612
+    "exp":"-12.248701 in",
+    "val":-0.3111170054
    }
   },
   "backLeft":{
    "x":{
-    "exp":"-12.43 in",
-    "val":-0.315722
+    "exp":"-9.736289 in",
+    "val":-0.24730174059999996
    },
    "y":{
-    "exp":"-9.778 in",
-    "val":-0.2483612
+    "exp":"-12.32 in",
+    "val":-0.312928
    }
   },
   "mass":{
