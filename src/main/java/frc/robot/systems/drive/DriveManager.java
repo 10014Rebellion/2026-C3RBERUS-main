@@ -167,6 +167,29 @@ public class DriveManager {
     }
 
     ///////////////////////// STATE COMMANDS \\\\\\\\\\\\\\\\\\\\\\\\
+    public void setDriveState(DriveState state) {
+        mDriveState = state;
+        switch (mDriveState) {
+            case AUTON:
+                mDrive.setFFModel(true, false);
+                break;
+            case AUTO_ALIGN, STOP:
+                mDrive.setFFModel(false, false);
+                break;
+            default:
+                mDrive.setFFModel(false, true);
+        }
+    } 
+
+    public Command setDriveStateCommand(DriveState state) {
+        return Commands.runOnce(() -> setDriveState(state), mDrive);
+    }
+
+    /* Set's state initially, and doesn't end till interruped by another drive command */
+    public Command setDriveStateCommandContinued(DriveState state) {
+        return new FunctionalCommand(() -> setDriveState(state), () -> {}, (interrupted) -> {}, () -> false, mDrive);
+    }
+    
     public Command setToTeleop() {
         return setDriveStateCommandContinued(DriveState.TELEOP);
     }
@@ -303,32 +326,7 @@ public class DriveManager {
             () -> new ChassisSpeeds());
     }
 
-    /* BASE STATE COMMANDS */
-    public Command setDriveStateCommand(DriveState state) {
-        return Commands.runOnce(() -> setDriveState(state), mDrive);
-    }
-
-    /* Set's state initially, and doesn't end till interruped by another drive command */
-    public Command setDriveStateCommandContinued(DriveState state) {
-        return new FunctionalCommand(() -> setDriveState(state), () -> {}, (interrupted) -> {}, () -> false, mDrive);
-    }
-
     ///////////// SETTERS \\\\\\\\\\\\\
-    /* Sets the drive state used in periodic(), and handles init condtions like resetting PID controllers */
-    public void setDriveState(DriveState state) {
-        mDriveState = state;
-        switch (mDriveState) {
-            case AUTON:
-                mDrive.setFFModel(true, false);
-                break;
-            case AUTO_ALIGN, STOP:
-                mDrive.setFFModel(false, false);
-                break;
-            default:
-                mDrive.setFFModel(false, true);
-        }
-    }
-
     public void acceptJoystickInputs(
             DoubleSupplier pXSupplier, DoubleSupplier pYSupplier,
             DoubleSupplier pThetaSupplier, Supplier<Rotation2d> pPOVSupplier) {
