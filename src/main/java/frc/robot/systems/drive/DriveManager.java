@@ -167,7 +167,7 @@ public class DriveManager {
     }
 
     ///////////////////////// STATE COMMANDS \\\\\\\\\\\\\\\\\\\\\\\\
-    /* Sets drive state  and handles FF model initial conditiosn */
+    /* Sets drive state  and handles FF model initial conditions */
     public void setDriveState(DriveState state) {
         mDriveState = state;
         switch (mDriveState) {
@@ -191,44 +191,73 @@ public class DriveManager {
         return new FunctionalCommand(() -> setDriveState(state), () -> {}, (interrupted) -> {}, () -> false, mDrive);
     }
     
-    /* Implemented methods */
+    /*
+     * REGULAR DRIVER CONTROL 
+     */
     public Command setToTeleop() {
         return setDriveStateCommandContinued(DriveState.TELEOP);
     }
 
+    /*
+     * SLOWED DRIVER CONTROL 
+     */
     public Command setToTeleopSniper() {
         return setDriveStateCommandContinued(DriveState.TELEOP_SNIPER);
     }
 
+    /*
+     * DRIVER CONTROL USING XBOX POV BUTTONS
+     */
     public Command setToPOVSniper() {
         return setDriveStateCommandContinued(DriveState.POV_SNIPER);
     }
 
+    /*
+     * STOPS DRIVE
+     */
     public Command setToStop() {
         return setDriveStateCommand(DriveState.STOP);
     }
 
+    /*
+     * TESTS ROTATION WHILE TRANSLATION
+     */
     public Command setToDriftTest() {
         return setDriveStateCommandContinued(DriveState.DRIFT_TEST);
     }
 
+    /*
+     * TESTS 0 TO X SPEED DISTANCE
+     */
     public Command setToLinearTest() {
         return setDriveStateCommandContinued(DriveState.LINEAR_TEST);
     }
 
+    /*
+     * SYS ID
+     */
     public Command setToSysIDCharacterization() {
         return setDriveStateCommand(DriveState.SYSID_CHARACTERIZATION);
     }
 
+    /*
+     * WHEEL ODOM CHARACTERIZATION
+     */
     public Command setToWheelCharacterization() {
         return setDriveStateCommand(DriveState.WHEEL_CHARACTERIZATION);
     }
 
-    public Command customFollowPathCommand(PathPlannerPath path) {
-        return customFollowPathCommand(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
+    /*
+     * FOLLOWS PATHPLANNER PATH WITH DEFAULT PID
+     */
+    public Command followPathCommand(PathPlannerPath path) {
+        return followPathCommand(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
     }
 
-    public Command customFollowPathCommand(PathPlannerPath path, PPHolonomicDriveController drivePID) {
+    /*
+     * FOLLOWS PATHPLANNER PATH WITH CUSTOM PID
+     */
+    public Command followPathCommand(PathPlannerPath path, PPHolonomicDriveController drivePID) {
         return new FollowPathCommand(
             path, mDrive::getPoseEstimate, 
             mDrive::getRobotChassisSpeeds,
@@ -243,6 +272,9 @@ public class DriveManager {
             mDrive);
     }
 
+    /*
+     * GAME SPECIFIC SETPOINTS FOR HEADING, LINE AND AUTO CONTROLLER
+     */
     public Command getGameDriveCommand(GameDriveStates pGameDriveStates) {
         return mGameDriveManager.getSetGameDriveStateCmd(pGameDriveStates);
     }
@@ -308,9 +340,7 @@ public class DriveManager {
 
     public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation, TurnPointFeedforward pTurnPointFeedforward, DriveState headingState) {
         return new InstantCommand(() -> {
-            if(!(headingState.equals(DriveState.AUTON_HEADING_ALIGN) || headingState.equals(DriveState.HEADING_ALIGN))) {
-                Telemetry.reportIssue(new DriveErrors.WrongHeadingState());
-            }
+            if(!validHeadingState(headingState)) Telemetry.reportIssue(new DriveErrors.WrongHeadingState());
             mGoalRotationSup = pGoalRotation;
             mHeadingController.setHeadingGoal(mGoalRotationSup);
             mHeadingController.reset(
@@ -371,5 +401,9 @@ public class DriveManager {
 
     public LineController getLineAlignController() {
         return mLineAlignController;
+    }
+
+    public boolean validHeadingState(DriveState state) {
+        return state.equals(DriveState.AUTON_HEADING_ALIGN) || state.equals(DriveState.HEADING_ALIGN);
     }
 }

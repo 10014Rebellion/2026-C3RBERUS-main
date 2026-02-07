@@ -164,7 +164,7 @@ public class AutonCommands extends SubsystemBase {
                     mRobotDrive.setPose(AllianceFlipUtil.apply(ideaTraj.sample(0).pose));
                 }
             }),
-            mRobotDrive.getDriveManager().customFollowPathCommand(path).withTimeout(ideaTraj.getTotalTimeSeconds()),
+            mRobotDrive.getDriveManager().followPathCommand(path).withTimeout(ideaTraj.getTotalTimeSeconds()),
             mRobotDrive.getDriveManager().setToStop()
         );
     }
@@ -182,7 +182,7 @@ public class AutonCommands extends SubsystemBase {
                     mRobotDrive.setPose(AllianceFlipUtil.apply(ideaTraj.sample(0).pose));
                 }
             }),
-            mRobotDrive.getDriveManager().customFollowPathCommand(path, pPID).withTimeout(ideaTraj.getTotalTimeSeconds()),
+            mRobotDrive.getDriveManager().followPathCommand(path, pPID).withTimeout(ideaTraj.getTotalTimeSeconds()),
             mRobotDrive.getDriveManager().setToStop()
         );
     }
