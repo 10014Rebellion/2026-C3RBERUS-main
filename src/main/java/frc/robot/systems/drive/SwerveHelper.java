@@ -6,10 +6,12 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import static frc.robot.systems.drive.DriveConstants.kAzimuthDriveScalar;
 import static frc.robot.systems.drive.DriveConstants.kDriveMotorGearing;
 import static frc.robot.systems.drive.DriveConstants.kKinematics;
 import static frc.robot.systems.drive.DriveConstants.kMaxLinearSpeedMPS;
 import static frc.robot.systems.drive.DriveConstants.kSkidRatioCap;
+import static frc.robot.systems.drive.DriveConstants.kWheelInertia;
 import static frc.robot.systems.drive.DriveConstants.kWheelRadiusMeters;
 
 import java.util.Arrays;
@@ -89,6 +91,18 @@ public class SwerveHelper {
         double driveMotorAmperage = kKrakenFOCModel.getCurrent(driveMotorTorque);
 
         return driveMotorAmperage;
+    }
+
+    public static double ppFFScalar(SwerveModuleState currentState, DriveFeedforwards ff, int i) {
+        return 
+            projectTorque(currentState, 
+                VecBuilder.fill(
+                    ff.robotRelativeForcesXNewtons()[i], 
+                    ff.robotRelativeForcesYNewtons()[i])) 
+                / 
+            Math.hypot(
+                ff.robotRelativeForcesXNewtons()[i], 
+                ff.robotRelativeForcesYNewtons()[i]);
     }
 
     public static void logDriveFeedforward(DriveFeedforwards ff, int i) {
@@ -237,10 +251,10 @@ public class SwerveHelper {
         return angleDelta.getRadians() * gearing * wheelRadius;
     }
 
-    public static double deadReckoningFeedforward(Rotation2d angleDelta, double gearing, double wheelRadiusM, double inertia) {
-        double distM = deadReckoningTurnToDriveConv(angleDelta, gearing, wheelRadiusM);
+    public static double deadReckoningFeedforward(Rotation2d angleDelta) {
+        double distM = deadReckoningTurnToDriveConv(angleDelta, kDriveMotorGearing, kWheelRadiusMeters);
         double accelerationM = (2 * distM) / (dt * dt);
 
-        return -kKrakenFOCModel.getCurrent(wheelRadiusM * accelerationM * inertia);
+        return -kKrakenFOCModel.getCurrent(kWheelRadiusMeters * accelerationM * kWheelInertia) * kAzimuthDriveScalar;
     }
 }

@@ -99,6 +99,8 @@ public class Drive extends SubsystemBase {
     private ChassisSpeeds mDesiredSpeeds = new ChassisSpeeds();
     private ChassisSpeeds mPPDesiredSpeeds = new ChassisSpeeds();
     private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
+    private boolean mUseChoreoFeedForward = false;
+    private boolean mFilterFeedForward = false;
     private final PathConstraints mDriveConstraints = DriveConstants.kAutoConstraints;
 
     // private SwerveModuleState[] mPrevSetpointStates = SwerveUtils.zeroStates();
@@ -331,7 +333,6 @@ public class Drive extends SubsystemBase {
 
         // Telemetry.log("Drive/Odometry/generatedFieldSpeeds",
         // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
-
         for (int i = 0; i < 4; i++) {
             if (kUseGenerator) {
                 /* Logs the drive feedforward stuff */
@@ -347,19 +348,15 @@ public class Drive extends SubsystemBase {
                 setpointStates[i].optimize(mModules[i].getCurrentState().angle);
 
                 /* Feedforward cases based on driveState */
-                double driveAmps = calculateDriveFeedforward(
-                    mPreviousSetpoint, mModules[i].getCurrentState(),
-                    unOptimizedSetpointStates[i], setpointStates[i], i);
-                driveAmps += SwerveHelper.deadReckoningFeedforward(
-                    mAngleDeltas[i], kDriveMotorGearing, kWheelRadiusMeters, DriveConstants.kWheelInertia)
-                        * kAzimuthDriveScalar;
+                double driveAmps = calculateDriveFeedforward(i) + SwerveHelper.deadReckoningFeedforward(mAngleDeltas[i]);
                 double desiredAzimuthVelocityRadPS = 
                     mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i];
 
                 // Multiplies by cos(angleError) to stop the drive from going in the wrong direction
                 setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
 
-                optimizedSetpointStates[i] = mModules[i].setDesiredStateWithAmpFF(setpointStates[i], driveAmps, desiredAzimuthVelocityRadPS);
+                optimizedSetpointStates[i] = 
+                    mModules[i].setDesiredStateWithAmpFF(setpointStates[i], driveAmps, desiredAzimuthVelocityRadPS);
 
                 Logger.recordOutput("Drive/DesiredAzimuthRotationSpeed"+mModules[i].getModuleName(), desiredAzimuthVelocityRadPS);
                 /* Normalized for logging */
@@ -376,7 +373,6 @@ public class Drive extends SubsystemBase {
         }
 
         // mPrevSetpointStates = optimizedSetpointStates;
-
         Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(optimizedSetpointStates));
@@ -386,27 +382,20 @@ public class Drive extends SubsystemBase {
     }
 
     /* Calculates DriveFeedforward based off state */
-    public double calculateDriveFeedforward(
-            SwerveSetpoint setpoint, SwerveModuleState currentState,
-            SwerveModuleState unoptimizedState, SwerveModuleState optimizedState, int i) {
-        double driveAmps = 0.0;
-        switch (mDriveState) {
-            /* No need to optimize for Choreo, as it handles it under the hood */
-            case AUTON:
-                driveAmps = SwerveHelper.convertChoreoNewtonsToAmps(currentState, mPathPlanningFF, i);
-                break;
-            case AUTO_ALIGN:
-            default:
-                driveAmps = setpoint.feedforwards().torqueCurrentsAmps()[i];
-        }
+    public double calculateDriveFeedforward(int i) {
+        double driveAmps = (mUseChoreoFeedForward) ? 
+            SwerveHelper.convertChoreoNewtonsToAmps(getModuleStates()[i], mPathPlanningFF, i) :
+            mPathPlanningFF.torqueCurrentsAmps()[i] * SwerveHelper.ppFFScalar(getModuleStates()[i], mPathPlanningFF, i);
 
-        driveAmps = SwerveHelper.optimizeTorque(unoptimizedState, optimizedState, driveAmps, currentState, i);
-
-        if(!mDriveState.equals(DriveState.AUTON) && !mDriveState.equals(DriveState.AUTO_ALIGN)) 
-            driveAmps = SwerveHelper.lowPassFilter(mPrevDriveAmps[i], driveAmps, tDriveFFAggressiveness.get());
+        if(mFilterFeedForward) driveAmps = SwerveHelper.lowPassFilter(mPrevDriveAmps[i], driveAmps, tDriveFFAggressiveness.get());
 
         mPrevDriveAmps[i] = driveAmps;
         return driveAmps;
+    }
+
+    public void setFFModel(boolean pUseChoreoFeedForward, boolean pFilterFeedForward) {
+        mUseChoreoFeedForward = pUseChoreoFeedForward;
+        mFilterFeedForward = pFilterFeedForward;
     }
 
     ///////////////////////// STATE SETTING \\\\\\\\\\\\\\\\\\\\\\\\
@@ -544,6 +533,16 @@ public class Drive extends SubsystemBase {
     /* Sets the drive state used in periodic(), and handles init condtions like resetting PID controllers */
     private void setDriveState(DriveState state) {
         mDriveState = state;
+        switch (mDriveState) {
+            case AUTON:
+                setFFModel(true, false);
+                break;
+            case AUTO_ALIGN, STOP:
+                setFFModel(false, false);
+                break;
+            default:
+                setFFModel(false, true);
+        }
     }
 
     ////////////// LOCALIZATION(MAINLY RESETING LOGIC) \\\\\\\\\\\\\\\\
