@@ -83,7 +83,7 @@ public class DriveManager {
         mHeadingController.setHeadingGoal(mGoalRotationSup);
     }
 
-    public ChassisSpeeds computeDesiredSpeeds() {
+    public ChassisSpeeds computeDesiredSpeedsFromState() {
         mHeadingController.updateController();
         mAutoAlignController.updateControllers();
         mLineAlignController.updateControllers();
@@ -167,6 +167,7 @@ public class DriveManager {
     }
 
     ///////////////////////// STATE COMMANDS \\\\\\\\\\\\\\\\\\\\\\\\
+    /* Sets drive state  and handles FF model initial conditiosn */
     public void setDriveState(DriveState state) {
         mDriveState = state;
         switch (mDriveState) {
@@ -190,6 +191,7 @@ public class DriveManager {
         return new FunctionalCommand(() -> setDriveState(state), () -> {}, (interrupted) -> {}, () -> false, mDrive);
     }
     
+    /* Implemented methods */
     public Command setToTeleop() {
         return setDriveStateCommandContinued(DriveState.TELEOP);
     }

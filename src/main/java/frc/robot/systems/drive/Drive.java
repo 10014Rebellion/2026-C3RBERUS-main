@@ -123,7 +123,7 @@ public class Drive extends SubsystemBase {
     @Override
     public void periodic() {
         updateSensorsAndOdometry();
-        runSwerve(mDriveManager.computeDesiredSpeeds());
+        runSwerve(mDriveManager.computeDesiredSpeedsFromState());
     }
 
     private void updateSensorsAndOdometry() {
