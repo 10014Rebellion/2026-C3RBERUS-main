@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.conveyor.Conveyor;
+import frc.robot.systems.conveyor.Conveyor.ConveyerGoal;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.Intake.IntakeGoal;
@@ -20,13 +22,15 @@ public class ButtonBindings {
     private final Flywheels mFlywheelsSS;
     private final Indexers mIndexers;
     private final Intake mIntake;
+    private final Conveyor mConveyor;
     private final FlydigiApex4 mDriverController = new FlydigiApex4(BindingsConstants.kDriverControllerPort);
 
-    public ButtonBindings(Drive pDriveSS, Flywheels pFlywheelsSS, Indexers pIndexersSS, Intake pIntakeSS) {
+    public ButtonBindings(Drive pDriveSS, Flywheels pFlywheelsSS, Indexers pIndexersSS, Intake pIntakeSS, Conveyor pConveyorSS) {
         this.mFlywheelsSS = pFlywheelsSS;
         this.mIndexers = pIndexersSS;
         this.mDriveSS = pDriveSS;
         this.mIntake = pIntakeSS;
+        this.mConveyor = pConveyorSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.setToTeleop());
     }
 
@@ -79,12 +83,12 @@ public class ButtonBindings {
             .onFalse(new InstantCommand(() -> mIndexers.setIndexerVolts(0)));
 
         mDriverController.a()
-            .onTrue(new InstantCommand(() -> mIntake.setGoal(IntakeGoal.kIntake)))
-            .onFalse(new InstantCommand(() -> mIntake.setGoal(IntakeGoal.kStop)));
+            .onTrue(new InstantCommand(() -> mConveyor.setGoal(ConveyerGoal.kIntake)))
+            .onFalse(new InstantCommand(() -> mConveyor.setGoal(ConveyerGoal.kStop)));
 
         mDriverController.b()
-            .onTrue(new InstantCommand(() -> mIntake.setGoal(IntakeGoal.kOuttake)))
-            .onFalse(new InstantCommand(() -> mIntake.setGoal(IntakeGoal.kStop)));
+            .onTrue(new InstantCommand(() -> mConveyor.setGoal(ConveyerGoal.kOuttake)))
+            .onFalse(new InstantCommand(() -> mConveyor.setGoal(ConveyerGoal.kStop)));
 
     }
 }

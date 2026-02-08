@@ -4,29 +4,80 @@
 
 package frc.robot.systems.conveyor;
 
+import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.intake.Intake.IntakeGoal;
 
 public class Conveyor extends SubsystemBase {
+
+  public enum ConveyerGoal {
+    kIntake(() -> 8.0),
+    kOuttake(() -> -6.0),
+    kStop(() -> 0.0),
+    /** Custom setpoint that can be modified over network tables; Useful for debugging */
+    custom(new LoggedTunableNumber("Conveyor/Custom", 0.0));
+
+    private DoubleSupplier goalMeters;
+
+    ConveyerGoal(DoubleSupplier goalMeters) {
+      this.goalMeters = goalMeters;
+    }
+
+    public double getGoalVolts() {
+      return this.goalMeters.getAsDouble();
+    }
+  }
+
+
   private final ConveyorIO mConveyorIO;
   private final ConveyorInputsAutoLogged mConveyorInputs = new ConveyorInputsAutoLogged();
 
+  private ConveyerGoal mCurrentGoal = null;
+  private double mCurrentIntakeGoalVolts = 0.0;
+
+  /** Creates a new Climb. */
   public Conveyor(ConveyorIO pConveyorIO) {
     this.mConveyorIO = pConveyorIO;
   }
-
-  public void setConveyorVolts(double pVolts) {
-    mConveyorIO.setMotorVolts(pVolts);
-  }
-
-  public void stopConveyorMotor() {
-    mConveyorIO.stopMotor();
-  }
-
+  
   @Override
   public void periodic() {
     mConveyorIO.updateInputs(mConveyorInputs);
     Logger.processInputs("Conveyor", mConveyorInputs);
+    
+    if(DriverStation.isDisabled()){
+      stopIntakeMotor();
+    }
+
+    if (mCurrentGoal != null){
+      mCurrentIntakeGoalVolts = mCurrentGoal.getGoalVolts();
+
+      setIntakeVolts(mCurrentIntakeGoalVolts);
+    }
+
   }
+
+  public void setIntakeVolts(double pVolts) {
+    mConveyorIO.setMotorVolts(pVolts);
+  }
+
+  public void stopIntakeMotor() {
+    mConveyorIO.stopMotor();
+  }
+
+    public void setGoal(ConveyerGoal pGoal){
+    mCurrentGoal = pGoal;
+  }
+
+  @AutoLogOutput(key = "Conveyor/Goal")
+  public ConveyerGoal getGoal(){
+    return mCurrentGoal;
+  }
+  
 }

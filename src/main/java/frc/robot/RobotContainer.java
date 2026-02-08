@@ -31,6 +31,12 @@ import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
+import frc.robot.systems.conveyor.Conveyor;
+import frc.robot.systems.conveyor.ConveyorConstants;
+import frc.robot.systems.conveyor.ConveyorIO;
+import frc.robot.systems.conveyor.ConveyorIOKrakenx44;
+import frc.robot.systems.conveyor.ConveyorIOSim;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 
@@ -39,6 +45,7 @@ public class RobotContainer {
     private final Flywheels mFlywheels;
     private final Indexers mIndexers;
     private final Intake mIntake;
+    private final Conveyor mConveyor;
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
     private final AutonCommands autos;
@@ -62,6 +69,7 @@ public class RobotContainer {
                     }));
 
                 mIntake = new Intake(new IntakeIOKrakenx44(IntakeConstants.kIntakeMotorConstants));
+                mConveyor = new Conveyor(new ConveyorIOKrakenx44(ConveyorConstants.kConveyorMotorConstants));
                 break;
 
             case SIM:
@@ -81,6 +89,7 @@ public class RobotContainer {
                     }));
 
                 mIntake = new Intake(new IntakeIOSim(IntakeConstants.kIntakeMotorConstants));
+                mConveyor = new Conveyor(new ConveyorIOSim(ConveyorConstants.kConveyorMotorConstants));
                 break;
 
             default:
@@ -99,6 +108,7 @@ public class RobotContainer {
                         new ATagCameraIO() {}
                     }));
                 mIntake = new Intake(new IntakeIO() {});
+                mConveyor = new Conveyor(new ConveyorIO() {});
                 break;
         }
         
@@ -111,7 +121,7 @@ public class RobotContainer {
         mIndexers = new Indexers(
             new IndexerIOKrakenx44(IndexerConstants.kIndexerLeaderConfig), new IndexerIOKrakenx44(IndexerConstants.kIndexerFollowerConfig));
 
-        mButtonBindings = new ButtonBindings(mDrive, mFlywheels, mIndexers, mIntake);
+        mButtonBindings = new ButtonBindings(mDrive, mFlywheels, mIndexers, mIntake, mConveyor);
 
         initBindings();
 
