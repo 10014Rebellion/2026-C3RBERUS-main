@@ -65,6 +65,13 @@ public class HardwareRecords {
         ArmFeedforward feedforward
     ) {}
 
+    public static record ArmControllerMotionMagicFOC(
+        int slot,
+        PDConstants pdController,
+        MotionMagicConstants motionMagicConstants,
+        ArmFeedforward feedforward
+    ) {}
+
     public static record SimpleController(
         int slot,
         PDConstants pdController,

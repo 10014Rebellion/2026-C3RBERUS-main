@@ -36,12 +36,20 @@ import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
+import frc.robot.systems.conveyor.Conveyor;
+import frc.robot.systems.conveyor.ConveyorConstants;
+import frc.robot.systems.conveyor.ConveyorIO;
+import frc.robot.systems.conveyor.ConveyorIOKrakenx44;
+import frc.robot.systems.conveyor.ConveyorIOSim;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 
 public class RobotContainer {
     private final Drive mDrive;
     private final Shooter mShooter;
+    private final Conveyor mConveyor;
+
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
     private final AutonCommands autos;
@@ -57,12 +65,7 @@ public class RobotContainer {
                         new Module("BR", new ModuleIOKraken(kBackRightHardware))
                     },
                     new GyroIOPigeon2(),
-                    new ATagVision(new ATagCameraIO[]{
-                        new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
-                    }));
+                    new ATagVision(new ATagCameraIO[]{}));
 
                 mShooter = new Shooter(
                     new Indexers(
@@ -75,6 +78,8 @@ public class RobotContainer {
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
                     )
                 );
+
+                mConveyor = new Conveyor(new ConveyorIOKrakenx44(ConveyorConstants.kConveyorMotorConstants));
                 break;
 
             case SIM:
@@ -104,6 +109,8 @@ public class RobotContainer {
                         new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
                     )
                 );
+
+                mConveyor = new Conveyor(new ConveyorIOSim());
                 break;
 
             default:
@@ -133,11 +140,13 @@ public class RobotContainer {
                         new FlywheelIO() {}
                     )
                 );
+
+                mConveyor = new Conveyor(new ConveyorIO() {});
                 break;
         }
         
     
-        mButtonBindings = new ButtonBindings(mDrive, mShooter);
+        mButtonBindings = new ButtonBindings(mDrive, mShooter, mConveyor);
 
         initBindings();
 

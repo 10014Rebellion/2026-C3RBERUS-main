@@ -11,7 +11,7 @@ import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.hardware.HardwareRecords.MotionMagicConstants;
 import frc.lib.hardware.HardwareRecords.MotionMagicFOCController;
-import frc.lib.hardware.HardwareRecords.ArmController;
+import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagicFOC;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.PDConstants;
@@ -93,21 +93,22 @@ public class ShooterConstants {
         public static final BasicMotorHardware kHoodConfig = new BasicMotorHardware(
             55,
             Constants.kSubsystemsCANBus,
-            1, // TODO: TUNE ME
-            InvertedValue.CounterClockwise_Positive, 
+            133/9.0, // TODO: TUNE ME
+            InvertedValue.Clockwise_Positive, 
             NeutralModeValue.Brake, 
             new CurrentLimits(40, 50)
         );
 
-        public static final ArmController kHoodControlConfig = new ArmController(
+        public static final ArmControllerMotionMagicFOC kHoodControlConfig = new ArmControllerMotionMagicFOC(
             0, // not currently used
-            new PDConstants(0, 0), // TODO: TUNE ME
-            new ArmFeedforward(0, 0, 0, 0) // TODO: TUNE ME
+            new PDConstants(10, 0), // TODO: TUNE ME
+            new MotionMagicConstants(100, 200, 0),  // TODO: TUNE ME
+            new ArmFeedforward(0, 0.03, 0, 0) // TODO: TUNE ME
         );
 
         public static final RotationSoftLimits kHoodLimits = new RotationSoftLimits(
-            Rotation2d.kZero, 
-            Rotation2d.kZero // TUNE ME!
+            Rotation2d.fromDegrees(0.0), 
+            Rotation2d.fromDegrees(24.96) // TUNE ME! 
         );
     }
 

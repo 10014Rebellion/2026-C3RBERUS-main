@@ -2,24 +2,25 @@
 
 package frc.robot.bindings;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
-import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.conveyor.Conveyor;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.shooter.Shooter;
-import frc.robot.commands.DriveCharacterizationCommands;
 
 public class ButtonBindings {
     private final Drive mDriveSS;
     private final Shooter mShooterSS;
+    private final Conveyor mConveyorSS;
     private final FlydigiApex4 mDriverController = new FlydigiApex4(BindingsConstants.kDriverControllerPort);
 
-    public ButtonBindings(Drive pDriveSS, Shooter pShooterSS) {
-        this.mShooterSS = pShooterSS;
+    public ButtonBindings(Drive pDriveSS, Shooter pShooterSS, Conveyor pConveyorSS) {
         this.mDriveSS = pDriveSS;
+        this.mShooterSS = pShooterSS;
+        this.mConveyorSS = pConveyorSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.setToTeleop());
     }
 
@@ -34,6 +35,27 @@ public class ButtonBindings {
                 () -> mDriverController.getPOVAngle());
 
         mDriverController.y().onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
+
+        mDriverController.a()
+            .onTrue(mConveyorSS.setConveyorVoltsCmd(9))
+            .onFalse(mConveyorSS.setConveyorVoltsCmd(0));
+
+        mDriverController.povUp()
+            .onTrue(mShooterSS.setHoodRot(Rotation2d.fromDegrees(20)));
+
+        mDriverController.povRight()
+            .onTrue(mShooterSS.setHoodRot(Rotation2d.fromDegrees(10)));
+
+        mDriverController.povDown()
+            .onTrue(mShooterSS.setHoodRot(Rotation2d.kZero));
+
+        mDriverController.rightTrigger()
+            .onTrue(mShooterSS.setIndexersVoltsCmd(12))
+            .onFalse(mShooterSS.setIndexersVoltsCmd(0));
+
+        mDriverController.leftTrigger()
+            .onTrue(mShooterSS.setFlywheelsRPSCmd(80))
+            .onFalse(mShooterSS.setFlywheelsVoltsCmd(0));
 
         // mDriverController.a()
         //     .onTrue(
@@ -55,32 +77,26 @@ public class ButtonBindings {
     //         ))
     //         .onFalse(mDriveSS.setToTeleop());
 
-        mDriverController.x()
-            .onTrue(DriveCharacterizationCommands.testAzimuthsVoltage(mDriveSS, 0, 1, 2, 3))
-            .onFalse(mDriveSS.setToTeleop());
 
         // mDriverController.a()
         //     .onTrue(Commands.runOnce(() -> mDriveSS.setPose(new Pose2d()), mDriveSS)
         //             .andThen(mDriveSS.setToGenericLineAlign(() -> new Pose2d(2.5, 2.5, Rotation2d.fromDegrees(45.0)), () -> Rotation2d.fromDegrees(45.0))));
     
-        mDriverController.a()
-            .onTrue(new InstantCommand())
-            .onFalse(new InstantCommand());
+        // mDriverController.a()
+        //     .onTrue(new InstantCommand())
+        //     .onFalse(new InstantCommand());
 
-        mDriverController.leftTrigger()
-            .onTrue(mShooterSS.setFlywheelsVoltsCmd(11))
-            .onFalse(mShooterSS.setFlywheelsVoltsCmd(0));
 
-        mDriverController.rightTrigger()
-            .onTrue(mShooterSS.setIndexersVoltsCmd(12))
-            .onFalse(mShooterSS.setIndexersVoltsCmd(0));
+        // mDriverController.rightTrigger()
+        //     .onTrue(mShooterSS.setIndexersVoltsCmd(12))
+        //     .onFalse(mShooterSS.setIndexersVoltsCmd(0));
 
-        mDriverController.leftBumper()
-            .onTrue(mShooterSS.setHoodVoltsCmd(1))
-            .onFalse(mShooterSS.setHoodVoltsCmd(0));
+        // mDriverController.leftBumper()
+        //     .onTrue(mShooterSS.setHoodVoltsCmd(1))
+        //     .onFalse(mShooterSS.setHoodVoltsCmd(0));
 
-        mDriverController.rightBumper()
-            .onTrue(mShooterSS.setHoodVoltsCmd(-1))
-            .onFalse(mShooterSS.setHoodVoltsCmd(0));
+        // mDriverController.rightBumper()
+        //     .onTrue(mShooterSS.setHoodVoltsCmd(-1))
+        //     .onFalse(mShooterSS.setHoodVoltsCmd(0));
     }
 }

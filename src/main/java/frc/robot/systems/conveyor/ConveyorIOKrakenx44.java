@@ -52,6 +52,18 @@ public class ConveyorIOKrakenx44 implements ConveyorIO {
         mConveyorTempCelsius = mConveyorMotor.getDeviceTemp();
 
         mConveyorMotor.getConfigurator().apply(ConveyorConfig);
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0, 
+            mConveyorVelocityMPS,
+            mConveyorAccelerationMPSS, 
+            mConveyorVoltage,
+            mConveyorSupplyCurrent,
+            mConveyorStatorCurrent,
+            mConveyorTempCelsius
+        );
+
+        mConveyorMotor.optimizeBusUtilization();
     }
 
     @Override

@@ -13,7 +13,7 @@ public class ConveyorConstants {
         42, // Motor ID // TODO: TUNE ME!
         Constants.kSubsystemsCANBus, 
         1, // Rotor to Mechanism Ratio // TODO: TUNE ME!
-        InvertedValue.CounterClockwise_Positive,
+        InvertedValue.Clockwise_Positive,
         NeutralModeValue.Coast,
         new CurrentLimits(30, 40)
     );

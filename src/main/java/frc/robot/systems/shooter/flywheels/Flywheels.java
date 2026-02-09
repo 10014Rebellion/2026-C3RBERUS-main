@@ -2,7 +2,6 @@ package frc.robot.systems.shooter.flywheels;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 import static frc.robot.systems.shooter.ShooterConstants.FlywheelConstants.kFlywheelControlConfig;
@@ -10,8 +9,6 @@ import static frc.robot.systems.shooter.ShooterConstants.FlywheelConstants.kFlyw
 public class Flywheels extends SubsystemBase {
   private final FlywheelIO mLeaderFlywheelIO;
   private final FlywheelIO mFollowerFlywheelIO;
-
-  private final DCMotor mSimMotor;
 
   private final FlywheelInputsAutoLogged mLeaderFlywheelInputs = new FlywheelInputsAutoLogged();
   private final FlywheelInputsAutoLogged mFollowerFlywheelInputs = new FlywheelInputsAutoLogged();
@@ -26,7 +23,6 @@ public class Flywheels extends SubsystemBase {
   public Flywheels(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO) {
     this.mLeaderFlywheelIO = pLeaderFlywheelIO;
     this.mFollowerFlywheelIO = pFollowerFlywheelIO;
-    this.mSimMotor = DCMotor.getKrakenX44Foc(2);
   }
 
   public void setFlywheelVolts(double pVolts) {
@@ -35,13 +31,7 @@ public class Flywheels extends SubsystemBase {
   }
 
   public void setFlywheelSpeeds(double pRPS) {
-    double feedforward = 0;
-    // mSimMotor.getCurrent(
-    //   mLeaderFlywheelInputs.iFlywheelClosedLoopReference * Math.PI * 2, 
-    //   mLeaderFlywheelInputs.iFlywheelMotorVolts
-    // );
-    
-    mLeaderFlywheelIO.setMotorVelAndAccel(pRPS, 0, feedforward);
+    mLeaderFlywheelIO.setMotorVelAndAccel(pRPS, 0, 0);
     mFollowerFlywheelIO.enforceFollower();
   }
 

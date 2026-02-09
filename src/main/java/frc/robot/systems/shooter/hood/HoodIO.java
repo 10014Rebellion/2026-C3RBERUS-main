@@ -1,7 +1,6 @@
 package frc.robot.systems.shooter.hood;
 
 import org.littletonrobotics.junction.AutoLog;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public interface HoodIO {
@@ -18,9 +17,15 @@ public interface HoodIO {
     public double iHoodTempCelsius = 0.0;
   }
 
+  public default void setPDConstants(double pKP, double pKD) {}
+
+  public default void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {}
+
   public default void updateInputs(HoodInputs pInputs) {}
 
-  public default void setMotorPosition(double pVelocityRPS, double pFeedforward) {}
+  public default void setMotorPosition(Rotation2d pRotationSP, double pFeedforward) {}
+
+  public default void stopIfCrazy() {}
 
   public default void setMotorVolts(double pVolts) {}
 
