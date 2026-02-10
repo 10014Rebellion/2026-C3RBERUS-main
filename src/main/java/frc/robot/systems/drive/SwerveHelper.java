@@ -47,7 +47,9 @@ public class SwerveHelper {
             new Rotation2d(speeds.omegaRadiansPerSecond * dt * driftRate));
         var twist = new Pose2d().log(desiredDeltaPose);
 
-        return new ChassisSpeeds((twist.dx / dt), (twist.dy / dt), (speeds.omegaRadiansPerSecond));
+        double discOmegaRadiansPerSecond = ChassisSpeeds.discretize(speeds, dt).omegaRadiansPerSecond;
+
+        return new ChassisSpeeds((twist.dx / dt), (twist.dy / dt), (discOmegaRadiansPerSecond));
     }
 
     public static SwerveModuleState copyState(SwerveModuleState state) {

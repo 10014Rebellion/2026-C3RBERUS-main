@@ -33,6 +33,7 @@ import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVision.VisionObservation;
+import frc.robot.systems.drive.controllers.SpeedErrorController;
 import frc.robot.systems.drive.gyro.GyroIO;
 import frc.robot.systems.drive.gyro.GyroInputsAutoLogged;
 import frc.robot.systems.drive.modules.Module;
@@ -68,6 +69,7 @@ public class Drive extends SubsystemBase {
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
     private final boolean kUseGenerator = true;
+    private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
 
     private DriveManager mDriveManager;
 
@@ -215,7 +217,7 @@ public class Drive extends SubsystemBase {
     /* Sets the desired swerve module states to the robot */
     public void runSwerve(ChassisSpeeds speeds) {
         if(speeds == null) return;
-        mDesiredSpeeds = SwerveHelper.discretize(speeds, tDriftRate.get());
+        mDesiredSpeeds = mSpeedErrorController.correctSpeed(getRobotChassisSpeeds(), SwerveHelper.discretize(speeds, tDriftRate.get()));
 
         /* Logs all the possible drive states, great for debugging */
         SwerveHelper.logPossibleDriveStates(
