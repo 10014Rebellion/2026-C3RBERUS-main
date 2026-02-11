@@ -4,29 +4,28 @@
 
 package frc.robot.systems.intake;
 
-import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.systems.intake.pivot.IntakePivotSS;
+import frc.robot.systems.intake.roller.IntakeRollerSS;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+public class Intake {
+  private final IntakeRollerSS mIntakeRollerSS;
+  private final IntakePivotSS mIntakePivotSS;
 
-public class Intake extends SubsystemBase {
-  private final IntakeIO mIntakeIO;
-  private final IntakeInputsAutoLogged mIntakeInputs = new IntakeInputsAutoLogged();
-  /** Creates a new Climb. */
-  public Intake(IntakeIO pIntakeIO) {
-    this.mIntakeIO = pIntakeIO;
+  public Intake(IntakeRollerSS pIntakeRollerSS, IntakePivotSS pIntakePivotSS) {
+    this.mIntakeRollerSS = pIntakeRollerSS;
+    this.mIntakePivotSS = pIntakePivotSS;
   }
 
-  public void setIntakeVolts(double pVolts) {
-    mIntakeIO.setMotorVolts(pVolts);
+  public void setRollerVolts(double pVolts) {
+    mIntakeRollerSS.setVolts(pVolts);
   }
 
-  public void stopIntakeMotor() {
-    mIntakeIO.stopMotor();
+  public void stopRollerMotor() {
+    mIntakeRollerSS.stopMotor();
   }
-  @Override
-  public void periodic() {
-    mIntakeIO.updateInputs(mIntakeInputs);
-    Logger.processInputs("Intake", mIntakeInputs);
-    // This method will be called once per scheduler run
+
+  public void setPivotRotCmd(Rotation2d pRotSP) {
+    mIntakePivotSS.setPivotVolts(0);
   }
 }

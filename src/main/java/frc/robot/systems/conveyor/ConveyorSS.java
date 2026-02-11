@@ -10,11 +10,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Conveyor extends SubsystemBase {
+public class ConveyorSS extends SubsystemBase {
   private final ConveyorIO mConveyorIO;
   private final ConveyorInputsAutoLogged mConveyorInputs = new ConveyorInputsAutoLogged();
 
-  public Conveyor(ConveyorIO pConveyorIO) {
+  public ConveyorSS(ConveyorIO pConveyorIO) {
     this.mConveyorIO = pConveyorIO;
   }
 

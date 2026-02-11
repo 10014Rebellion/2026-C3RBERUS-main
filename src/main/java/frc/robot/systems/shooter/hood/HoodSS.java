@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 
-public class Hood extends SubsystemBase{
+public class HoodSS extends SubsystemBase{
   private final HoodIO mHoodIO;
   private final ArmFeedforward mHoodFF;
   private final HoodInputsAutoLogged mHoodInputs = new HoodInputsAutoLogged();
@@ -23,7 +23,7 @@ public class Hood extends SubsystemBase{
   private final LoggedTunableNumber tHoodMaxAccel = new LoggedTunableNumber("Hood/Control/MaxAcceleration", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration());
   private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Hood/Control/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
 
-  public Hood(HoodIO pHoodIO) {
+  public HoodSS(HoodIO pHoodIO) {
     this.mHoodIO = pHoodIO;
     this.mHoodFF = HoodConstants.kHoodControlConfig.feedforward();
   }

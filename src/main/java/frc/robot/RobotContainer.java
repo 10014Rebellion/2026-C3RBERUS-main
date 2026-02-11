@@ -23,23 +23,23 @@ import frc.robot.systems.shooter.ShooterConstants.IndexerConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelIO;
 import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
 import frc.robot.systems.shooter.flywheels.FlywheelIOSim;
-import frc.robot.systems.shooter.flywheels.Flywheels;
-import frc.robot.systems.shooter.hood.Hood;
+import frc.robot.systems.shooter.flywheels.FlywheelsSS;
+import frc.robot.systems.shooter.hood.HoodSS;
 import frc.robot.systems.shooter.hood.HoodIO;
 import frc.robot.systems.shooter.hood.HoodIOKrakenX44;
 import frc.robot.systems.shooter.hood.HoodIOSim;
 import frc.robot.systems.shooter.indexers.IndexerIO;
 import frc.robot.systems.shooter.indexers.IndexerIOKrakenX44;
 import frc.robot.systems.shooter.indexers.IndexerIOSim;
-import frc.robot.systems.shooter.indexers.Indexers;
+import frc.robot.systems.shooter.indexers.IndexersSS;
 import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
-import frc.robot.systems.conveyor.Conveyor;
+import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorConstants;
 import frc.robot.systems.conveyor.ConveyorIO;
-import frc.robot.systems.conveyor.ConveyorIOKrakenx44;
+import frc.robot.systems.conveyor.ConveyorIOKrakenX44;
 import frc.robot.systems.conveyor.ConveyorIOSim;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -48,7 +48,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
     private final Drive mDrive;
     private final Shooter mShooter;
-    private final Conveyor mConveyor;
+    private final ConveyorSS mConveyor;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
@@ -68,18 +68,18 @@ public class RobotContainer {
                     new ATagVision(new ATagCameraIO[]{}));
 
                 mShooter = new Shooter(
-                    new Indexers(
+                    new IndexersSS(
                         new IndexerIOKrakenX44(IndexerConstants.kIndexerLeaderConfig), 
                         new IndexerIOKrakenX44(IndexerConstants.kIndexerFollowerConfig)
                     ),
-                    new Hood(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
-                    new Flywheels(
+                    new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
+                    new FlywheelsSS(
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
                     )
                 );
 
-                mConveyor = new Conveyor(new ConveyorIOKrakenx44(ConveyorConstants.kConveyorMotorConstants));
+                mConveyor = new ConveyorSS(new ConveyorIOKrakenX44(ConveyorConstants.kConveyorMotorConstants));
                 break;
 
             case SIM:
@@ -99,18 +99,18 @@ public class RobotContainer {
                     }));
 
                 mShooter = new Shooter(
-                    new Indexers(
+                    new IndexersSS(
                         new IndexerIOSim(IndexerConstants.kIndexerLeaderConfig), 
                         new IndexerIOSim(IndexerConstants.kIndexerFollowerConfig)
                     ),
-                    new Hood(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
-                    new Flywheels(
+                    new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
+                    new FlywheelsSS(
                         new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
                         new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
                     )
                 );
 
-                mConveyor = new Conveyor(new ConveyorIOSim());
+                mConveyor = new ConveyorSS(new ConveyorIOSim());
                 break;
 
             default:
@@ -130,18 +130,18 @@ public class RobotContainer {
                     }));
 
                  mShooter = new Shooter(
-                    new Indexers(
+                    new IndexersSS(
                         new IndexerIO() {}, 
                         new IndexerIO() {}
                     ),
-                    new Hood(new HoodIO() {}),
-                    new Flywheels(
+                    new HoodSS(new HoodIO() {}),
+                    new FlywheelsSS(
                         new FlywheelIO() {},
                         new FlywheelIO() {}
                     )
                 );
 
-                mConveyor = new Conveyor(new ConveyorIO() {});
+                mConveyor = new ConveyorSS(new ConveyorIO() {});
                 break;
         }
         

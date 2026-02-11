@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.shooter.ShooterConstants.IndexerConstants;
 
-public class Indexers extends SubsystemBase {
+public class IndexersSS extends SubsystemBase {
   private final IndexerIO mLeaderIndexerIO;
   private final IndexerIO mFollowerIndexerIO;
 
@@ -21,7 +21,7 @@ public class Indexers extends SubsystemBase {
   
   private SimpleMotorFeedforward mIndexerFeedForward = IndexerConstants.kIndexerControlConfig.feedforward();
   
-  public Indexers(IndexerIO pLeaderIndexerIO, IndexerIO pFollowerIndexerIO) {
+  public IndexersSS(IndexerIO pLeaderIndexerIO, IndexerIO pFollowerIndexerIO) {
     this.mLeaderIndexerIO = pLeaderIndexerIO;
     this.mFollowerIndexerIO = pFollowerIndexerIO;
   }

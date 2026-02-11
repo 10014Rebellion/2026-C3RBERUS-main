@@ -7,7 +7,7 @@ import frc.lib.tuning.LoggedTunableNumber;
 
 import static frc.robot.systems.shooter.ShooterConstants.FlywheelConstants.kFlywheelControlConfig;
 
-public class Flywheels extends SubsystemBase {
+public class FlywheelsSS extends SubsystemBase {
   private final FlywheelIO mLeaderFlywheelIO;
   private final FlywheelIO mFollowerFlywheelIO;
 
@@ -27,7 +27,7 @@ public class Flywheels extends SubsystemBase {
 
   private SimpleMotorFeedforward mFlywheelFeedforward = kFlywheelControlConfig.feeforward();
 
-  public Flywheels(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO) {
+  public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO) {
     this.mLeaderFlywheelIO = pLeaderFlywheelIO;
     this.mFollowerFlywheelIO = pFollowerFlywheelIO;
   }

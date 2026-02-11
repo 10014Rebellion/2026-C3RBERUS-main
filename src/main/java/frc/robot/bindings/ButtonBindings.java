@@ -7,17 +7,17 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
-import frc.robot.systems.conveyor.Conveyor;
+import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.shooter.Shooter;
 
 public class ButtonBindings {
     private final Drive mDriveSS;
     private final Shooter mShooterSS;
-    private final Conveyor mConveyorSS;
+    private final ConveyorSS mConveyorSS;
     private final FlydigiApex4 mDriverController = new FlydigiApex4(BindingsConstants.kDriverControllerPort);
 
-    public ButtonBindings(Drive pDriveSS, Shooter pShooterSS, Conveyor pConveyorSS) {
+    public ButtonBindings(Drive pDriveSS, Shooter pShooterSS, ConveyorSS pConveyorSS) {
         this.mDriveSS = pDriveSS;
         this.mShooterSS = pShooterSS;
         this.mConveyorSS = pConveyorSS;

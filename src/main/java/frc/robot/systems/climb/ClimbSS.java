@@ -17,7 +17,7 @@ import frc.lib.hardware.HardwareRecords.ElevatorController;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.tuning.LoggedTunableNumber;
 
-public class Climb extends SubsystemBase {
+public class ClimbSS extends SubsystemBase {
 
   @AutoLogOutput(key = "Elevator/CurrentSlot")
   public static int mSlot = 0;
@@ -57,7 +57,7 @@ public class Climb extends SubsystemBase {
   private double mCurrentClimbGoalPositionMeters = 0.0;
   private ElevatorFeedforward mFeedforward;
 
-  public Climb(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits) {
+  public ClimbSS(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits) {
     this.mClimbIO = pClimbIO;
     this.mSoftLimits = pSoftLimits;
     // this.mFeedforward = kControllers.getSlot(mSlot, ElevatorFeedforward.class);

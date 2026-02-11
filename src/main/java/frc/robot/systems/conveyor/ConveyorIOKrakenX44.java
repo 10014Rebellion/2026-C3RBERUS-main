@@ -15,7 +15,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 
-public class ConveyorIOKrakenx44 implements ConveyorIO {
+public class ConveyorIOKrakenX44 implements ConveyorIO {
     private final TalonFX mConveyorMotor;
     private final VoltageOut mConveyorVoltageControl = new VoltageOut(0.0);
 
@@ -26,7 +26,7 @@ public class ConveyorIOKrakenx44 implements ConveyorIO {
     private final StatusSignal<Temperature> mConveyorTempCelsius;
     private final StatusSignal<AngularAcceleration> mConveyorAccelerationMPSS;
 
-    public ConveyorIOKrakenx44(BasicMotorHardware pConfig) {
+    public ConveyorIOKrakenX44(BasicMotorHardware pConfig) {
         mConveyorMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
         var ConveyorConfig = new TalonFXConfiguration();
 

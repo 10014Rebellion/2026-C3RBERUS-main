@@ -3,17 +3,16 @@ package frc.robot.systems.shooter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.systems.shooter.flywheels.Flywheels;
-import frc.robot.systems.shooter.hood.Hood;
-import frc.robot.systems.shooter.indexers.Indexers;
+import frc.robot.systems.shooter.flywheels.FlywheelsSS;
+import frc.robot.systems.shooter.hood.HoodSS;
+import frc.robot.systems.shooter.indexers.IndexersSS;
 
-public class Shooter extends SubsystemBase {
-  private final Indexers mIndexersSS;
-  private final Hood mHoodSS;
-  private final Flywheels mFlywheelSS;
+public class Shooter {
+  private final IndexersSS mIndexersSS;
+  private final HoodSS mHoodSS;
+  private final FlywheelsSS mFlywheelSS;
 
-  public Shooter(Indexers pIndexerSS, Hood pHoodSS, Flywheels pFlywheelSS) {
+  public Shooter(IndexersSS pIndexerSS, HoodSS pHoodSS, FlywheelsSS pFlywheelSS) {
     this.mIndexersSS = pIndexerSS; this.mHoodSS = pHoodSS; this.mFlywheelSS = pFlywheelSS; // I miss my C++ initializer lists :'(
   }
 
@@ -43,10 +42,5 @@ public class Shooter extends SubsystemBase {
 
   public Command setHoodVoltsCmd(double pVolts) {
     return new InstantCommand(() -> mHoodSS.setHoodVolts(pVolts));
-  }
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
   }
 }
