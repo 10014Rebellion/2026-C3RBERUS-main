@@ -48,6 +48,18 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         mIntakePivotTempCelsius = mIntakePivotMotor.getDeviceTemp();
         
         mIntakePivotMotor.getConfigurator().apply(IntakeConfig);
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0, 
+            mIntakePivotVelocityMPS,
+            mIntakePivotAccelerationMPSS, 
+            mIntakePivotVoltage,
+            mIntakePivotSupplyCurrent,
+            mIntakePivotStatorCurrent,
+            mIntakePivotTempCelsius
+        );
+
+        mIntakePivotMotor.optimizeBusUtilization();
     }
 
     @Override

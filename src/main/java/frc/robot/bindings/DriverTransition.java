@@ -4,6 +4,7 @@ import frc.robot.Constants;
 
 public class DriverTransition {
     private final double kSwitchTimeSec = 3;
+
     private final double kStepAmount = 1.0 / ((int) Math.ceil(kSwitchTimeSec / Constants.kPeriodicSec));
     private double kDefenderFactor = 0.0;
     private DriverType mActiveDriver = DriverType.SCORER;
@@ -23,11 +24,11 @@ public class DriverTransition {
     }
 
     public double getScorerFactor() {
-        if(mDesiredDriver == DriverType.SCORER) {
-            return 1.0 - kDefenderFactor;
-        } else { // if (mDesiredDriver == DriverType.DEFENDER) {
-            return kDefenderFactor;
-        }
+        return 1.0 - kDefenderFactor;
+    }
+
+    public double getDefenderFactor() {
+        return kDefenderFactor;
     }
 
     public void periodic() {

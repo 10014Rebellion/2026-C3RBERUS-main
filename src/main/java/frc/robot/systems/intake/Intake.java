@@ -9,12 +9,12 @@ import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
 
 public class Intake {
-  private final IntakeRollerSS mIntakeRollerSS;
   private final IntakePivotSS mIntakePivotSS;
+  private final IntakeRollerSS mIntakeRollerSS;
 
-  public Intake(IntakeRollerSS pIntakeRollerSS, IntakePivotSS pIntakePivotSS) {
-    this.mIntakeRollerSS = pIntakeRollerSS;
+  public Intake(IntakePivotSS pIntakePivotSS, IntakeRollerSS pIntakeRollerSS) {
     this.mIntakePivotSS = pIntakePivotSS;
+    this.mIntakeRollerSS = pIntakeRollerSS;
   }
 
   public void setRollerVolts(double pVolts) {

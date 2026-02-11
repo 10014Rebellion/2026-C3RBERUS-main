@@ -16,6 +16,16 @@ import frc.robot.systems.drive.modules.Module;
 import frc.robot.systems.drive.modules.ModuleIO;
 import frc.robot.systems.drive.modules.ModuleIOKraken;
 import frc.robot.systems.drive.modules.ModuleIOSim;
+import frc.robot.systems.intake.Intake;
+import frc.robot.systems.intake.IntakeConstants;
+import frc.robot.systems.intake.pivot.IntakePivotIO;
+import frc.robot.systems.intake.pivot.IntakePivotIOKrakenX44;
+import frc.robot.systems.intake.pivot.IntakePivotIOSim;
+import frc.robot.systems.intake.pivot.IntakePivotSS;
+import frc.robot.systems.intake.roller.IntakeRollerIO;
+import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
+import frc.robot.systems.intake.roller.IntakeRollerIOSim;
+import frc.robot.systems.intake.roller.IntakeRollerSS;
 import frc.robot.systems.shooter.Shooter;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
@@ -49,6 +59,7 @@ public class RobotContainer {
     private final Drive mDrive;
     private final Shooter mShooter;
     private final ConveyorSS mConveyor;
+    private final Intake mIntake;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
@@ -77,6 +88,11 @@ public class RobotContainer {
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
                     )
+                );
+
+                mIntake = new Intake(
+                    new IntakePivotSS(new IntakePivotIOKrakenX44(IntakeConstants.PivotConstants.kPivotMotorConfig)),
+                    new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
                 mConveyor = new ConveyorSS(new ConveyorIOKrakenX44(ConveyorConstants.kConveyorMotorConstants));
@@ -110,6 +126,11 @@ public class RobotContainer {
                     )
                 );
 
+                mIntake = new Intake(
+                    new IntakePivotSS(new IntakePivotIOSim()),
+                    new IntakeRollerSS(new IntakeRollerIOSim())
+                );
+
                 mConveyor = new ConveyorSS(new ConveyorIOSim());
                 break;
 
@@ -141,12 +162,17 @@ public class RobotContainer {
                     )
                 );
 
+                mIntake = new Intake(
+                    new IntakePivotSS(new IntakePivotIO() {}),
+                    new IntakeRollerSS(new IntakeRollerIO() {})
+                );
+
                 mConveyor = new ConveyorSS(new ConveyorIO() {});
                 break;
         }
         
     
-        mButtonBindings = new ButtonBindings(mDrive, mShooter, mConveyor);
+        mButtonBindings = new ButtonBindings(mDrive, mShooter, mIntake, mConveyor);
 
         initBindings();
 

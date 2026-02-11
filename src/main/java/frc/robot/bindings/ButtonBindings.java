@@ -9,20 +9,24 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.drive.Drive;
+import frc.robot.systems.intake.Intake;
 import frc.robot.systems.shooter.Shooter;
 
 public class ButtonBindings {
     private final Drive mDriveSS;
-    private final Shooter mShooterSS;
+    private final Shooter mShooter;
+    private final Intake mIntake;
     private final ConveyorSS mConveyorSS;
     private final FlydigiApex4 mDriverController = new FlydigiApex4(BindingsConstants.kDriverControllerPort);
 
-    public ButtonBindings(Drive pDriveSS, Shooter pShooterSS, ConveyorSS pConveyorSS) {
+    public ButtonBindings(Drive pDriveSS, Shooter pShooter, Intake pIntake, ConveyorSS pConveyorSS) {
         this.mDriveSS = pDriveSS;
-        this.mShooterSS = pShooterSS;
+        this.mShooter = pShooter;
+        this.mIntake = pIntake;
         this.mConveyorSS = pConveyorSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.setToTeleop());
     }
+
 
     public void initDriverButtonBindings() {
         new Trigger(() -> DriverStation.isTeleopEnabled())
@@ -41,25 +45,25 @@ public class ButtonBindings {
             .onFalse(mConveyorSS.setConveyorVoltsCmd(0));
 
         mDriverController.povUp()
-            .onTrue(mShooterSS.setHoodRot(Rotation2d.fromDegrees(20)));
+            .onTrue(mShooter.setHoodRot(Rotation2d.fromDegrees(20)));
 
         mDriverController.povRight()
-            .onTrue(mShooterSS.setHoodRot(Rotation2d.fromDegrees(10)));
+            .onTrue(mShooter.setHoodRot(Rotation2d.fromDegrees(10)));
 
         mDriverController.povDown()
-            .onTrue(mShooterSS.setHoodRot(Rotation2d.kZero));
+            .onTrue(mShooter.setHoodRot(Rotation2d.kZero));
 
         mDriverController.rightTrigger()
-            .onTrue(mShooterSS.setIndexersVoltsCmd(9))
-            .onFalse(mShooterSS.setIndexersVoltsCmd(0.0));
+            .onTrue(mShooter.setIndexersVoltsCmd(9))
+            .onFalse(mShooter.setIndexersVoltsCmd(0.0));
 
         mDriverController.leftTrigger()
-            .onTrue(mShooterSS.setFlywheelsRPSCmd(90))
-            .onFalse(mShooterSS.setFlywheelsRPSCmd(0));
+            .onTrue(mShooter.setFlywheelsRPSCmd(90))
+            .onFalse(mShooter.setFlywheelsRPSCmd(0));
 
         mDriverController.leftBumper()
-            .onTrue(mShooterSS.setFlywheelsVoltsCmd(12))
-            .onFalse(mShooterSS.setFlywheelsVoltsCmd(0));
+            .onTrue(mShooter.setFlywheelsVoltsCmd(12))
+            .onFalse(mShooter.setFlywheelsVoltsCmd(0));
 
         // mDriverController.a()
         //     .onTrue(

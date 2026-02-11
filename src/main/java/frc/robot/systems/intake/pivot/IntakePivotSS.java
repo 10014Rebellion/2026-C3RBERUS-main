@@ -16,6 +16,10 @@ public class IntakePivotSS extends SubsystemBase {
     this.mIntakePivotIO = pIntakePivotIO;
   }
 
+  // public void setPivotRot(Rotation2d pRot) {
+  //   mIntakePivotIO.setMotorVolts(pVolts);
+  // }
+
   public void setPivotVolts(double pVolts) {
     mIntakePivotIO.setMotorVolts(pVolts);
   }

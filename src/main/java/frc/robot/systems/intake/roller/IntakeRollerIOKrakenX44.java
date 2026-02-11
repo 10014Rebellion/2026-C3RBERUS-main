@@ -48,6 +48,18 @@ public class IntakeRollerIOKrakenX44 implements IntakeRollerIO{
         mIntakeRollerTempCelsius = mIntakeRollerMotor.getDeviceTemp();
         
         mIntakeRollerMotor.getConfigurator().apply(IntakeConfig);
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0, 
+            mIntakeRollerVelocityMPS,
+            mIntakeRollerAccelerationMPSS, 
+            mIntakeRollerVoltage,
+            mIntakeRollerSupplyCurrent,
+            mIntakeRollerStatorCurrent,
+            mIntakeRollerTempCelsius
+        );
+
+        mIntakeRollerMotor.optimizeBusUtilization();
     }
 
     @Override
