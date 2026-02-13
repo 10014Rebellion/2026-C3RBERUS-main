@@ -130,8 +130,8 @@ public class RobotContainer {
                 );
 
                 mIntake = new Intake(
-                    new IntakePivotSS(new IntakePivotIOSim()),
-                    new IntakeRollerSS(new IntakeRollerIOSim())
+                    new IntakePivotSS(new IntakePivotIO() {}),
+                    new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
                 mConveyor = new ConveyorSS(new ConveyorIOSim());
