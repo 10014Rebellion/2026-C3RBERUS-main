@@ -45,33 +45,12 @@ public class RobotContainer {
                             new Module("BR", new ModuleIOKraken(kBackRightHardware))
                         },
                         new GyroIOPigeon2(),
-                        new AprilTag(new AprilTagIO[] {
-                            new AprilTagIOPVTag(
-                                    AprilTagConstants.kFrontLeftCamName, 
-                                    AprilTagConstants.kFrontLeftCamTransform, 
-                                    AprilTagConstants.kFrontLeftCamOrientation),
-                            new AprilTagIOPVTag(
-                                    AprilTagConstants.kFrontRightCamName,
-                                    AprilTagConstants.kFrontRightCamTransform,
-                                    AprilTagConstants.kFrontRightCamOrientation),
-                            new AprilTagIOPVTag(
-                                    AprilTagConstants.kBackLeftCamName, 
-                                    AprilTagConstants.kBackLeftCamTransform, 
-                                    AprilTagConstants.kBackLeftCamOrientation),
-                            new AprilTagIOPVTag(
-                                    AprilTagConstants.kBackRightCamName,
-                                    AprilTagConstants.kBackRightCamTransform,
-                                    AprilTagConstants.kBackRightCamOrientation)
-                        }),
+                        new AprilTag(new AprilTagIO[] {}),
                         new ObjectDetect(new ObjectDetectIO[] {
                             new ObjectDetectIOPV(
                                     ObjectDetectConstants.kFrontRightCamName,
                                     ObjectDetectConstants.kFrontRightCamTransform,
-                                    ObjectDetectConstants.kFrontRightCamOrientation),
-                            new ObjectDetectIOPV(
-                                    ObjectDetectConstants.kFrontLeftCamName, 
-                                    ObjectDetectConstants.kFrontLeftCamTransform, 
-                                    ObjectDetectConstants.kFrontLeftCamOrientation)
+                                    ObjectDetectConstants.kFrontRightCamOrientation)
                         }));
                 break;
 

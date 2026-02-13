@@ -25,7 +25,7 @@ import edu.wpi.first.math.util.Units;
 public class ObjectDetectConstants {
 
     // Best to get these from CAD, or in person.
-    public static final String kFrontLeftCamName = "FrontLeft"; // >>> TODO: TUNE ME
+    public static final String kFrontLeftCamName = "FrontLeft-OV9782"; // >>> TODO: TUNE ME
     public static final ObjectOrientation kFrontLeftCamOrientation = ObjectOrientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kFrontLeftCamTransform = new Transform3d(
             new Translation3d(
@@ -39,7 +39,7 @@ public class ObjectDetectConstants {
                     Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
                     ));
 
-    public static final String kFrontRightCamName = "FrontRight"; // >>> TODO: TUNE ME
+    public static final String kFrontRightCamName = "FrontRight-OV9782"; // >>> TODO: TUNE ME
     public static final ObjectOrientation kFrontRightCamOrientation = ObjectOrientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kFrontRightCamTransform = new Transform3d(
             new Translation3d(

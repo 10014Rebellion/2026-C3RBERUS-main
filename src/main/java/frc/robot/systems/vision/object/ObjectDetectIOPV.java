@@ -109,7 +109,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
                         cornersY[i][j] = latestResult.targets.get(i).getMinAreaRectCorners().get(j).y;
                     }
 
-                    poses[i] = computePose(cornersX[i], cornersY[i], kPixelToRad, pLastRobotPose);
+                    poses[i] = computeCameratoObjectPose2d(cornersX[i], cornersY[i], kPixelToRad, pLastRobotPose);
                 }
 
                 pInputs.iTrackedTargetsClass = classes;
@@ -154,7 +154,7 @@ public class ObjectDetectIOPV implements ObjectDetectIO{
         return "";
     }
 
-    private Pose2d computePose(double[] pXcoords, double[] pYcoords, double pPixelToRad, Pose2d pLastPose){
+    private Pose2d computeCameratoObjectPose2d(double[] pXcoords, double[] pYcoords, double pPixelToRad, Pose2d pLastPose){
         double heightinPixels = pYcoords[1] - pYcoords[0];
         double theta = heightinPixels / pPixelToRad;
 
