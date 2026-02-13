@@ -82,11 +82,18 @@ public class SwerveHelper {
     }
 
     // ASSUMES THE CHOREO'S MOTOR TORQUE DOESN'T ALREADY EXCEED THE MOTOR'S LIMIT
-    public static double convertChoreoNewtonsToAmps(SwerveModuleState currentState, DriveFeedforwards ff, int i) {
-        double choreoLinearForceNewtons = projectTorque(currentState, 
-            VecBuilder.fill(
+    public static double convertChoreoNewtonsToAmps(SwerveModuleState currentState, SwerveModuleState unoptimizedDesiredState, DriveFeedforwards ff, int i) {
+        double choreoLinearForceNewtons = 
+            ppFFScalar(
+                currentState, 
+                unoptimizedDesiredState) 
+            * Math.hypot(
                 ff.robotRelativeForcesXNewtons()[i], 
-                ff.robotRelativeForcesYNewtons()[i]));
+                ff.robotRelativeForcesYNewtons()[i])
+            * Math.signum(projectTorque(currentState, 
+             VecBuilder.fill(
+                 ff.robotRelativeForcesXNewtons()[i], 
+                 ff.robotRelativeForcesYNewtons()[i])));
 
         // NEWTONS -> GEARBOX TORQUE -> MOTOR TORQUE
         double driveMotorTorque = (choreoLinearForceNewtons * kWheelRadiusMeters) / kDriveMotorGearing;
@@ -95,16 +102,16 @@ public class SwerveHelper {
         return driveMotorAmperage;
     }
 
-    public static double ppFFScalar(SwerveModuleState currentState, DriveFeedforwards ff, int i) {
-        return 
-            projectTorque(currentState, 
-                VecBuilder.fill(
-                    ff.robotRelativeForcesXNewtons()[i], 
-                    ff.robotRelativeForcesYNewtons()[i])) 
-                / 
-            Math.hypot(
-                ff.robotRelativeForcesXNewtons()[i], 
-                ff.robotRelativeForcesYNewtons()[i]);
+    public static double ppFFScalar(SwerveModuleState currentState, SwerveModuleState unoptimizedDesiredState) {
+        Vector<N2> wheelDirection = VecBuilder.fill(
+            Math.signum(currentState.speedMetersPerSecond) * currentState.angle.getCos(), 
+            Math.signum(currentState.speedMetersPerSecond) * currentState.angle.getCos());
+
+        Vector<N2> setpointDirection = VecBuilder.fill(
+            Math.signum(unoptimizedDesiredState.speedMetersPerSecond) * unoptimizedDesiredState.angle.getCos(), 
+            Math.signum(unoptimizedDesiredState.speedMetersPerSecond) * unoptimizedDesiredState.angle.getCos());
+        
+        return wheelDirection.dot(setpointDirection);
     }
 
     public static void logDriveFeedforward(DriveFeedforwards ff, int i) {

@@ -303,17 +303,17 @@ public class Drive extends SubsystemBase {
     }
 
     /* Calculates DriveFeedforward based off state */
-    public double calculateDriveFeedforward(int i) {
+    public double calculateDriveFeedforward(SwerveModuleState[] unoptimizedSetpointStates, int i) {
         double driveAmps = (mUseChoreoFeedForward) 
             ? SwerveHelper.convertChoreoNewtonsToAmps(
                 getModuleStates()[i], 
+                unoptimizedSetpointStates[i],
                 mPathPlanningFF, 
                 i)
             : mPathPlanningFF.torqueCurrentsAmps()[i] 
                 * SwerveHelper.ppFFScalar(
                     getModuleStates()[i], 
-                    mPathPlanningFF, 
-                    i);
+                    unoptimizedSetpointStates[i]);
 
         if(mFilterFeedForward) {
             driveAmps = SwerveHelper.lowPassFilter(
