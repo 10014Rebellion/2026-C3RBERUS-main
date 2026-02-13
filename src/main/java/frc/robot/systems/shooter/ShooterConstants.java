@@ -12,7 +12,7 @@ import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.hardware.HardwareRecords.MotionMagicConstants;
 import frc.lib.hardware.HardwareRecords.MotionMagicFOCControllerFF;
-import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagicFOC;
+import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.PDConstants;
@@ -68,8 +68,8 @@ public class ShooterConstants {
     };
 
 
-    public static class IndexerConstants {
-        public static final BasicMotorHardware kIndexerLeaderConfig = new BasicMotorHardware(
+    public static class FuelPumpConstants {
+        public static final BasicMotorHardware kFuelPumpLeaderConfig = new BasicMotorHardware(
             53,
             Constants.kSubsystemsCANBus,
             1,
@@ -78,13 +78,13 @@ public class ShooterConstants {
             new CurrentLimits(40, 50)
         );
 
-        public static final FollowerMotorHardware kIndexerFollowerConfig = new FollowerMotorHardware(
+        public static final FollowerMotorHardware kFuelPumpFollowerConfig = new FollowerMotorHardware(
             54,
-            kIndexerLeaderConfig,
+            kFuelPumpLeaderConfig,
             MotorAlignmentValue.Opposed
         );
 
-        public static final SimpleController kIndexerControlConfig = new SimpleController(
+        public static final SimpleController kFuelPumpControlConfig = new SimpleController(
             0,
             new PDConstants(2, 0.01), // TODO: TUNE ME
             new SimpleMotorFeedforward(0.3, 0, 0) // TODO: TUNE ME
@@ -101,7 +101,7 @@ public class ShooterConstants {
             new CurrentLimits(40, 50)
         );
 
-        public static final ArmControllerMotionMagicFOC kHoodControlConfig = new ArmControllerMotionMagicFOC(
+        public static final ArmControllerMotionMagic kHoodControlConfig = new ArmControllerMotionMagic(
             0, // not currently used
             new PDConstants(10, 0), // TODO: TUNE ME
             new MotionMagicConstants(100, 200, 0),  // TODO: TUNE ME

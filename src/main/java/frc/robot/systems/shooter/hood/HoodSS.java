@@ -56,7 +56,7 @@ public class HoodSS extends SubsystemBase{
     mHoodIO.updateInputs(mHoodInputs);
 
     refreshTuneables();
-    mHoodIO.stopIfCrazy();
+    mHoodIO.enforceSoftLimits();
 
     Logger.processInputs("Hood", mHoodInputs);
   }

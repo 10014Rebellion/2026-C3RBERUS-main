@@ -54,8 +54,8 @@ public class ButtonBindings {
             .onTrue(mShooter.setHoodRot(Rotation2d.kZero));
 
         mDriverController.rightTrigger()
-            .onTrue(mShooter.setIndexersVoltsCmd(9))
-            .onFalse(mShooter.setIndexersVoltsCmd(0.0));
+            .onTrue(mShooter.setFuelPumpsVoltsCmd(9))
+            .onFalse(mShooter.setFuelPumpsVoltsCmd(0.0));
 
         mDriverController.leftTrigger()
             .onTrue(mShooter.setFlywheelsRPSCmd(90))
@@ -96,8 +96,8 @@ public class ButtonBindings {
 
 
         // mDriverController.rightTrigger()
-        //     .onTrue(mShooterSS.setIndexersVoltsCmd(12))
-        //     .onFalse(mShooterSS.setIndexersVoltsCmd(0));
+        //     .onTrue(mShooterSS.setFuelPumpsVoltsCmd(12))
+        //     .onFalse(mShooterSS.setFuelPumpsVoltsCmd(0));
 
         // mDriverController.leftBumper()
         //     .onTrue(mShooterSS.setHoodVoltsCmd(1))

@@ -27,7 +27,7 @@ public class BindingsConstants {
             0.075, // Left Joystick Deadband
             1.0, // Rotational Scalar
             3.0, // Rotational Exponent
-            0.1, // Right Joystick Deadband
+            0.1, //     Right Joystick Deadband
             0.2 // Sniper Scalar
         ),
 

@@ -6,8 +6,6 @@ import static frc.robot.systems.drive.DriveConstants.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auton.AutonCommands;
-import frc.robot.bindings.BindingsConstants;
-import frc.robot.bindings.ButtonBindings;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 import frc.robot.systems.drive.gyro.GyroIO;
@@ -29,19 +27,21 @@ import frc.robot.systems.intake.roller.IntakeRollerSS;
 import frc.robot.systems.shooter.Shooter;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
-import frc.robot.systems.shooter.ShooterConstants.IndexerConstants;
+import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelIO;
 import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
 import frc.robot.systems.shooter.flywheels.FlywheelIOSim;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
+import frc.robot.systems.shooter.fuelpump.FuelPumpIO;
+import frc.robot.systems.shooter.fuelpump.FuelPumpIOKrakenX44;
+import frc.robot.systems.shooter.fuelpump.FuelPumpIOSim;
+import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.hood.HoodSS;
+import frc.robot.bindings.BindingsConstants;
+import frc.robot.bindings.ButtonBindings;
 import frc.robot.systems.shooter.hood.HoodIO;
 import frc.robot.systems.shooter.hood.HoodIOKrakenX44;
 import frc.robot.systems.shooter.hood.HoodIOSim;
-import frc.robot.systems.shooter.indexers.IndexerIO;
-import frc.robot.systems.shooter.indexers.IndexerIOKrakenX44;
-import frc.robot.systems.shooter.indexers.IndexerIOSim;
-import frc.robot.systems.shooter.indexers.IndexersSS;
 import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
@@ -79,9 +79,9 @@ public class RobotContainer {
                     new ATagVision(new ATagCameraIO[]{}));
 
                 mShooter = new Shooter(
-                    new IndexersSS(
-                        new IndexerIOKrakenX44(IndexerConstants.kIndexerLeaderConfig), 
-                        new IndexerIOKrakenX44(IndexerConstants.kIndexerFollowerConfig)
+                    new FuelPumpSS(
+                        new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpLeaderConfig), 
+                        new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpFollowerConfig)
                     ),
                     new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
                     new FlywheelsSS(
@@ -91,7 +91,10 @@ public class RobotContainer {
                 );
 
                 mIntake = new Intake(
-                    new IntakePivotSS(new IntakePivotIOKrakenX44(IntakeConstants.PivotConstants.kPivotMotorConfig)),
+                    new IntakePivotSS(new IntakePivotIOKrakenX44(
+                        IntakeConstants.PivotConstants.kPivotMotorConfig, 
+                        IntakeConstants.PivotConstants.kPivotEncoderConfig,
+                        IntakeConstants.PivotConstants.kPivotLimits)),
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
@@ -115,9 +118,9 @@ public class RobotContainer {
                     }));
 
                 mShooter = new Shooter(
-                    new IndexersSS(
-                        new IndexerIOSim(IndexerConstants.kIndexerLeaderConfig), 
-                        new IndexerIOSim(IndexerConstants.kIndexerFollowerConfig)
+                    new FuelPumpSS(
+                        new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
+                        new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig)
                     ),
                     new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
                     new FlywheelsSS(
@@ -151,9 +154,9 @@ public class RobotContainer {
                     }));
 
                  mShooter = new Shooter(
-                    new IndexersSS(
-                        new IndexerIO() {}, 
-                        new IndexerIO() {}
+                    new FuelPumpSS(
+                        new FuelPumpIO() {}, 
+                        new FuelPumpIO() {}
                     ),
                     new HoodSS(new HoodIO() {}),
                     new FlywheelsSS(

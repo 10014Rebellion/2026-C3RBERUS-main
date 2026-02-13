@@ -54,6 +54,14 @@ public class HardwareRecords {
         SensorDirectionValue direction
     ) {}
 
+    public static record MaxSplineEncoderHardware(
+        int canID,
+        double offset,
+        boolean zeroCentered,
+        boolean inverted,
+        double gearRatio
+    ){}
+
     public static record ElevatorController(
         int slot,
         PDConstants pdController,
@@ -67,7 +75,7 @@ public class HardwareRecords {
         ArmFeedforward feedforward
     ) {}
 
-    public static record ArmControllerMotionMagicFOC(
+    public static record ArmControllerMotionMagic(
         int slot,
         PDConstants pdController,
         MotionMagicConstants motionMagicConstants,

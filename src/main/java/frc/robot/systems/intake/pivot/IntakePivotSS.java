@@ -6,6 +6,7 @@ package frc.robot.systems.intake.pivot;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakePivotSS extends SubsystemBase {
@@ -16,9 +17,9 @@ public class IntakePivotSS extends SubsystemBase {
     this.mIntakePivotIO = pIntakePivotIO;
   }
 
-  // public void setPivotRot(Rotation2d pRot) {
-  //   mIntakePivotIO.setMotorVolts(pVolts);
-  // }
+  public void setPivotRot(Rotation2d pRot) {
+    mIntakePivotIO.setMotorRot(pRot, 0);
+  }
 
   public void setPivotVolts(double pVolts) {
     mIntakePivotIO.setMotorVolts(pVolts);
@@ -30,6 +31,9 @@ public class IntakePivotSS extends SubsystemBase {
   @Override
   public void periodic() {
     mIntakePivotIO.updateInputs(mIntakePivotInputs);
+
+    mIntakePivotIO.enforceSoftLimits();
+
     Logger.processInputs("Intake", mIntakePivotInputs);
   }
 }

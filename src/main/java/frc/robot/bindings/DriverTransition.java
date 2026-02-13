@@ -1,5 +1,7 @@
 package frc.robot.bindings;
 
+import java.util.function.DoubleSupplier;
+
 import frc.robot.Constants;
 
 public class DriverTransition {
@@ -11,11 +13,23 @@ public class DriverTransition {
     private DriverType mDesiredDriver = DriverType.SCORER;
 
     public enum DriverType {
-        SCORER,
-        DEFENDER
+        DEFENDER,
+        SCORER
     } 
 
     public DriverTransition() {}
+
+    public void hardSetDriverAs(DriverType pDriverToSwitchTo) {
+        if(pDriverToSwitchTo == DriverType.DEFENDER) {
+            kDefenderFactor = 1;
+            mActiveDriver = DriverType.DEFENDER;
+            mDesiredDriver = DriverType.DEFENDER;
+        } else {
+            kDefenderFactor = 0;
+            mActiveDriver = DriverType.SCORER;
+            mDesiredDriver = DriverType.SCORER;
+        }
+    }
 
     public void switchTo(DriverType pDriverToSwitchTo) {
         if(mActiveDriver != pDriverToSwitchTo) {
@@ -23,12 +37,18 @@ public class DriverTransition {
         }
     }
 
-    public double getScorerFactor() {
-        return 1.0 - kDefenderFactor;
+    /*
+     * Should be fetched periodically during trigger (supplier)
+     */
+    public DoubleSupplier getScorerFactorSupplier() {
+        return () -> 1.0 - kDefenderFactor;
     }
 
-    public double getDefenderFactor() {
-        return kDefenderFactor;
+    /*
+     * Should be fetched periodically during trigger (supplier)
+     */
+    public DoubleSupplier getDefenderFactorSupplier() {
+        return () -> kDefenderFactor;
     }
 
     public void periodic() {

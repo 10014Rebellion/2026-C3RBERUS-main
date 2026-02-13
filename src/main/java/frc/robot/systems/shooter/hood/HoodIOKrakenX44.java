@@ -125,11 +125,6 @@ public class HoodIOKrakenX44 implements HoodIO{
         return Rotation2d.fromRotations(mHoodPosition.getValueAsDouble());
     }
 
-    private boolean shouldBeLimited(){
-        return(getPos().getRotations() > mRotationSoftLimits.forwardLimit().getRotations() && mHoodVoltage.getValueAsDouble() > 0) || 
-            (getPos().getRotations() < mRotationSoftLimits.backwardLimit().getRotations() && mHoodVoltage.getValueAsDouble() < 0);
-    }
-
     @Override 
     public void setPDConstants(double pKP, double pKD) {
         Slot0Configs slotConfig = new Slot0Configs();
@@ -149,19 +144,21 @@ public class HoodIOKrakenX44 implements HoodIO{
 
     @Override
     public void setMotorPosition(Rotation2d pPosition, double pFeedforward) {
-        if(shouldBeLimited()) stopMotor();
-        else mHoodMotor.setControl(mHoodPositionControl.withPosition(pPosition.getRotations()).withFeedForward(pFeedforward));   
+        mHoodMotor.setControl(mHoodPositionControl.withPosition(pPosition.getRotations()).withFeedForward(pFeedforward)); 
+        enforceSoftLimits();  
     }
 
     @Override
-    public void stopIfCrazy(){
-        if(shouldBeLimited()) stopMotor();
+    public void enforceSoftLimits() {
+        double currentRotation = getPos().getRotations();
+        if((currentRotation > mRotationSoftLimits.forwardLimit().getRotations() && mHoodVoltage.getValueAsDouble() > 0) || 
+           (currentRotation < mRotationSoftLimits.backwardLimit().getRotations() && mHoodVoltage.getValueAsDouble() < 0)) stopMotor();
     }
 
     @Override
     public void setMotorVolts(double pVolts) {
-        if(shouldBeLimited()) stopMotor();
-        else mHoodMotor.setControl(mHoodVoltageControl.withOutput(pVolts));
+        mHoodMotor.setControl(mHoodVoltageControl.withOutput(pVolts));
+        enforceSoftLimits();
     }
 
     @Override

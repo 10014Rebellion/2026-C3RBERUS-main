@@ -25,7 +25,7 @@ public interface HoodIO {
 
   public default void setMotorPosition(Rotation2d pRotationSP, double pFeedforward) {}
 
-  public default void stopIfCrazy() {}
+  public default void enforceSoftLimits() {}
 
   public default void setMotorVolts(double pVolts) {}
 

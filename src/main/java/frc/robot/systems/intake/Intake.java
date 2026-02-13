@@ -5,6 +5,8 @@
 package frc.robot.systems.intake;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
 
@@ -17,15 +19,15 @@ public class Intake {
     this.mIntakeRollerSS = pIntakeRollerSS;
   }
 
-  public void setRollerVolts(double pVolts) {
-    mIntakeRollerSS.setVolts(pVolts);
+  public Command setRollerVoltsCmd(double pVolts) {
+    return new InstantCommand(() -> mIntakeRollerSS.setVolts(pVolts));
   }
 
-  public void stopRollerMotor() {
-    mIntakeRollerSS.stopMotor();
+  public Command stopRollerMotorCmd() {
+    return new InstantCommand(() -> mIntakeRollerSS.stopMotor());
   }
 
-  public void setPivotRotCmd(Rotation2d pRotSP) {
-    mIntakePivotSS.setPivotVolts(0);
+  public Command setPivotRotCmd(Rotation2d pRotSP) {
+    return new InstantCommand(() -> mIntakePivotSS.setPivotRot(pRotSP));
   }
 }
