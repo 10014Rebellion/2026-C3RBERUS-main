@@ -66,9 +66,9 @@ public class HoodIOKrakenX44 implements HoodIO{
         HoodConfig.Slot0.kG = HoodConstants.kHoodControlConfig.feedforward().getKg();
         HoodConfig.Slot0.kV = HoodConstants.kHoodControlConfig.feedforward().getKv();
         HoodConfig.Slot0.kA = HoodConstants.kHoodControlConfig.feedforward().getKa();
-        // HoodConfig.MotionMagic.MotionMagicCruiseVelocity = HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity();
-        // HoodConfig.MotionMagic.MotionMagicCruiseVelocity = HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration();
-        // HoodConfig.MotionMagic.MotionMagicCruiseVelocity = HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk();
+        HoodConfig.MotionMagic.MotionMagicCruiseVelocity = HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity();
+        HoodConfig.MotionMagic.MotionMagicAcceleration = HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration();
+        HoodConfig.MotionMagic.MotionMagicJerk = HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk();
 
         mHoodMotor.getConfigurator().apply(HoodConfig);
 
