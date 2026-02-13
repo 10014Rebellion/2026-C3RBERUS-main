@@ -56,11 +56,18 @@ public class Drive extends SubsystemBase {
     public static RobotConfig mRobotConfig;
     private final SwerveSetpointGenerator mSetpointGenerator;
     private SwerveSetpoint mPreviousSetpoint =
-            new SwerveSetpoint(new ChassisSpeeds(), SwerveHelper.zeroStates(), DriveFeedforwards.zeros(4), AzimuthFeedForward.zeros());
+            new SwerveSetpoint(
+                new ChassisSpeeds(), 
+                SwerveHelper.zeroStates(), 
+                DriveFeedforwards.zeros(4), 
+                AzimuthFeedForward.zeros());
 
     private ChassisSpeeds mDesiredSpeeds = new ChassisSpeeds();
     private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
+    private DriveFeedforwards mDefaultFF = DriveFeedforwards.zeros(4);
+    @AutoLogOutput(key = "Drive/Feedforward/Choreo")
     private boolean mUseChoreoFeedForward = false;
+    @AutoLogOutput(key = "Drive/Feedforward/Filter")
     private boolean mFilterFeedForward = false;
     private final PathConstraints mDriveConstraints = DriveConstants.kAutoConstraints;
 
@@ -245,12 +252,13 @@ public class Drive extends SubsystemBase {
         /* Only for logging purposes */
         SwerveModuleState[] moduleTorques = SwerveHelper.zeroStates();
 
+        mDefaultFF = mPreviousSetpoint.feedforwards();
         // Telemetry.log("Drive/Odometry/generatedFieldSpeeds",
         // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
         for (int i = 0; i < 4; i++) {
             if (kUseGenerator) {
                 /* Logs the drive feedforward stuff */
-                SwerveHelper.logDriveFeedforward(mPreviousSetpoint.feedforwards(), i);
+                SwerveHelper.logDriveFeedforward(mDefaultFF, i);
 
                 setpointStates[i] = new SwerveModuleState(
                     mPreviousSetpoint.moduleStates()[i].speedMetersPerSecond,
@@ -311,10 +319,11 @@ public class Drive extends SubsystemBase {
                 unoptimizedSetpointStates[i],
                 mPathPlanningFF, 
                 i)
-            : mPathPlanningFF.torqueCurrentsAmps()[i] 
+            : mDefaultFF.torqueCurrentsAmps()[i] 
                 * SwerveHelper.ppFFScalar(
                     getModuleStates()[i], 
-                    unoptimizedSetpointStates[i]);
+                    unoptimizedSetpointStates[i],
+                    i);
 
         if(mFilterFeedForward) {
             driveAmps = SwerveHelper.lowPassFilter(

@@ -73,7 +73,7 @@ public class Module {
                     mVelocitySetpointMPS, 
                     mDriveFF.getKs() * Math.signum(mVelocitySetpointMPS)
                     + mDriveFF.getKv() * mVelocitySetpointMPS
-                    + mDriveFF.getKa() * mAmperageFeedforward;);
+                    + mDriveFF.getKa() * mAmperageFeedforward);
             } else {
                 if (mAmperageFeedforward != null) {
                     double ffOutput =

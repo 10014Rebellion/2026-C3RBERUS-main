@@ -16,6 +16,8 @@ import static frc.robot.systems.drive.DriveConstants.kWheelRadiusMeters;
 
 import java.util.Arrays;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -86,7 +88,8 @@ public class SwerveHelper {
         double choreoLinearForceNewtons = 
             ppFFScalar(
                 currentState, 
-                unoptimizedDesiredState) 
+                unoptimizedDesiredState,
+                i) 
             * Math.hypot(
                 ff.robotRelativeForcesXNewtons()[i], 
                 ff.robotRelativeForcesYNewtons()[i])
@@ -102,14 +105,16 @@ public class SwerveHelper {
         return driveMotorAmperage;
     }
 
-    public static double ppFFScalar(SwerveModuleState currentState, SwerveModuleState unoptimizedDesiredState) {
+    public static double ppFFScalar(SwerveModuleState currentState, SwerveModuleState unoptimizedDesiredState, int i) {
         Vector<N2> wheelDirection = VecBuilder.fill(
             Math.signum(currentState.speedMetersPerSecond) * currentState.angle.getCos(), 
-            Math.signum(currentState.speedMetersPerSecond) * currentState.angle.getCos());
+            Math.signum(currentState.speedMetersPerSecond) * currentState.angle.getSin());
 
         Vector<N2> setpointDirection = VecBuilder.fill(
             Math.signum(unoptimizedDesiredState.speedMetersPerSecond) * unoptimizedDesiredState.angle.getCos(), 
-            Math.signum(unoptimizedDesiredState.speedMetersPerSecond) * unoptimizedDesiredState.angle.getCos());
+            Math.signum(unoptimizedDesiredState.speedMetersPerSecond) * unoptimizedDesiredState.angle.getSin());
+
+        Logger.recordOutput("Drive/ppFfScalar/"+i, wheelDirection.dot(setpointDirection));
         
         return wheelDirection.dot(setpointDirection);
     }
