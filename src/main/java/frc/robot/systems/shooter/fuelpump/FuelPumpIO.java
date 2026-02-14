@@ -18,6 +18,8 @@ public interface FuelPumpIO {
 
     public default void setPDConstants(int pSlot, double pKP, double pKD) {}
 
+    public default void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {}
+
     public default void enforceFollower() {}
 
     public default void updateInputs(FuelPumpInputs pInputs) {}

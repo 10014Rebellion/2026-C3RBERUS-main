@@ -97,7 +97,7 @@ public class HardwareRecords {
     public static record MotionMagicFOCControllerFF(
         int slot,
         PDConstants pdController,
-        SimpleMotorFeedforward feeforward,
+        SimpleMotorFeedforward feedforward,
         MotionMagicConstants motionMagicConstants
     ) {}
 

@@ -84,10 +84,12 @@ public class ShooterConstants {
             MotorAlignmentValue.Opposed
         );
 
-        public static final SimpleController kFuelPumpControlConfig = new SimpleController(
-            0,
-            new PDConstants(2, 0.01), // TODO: TUNE ME
-            new SimpleMotorFeedforward(0.3, 0, 0) // TODO: TUNE ME
+        public static final MotionMagicFOCControllerFF kFuelPumpControlConfig = new MotionMagicFOCControllerFF(
+            0, // not currently used
+            // original kP = 9 
+            new PDConstants(0, 0),
+            new SimpleMotorFeedforward(0.37, 0, 0),
+            new MotionMagicConstants(0, 1000, 10000)
         );
     }
 
