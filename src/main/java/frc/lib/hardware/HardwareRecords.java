@@ -64,9 +64,8 @@ public class HardwareRecords {
 
     public static record ElevatorController(
         int slot,
-        PDConstants pdController,
         ElevatorFeedforward feedforward,
-        MotionConstraints constraints
+        double tolerance
     ) {}
 
     public static record ArmController(

@@ -19,6 +19,6 @@ public interface ClimbIO {
 
     public default void updateInputs(ClimbInputs pInputs) {}
     public default void setMotorVolts(double pVolts) {}
-    public default void setMotorPosition(double pPositionM) {}
+    public default void setMotorPosition(double pPositionM, double pFeedforward) {}
     public default void stopMotor() {}
 }

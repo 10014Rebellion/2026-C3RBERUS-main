@@ -22,7 +22,6 @@ import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 public class ClimbIOKrakenx44 implements ClimbIO {
     private final TalonFX mClimbMotor;
     private final VoltageOut mClimbVoltageControl = new VoltageOut(0.0);
-    private final MotionMagicVoltage mClimbPositionControl = new MotionMagicVoltage(0.0);
 
     private final StatusSignal<AngularVelocity> mClimbVelocityMPS;
     private final StatusSignal<Voltage> mClimbVoltage;
@@ -94,21 +93,6 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     @Override
     public void setMotorVolts(double pVolts) {
         mClimbMotor.setControl(mClimbVoltageControl.withOutput(pVolts));
-    }
-
-    @Override
-    public void setMotorPosition(int pSlot, double pPositionM, double pFeedforward) {
-        mClimbMotor.setControl(mClimbPositionControl.withPosition(pPositionM).withFeedForward(pFeedforward).withSlot(pSlot));
-    }
-
-    @Override
-    public void setPIDConstants(int pSlot, double pKP, double pKI, double pKD){
-        var slotConfigs = new SlotConfigs();
-        slotConfigs.SlotNumber = pSlot;
-        slotConfigs.kP = pKP;
-        slotConfigs.kI = pKI;
-        slotConfigs.kD = pKD;
-        mClimbMotor.getConfigurator().apply(slotConfigs);
     }
 
     @Override

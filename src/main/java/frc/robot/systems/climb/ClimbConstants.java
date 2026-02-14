@@ -9,8 +9,6 @@ import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.ElevatorController;
-import frc.lib.hardware.HardwareRecords.MotionConstraints;
-import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 
@@ -21,7 +19,7 @@ public class ClimbConstants {
         Constants.kSubsystemsCANBus, 
         1, // Rotor to Mechanism Ratio // TODO: TUNE ME!
         InvertedValue.CounterClockwise_Positive,
-        NeutralModeValue.Coast,
+        NeutralModeValue.Brake,
         new CurrentLimits(30, 40)
     );
 
@@ -33,96 +31,17 @@ public class ClimbConstants {
         20, 
         true, 
         0.0, 
-        0.002);
+        0.002
+    );
 
     public static final PositionSoftLimits kSoftLimits = new PositionSoftLimits(
         1.0, 
+        0
+    );
+
+    public static final ElevatorController kController = new ElevatorController(
+        0, 
+        new ElevatorFeedforward(.0, 0.0, 0.0), 
         0);
-    
-    public static final ElevatorController kController0 = 
-    
-        switch(Constants.kCurrentMode){
-        
-            case REAL -> 
-                new ElevatorController(
-                    0, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                        
-                        
-            case SIM -> 
-                new ElevatorController(
-                    0, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                
-                        
-            default -> 
-                new ElevatorController(
-                    0, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                    
-        };
 
-    public static final ElevatorController kController1 = 
-    
-        switch(Constants.kCurrentMode){
-            case REAL -> 
-                new ElevatorController(
-                    1, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                        
-                        
-            case SIM -> 
-                new ElevatorController(
-                    1, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                
-                        
-            default -> 
-                new ElevatorController(
-                    1, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                        
-        };
-        
-        
-    public static final ElevatorController kController2 = 
-
-        switch(Constants.kCurrentMode){
-        
-            case REAL -> 
-                new ElevatorController(
-                    2, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                        
-                        
-            case SIM -> 
-                new ElevatorController(
-                    2, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));
-                
-                        
-            default -> 
-                new ElevatorController(
-                    2, 
-                    new PDConstants(0, 0), 
-                    new ElevatorFeedforward(0, 0, 0),
-                    new MotionConstraints(0, 0, 0));                        
-        };
-
-    }
+}
