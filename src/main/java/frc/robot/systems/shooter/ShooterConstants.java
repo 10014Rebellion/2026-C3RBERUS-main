@@ -18,8 +18,6 @@ import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.RelativeCANCoderHardware;
 import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
-import frc.lib.hardware.HardwareRecords.SimpleController;
-
 public class ShooterConstants {
     /** 
      * Empirically tuned hood angle for a given horizontal shooter-to-hub distance.
