@@ -1,9 +1,7 @@
 package frc.robot.systems.climb;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import frc.lib.controls.SlottedController;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 
 public class ClimbIOSim implements ClimbIO{
