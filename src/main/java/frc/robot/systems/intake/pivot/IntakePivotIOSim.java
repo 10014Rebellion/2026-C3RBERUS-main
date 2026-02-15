@@ -1,8 +1,5 @@
 package frc.robot.systems.intake.pivot;
 
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.pathplanner.lib.config.PIDConstants;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,6 +32,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     }
 
     public void updateInputs(IntakePivotInputs pInputs) {
+        mIntakePivotMotor.update(0.02);
         pInputs.iIsIntakePivotConnected = true;
         pInputs.iIntakePivotRotation = getPos();
         pInputs.iIntakePivotVelocityRPS = mIntakePivotMotor.getAngularVelocityRPM() / 60.0;
@@ -63,7 +61,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     }
 
     public void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {
-
+        return;
     }
 
     public void enforceSoftLimits() {

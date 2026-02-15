@@ -64,9 +64,8 @@ public class HardwareRecords {
 
     public static record ElevatorController(
         int slot,
-        PDConstants pdController,
         ElevatorFeedforward feedforward,
-        MotionConstraints constraints
+        double tolerance
     ) {}
 
     public static record ArmController(
@@ -97,7 +96,7 @@ public class HardwareRecords {
     public static record MotionMagicFOCControllerFF(
         int slot,
         PDConstants pdController,
-        SimpleMotorFeedforward feeforward,
+        SimpleMotorFeedforward feedforward,
         MotionMagicConstants motionMagicConstants
     ) {}
 

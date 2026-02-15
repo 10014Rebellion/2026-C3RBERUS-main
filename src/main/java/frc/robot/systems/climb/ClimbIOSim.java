@@ -1,30 +1,19 @@
 package frc.robot.systems.climb;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import frc.lib.controls.SlottedController;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 
 public class ClimbIOSim implements ClimbIO{
-    // private final ElevatorSim mElevatorSim;
+
     private double mAppliedVolts;
-    private PIDController mClimbPID;
-
     private final BasicMotorHardware mConfig;
-    private final SlottedController mController;
-
     private final ElevatorSim mElevatorSim;
 
 
-    public ClimbIOSim(BasicMotorHardware pConfig, SlottedController pController) {
+    public ClimbIOSim(BasicMotorHardware pConfig) {
 
         this.mConfig = pConfig;
-        this.mController = pController;
-
-        // mElevatorSim = new ElevatorSim()
-
-        mClimbPID = new PIDController(0.0, 0.0, 0.0);
 
         mElevatorSim = new ElevatorSim(
             ClimbConstants.kSimElevator.kMotor(),
@@ -57,16 +46,6 @@ public class ClimbIOSim implements ClimbIO{
     public void setMotorVolts(double pVolts){
         mAppliedVolts = MathUtil.clamp(12.0, -12.0, pVolts);
         mElevatorSim.setInputVoltage(mAppliedVolts);
-    }
-
-    @Override
-    public void setMotorPosition(int pSlot, double pPositionM, double pFeedforward){
-        setMotorVolts(mClimbPID.calculate(mElevatorSim.getPositionMeters(), pPositionM) + pFeedforward);
-    }
-
-    @Override
-    public void setPIDConstants(int pSlot, double pKP, double pKI, double pKD){
-
     }
 
     @Override
