@@ -76,7 +76,7 @@ public class ButtonBindings {
 
         mDriverController.a()
             .onTrue(
-                mDriveSS.getDriveManager().setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate())))
+                mDriveSS.getDriveManager().setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), () -> GameGoalPoseChooser.getHub()))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
             
        mDriverController.b()
