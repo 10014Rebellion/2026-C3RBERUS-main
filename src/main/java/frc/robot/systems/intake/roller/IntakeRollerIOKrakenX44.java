@@ -73,7 +73,7 @@ public class IntakeRollerIOKrakenX44 implements IntakeRollerIO{
             mIntakeRollerTempCelsius
 
         ).isOK();
-        pInputs.iIntakeRollerVelocityMPS = mIntakeRollerVelocityMPS.getValueAsDouble();
+        pInputs.iIntakeRollerVelocityRPS = mIntakeRollerVelocityMPS.getValueAsDouble();
         pInputs.iIntakeRollerAccelerationMPSS = mIntakeRollerAccelerationMPSS.getValueAsDouble();
         pInputs.iIntakeRollerMotorVolts = mIntakeRollerVoltage.getValueAsDouble();
         pInputs.iIntakeRollerSupplyCurrentAmps = mIntakeRollerSupplyCurrent.getValueAsDouble();

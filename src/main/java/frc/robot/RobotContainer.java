@@ -49,7 +49,7 @@ import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorConstants;
 import frc.robot.systems.conveyor.ConveyorIO;
-import frc.robot.systems.conveyor.ConveyorIOKrakenX44;
+import frc.robot.systems.conveyor.ConveyorIOKrakenX60;
 import frc.robot.systems.conveyor.ConveyorIOSim;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -98,7 +98,7 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
-                mConveyor = new ConveyorSS(new ConveyorIOKrakenX44(ConveyorConstants.kConveyorMotorConstants));
+                mConveyor = new ConveyorSS(new ConveyorIOKrakenX60(ConveyorConstants.kConveyorMotorConstants));
                 break;
 
             case SIM:
@@ -117,6 +117,8 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
                     }));
 
+                FlywheelIOSim flywheelLeaderSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
+                FlywheelIOSim flywheelFollowerSim = flywheelLeaderSim;
                 mShooter = new Shooter(
                     new FuelPumpSS(
                         new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
@@ -124,8 +126,8 @@ public class RobotContainer {
                     ),
                     new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
                     new FlywheelsSS(
-                        new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
-                        new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
+                        flywheelLeaderSim,
+                        flywheelFollowerSim
                     )
                 );
 

@@ -8,7 +8,7 @@ public interface ConveyorIO {
     @AutoLog
     public static class ConveyorInputs {
       public boolean iIsConveyorConnected = false;
-      public double iConveyorVelocityMPS = 0.0;
+      public double iConveyorVelocityRPS = 0.0;
       public double iConveyorAccelerationMPSS = 0.0;
       public double iConveyorMotorVolts = 0.0;
       public double iConveyorSupplyCurrentAmps = 0.0;

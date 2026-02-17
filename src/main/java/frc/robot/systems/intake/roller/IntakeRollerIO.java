@@ -8,7 +8,7 @@ public interface IntakeRollerIO {
     @AutoLog
     public static class IntakeRollerInputs {
       public boolean iIsIntakeRollerConnected = false;
-      public double iIntakeRollerVelocityMPS = 0.0;
+      public double iIntakeRollerVelocityRPS = 0.0;
       public double iIntakeRollerAccelerationMPSS = 0.0;
       public double iIntakeRollerMotorVolts = 0.0;
       public double iIntakeRollerSupplyCurrentAmps = 0.0;

@@ -6,26 +6,17 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.robot.systems.shooter.ShooterConstants.FlywheelConstants;
 
 public class FlywheelIOSim implements FlywheelIO{
 
     private DCMotorSim mFlywheelMotor;
-    private boolean mIsFollower;
     private double mAppliedVoltage;
     private final PIDController mFlywheelController;
-
-    // FOLLOWER CONSTRUCTOR
-    public FlywheelIOSim(FollowerMotorHardware pFollowerConfig) {
-        this(pFollowerConfig.motorID(), pFollowerConfig.leaderConfig());
-        mIsFollower = true;
-    }
     
     // LEADER CONSTRUCTOR
     public FlywheelIOSim(BasicMotorHardware pLeaderConfig) {
         this(pLeaderConfig.motorID(), pLeaderConfig);
-        mIsFollower = false;
     }
 
     private FlywheelIOSim(int pMotorID, BasicMotorHardware pHardware){
@@ -65,11 +56,6 @@ public class FlywheelIOSim implements FlywheelIO{
     // Inverts voltage if follower as the rest of the close loop control runs of this same method //
     public void setMotorVolts(double pVolts) {
         mAppliedVoltage = MathUtil.clamp(pVolts, -12.0, 12.0);
-
-        if(mIsFollower){
-            mAppliedVoltage *= -1;
-        }
-
         mFlywheelMotor.setInputVoltage(mAppliedVoltage);
     }
 
