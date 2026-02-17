@@ -33,6 +33,9 @@ import frc.robot.systems.shooter.flywheels.FlywheelIO;
 import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
 import frc.robot.systems.shooter.flywheels.FlywheelIOSim;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
+import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
+import frc.robot.systems.shooter.flywheels.encoder.EncoderIOCANCoder;
+import frc.robot.systems.shooter.flywheels.encoder.EncoderIOSim;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIO;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIOKrakenX44;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIOSim;
@@ -67,7 +70,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         switch (Constants.kCurrentMode) {
-            case REAL:
+            case REAL: {
                 mDrive = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIOKraken(kFrontLeftHardware)),
@@ -86,7 +89,8 @@ public class RobotContainer {
                     new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
                     new FlywheelsSS(
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
-                        new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
+                        new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig),
+                        new EncoderIOCANCoder(ShooterConstants.FlywheelConstants.kCANCoderConfig)
                     )
                 );
 
@@ -100,8 +104,8 @@ public class RobotContainer {
 
                 mConveyor = new ConveyorSS(new ConveyorIOKrakenX44(ConveyorConstants.kConveyorMotorConstants));
                 break;
-
-            case SIM:
+            }
+            case SIM: {
                 mDrive = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIOSim()),
@@ -116,7 +120,7 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
                     }));
-
+                
                 mShooter = new Shooter(
                     new FuelPumpSS(
                         new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
@@ -125,7 +129,8 @@ public class RobotContainer {
                     new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
                     new FlywheelsSS(
                         new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
-                        new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig)
+                        new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig),
+                        new EncoderIOSim(ShooterConstants.FlywheelConstants.kCANCoderConfig)
                     )
                 );
 
@@ -136,8 +141,9 @@ public class RobotContainer {
 
                 mConveyor = new ConveyorSS(new ConveyorIOSim());
                 break;
+            }
 
-            default:
+            default: {
                 mDrive = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIO() {}),
@@ -161,7 +167,8 @@ public class RobotContainer {
                     new HoodSS(new HoodIO() {}),
                     new FlywheelsSS(
                         new FlywheelIO() {},
-                        new FlywheelIO() {}
+                        new FlywheelIO() {},
+                        new EncoderIO() {}
                     )
                 );
 
@@ -172,6 +179,7 @@ public class RobotContainer {
 
                 mConveyor = new ConveyorSS(new ConveyorIO() {});
                 break;
+            }
         }
         
     

@@ -10,8 +10,8 @@ public interface FlywheelIO {
       public boolean iIsFlywheelConnected = false;
       public boolean iIsLeader = true;
       public String iFlywheelControlMode = "";
-      public double iFlywheelVelocityRPS = 0.0;
-      public double iFlywheelAccelerationRPSS = 0.0;
+      public double iFlywheelRotorVelocityRPS = 0.0;
+      public double iFlywheelRotorAccelerationRPSS = 0.0;
       public double iFlywheelMotorVolts = 0.0;
       public double iFlywheelSupplyCurrentAmps = 0.0;
       public double iFlywheelStatorCurrentAmps = 0.0;

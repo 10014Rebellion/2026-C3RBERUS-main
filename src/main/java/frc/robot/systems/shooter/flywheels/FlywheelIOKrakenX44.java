@@ -2,18 +2,15 @@ package frc.robot.systems.shooter.flywheels;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -38,14 +35,7 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
     private final StatusSignal<AngularAcceleration> mFlywheelAccelerationRPSS;
     private final StatusSignal<Double> mFlywheelClosedLoopReference;
     private Follower mFollowerController = null;
-    private static final CANcoder mFlywheelCANCoder;
 
-    static {
-        mFlywheelCANCoder = new CANcoder(FlywheelConstants.kCANCoderConfig.cancoderID());
-        CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
-        encoderConfig.MagnetSensor.SensorDirection = FlywheelConstants.kCANCoderConfig.direction();
-        mFlywheelCANCoder.getConfigurator().apply(encoderConfig);
-    }
 
     // FOLLOWER CONSTRUCTOR
     public FlywheelIOKrakenX44(FollowerMotorHardware pFollowerConfig) {
@@ -125,8 +115,8 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
         ).isOK();
         pInputs.iIsLeader = isLeader();
         pInputs.iFlywheelControlMode = mFlywheelControlMode.getValue().toString();
-        pInputs.iFlywheelVelocityRPS = mFlywheelVelocityRPS.getValueAsDouble();
-        pInputs.iFlywheelAccelerationRPSS = mFlywheelAccelerationRPSS.getValueAsDouble();
+        pInputs.iFlywheelRotorVelocityRPS = mFlywheelVelocityRPS.getValueAsDouble();
+        pInputs.iFlywheelRotorAccelerationRPSS = mFlywheelAccelerationRPSS.getValueAsDouble();
         pInputs.iFlywheelMotorVolts = mFlywheelVoltage.getValueAsDouble();
         pInputs.iFlywheelSupplyCurrentAmps = mFlywheelSupplyCurrent.getValueAsDouble();
         pInputs.iFlywheelStatorCurrentAmps = mFlywheelStatorCurrent.getValueAsDouble();

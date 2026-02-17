@@ -4,15 +4,18 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
-
+import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
+import frc.robot.systems.shooter.flywheels.encoder.EncoderInputsAutoLogged;
 import static frc.robot.systems.shooter.ShooterConstants.FlywheelConstants.kFlywheelControlConfig;
 
 public class FlywheelsSS extends SubsystemBase {
   private final FlywheelIO mLeaderFlywheelIO;
   private final FlywheelIO mFollowerFlywheelIO;
+  private final EncoderIO mFlywheelEncoder;
 
   private final FlywheelInputsAutoLogged mLeaderFlywheelInputs = new FlywheelInputsAutoLogged();
   private final FlywheelInputsAutoLogged mFollowerFlywheelInputs = new FlywheelInputsAutoLogged();
+  private final EncoderInputsAutoLogged mEncoderInputs = new EncoderInputsAutoLogged();
 
   private final LoggedTunableNumber tFlywheelKP = new LoggedTunableNumber("Flywheel/Control/kP", kFlywheelControlConfig.pdController().kP());
   private final LoggedTunableNumber tFlywheelKD = new LoggedTunableNumber("Flywheel/Control/kD", kFlywheelControlConfig.pdController().kD());
@@ -27,9 +30,10 @@ public class FlywheelsSS extends SubsystemBase {
 
   private SimpleMotorFeedforward mFlywheelFeedforward = kFlywheelControlConfig.feedforward();
 
-  public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO) {
+  public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
     this.mLeaderFlywheelIO = pLeaderFlywheelIO;
     this.mFollowerFlywheelIO = pFollowerFlywheelIO;
+    this.mFlywheelEncoder = pFlywheelEncoder;
   }
 
   public void setFlywheelVolts(double pVolts) {
@@ -38,7 +42,7 @@ public class FlywheelsSS extends SubsystemBase {
   }
 
     public double getFlywheelRPS() {
-    return (mLeaderFlywheelInputs.iFlywheelVelocityRPS + mFollowerFlywheelInputs.iFlywheelVelocityRPS) / 2.0;
+    return (mLeaderFlywheelInputs.iFlywheelRotorVelocityRPS + mFollowerFlywheelInputs.iFlywheelRotorVelocityRPS) / 2.0;
   }
 
   public void setFlywheelSpeeds(double pRPS) {
@@ -66,12 +70,14 @@ public class FlywheelsSS extends SubsystemBase {
   public void periodic() {
     mLeaderFlywheelIO.updateInputs(mLeaderFlywheelInputs);
     mFollowerFlywheelIO.updateInputs(mFollowerFlywheelInputs);
+    mFlywheelEncoder.updateInputs(mEncoderInputs);
     
     refreshTuneables();
     mFollowerFlywheelIO.enforceFollower(); // Sometimes during enable and disable it no longer follows briefly, this scares me, so this is a failsafe
 
     Logger.processInputs("Flywheel/Leader", mLeaderFlywheelInputs);
-    Logger.processInputs("Flywheel/Follower", mFollowerFlywheelInputs);    
+    Logger.processInputs("Flywheel/Follower", mFollowerFlywheelInputs);
+    Logger.processInputs("Flywheel/Encoder", mEncoderInputs);
   }
 
   private void refreshTuneables() {
