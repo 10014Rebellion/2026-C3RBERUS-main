@@ -97,8 +97,8 @@ public class ATagCameraIOPV implements ATagCameraIO {
             }
 
             if (latestValidResult == null || !latestValidResult.hasTargets()) {
-                DriverStation.reportWarning(
-                        "No valid pose found in unread PhotonVision results for " + mCamName, false);
+                // DriverStation.reportWarning(
+                //         "No valid pose found in unread PhotonVision results for " + mCamName, false);
                 pInputs.iHasTarget = false;
                 return;
             }
