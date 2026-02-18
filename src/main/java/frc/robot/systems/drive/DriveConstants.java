@@ -50,7 +50,7 @@ public class DriveConstants {
     public static final PIDConstants kPPRotationPID = new PIDConstants(0.8, 0.0, 0.0); // TODO: TUNE ME
 
     /* DRIVEBASE TUNING / ODOMETRY / MISC*/
-    public static final CANBus kCANBus = new CANBus("rebeldrive"); // TODO: TUNE ME
+    public static final CANBus kCANBus = new CANBus("drivebase"); // TODO: TUNE ME
     public static final boolean isCANFD = true; 
     public static final double kOdometryFrequency = isCANFD ? 250.0 : 100.0;
     static final Lock kOdometryLock = new ReentrantLock(); 
@@ -69,7 +69,7 @@ public class DriveConstants {
     /* GENERAL SWERVE MODULE CONSTANTS */
     public static final boolean kTurnMotorInvert = false; // TODO: TUNE ME
     public static final double kCANCoderToMechanismRatio = 1; // TODO: TUNE ME
-    public static final double kAzimuthMotorGearing = 22.281 / 1.0; // TODO: TUNE ME
+    public static final double kAzimuthMotorGearing = 25.464 / 1.0; // TODO: TUNE ME
     public static final double kDriveMotorGearing = 4.50 / 1.0; // TODO: TUNE ME
     public static final double kWheelRadiusMeters = Units.inchesToMeters(1.4175); // TODO: TUNE ME
     public static final double kWheelCircumferenceMeters = 2 * Math.PI * kWheelRadiusMeters;
