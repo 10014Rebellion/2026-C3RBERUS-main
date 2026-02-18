@@ -47,7 +47,7 @@ public class ModuleIOSim implements ModuleIO {
         pInputs.iDriveVelocityMPS = (mDriveMotor.getAngularVelocityRPM() * kWheelCircumferenceMeters) / 60.0;
         pInputs.iDriveStatorCurrentAmps = Math.abs(mDriveMotor.getCurrentDrawAmps());
         pInputs.iDriveTemperatureCelsius = 0.0;
-        pInputs.iAzimuthMotorVolts = mAzimuthAppliedVolts;
+        pInputs.iDriveMotorVolts = mDriveAppliedVolts;
 
         pInputs.iAzimuthAbsolutePosition = new Rotation2d(mAzimuthMotor.getAngularPositionRad());
         pInputs.iAzimuthPosition = new Rotation2d(mAzimuthMotor.getAngularPositionRad());
@@ -68,6 +68,7 @@ public class ModuleIOSim implements ModuleIO {
     /////////// DRIVE MOTOR METHODS \\\\\\\\\\\
     @Override
     public void setDriveVolts(double pVolts) {
+        mDriveAppliedVolts = pVolts;
         mDriveMotor.setInputVoltage(mDriveAppliedVolts);
     }
 

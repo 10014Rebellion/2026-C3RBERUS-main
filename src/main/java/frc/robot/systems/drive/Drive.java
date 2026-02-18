@@ -157,6 +157,7 @@ public class Drive extends SubsystemBase {
             SwerveModulePosition[] moduleDeltas = SwerveHelper.zeroPositions();
 
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+                // System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n"+mModules[moduleIndex].getOdometryPositions().length+"\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
                 modulePositions[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
 
                 mAngleDeltas[moduleIndex] = mAngleDeltas[moduleIndex].plus(
@@ -279,7 +280,7 @@ public class Drive extends SubsystemBase {
                 // Multiplies by cos(angleError) to stop the drive from going in the wrong direction
                 setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
 
-                optimizedSetpointStates[i] = mModules[i].setDesiredStateWithAmpFF(
+                optimizedSetpointStates[i] = mModules[i].setDesiredStateWithFF(
                     setpointStates[i], 
                     driveAmps, 
                     desiredAzimuthVelocityRadPS);
