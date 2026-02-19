@@ -18,12 +18,12 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Filesystem;
 import frc.lib.telemetry.Telemetry;
 import frc.robot.Constants;
-import frc.robot.errors.DriveErrors.PPCacheSaveFailed;
-import frc.robot.errors.DriveErrors.PPConfigCacheLoadFailed;
-import frc.robot.errors.DriveErrors.PPConfigDefaultLoadFailed;
-import frc.robot.errors.DriveErrors.PPConfigLoadedFromCache;
-import frc.robot.errors.DriveErrors.PPConfigLoadedFromDefault;
-import frc.robot.errors.DriveErrors.PPGuiLoadFailed;
+import frc.robot.logging.DriveErrors.PPCacheSaveFailed;
+import frc.robot.logging.DriveErrors.PPConfigCacheLoadFailed;
+import frc.robot.logging.DriveErrors.PPConfigDefaultLoadFailed;
+import frc.robot.logging.DriveErrors.PPConfigLoadedFromCache;
+import frc.robot.logging.DriveErrors.PPConfigLoadedFromDefault;
+import frc.robot.logging.DriveErrors.PPGuiLoadFailed;
 
 import org.json.simple.parser.ParseException;
 

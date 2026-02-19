@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.lib.telemetry.Telemetry;
 import frc.robot.bindings.profilebindings.ProfileBindings;
-import frc.robot.errors.DriveErrors.ProfileExponentZero;
+import frc.robot.logging.DriveErrors.ProfileExponentZero;
 import frc.robot.systems.drive.DriveConstants;
 
 import java.util.function.DoubleSupplier;

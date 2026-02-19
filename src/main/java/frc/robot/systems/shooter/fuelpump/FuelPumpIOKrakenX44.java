@@ -20,7 +20,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.telemetry.Telemetry;
-import frc.robot.errors.MotorErrors;
+import frc.robot.logging.MotorErrors;
 import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 

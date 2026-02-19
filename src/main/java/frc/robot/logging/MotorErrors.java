@@ -1,4 +1,4 @@
-package frc.robot.errors;
+package frc.robot.logging;
 
 import frc.lib.telemetry.TelemetryConstants.Severity;
 import frc.lib.telemetry.TelemetryError;

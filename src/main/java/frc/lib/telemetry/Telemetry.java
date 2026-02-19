@@ -2,15 +2,20 @@
 
 package frc.lib.telemetry;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.RobotState;
 import frc.lib.telemetry.TelemetryConstants.Severity;
+import frc.robot.logging.TelemetryKeys;
 import frc.robot.systems.apriltag.ATagVision.VisionObservation;
-
 import java.util.HashSet;
 import java.util.Set;
 
 public class Telemetry extends TelemetryRecordOutput {
-    private static final Set<TelemetryError> activeErrors = new HashSet<>();
+    private static final Set<TelemetryError> mActiveErrors = new HashSet<>();
+    private static final NetworkTable mWebserverTable = NetworkTableInstance.getDefault().getTable(TelemetryKeys.TABLE);
 
     private Telemetry() {}
 
@@ -33,7 +38,7 @@ public class Telemetry extends TelemetryRecordOutput {
      * @param Error to resolve
      */
     public static void reportIssue(TelemetryError pError) {
-        if (activeErrors.add(pError)) {
+        if (mActiveErrors.add(pError)) {
             Throwable trace = new Throwable();
             publishError(pError, trace);
         }
@@ -44,7 +49,7 @@ public class Telemetry extends TelemetryRecordOutput {
      * @param Error to resolve
      */
     public static void clearIssue(TelemetryError pError) {
-        if (activeErrors.remove(pError)) {
+        if (mActiveErrors.remove(pError)) {
             publishClear(pError);
         }
     }
@@ -96,18 +101,30 @@ public class Telemetry extends TelemetryRecordOutput {
     }
 
     public static int getNumberOfActiveErrors() {
-        return activeErrors.size();
+        return mActiveErrors.size();
     }
 
     public static int getNumberOfActiveErrors(Severity pErrorSeverity) {
         int count = 0;
-        for (TelemetryError error : activeErrors) if (error.severity() == pErrorSeverity) count++;
+        for (TelemetryError error : mActiveErrors) if (error.severity() == pErrorSeverity) count++;
         return count;
     }
 
     public static int getNumberOfActiveErrors(Class<? extends TelemetryError> pErrorClass) {
         int count = 0;
-        for (TelemetryError lError : activeErrors) if (pErrorClass.isInstance(lError)) count++;
+        for (TelemetryError lError : mActiveErrors) if (pErrorClass.isInstance(lError)) count++;
         return count;
+    }
+
+    public static void log(String key, double value) {
+        TelemetryRecordOutput.log(key, value);
+        mWebserverTable.getEntry(key).setDouble(value);
+    }
+
+    public void periodic(double shooterRps) {
+        mWebserverTable.getEntry(TelemetryKeys.BATTERY).setDouble(RobotController.getBatteryVoltage());
+        mWebserverTable.getEntry(TelemetryKeys.ENABLED).setBoolean(RobotState.isEnabled());
+        mWebserverTable.getEntry(TelemetryKeys.AUTO).setBoolean(RobotState.isAutonomous());
+        mWebserverTable.getEntry(TelemetryKeys.SHOOTER_RPS).setDouble(shooterRps);
     }
 }

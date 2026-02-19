@@ -32,9 +32,9 @@ import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.drive.controllers.LineController;
 import frc.robot.systems.drive.controllers.ManualTeleopController;
 import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
-import frc.robot.errors.DriveErrors;
 import frc.robot.game.GameDriveManager;
 import frc.robot.game.GameDriveManager.GameDriveStates;
+import frc.robot.logging.DriveErrors;
 
 public class DriveManager {
     public static enum DriveState {
