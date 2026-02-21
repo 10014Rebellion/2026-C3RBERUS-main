@@ -8,7 +8,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
@@ -20,7 +20,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.telemetry.Telemetry;
-import frc.robot.errors.MotorErrors;
+import frc.robot.logging.MotorErrors;
 import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 
@@ -28,7 +28,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
     private final TalonFX mFuelPumpMotor;
     
     private final VoltageOut mFuelPumpVoltageControl = new VoltageOut(0.0);
-    private final MotionMagicVelocityTorqueCurrentFOC mFuelPumpVelocityControl = new MotionMagicVelocityTorqueCurrentFOC(0.0);
+    private final VelocityTorqueCurrentFOC mFuelPumpVelocityControl = new VelocityTorqueCurrentFOC(0.0);
 
     private double mFuelPumpVelocityGoal = 0.0;
 
@@ -62,9 +62,6 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
 
         FuelPumpConfig.Slot0.kP = FuelPumpConstants.kFuelPumpControlConfig.pdController().kP();
         FuelPumpConfig.Slot0.kD = FuelPumpConstants.kFuelPumpControlConfig.pdController().kD();
-        FuelPumpConfig.MotionMagic.MotionMagicCruiseVelocity = FuelPumpConstants.kFuelPumpControlConfig.motionMagicConstants().maxVelocity();
-        FuelPumpConfig.MotionMagic.MotionMagicAcceleration = FuelPumpConstants.kFuelPumpControlConfig.motionMagicConstants().maxAcceleration();
-        FuelPumpConfig.MotionMagic.MotionMagicJerk = FuelPumpConstants.kFuelPumpControlConfig.motionMagicConstants().maxJerk();
 
         FuelPumpConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         FuelPumpConfig.CurrentLimits.SupplyCurrentLimit = pHardware.currentLimit().supplyCurrentLimit();

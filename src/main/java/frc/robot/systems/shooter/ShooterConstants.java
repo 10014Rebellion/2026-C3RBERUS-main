@@ -1,5 +1,9 @@
 package frc.robot.systems.shooter;
 
+import java.util.function.Supplier;
+
+import org.dyn4j.geometry.Rotation;
+
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -67,6 +71,30 @@ public class ShooterConstants {
 
 
     public static class FuelPumpConstants {
+        public enum FuelPumpStates {
+            DISCONNECTED(null),
+            INDEXING(() -> Rotation2d.fromRotations(0)), // TODO: TUNE ME!
+            UNJAMMING(() -> Rotation2d.fromRotations(0)), // TODO: TUNE ME!
+            STOPPED(() -> Rotation2d.fromRotations(0));
+
+            Supplier<Rotation2d> mDesiredRPS;
+            FuelPumpStates(Supplier<Rotation2d> pDesiredRPS) {
+                this.mDesiredRPS = pDesiredRPS;
+            }
+
+            public Supplier<Rotation2d> getRPS() {
+                return mDesiredRPS == null ? () -> Rotation2d.kZero : mDesiredRPS;
+            }
+
+            public Rotation2d getRotRPS() {
+                return mDesiredRPS == null ? Rotation2d.kZero : mDesiredRPS.get();
+            }
+
+            public double getValueRPS() {
+                return mDesiredRPS == null ? 0 : mDesiredRPS.get().getRotations();
+            }
+        }
+
         public static final BasicMotorHardware kFuelPumpLeaderConfig = new BasicMotorHardware(
             53,
             Constants.kSubsystemsCANBus,

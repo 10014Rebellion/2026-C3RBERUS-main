@@ -19,10 +19,6 @@ public class FuelPumpSS extends SubsystemBase {
   private final LoggedTunableNumber tFuelPumpKS = new LoggedTunableNumber("FuelPump/Control/kS", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKs());
   private final LoggedTunableNumber tFuelPumpKV = new LoggedTunableNumber("FuelPump/Control/kV", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKv());
   private final LoggedTunableNumber tFuelPumpKA = new LoggedTunableNumber("FuelPump/Control/kA", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKa());
-
-  private final LoggedTunableNumber tFuelCruiseVel = new LoggedTunableNumber("Flywheel/Control/CruiseVel", FuelPumpConstants.kFuelPumpControlConfig.motionMagicConstants().maxVelocity());
-  private final LoggedTunableNumber tFuelMaxAccel = new LoggedTunableNumber("Flywheel/Control/MaxAcceleration", FuelPumpConstants.kFuelPumpControlConfig.motionMagicConstants().maxAcceleration());
-  private final LoggedTunableNumber tFuelMaxJerk = new LoggedTunableNumber("Flywheel/Control/MaxJerk", FuelPumpConstants.kFuelPumpControlConfig.motionMagicConstants().maxJerk());
   
   private SimpleMotorFeedforward mFuelPumpFeedForward = FuelPumpConstants.kFuelPumpControlConfig.feedforward();
   
@@ -56,12 +52,7 @@ public class FuelPumpSS extends SubsystemBase {
     mLeaderFuelPumpIO.setPDConstants(0, pKP, pKD);
     mFollowerFuelPumpIO.setPDConstants(0, pKP, pKD);
   }
-  
-  private void setBothMagicMotionConstraints(double pCruiseVelo, double pMaxAccel, double pMaxJerk){
-    mLeaderFuelPumpIO.setMotionMagicConstants(pCruiseVelo, pMaxAccel, pMaxJerk);
-    mFollowerFuelPumpIO.setMotionMagicConstants(pCruiseVelo, pMaxAccel, pMaxJerk);
-  }
-  
+
   @Override
   public void periodic() {
     mLeaderFuelPumpIO.updateInputs(mLeaderFuelPumpInputs);
@@ -83,11 +74,6 @@ public class FuelPumpSS extends SubsystemBase {
     LoggedTunableNumber.ifChanged( hashCode(), 
       () -> mFuelPumpFeedForward = new SimpleMotorFeedforward(tFuelPumpKS.get(), tFuelPumpKV.get(), tFuelPumpKA.get()), 
       tFuelPumpKS, tFuelPumpKV, tFuelPumpKA
-    );
-
-    LoggedTunableNumber.ifChanged( hashCode(), 
-    () -> setBothMagicMotionConstraints(tFuelCruiseVel.get(), tFuelMaxAccel.get(), tFuelMaxJerk.get()), 
-    tFuelCruiseVel, tFuelMaxAccel, tFuelMaxJerk
     );
   }
 }

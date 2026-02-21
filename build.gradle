@@ -1,3 +1,5 @@
+import java.nio.file.Files
+
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
@@ -10,6 +12,11 @@ java {
 }
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
+def telemetryKeysJava = file("src/main/java/frc/robot/logging/TelemetryKeys.java")
+def dashboardDeployDir = file("src/main/deploy/dashboard")
+def telemetryKeysJsOut = file("${dashboardDeployDir}/telemetryKeys.js")
+
+
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -136,4 +143,58 @@ gversion {
     dateFormat   = "yyyy-MM-dd HH:mm:ss z"
     timeZone     = "America/Chicago"
     indent       = "  "
+}
+
+// Generate dashboard telemetryjava
+tasks.register("generateTelemetryKeysJs") {
+    inputs.file(telemetryKeysJava)
+    outputs.file(telemetryKeysJsOut)
+
+    doLast {
+        if (!telemetryKeysJava.exists()) {
+            throw new GradleException("TelemetryKeys.java not found at: ${telemetryKeysJava}")
+        }
+
+        dashboardDeployDir.mkdirs()
+        def text = telemetryKeysJava.getText("UTF-8")
+
+        def tableMatch = (text =~ /public\s+static\s+final\s+String\s+TABLE\s*=\s*"([^"]+)";/)
+        if (!tableMatch.find()) {
+            throw new GradleException("Could not find TABLE in TelemetryKeys.java")
+        }
+        def table = tableMatch.group(1)
+
+        def stringMatches = (text =~ /public\s+static\s+final\s+String\s+([A-Z0-9_]+)\s*=\s*"([^"]+)";/)
+        def doubleMatches = (text =~ /public\s+static\s+final\s+double\s+([A-Z0-9_]+)\s*=\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?);/)
+        def intMatches = (text =~ /public\s+static\s+final\s+int\s+([A-Z0-9_]+)\s*=\s*([0-9]+);/)
+        def booleanMatches = (text =~ /public\s+static\s+final\s+boolean\s+([A-Z0-9_]+)\s*=\s*(true|false);/)
+
+        def js = new StringBuilder()
+        js.append("// AUTO-GENERATED from TelemetryKeys.java. DO NOT EDIT.\n")
+        js.append("export const TABLE = \"${table}\";\n\n")
+
+        js.append("export const KEYS = {\n")
+        stringMatches.each { m ->
+            def name = m[1]
+            def value = m[2]
+            if (name != "TABLE") {
+                js.append("  ${name}: \"${value}\",\n")
+            }
+        }
+        js.append("};\n\n")
+
+        js.append("export const CONST = {\n")
+        doubleMatches.each { m -> js.append("  ${m[1]}: ${m[2]},\n") }
+        intMatches.each { m -> js.append("  ${m[1]}: ${m[2]},\n") }
+        booleanMatches.each { m -> js.append("  ${m[1]}: ${m[2]},\n") }
+        js.append("};\n")
+
+        telemetryKeysJsOut.write(js.toString(), "UTF-8")
+        println("Generated: ${telemetryKeysJsOut}")
+    }
+}
+
+tasks.named("processResources") { dependsOn("generateTelemetryKeysJs") }
+tasks.matching { it.name.toLowerCase().contains("deploy") }.configureEach {
+    dependsOn("generateTelemetryKeysJs")
 }
