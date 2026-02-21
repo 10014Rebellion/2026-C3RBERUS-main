@@ -42,10 +42,6 @@ public class ButtonBindings {
         //     .onTrue(mIntakeSS.setPivotTuneableAmps())
         //     .onFalse(mIntakeSS.stopPivotMotorCmd());
 
-        // mDriverController.rightBumper()
-        //     .onTrue(mIntakeSS.setPivotTuneableSetpoint())
-        //     .onFalse(mIntakeSS.stopPivotMotorCmd());
-
         mDriverController.rightTrigger()
             // .onTrue(mIntakeSS.setRollerVoltsCmd(12.0))
             .onTrue(
@@ -61,16 +57,16 @@ public class ButtonBindings {
             // .onTrue(mIntakeSS.setRollerVoltsCmd(12.0))
             .onTrue(
                 mConveyorSS.setConveyorVoltsCmd(10.014).andThen(
-                mIntakeSS.setRollerVoltsCmd(10.014))
+                mIntakeSS.setRollerVoltsCmd(12))
             )
             .onFalse(
                 mConveyorSS.setConveyorVoltsCmd(0.0).andThen(
                 mIntakeSS.setRollerVoltsCmd(0.0))
             );
 
-        mDriverController.leftTrigger()
-            .onTrue(mShooter.setFlywheelsRPSCmd(10))
-            .onFalse(mShooter.setFlywheelsVoltsCmd(0.0));
+        mDriverController.rightBumper()
+            .onTrue(mIntakeSS.setPivotRotCmd(Rotation2d.fromRotations(0.15)))
+            .onFalse(mIntakeSS.setPivotRotCmd(Rotation2d.fromRotations(0.294)));
 
         mDriverController.povUp()
             .onTrue(mShooter.setHoodRot(Rotation2d.fromDegrees(20)));
@@ -85,9 +81,9 @@ public class ButtonBindings {
         //     .onTrue(mShooter.setFuelPumpsVoltsCmd(9))
         //     .onFalse(mShooter.setFuelPumpsVoltsCmd(0.0));
 
-        // mDriverController.leftTrigger()
-        //     .onTrue(mShooter.setFlywheelsRPSCmd(90))
-        //     .onFalse(mShooter.setFlywheelsRPSCmd(0));
+        mDriverController.leftBumper()
+            .onTrue(mShooter.setFlywheelsRPSCmd(90))
+            .onFalse(mShooter.setFlywheelsRPSCmd(0));
 
         // mDriverController.leftBumper()
         //     .onTrue(mShooter.setFlywheelsVoltsCmd(12))

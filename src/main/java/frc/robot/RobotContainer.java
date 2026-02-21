@@ -19,6 +19,7 @@ import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.pivot.IntakePivotIO;
 import frc.robot.systems.intake.pivot.IntakePivotIOKrakenX44;
+import frc.robot.systems.intake.pivot.IntakePivotIOSim;
 import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.roller.IntakeRollerIO;
 import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
@@ -133,7 +134,10 @@ public class RobotContainer {
                 );
 
                 mIntake = new Intake(
-                    new IntakePivotSS(new IntakePivotIO() {}),
+                    new IntakePivotSS(new IntakePivotIOSim(
+                        IntakeConstants.PivotConstants.kPivotMotorConfig, 
+                        IntakeConstants.PivotConstants.kPivotEncoderConfig,
+                        IntakeConstants.PivotConstants.kPivotLimits)),
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
