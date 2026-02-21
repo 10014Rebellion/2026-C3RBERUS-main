@@ -1,5 +1,6 @@
 package frc.robot.systems.shooter.hood;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -22,6 +23,9 @@ public class HoodSS extends SubsystemBase{
   private final LoggedTunableNumber tHoodCruiseVel = new LoggedTunableNumber("Hood/Control/CruiseVel", HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity());
   private final LoggedTunableNumber tHoodMaxAccel = new LoggedTunableNumber("Hood/Control/MaxAcceleration", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration());
   private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Hood/Control/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
+  private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Hood/Control/Tolerance", HoodConstants.kToleranceRotations);
+
+  private Rotation2d mCurrentPositionGoal = Rotation2d.fromRotations(0.0);
 
   public HoodSS(HoodIO pHoodIO) {
     this.mHoodIO = pHoodIO;
@@ -37,7 +41,8 @@ public class HoodSS extends SubsystemBase{
   }
 
   public void setHoodRot(Rotation2d pRotSP) {
-    mHoodIO.setMotorPosition(pRotSP, mHoodFF.calculate(pRotSP.getRadians(), mHoodInputs.iHoodVelocityRPS));
+    mCurrentPositionGoal = pRotSP;
+    mHoodIO.setMotorPosition(mCurrentPositionGoal, mHoodFF.calculate(mCurrentPositionGoal.getRadians(), mHoodInputs.iHoodVelocityRPS));
   }
 
   public void stopHoodMotor() {
@@ -49,6 +54,20 @@ public class HoodSS extends SubsystemBase{
     mHoodFF.setKg(kG);
     mHoodFF.setKv(kV);
     mHoodFF.setKa(kA);
+  }
+
+  public Rotation2d getPosition(){
+    return mHoodInputs.iHoodAngle;
+  }
+
+  @AutoLogOutput(key = "Shooter/Hood/Feedback/ErrorRotation")
+  public double getErrorRotationsPerSec() {
+    return mCurrentPositionGoal.getRotations() - getPosition().getRotations();
+  }
+
+  @AutoLogOutput(key = "Shooter/Hood/Feedback/AtGoal")
+  public boolean atGoal() {
+    return Math.abs(getErrorRotationsPerSec()) < tHoodTolerance.get();
   }
   
   @Override
