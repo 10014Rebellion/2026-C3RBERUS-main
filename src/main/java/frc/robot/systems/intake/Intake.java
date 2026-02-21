@@ -41,6 +41,6 @@ public class Intake {
   }
 
   public Command setPivotRotCmd(Rotation2d pRotSP) {
-    return new InstantCommand(() -> mIntakePivotSS.setPivotRot(pRotSP), mIntakePivotSS);
+    return new InstantCommand(() -> mIntakePivotSS.setPivotRot(pRotSP));
   }
 }

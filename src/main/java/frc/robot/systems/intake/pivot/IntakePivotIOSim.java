@@ -5,27 +5,32 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
 import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
-
+import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 
 public class IntakePivotIOSim implements IntakePivotIO {
 
-    private final DCMotorSim mIntakePivotMotor;
+    private final SingleJointedArmSim mIntakePivotMotor;
     private final PIDController mIntakePivotController;
     private double mAppliedVolts = 0.0;
     private final RotationSoftLimits mLimits;
 
     public IntakePivotIOSim(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig, RotationSoftLimits pLimits) {
-        mIntakePivotMotor = new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), 0.004, pConfig.rotorToMechanismRatio()),
-            DCMotor.getKrakenX60Foc(1).withReduction(pConfig.rotorToMechanismRatio()),
-            0.0,
-            0.0
-        );
+        mIntakePivotMotor = new SingleJointedArmSim(
+            DCMotor.getKrakenX60(1), 
+            pConfig.rotorToMechanismRatio(), 
+            0.05, 
+            Units.inchesToMeters(18), 
+            IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRadians(), 
+            IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRadians(), 
+            true,
+            IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRadians());
 
         mIntakePivotController = new PIDController(PivotConstants.kPivotController.pdController().kP(), 0.0, PivotConstants.kPivotController.pdController().kD());
         mLimits = pLimits;
@@ -35,16 +40,16 @@ public class IntakePivotIOSim implements IntakePivotIO {
         mIntakePivotMotor.update(0.02);
         pInputs.iIsIntakePivotConnected = true;
         pInputs.iIntakePivotRotation = getPos();
-        pInputs.iIntakePivotVelocityRPS = mIntakePivotMotor.getAngularVelocityRPM() / 60.0;
-        pInputs.iIntakePivotAccelerationRPSS = Math.PI *2 / (mIntakePivotMotor.getAngularAccelerationRadPerSecSq());
+        pInputs.iIntakePivotVelocityRPS = mIntakePivotMotor.getVelocityRadPerSec() / (2 * Math.PI);
+        pInputs.iIntakePivotAccelerationRPSS = 0.0;
         pInputs.iIntakePivotMotorVolts = mAppliedVolts;
         pInputs.iIntakePivotSupplyCurrentAmps = 0.0;
-        pInputs.iIntakePivotStatorCurrentAmps = 0.0;
+        pInputs.iIntakePivotStatorCurrentAmps = mIntakePivotMotor.getCurrentDrawAmps();
         pInputs.iIntakePivotTempCelsius = 0.0;
     }
 
     public Rotation2d getPos(){
-        return Rotation2d.fromRotations(mIntakePivotMotor.getAngularPositionRotations());
+        return Rotation2d.fromRadians(mIntakePivotMotor.getAngleRads());
     }
 
     public void setMotorVolts(double pVolts) {

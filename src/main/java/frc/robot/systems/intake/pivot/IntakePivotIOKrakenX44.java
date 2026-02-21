@@ -166,15 +166,16 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
 
     @Override
     public void setMotorRot(Rotation2d pRot, double feedforward) {
-        mIntakePivotMotor.setControl(mIntakePivotRotationControl.withPosition(pRot.getRotations()).withFeedForward(0));
+        mIntakePivotMotor.setControl(mIntakePivotRotationControl.withPosition(pRot.getRotations()).withFeedForward(feedforward));
         enforceSoftLimits();
     }
+    
 
     @Override
     public void enforceSoftLimits() {
         double currentRotation = getPos().getRotations();
-        if((currentRotation > mLimits.forwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() > 0) || 
-           (currentRotation < mLimits.backwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() < 0)) stopMotor();
+        if((currentRotation < mLimits.forwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() > 0) || 
+           (currentRotation > mLimits.backwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() < 0)) stopMotor();
     }
 
     @Override

@@ -43,7 +43,7 @@ public class IntakePivotSS extends SubsystemBase {
   public void setPivotRot(Rotation2d pRot) {
     mIntakePivotIO.setMotorRot(
       pRot, 
-      mPivotFF.calculate(mIntakePivotInputs.iIntakePivotRotation.getRotations(), mIntakePivotInputs.iIntakePivotVelocityRPS));
+      mPivotFF.calculate(mIntakePivotInputs.iIntakePivotRotation.getRadians(), mIntakePivotInputs.iIntakePivotVelocityRPS));
   }
 
   public void setPivotVolts(double pVolts) {
@@ -76,7 +76,7 @@ public class IntakePivotSS extends SubsystemBase {
     mIntakePivotIO.updateInputs(mIntakePivotInputs);
 
     refreshTuneables();
-    mIntakePivotIO.enforceSoftLimits();
+    // mIntakePivotIO.enforceSoftLimits();
 
     Logger.processInputs("Intake", mIntakePivotInputs);
   }
