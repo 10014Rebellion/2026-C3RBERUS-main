@@ -2,6 +2,7 @@ package frc.robot.systems.shooter.flywheels;
 
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
@@ -42,13 +43,13 @@ public class FlywheelsSS extends SubsystemBase {
   }
 
     public double getFlywheelRPS() {
-    return (mLeaderFlywheelInputs.iFlywheelRotorVelocityRPS + mFollowerFlywheelInputs.iFlywheelRotorVelocityRPS) / 2.0;
+      return mEncoderInputs.iEncoderVelocityRPS.getRotations();
   }
 
   public void setFlywheelSpeeds(double pRPS) {
     mLeaderFlywheelIO.setMotorVelAndAccel(pRPS, 0, mFlywheelFeedforward.calculateWithVelocities(getFlywheelRPS(), pRPS));
     mFollowerFlywheelIO.enforceFollower();
-    Logger.recordOutput("Flywheel/Goal", pRPS);
+    Logger.recordOutput("Flywheel/Goal", Rotation2d.fromRotations(pRPS));
   }
 
   public void stopFlywheelMotor() {
