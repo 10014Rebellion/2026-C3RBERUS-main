@@ -1,5 +1,6 @@
 package frc.robot.systems.shooter.flywheels;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
@@ -33,9 +34,10 @@ public class FlywheelsSS extends SubsystemBase {
   private final LoggedTunableNumber tFlywheelMaxAccel = new LoggedTunableNumber("Flywheel/Control/MaxAcceleration", kFlywheelControlConfig.motionMagicConstants().maxAcceleration());
   private final LoggedTunableNumber tFlywheelMaxJerk = new LoggedTunableNumber("Flywheel/Control/MaxJerk", kFlywheelControlConfig.motionMagicConstants().maxJerk());
 
-  private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Flywheel/BangBang/Tolerance", ShooterConstants.FlywheelConstants.kBangBangTolerance);
+  private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Flywheel/BangBang/Tolerance", ShooterConstants.FlywheelConstants.kTolerance);
   private final LoggedTunableNumber tFlywheelTimeout = new LoggedTunableNumber("Flywheel/BangBang/Timeout", ShooterConstants.FlywheelConstants.kBangBangTimeout);
-  private double mTolerance = ShooterConstants.FlywheelConstants.kBangBangTolerance;
+
+  private double mTolerance = ShooterConstants.FlywheelConstants.kTolerance;
   private double mTimeout = ShooterConstants.FlywheelConstants.kBangBangTimeout;
 
   private SimpleMotorFeedforward mFlywheelFeedforward = kFlywheelControlConfig.feedforward();
@@ -84,6 +86,16 @@ public class FlywheelsSS extends SubsystemBase {
     mFlywheelFeedforward.setKv(pKV);
     mFlywheelFeedforward.setKs(pKS);
     mFlywheelFeedforward.setKa(pKA);
+  }
+
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRotationsPerSec")
+  public double getErrorRotationsPerSec() {
+    return mCurrentRPS - getFlywheelRPS();
+  }
+
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtGoal")
+  public boolean atGoal() {
+    return Math.abs(getErrorRotationsPerSec()) < mTolerance;
   }
   
   @Override
@@ -158,4 +170,6 @@ public class FlywheelsSS extends SubsystemBase {
       tFlywheelTimeout
     );
   }
+
+
 }
