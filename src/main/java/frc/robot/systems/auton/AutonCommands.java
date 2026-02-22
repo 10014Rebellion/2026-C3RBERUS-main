@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
@@ -36,6 +37,7 @@ public class AutonCommands extends SubsystemBase {
         mAutoChooser.setDefaultOption("Stationary", () -> backUpAuton());
         tryToAddPathToChooser("FirstTestPath", () -> firstPathTest("FirstPathTest", "FirstPath"));
         tryToAddPathToChooser("FirstAuto", () -> autoTest("FirstAuto","FirstPath", "SecondPath"));
+        tryToAddPathToChooser("LeftScoreAndClimb", () -> leftScoreAndClimb());
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     }
@@ -43,6 +45,65 @@ public class AutonCommands extends SubsystemBase {
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
     public Command backUpAuton() {
         return new InstantCommand();
+    }
+
+    public Command leftScoreAndClimb() {
+        AutoEvent auto = new AutoEvent("LeftScoreAndClimb", this);
+        Trigger autoActivted = auto.getIsRunningTrigger();
+
+        String path1Name = "ITl_BN";
+
+        SequentialEndingCommandGroup autoPath1 = followChoreoPath(path1Name, true);
+
+        Trigger isPath1Running = auto.loggedCondition(path1Name+"/isRunning", () -> autoPath1.isRunning(), true);
+        Trigger hasPath1Ended = auto.loggedCondition(path1Name+"/hasEnded", () -> autoPath1.hasEnded(), true);
+        Trigger deployIntake = auto.loggedCondition(path1Name+"/deployIntake", () -> false, true);
+
+        String path2Name = "P1BN_BS";
+
+        SequentialEndingCommandGroup autoPath2 = followChoreoPath(path2Name, false);
+
+        Trigger isPath2Running = auto.loggedCondition(path2Name+"/isRunning", () -> autoPath2.isRunning(), true);
+        Trigger hasPath2Ended = auto.loggedCondition(path2Name+"/hasEnded", () -> autoPath2.hasEnded(), true);
+
+        String path3Name = "BL_LC";
+
+        SequentialEndingCommandGroup autoPath3 = followChoreoPath(path3Name, false);
+        SequentialEndingCommandGroup shootAtEndCommand = new SequentialEndingCommandGroup(shotIndexCommand());
+        SequentialEndingCommandGroup climbAtEndCommand = new SequentialEndingCommandGroup(shotIndexCommand());
+
+        Trigger isPath3Running = auto.loggedCondition(path3Name+"/isRunning", () -> autoPath3.isRunning(), true);
+        Trigger hasPath3Ended = auto.loggedCondition(path3Name+"/hasEnded", () -> autoPath3.hasEnded(), true);
+
+        Trigger doneShootingAtEnd = auto.loggedCondition(path3Name+"/doneShootingAtEnd", () -> shootAtEndCommand.hasEnded(), true);
+        Trigger doneClimingAtEnd = auto.loggedCondition(path3Name+"/doneClimbingAtEnd", () -> climbAtEndCommand.hasEnded(), true);
+
+        autoActivted
+            .onTrue(autoPath1);
+
+        isPath1Running.and(deployIntake)
+            .onTrue(deployIntakeCommand());
+
+        hasPath1Ended
+            .onTrue(autoPath2);
+
+        hasPath2Ended
+            .onTrue(autoPath3);
+
+        isPath3Running
+            .onTrue(spinFlywheelsommand());
+
+        hasPath3Ended
+            .onTrue(shotIndexCommand());
+
+        doneShootingAtEnd
+            .onTrue(climbCommand());
+    
+        doneClimingAtEnd
+            .onTrue(endAuto(auto));
+
+
+        return auto;
     }
 
     public Command firstPathTest(String pAutoName, String pName) {
@@ -102,6 +163,10 @@ public class AutonCommands extends SubsystemBase {
         return new InstantCommand();
     }
 
+    public Command deployIntakeCommand() {
+        return new InstantCommand();
+    }
+
     public Command bindexCommand() {
         return new InstantCommand();
     }
@@ -116,6 +181,14 @@ public class AutonCommands extends SubsystemBase {
 
     public Command turnToHubCommand() {
         return new InstantCommand();
+    }
+
+    public Command climbCommand() {
+        return new InstantCommand();
+    }
+
+    public Command endAuto(AutoEvent auto) {
+        return Commands.runOnce(() -> auto.cancel());
     }
 
     public BooleanSupplier inScoringRange() {

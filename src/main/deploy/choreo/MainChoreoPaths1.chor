@@ -3,12 +3,27 @@
  "version":2,
  "type":"Swerve",
  "variables":{
-  "expressions":{},
+  "expressions":{
+   "Max":{
+    "dimension":"LinAcc",
+    "var":{
+     "exp":"8 m / s ^ 2",
+     "val":8.0
+    }
+   },
+   "MaxV":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"3.5 m / s",
+     "val":3.5
+    }
+   }
+  },
   "poses":{
    "T1":{
     "x":{
-     "exp":"7.2180399894714355 m",
-     "val":7.2180399894714355
+     "exp":"7.218039998947144 m",
+     "val":7.218039998947144
     },
     "y":{
      "exp":"1.5398796796798706 m",
@@ -24,27 +39,27 @@
  "config":{
   "frontLeft":{
    "x":{
-    "exp":"19.505 / 2 in",
-    "val":0.2477135
+    "exp":"9.7747687 in",
+    "val":0.24827912497999996
    },
    "y":{
-    "exp":"24.5 / 2 in",
-    "val":0.31115
+    "exp":"-12.248701 in",
+    "val":-0.3111170054
    }
   },
   "backLeft":{
    "x":{
-    "exp":"-19.505 / 2 in",
-    "val":-0.2477135
+    "exp":"-9.736289 in",
+    "val":-0.24730174059999996
    },
    "y":{
-    "exp":"24.5 / 2 in",
-    "val":0.31115
+    "exp":"-12.32 in",
+    "val":-0.312928
    }
   },
   "mass":{
-   "exp":"150 lbs",
-   "val":68.0388555
+   "exp":"125 lbs",
+   "val":56.69904625
   },
   "inertia":{
    "exp":"6 kg m ^ 2",
@@ -59,12 +74,12 @@
    "val":0.036004499999999995
   },
   "vmax":{
-   "exp":"6000 RPM",
-   "val":628.3185307179587
+   "exp":"4560 RPM",
+   "val":477.5220833456485
   },
   "tmax":{
-   "exp":"1.2 N * m",
-   "val":1.2
+   "exp":"0.9 N * m",
+   "val":0.9
   },
   "cof":{
    "exp":"1.6",
@@ -72,16 +87,16 @@
   },
   "bumper":{
    "front":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"0.8001 / 2 m",
+    "val":0.40005
    },
    "side":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"0.923925 / 2 m",
+    "val":0.4619625
    },
    "back":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"0.8001 / 2 m",
+    "val":0.40005
    }
   },
   "differentialTrackWidth":{
@@ -91,7 +106,7 @@
  },
  "generationFeatures":[],
  "codegen":{
-  "root":"..\\C:\\Repos\\2026-robot-main\\src\\main\\java\\frc\\robot",
+  "root":null,
   "genVars":true,
   "genTrajData":true,
   "useChoreoLib":true
