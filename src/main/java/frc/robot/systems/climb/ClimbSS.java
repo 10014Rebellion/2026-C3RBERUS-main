@@ -14,7 +14,6 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.hardware.HardwareRecords.ElevatorController;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.tuning.LoggedTunableNumber;
 
@@ -46,7 +45,6 @@ public class ClimbSS extends SubsystemBase {
   }
 
   private final ClimbIO mClimbIO;
-  private final PositionSoftLimits mSoftLimits;
   private final ClimbInputsAutoLogged mClimbInputs = new ClimbInputsAutoLogged();
   private ClimbGoal mCurrentGoal = null;
   private double mCurrentClimbGoalPositionMeters = 0.0;
@@ -56,9 +54,11 @@ public class ClimbSS extends SubsystemBase {
 
   public ClimbSS(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits) {
     mClimbIO = pClimbIO;
-    mSoftLimits = pSoftLimits;
     mController = new BangBangController(ClimbConstants.kController.tolerance());
-    mFeedforward = new ElevatorFeedforward(mCurrentClimbGoalPositionMeters, mCurrentClimbGoalPositionMeters, mCurrentClimbGoalPositionMeters);
+    mFeedforward = new ElevatorFeedforward(
+      ClimbConstants.kController.feedforward().getKs(), 
+      ClimbConstants.kController.feedforward().getKg(), 
+      ClimbConstants.kController.feedforward().getKv());
   }
   
   @Override
@@ -67,12 +67,13 @@ public class ClimbSS extends SubsystemBase {
     Logger.processInputs("Climb", mClimbInputs);
 
     if (DriverStation.isDisabled()){
+      mClimbIO.enableBrakeMode();
       stopClimbMotor();
     }
 
     if (mCurrentGoal != null) {
       mCurrentClimbGoalPositionMeters = mCurrentGoal.getGoalMeters();
-      
+
       mClimbIO.enforceSoftLimits();
       setPosition(mCurrentClimbGoalPositionMeters);
     }

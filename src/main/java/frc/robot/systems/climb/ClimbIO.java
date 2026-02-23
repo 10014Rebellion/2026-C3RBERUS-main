@@ -21,5 +21,6 @@ public interface ClimbIO {
     public default void setMotorVolts(double pVolts) {}
     public default void setMotorPosition(double pPositionM, double pFeedforward) {}
     public default void enforceSoftLimits() {}
+    public default void enableBrakeMode() {}
     public default void stopMotor() {}
 }

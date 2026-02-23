@@ -4,12 +4,12 @@ package frc.robot.systems.climb;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -22,6 +22,7 @@ import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 public class ClimbIOKrakenx44 implements ClimbIO {
     private final TalonFX mClimbMotor;
     private final VoltageOut mClimbVoltageControl = new VoltageOut(0.0);
+    private final PositionSoftLimits mSoftLimits;
 
     private final StatusSignal<AngularVelocity> mClimbVelocityMPS;
     private final StatusSignal<Voltage> mClimbVoltage;
@@ -69,6 +70,8 @@ public class ClimbIOKrakenx44 implements ClimbIO {
             mClimbTempCelsius,
             mClimbPosition);
         mClimbMotor.optimizeBusUtilization();
+
+        mSoftLimits = pSoftLimits;
     }
 
     @Override
@@ -92,7 +95,14 @@ public class ClimbIOKrakenx44 implements ClimbIO {
 
     @Override
     public void enforceSoftLimits(){
-        
+        double currentPosition = mClimbPosition.getValueAsDouble();
+        if((currentPosition > mSoftLimits.forwardLimitM() && mClimbVoltage.getValueAsDouble() > 0) || 
+           (currentPosition < mSoftLimits.backwardLimitM() && mClimbVoltage.getValueAsDouble() < 0)) stopMotor();
+    }
+
+    @Override
+    public void enableBrakeMode(){
+        mClimbMotor.setNeutralMode(NeutralModeValue.Brake);
     }
 
     @Override

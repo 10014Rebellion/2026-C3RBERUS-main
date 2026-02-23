@@ -25,15 +25,13 @@ public class ClimbConstants {
     
     public static final PositionSoftLimits kSoftLimits = new PositionSoftLimits(
         0, 
-        .5
+        0.5
     );
 
     public static final SimulatedElevator kSimElevator = new SimulatedElevator(
         DCMotor.getKrakenX60(1), 
         9, 
         1, 
-        kSoftLimits.backwardLimitM(), 
-        kSoftLimits.forwardLimitM(), 
         true, 
         0.0, 
         0.001
