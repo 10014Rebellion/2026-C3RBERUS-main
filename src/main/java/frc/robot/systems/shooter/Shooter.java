@@ -3,7 +3,6 @@ package frc.robot.systems.shooter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.systems.shooter.ShooterConstants.FlywheelConstants.FlywheelState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.hood.HoodSS;
@@ -17,8 +16,12 @@ public class Shooter {
     this.mFuelPumpsSS = pFuelPumpSS; this.mHoodSS = pHoodSS; this.mFlywheelSS = pFlywheelSS; // I miss my C++ initializer lists :'(
   }
 
-  public Command setFlywheelsRPSCmd(double pRPS) {
-    return new InstantCommand(() -> mFlywheelSS.setFlywheelSpeeds(FlywheelState.TORQUE_FOC, pRPS), mFlywheelSS);
+  public Command setFlywheelsRPSCmd(Rotation2d pRPS) {
+    return new InstantCommand(() -> mFlywheelSS.setFlywheelSpeeds(pRPS), mFlywheelSS);
+  }
+
+  public Command setFlywheelsRPSCmd() {
+    return new InstantCommand(() -> mFlywheelSS.setFlywheelSpeeds(), mFlywheelSS);
   }
 
   public Command setFlywheelsVoltsCmd(double pVolts) {

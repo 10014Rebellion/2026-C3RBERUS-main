@@ -1,12 +1,12 @@
 package frc.robot.systems.intake.pivot;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
@@ -40,8 +40,8 @@ public class IntakePivotIOSim implements IntakePivotIO {
         mIntakePivotMotor.update(0.02);
         pInputs.iIsIntakePivotConnected = true;
         pInputs.iIntakePivotRotation = getPos();
-        pInputs.iIntakePivotVelocityRPS = mIntakePivotMotor.getVelocityRadPerSec() / (2 * Math.PI);
-        pInputs.iIntakePivotAccelerationRPSS = 0.0;
+        pInputs.iIntakePivotVelocityRPS = Rotation2d.fromRotations(mIntakePivotMotor.getVelocityRadPerSec() / (2 * Math.PI));
+        pInputs.iIntakePivotAccelerationRPSS = Rotation2d.kZero;
         pInputs.iIntakePivotMotorVolts = mAppliedVolts;
         pInputs.iIntakePivotSupplyCurrentAmps = 0.0;
         pInputs.iIntakePivotStatorCurrentAmps = mIntakePivotMotor.getCurrentDrawAmps();

@@ -11,6 +11,8 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -114,13 +116,13 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
         ).isOK();
         pInputs.iIsLeader = isLeader();
         pInputs.iFlywheelControlMode = mFlywheelControlMode.getValue().toString();
-        pInputs.iFlywheelRotorVelocityRPS = mFlywheelVelocityRPS.getValueAsDouble();
+        pInputs.iFlywheelRotorVelocityRPS = Rotation2d.fromRotations(mFlywheelVelocityRPS.getValueAsDouble());
         pInputs.iFlywheelRotorAccelerationRPSS = mFlywheelAccelerationRPSS.getValueAsDouble();
         pInputs.iFlywheelMotorVolts = mFlywheelVoltage.getValueAsDouble();
         pInputs.iFlywheelSupplyCurrentAmps = mFlywheelSupplyCurrent.getValueAsDouble();
         pInputs.iFlywheelStatorCurrentAmps = mFlywheelStatorCurrent.getValueAsDouble();
         pInputs.iFlywheelTempCelsius = mFlywheelTempCelsius.getValueAsDouble();
-        pInputs.iFlywheelClosedLoopReference = mFlywheelClosedLoopReference.getValueAsDouble();
+        pInputs.iFlywheelClosedLoopReference = Rotation2d.fromRotations(mFlywheelClosedLoopReference.getValueAsDouble());
     }
 
     public boolean isLeader() {

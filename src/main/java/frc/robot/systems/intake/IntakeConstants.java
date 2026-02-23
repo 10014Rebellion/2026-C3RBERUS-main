@@ -20,29 +20,29 @@ public class IntakeConstants {
         public static final BasicMotorHardware kPivotMotorConfig = new BasicMotorHardware(
             41, // TODO: TUNE ME;
             Constants.kSubsystemsCANBus,
-            1,
+            13.5,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Brake,
-            new CurrentLimits(30, 40)
+            new CurrentLimits(60, 80)
         );
 
         public static final CANdiEncoder kPivotEncoderConfig = new CANdiEncoder(
             40, 
             FeedbackSensorSourceValue.FusedCANdiPWM1,
-            1,
-            Rotation2d.fromRotations(0.102051 + 0.055555)
+            1.0,
+            Rotation2d.fromRotations(-0.241699 + 0.055555) // 0.055555 is to account for the fact that our CG is 20deg off the ground
         );
 
         public static final ArmControllerMotionMagic kPivotController = new ArmControllerMotionMagic(
             0, 
-            new PDConstants(5, 0), 
-            new MotionMagicConstants(5, 20, 0), 
-            new ArmFeedforward(0, 0, 0, 0)
+            new PDConstants(150, 5), 
+            new MotionMagicConstants(30, 50, 30), 
+            new ArmFeedforward(2, 32, 10, 0)
         );
 
         public static final RotationSoftLimits kPivotLimits = new RotationSoftLimits(
-            Rotation2d.fromRotations(-0.06), // Negative voltage limit
-            Rotation2d.fromRotations(0.305) // Positive voltage limit
+            Rotation2d.fromRotations(-0.054), // Negative voltage limit
+            Rotation2d.fromRotations(0.318) // Positive voltage limit
         );
     }
 
@@ -56,5 +56,4 @@ public class IntakeConstants {
             new CurrentLimits(30, 40)
         );
     }
-    
 }

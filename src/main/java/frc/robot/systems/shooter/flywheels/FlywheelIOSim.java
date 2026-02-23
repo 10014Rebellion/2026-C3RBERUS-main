@@ -2,6 +2,7 @@ package frc.robot.systems.shooter.flywheels;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -46,7 +47,7 @@ public class FlywheelIOSim implements FlywheelIO{
         pInputs.iFlywheelStatorCurrentAmps = Math.abs(mFlywheelMotor.getCurrentDrawAmps());
         pInputs.iFlywheelSupplyCurrentAmps = 0.0;
         pInputs.iFlywheelTempCelsius = 0.0;
-        pInputs.iFlywheelRotorVelocityRPS = mFlywheelMotor.getAngularVelocityRPM() * 60.0;
+        pInputs.iFlywheelRotorVelocityRPS = Rotation2d.fromRotations(mFlywheelMotor.getAngularVelocityRPM() / 60.0);
         pInputs.iIsFlywheelConnected = true;
     }
 

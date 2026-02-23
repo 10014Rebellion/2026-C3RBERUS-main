@@ -22,8 +22,10 @@ public class IntakePivotSS extends SubsystemBase {
 
   private final LoggedTunableNumber tPivotKP = new LoggedTunableNumber("Intake/Pivot/Control/kP", kPivotController.pdController().kP());
   private final LoggedTunableNumber tPivotKD = new LoggedTunableNumber("Intake/Pivot/Control/kD", kPivotController.pdController().kD());
+  private final LoggedTunableNumber tPivotCustomSetpointRot = new LoggedTunableNumber("Intake/Pivot/Control/CustomSetpointRot", 0);
 
-  private final LoggedTunableNumber tPivotKS = new LoggedTunableNumber("Intake/Pivot//Control/kS", kPivotController.feedforward().getKs());
+
+  private final LoggedTunableNumber tPivotKS = new LoggedTunableNumber("Intake/Pivot/Control/kS", kPivotController.feedforward().getKs());
   private final LoggedTunableNumber tPivotKG = new LoggedTunableNumber("Intake/Pivot/Control/kG", kPivotController.feedforward().getKg());
   private final LoggedTunableNumber tPivotKV = new LoggedTunableNumber("Intake/Pivot/Control/kV", kPivotController.feedforward().getKv());
   private final LoggedTunableNumber tPivotKA = new LoggedTunableNumber("Intake/Pivot/Control/kA", kPivotController.feedforward().getKa());
@@ -31,19 +33,32 @@ public class IntakePivotSS extends SubsystemBase {
   private final LoggedTunableNumber tPivotCruiseVel = new LoggedTunableNumber("Intake/Pivot/Control/CruiseVel", kPivotController.motionMagicConstants().maxVelocity());
   private final LoggedTunableNumber tPivotMaxAccel = new LoggedTunableNumber("Intake/Pivot/Control/MaxAcceleration", kPivotController.motionMagicConstants().maxAcceleration());
   private final LoggedTunableNumber tPivotMaxJerk = new LoggedTunableNumber("Intake/Pivot/Control/MaxJerk", kPivotController.motionMagicConstants().maxJerk());
-
   public static final LoggedTunableNumber tCustomAmps = new LoggedTunableNumber("Intake/Pivot/Custom/Amps", 0.0);
-  public static final LoggedTunableNumber tCustomSetpointRotation = new LoggedTunableNumber("Intake/Pivot/Custom/SetpointRotations", 0.0);
   
   public IntakePivotSS(IntakePivotIO pIntakePivotIO) {
     this.mIntakePivotIO = pIntakePivotIO;
     this.mPivotFF = kPivotController.feedforward();
   }
 
+  public void setPivotRot() {
+    setPivotRot(Rotation2d.fromRotations(tPivotCustomSetpointRot.getAsDouble()));
+  }
+
   public void setPivotRot(Rotation2d pRot) {
+    double ffOutput = mPivotFF.calculate(
+      mIntakePivotInputs.iIntakePivotRotation.getRadians(), 
+      mIntakePivotInputs.iIntakeClosedLoopReferenceSlope.getRadians()
+    );
+
+    double cos = mIntakePivotInputs.iIntakeClosedLoopReference.getCos();
+
+    Logger.recordOutput("IntakePivot/ffOutput", ffOutput);
+    Logger.recordOutput("IntakePivot/cos", cos);
+
     mIntakePivotIO.setMotorRot(
       pRot, 
-      mPivotFF.calculate(mIntakePivotInputs.iIntakePivotRotation.getRadians(), mIntakePivotInputs.iIntakePivotVelocityRPS));
+      ffOutput
+    );
   }
 
   public void setPivotVolts(double pVolts) {
@@ -52,12 +67,6 @@ public class IntakePivotSS extends SubsystemBase {
 
   public void setCustomPivotAmps() {
     mIntakePivotIO.setMotorAmps(tCustomAmps.get());
-  }
-
-  public void setCustomPivotSetpoint() {
-    mIntakePivotIO.setMotorRot(
-      Rotation2d.fromRotations(tCustomSetpointRotation.get()), 
-      mPivotFF.calculate(mIntakePivotInputs.iIntakePivotRotation.getRotations(), mIntakePivotInputs.iIntakePivotVelocityRPS));
   }
 
   public void stopPivotMotor() {
@@ -76,7 +85,7 @@ public class IntakePivotSS extends SubsystemBase {
     mIntakePivotIO.updateInputs(mIntakePivotInputs);
 
     refreshTuneables();
-    // mIntakePivotIO.enforceSoftLimits();
+    mIntakePivotIO.enforceSoftLimits();
 
     Logger.processInputs("Intake", mIntakePivotInputs);
   }

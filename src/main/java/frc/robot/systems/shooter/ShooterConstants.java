@@ -2,8 +2,6 @@ package frc.robot.systems.shooter;
 
 import java.util.function.Supplier;
 
-import org.dyn4j.geometry.Rotation;
-
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -165,7 +163,7 @@ public class ShooterConstants {
             1,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Coast,
-            new CurrentLimits(50, 60)
+            new CurrentLimits(60, 80)
         );
 
         public static final FollowerMotorHardware kFlywheelFollowerConfig = new FollowerMotorHardware(
@@ -178,7 +176,7 @@ public class ShooterConstants {
             0, // not currently used
             // original kP = 9 
             new PDConstants(9, 0), // Tuned for C3RBERUS!
-            new SimpleMotorFeedforward(0.35, 0, 0), // Tuned for C3RBERUS!
+            new SimpleMotorFeedforward(5.0, 0.1, 0), // Tuned for C3RBERUS!
             new MotionMagicConstants(0, 1000, 10000) // Tuned for C3RBERUS!
         );
     }

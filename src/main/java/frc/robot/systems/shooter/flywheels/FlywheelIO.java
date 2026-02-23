@@ -4,19 +4,21 @@ package frc.robot.systems.shooter.flywheels;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public interface FlywheelIO {
     @AutoLog
     public static class FlywheelInputs {
       public boolean iIsFlywheelConnected = false;
       public boolean iIsLeader = true;
       public String iFlywheelControlMode = "";
-      public double iFlywheelRotorVelocityRPS = 0.0;
+      public Rotation2d iFlywheelRotorVelocityRPS = Rotation2d.kZero;
       public double iFlywheelRotorAccelerationRPSS = 0.0;
       public double iFlywheelMotorVolts = 0.0;
       public double iFlywheelSupplyCurrentAmps = 0.0;
       public double iFlywheelStatorCurrentAmps = 0.0;
       public double iFlywheelTempCelsius = 0.0;
-      public double iFlywheelClosedLoopReference = 0.0;
+      public Rotation2d iFlywheelClosedLoopReference = Rotation2d.kZero;
     }
 
     public default void updateInputs(FlywheelInputs pInputs) {}

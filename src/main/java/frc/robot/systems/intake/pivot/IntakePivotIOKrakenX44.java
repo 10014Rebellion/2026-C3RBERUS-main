@@ -1,13 +1,20 @@
 package frc.robot.systems.intake.pivot;
 
+import static edu.wpi.first.units.Units.Radian;
+import static edu.wpi.first.units.Units.Rotation;
+
+import org.dyn4j.geometry.Rotation;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,10 +27,15 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
 import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
+import frc.robot.Constants;
 import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 
 public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private final TalonFX mIntakePivotMotor;
+
+    private final CANdi mEncoder;
+    private final StatusSignal<Angle> mIntakeEncoderAbsolutePosition;
+
     // private final DetachedEncoder mIntakePivotEncoder;
     private final VoltageOut mIntakePivotVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mIntakePivotAmpsControl = new TorqueCurrentFOC(0.0);
@@ -37,27 +49,21 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private final StatusSignal<Current> mIntakePivotSupplyCurrent;
     private final StatusSignal<Current> mIntakePivotStatorCurrent;
     private final StatusSignal<Temperature> mIntakePivotTempCelsius;
+    private final StatusSignal<Double> mIntakePivotReferencePosition;
+    private final StatusSignal<Double> mIntakePivotReferencePositionSlope;
 
     private final RotationSoftLimits mLimits;
-    private final Rotation2d mOffset;
+    private Rotation2d mPivotPos = Rotation2d.kZero;
     
     public IntakePivotIOKrakenX44(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig, RotationSoftLimits pLimits) {
-        this.mLimits = pLimits;
+        mEncoder = new CANdi(pEncoderConfig.canID(), Constants.kSubsystemsCANBus);
+        CANdiConfiguration mEncoderConfiguration = new CANdiConfiguration();
+        mEncoderConfiguration.PWM1.AbsoluteSensorOffset = -pEncoderConfig.offset().getRotations();
+        mEncoder.getConfigurator().apply(mEncoderConfiguration);
 
-        // Encoder
-        // mIntakePivotEncoder = new DetachedEncoder(pEncoderConfig.canID(), Model.MAXSplineEncoder){};
-        // DetachedEncoderConfig encoderConfig = new DetachedEncoderConfig();
-        // encoderConfig.dutyCycleZeroCentered(pEncoderConfig.zeroCentered());
-        // encoderConfig.inverted(pEncoderConfig.inverted());
-        // encoderConfig.dutyCycleOffset((float) pEncoderConfig.offset());
-        // encoderConfig.angleConversionFactor(1);
-        // encoderConfig.averageDepth(64);
-        // encoderConfig.positionConversionFactor(1);
-        // encoderConfig.velocityConversionFactor(1);
-        // encoderConfig.signals.encoderAnglePeriodMs(50);
-        // encoderConfig.signals.encoderPositionPeriodMs(50);
-        // encoderConfig.signals.encoderVelocityPeriodMs(50);
-        // mIntakePivotEncoder.configure(encoderConfig, ResetMode.kResetSafeParameters);
+        mIntakeEncoderAbsolutePosition = mEncoder.getPWM1Position();
+
+        this.mLimits = pLimits;
 
         // Motor
         mIntakePivotMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
@@ -71,10 +77,10 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         IntakeConfig.MotorOutput.NeutralMode = pConfig.neutralMode();
         IntakeConfig.MotorOutput.Inverted = pConfig.direction();
 
-        IntakeConfig.Feedback.FeedbackSensorSource = pEncoderConfig.feedbackPort(); // Okay so im like 99% sure this will not work... but unfortunately im still gonna try it.
+        IntakeConfig.Feedback.FeedbackSensorSource = pEncoderConfig.feedbackPort();
         IntakeConfig.Feedback.FeedbackRemoteSensorID = pEncoderConfig.canID();
         IntakeConfig.Feedback.SensorToMechanismRatio = pEncoderConfig.sensorToMechanismRatio();
-        // IntakeConfig.Feedback.RotorToSensorRatio = pConfig.rotorToMechanismRatio() / pEncoderConfig.sensorToMechanismRatio();
+        IntakeConfig.Feedback.RotorToSensorRatio = pConfig.rotorToMechanismRatio();
 
         IntakeConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         IntakeConfig.Slot0.kP = PivotConstants.kPivotController.pdController().kP();
@@ -96,6 +102,8 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         mIntakePivotSupplyCurrent = mIntakePivotMotor.getSupplyCurrent();
         mIntakePivotStatorCurrent = mIntakePivotMotor.getStatorCurrent();
         mIntakePivotTempCelsius = mIntakePivotMotor.getDeviceTemp();
+        mIntakePivotReferencePosition = mIntakePivotMotor.getClosedLoopReference();
+        mIntakePivotReferencePositionSlope = mIntakePivotMotor.getClosedLoopReferenceSlope();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0, 
@@ -107,13 +115,14 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
             mIntakePivotTempCelsius
         );
 
-
-        mOffset = pEncoderConfig.offset();
         mIntakePivotMotor.optimizeBusUtilization();
     }
 
     @Override
     public void updateInputs(IntakePivotInputs pInputs) {
+        pInputs.iIsEncoderConnected = BaseStatusSignal.refreshAll(mIntakeEncoderAbsolutePosition).isOK();
+        pInputs.iEncoderPosition = Rotation2d.fromRadians(mIntakeEncoderAbsolutePosition.getValue().in(Radian));
+
         pInputs.iIsIntakePivotConnected = BaseStatusSignal.refreshAll(
             mIntakePivotRotation,
             mIntakePivotVelocityRPS,
@@ -121,20 +130,28 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
             mIntakePivotVoltage,
             mIntakePivotSupplyCurrent,
             mIntakePivotStatorCurrent,
-            mIntakePivotTempCelsius
+            mIntakePivotTempCelsius,
+            mIntakePivotReferencePosition,
+            mIntakePivotReferencePositionSlope
         ).isOK();
-        pInputs.iIntakePivotRotation = getPos();
-        pInputs.iIntakePivotVelocityRPS = mIntakePivotVelocityRPS.getValueAsDouble();
-        pInputs.iIntakePivotAccelerationRPSS = mIntakePivotAccelerationRPSS.getValueAsDouble();
+        pInputs.iIntakePivotRotation = 
+            Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
+            // .minus(mOffset);
+        mPivotPos = Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
+        pInputs.iIntakePivotVelocityRPS = Rotation2d.fromRotations(mIntakePivotVelocityRPS.getValueAsDouble());
+        pInputs.iIntakePivotAccelerationRPSS = Rotation2d.fromRotations(mIntakePivotAccelerationRPSS.getValueAsDouble());
         pInputs.iIntakePivotMotorVolts = mIntakePivotVoltage.getValueAsDouble();
         pInputs.iIntakePivotSupplyCurrentAmps = mIntakePivotSupplyCurrent.getValueAsDouble();
         pInputs.iIntakePivotStatorCurrentAmps = mIntakePivotStatorCurrent.getValueAsDouble();
         pInputs.iIntakePivotTempCelsius = mIntakePivotTempCelsius.getValueAsDouble();
+        pInputs.iIntakeClosedLoopReference = 
+            Rotation2d.fromRotations(mIntakePivotReferencePosition.getValueAsDouble());
+            // .minus(mOffset);
+        pInputs.iIntakeClosedLoopReferenceSlope = 
+            Rotation2d.fromRotations(mIntakePivotReferencePositionSlope.getValueAsDouble());
+            // .minus(mOffset);
     }
 
-    private Rotation2d getPos() {
-        return Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble()).minus(mOffset);
-    }
 
     @Override 
     public void setPDConstants(double pKP, double pKD) {
@@ -173,7 +190,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
 
     @Override
     public void enforceSoftLimits() {
-        double currentRotation = getPos().getRotations();
+        double currentRotation = mPivotPos.getRotations();
         if((currentRotation > mLimits.forwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() > 0) || 
            (currentRotation < mLimits.backwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() < 0)) stopMotor();
     }

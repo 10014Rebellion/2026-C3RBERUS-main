@@ -9,14 +9,20 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public interface IntakePivotIO {
     @AutoLog
     public static class IntakePivotInputs {
+      public boolean iIsEncoderConnected = false;
+      public Rotation2d iEncoderPosition = Rotation2d.kZero;
+
+
       public boolean iIsIntakePivotConnected = false;
       public Rotation2d iIntakePivotRotation = Rotation2d.kZero;
-      public double iIntakePivotVelocityRPS = 0.0;
-      public double iIntakePivotAccelerationRPSS = 0.0;
+      public Rotation2d iIntakePivotVelocityRPS = Rotation2d.kZero;
+      public Rotation2d iIntakePivotAccelerationRPSS = Rotation2d.kZero;
       public double iIntakePivotMotorVolts = 0.0;
       public double iIntakePivotSupplyCurrentAmps = 0.0;
       public double iIntakePivotStatorCurrentAmps = 0.0;
       public double iIntakePivotTempCelsius = 0.0;
+      public Rotation2d iIntakeClosedLoopReference = Rotation2d.kZero;
+      public Rotation2d iIntakeClosedLoopReferenceSlope = Rotation2d.kZero;
     }
 
     public default void updateInputs(IntakePivotInputs pInputs) {}

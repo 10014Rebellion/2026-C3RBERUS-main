@@ -29,11 +29,7 @@ public class Intake {
   }
 
   public Command setPivotTuneableAmps() {
-    return Commands.run(() -> mIntakePivotSS.setCustomPivotAmps(), mIntakePivotSS);
-  }
-
-  public Command setPivotTuneableSetpoint() {
-    return Commands.run(() -> mIntakePivotSS.setCustomPivotSetpoint(), mIntakePivotSS);
+    return new InstantCommand(() -> mIntakePivotSS.setCustomPivotAmps(), mIntakePivotSS);
   }
 
   public Command stopRollerMotorCmd() {
@@ -45,6 +41,10 @@ public class Intake {
   }
 
   public Command setPivotRotCmd(Rotation2d pRotSP) {
-    return new InstantCommand(() -> mIntakePivotSS.setPivotRot(pRotSP));
+    return Commands.run(() -> mIntakePivotSS.setPivotRot(pRotSP));
+  }
+
+  public Command setPivotRotCmd() {
+    return Commands.run(() -> mIntakePivotSS.setPivotRot());
   }
 }
