@@ -17,6 +17,9 @@ import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 
 public class IntakeConstants {
     public static class PivotConstants {
+
+        public static double kPivotMotorToleranceRotations = 0.1;
+
         public static final BasicMotorHardware kPivotMotorConfig = new BasicMotorHardware(
             41, // TODO: TUNE ME;
             Constants.kSubsystemsCANBus,

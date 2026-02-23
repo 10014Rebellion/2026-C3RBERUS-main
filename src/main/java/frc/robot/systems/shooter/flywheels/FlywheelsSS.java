@@ -1,9 +1,11 @@
 package frc.robot.systems.shooter.flywheels;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderInputsAutoLogged;
 import static frc.robot.systems.shooter.ShooterConstants.FlywheelConstants.kFlywheelControlConfig;
@@ -30,10 +32,15 @@ public class FlywheelsSS extends SubsystemBase {
   private final LoggedTunableNumber tFlywheelMaxAccel = new LoggedTunableNumber("Flywheel/Control/MaxAcceleration", kFlywheelControlConfig.motionMagicConstants().maxAcceleration());
   private final LoggedTunableNumber tFlywheelMaxJerk = new LoggedTunableNumber("Flywheel/Control/MaxJerk", kFlywheelControlConfig.motionMagicConstants().maxJerk());
 
+  private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Flywheel/Control/Tolerance", ShooterConstants.FlywheelConstants.kToleranceRPS);
+
+  private double mCurrentRPSGoal;
+
   public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
     this.mLeaderFlywheelIO = pLeaderFlywheelIO;
     this.mFollowerFlywheelIO = pFollowerFlywheelIO;
     this.mFlywheelEncoder = pFlywheelEncoder;
+    this.mCurrentRPSGoal = 0.0;
   }
 
   public void setFlywheelVolts(double pVolts) {
@@ -42,6 +49,7 @@ public class FlywheelsSS extends SubsystemBase {
   }
 
   public void setFlywheelSpeeds(Rotation2d pRotPerS) {
+    mCurrentRPSGoal = pRotPerS.getRotations();
     mLeaderFlywheelIO.setMotorVelAndAccel(pRotPerS.getRotations(), 0, kFlywheelControlConfig.feedforward().calculate(pRotPerS.getRotations()));
     mFollowerFlywheelIO.enforceFollower();
   }
@@ -73,6 +81,16 @@ public class FlywheelsSS extends SubsystemBase {
     kFlywheelControlConfig.feedforward().setKv(pKV);
     kFlywheelControlConfig.feedforward().setKs(pKS);
     kFlywheelControlConfig.feedforward().setKa(pKA);
+  }
+
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRotationsPerSec")
+  public double getErrorRotationsPerSec() {
+    return mCurrentRPSGoal - getFlywheelRPS();
+  }
+
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtGoal")
+  public boolean atGoal() {
+    return Math.abs(getErrorRotationsPerSec()) < tFlywheelTolerance.get();
   }
   
   @Override
@@ -111,4 +129,6 @@ public class FlywheelsSS extends SubsystemBase {
       tFlywheelKS, tFlywheelKV, tFlywheelKA
     );
   }
+
+
 }

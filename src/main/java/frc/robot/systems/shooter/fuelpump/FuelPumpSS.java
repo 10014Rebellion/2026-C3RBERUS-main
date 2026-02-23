@@ -1,9 +1,11 @@
 package frc.robot.systems.shooter.fuelpump;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 
 public class FuelPumpSS extends SubsystemBase {
@@ -19,8 +21,12 @@ public class FuelPumpSS extends SubsystemBase {
   private final LoggedTunableNumber tFuelPumpKS = new LoggedTunableNumber("FuelPump/Control/kS", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKs());
   private final LoggedTunableNumber tFuelPumpKV = new LoggedTunableNumber("FuelPump/Control/kV", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKv());
   private final LoggedTunableNumber tFuelPumpKA = new LoggedTunableNumber("FuelPump/Control/kA", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKa());
+
+  private final LoggedTunableNumber tFuelPumpTolerance = new LoggedTunableNumber("FuelPump/Control/Tolerance", ShooterConstants.FuelPumpConstants.kToleranceRPS);
   
   private SimpleMotorFeedforward mFuelPumpFeedForward = FuelPumpConstants.kFuelPumpControlConfig.feedforward();
+
+  private double mCurrentRPSGoal = 0.0;
   
   public FuelPumpSS(FuelPumpIO pLeaderFuelPumpIO, FuelPumpIO pFollowerFuelPumpIO) {
     this.mLeaderFuelPumpIO = pLeaderFuelPumpIO;
@@ -32,8 +38,9 @@ public class FuelPumpSS extends SubsystemBase {
   }
 
   public void setFuelPumpRPS(double pDesiredRPS) {
-    double calculatedFF = mFuelPumpFeedForward.calculateWithVelocities(getAvgFuelPumpRPS(), pDesiredRPS);
-    mLeaderFuelPumpIO.setMotorVelocity(pDesiredRPS, calculatedFF);
+    mCurrentRPSGoal = pDesiredRPS;
+    double calculatedFF = mFuelPumpFeedForward.calculateWithVelocities(getAvgFuelPumpRPS(), mCurrentRPSGoal);
+    mLeaderFuelPumpIO.setMotorVelocity(mCurrentRPSGoal, calculatedFF);
     mFollowerFuelPumpIO.enforceFollower();
   }
 
@@ -56,6 +63,16 @@ public class FuelPumpSS extends SubsystemBase {
     mFuelPumpFeedForward.setKs(pKS);
     mFuelPumpFeedForward.setKv(pKV);
     mFuelPumpFeedForward.setKa(pKA);
+  }
+
+  @AutoLogOutput(key = "Shooter/FuelPump/Feedback/ErrorRotationsPerSec")
+  public double getErrorRotationsPerSec() {
+    return mCurrentRPSGoal - getAvgFuelPumpRPS();
+  }
+
+  @AutoLogOutput(key = "Shooter/FuelPump/Feedback/AtGoal")
+  public boolean atGoal() {
+    return Math.abs(getErrorRotationsPerSec()) < tFuelPumpTolerance.get();
   }
 
   @Override
