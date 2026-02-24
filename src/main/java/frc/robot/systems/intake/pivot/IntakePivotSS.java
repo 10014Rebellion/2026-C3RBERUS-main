@@ -58,8 +58,8 @@ public class IntakePivotSS extends SubsystemBase {
 
     double cos = mIntakePivotInputs.iIntakeClosedLoopReference.getCos();
 
-    Logger.recordOutput("IntakePivot/ffOutput", ffOutput);
-    Logger.recordOutput("IntakePivot/cos", cos);
+    Logger.recordOutput("Intake/Pivot/ffOutput", ffOutput);
+    Logger.recordOutput("Intake/Pivot/cos", cos);
 
     mIntakePivotIO.setMotorRot(
       pRot, 
@@ -113,7 +113,7 @@ public class IntakePivotSS extends SubsystemBase {
     refreshTuneables();
     mIntakePivotIO.enforceSoftLimits();
 
-    Logger.processInputs("Intake", mIntakePivotInputs);
+    Logger.processInputs("Intake/Pivot", mIntakePivotInputs);
   }
 
   private void refreshTuneables() {

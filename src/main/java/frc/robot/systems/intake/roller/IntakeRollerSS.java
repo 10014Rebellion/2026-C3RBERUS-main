@@ -27,6 +27,6 @@ public class IntakeRollerSS extends SubsystemBase {
   @Override
   public void periodic() {
     mIntakeRollerIO.updateInputs(mIntakeRollerInputs);
-    Logger.processInputs("Intake", mIntakeRollerInputs);
+    Logger.processInputs("Intake/Roller", mIntakeRollerInputs);
   }
 }
