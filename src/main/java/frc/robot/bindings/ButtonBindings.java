@@ -42,36 +42,25 @@ public class ButtonBindings {
 
         mDriverController.startButton().onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
 
-        mDriverController.leftTrigger()
-            .onTrue(mShooter.setFlywheelsRPSCmd(Rotation2d.fromRotations(60)).andThen(mShooter.setFuelPumpsVoltsCmd(10.0)))
-            .onTrue(mShooter.setFlywheelsRPSCmd(Rotation2d.fromRotations(20)).andThen(mShooter.setFuelPumpsVoltsCmd(0)));
-
-
-        mDriverController.leftBumper()
-            .onTrue(mShooter.setFlywheelsRPSCmd(Rotation2d.fromRotations(80)).andThen(mShooter.setFuelPumpsVoltsCmd(10.0)))
-            .onTrue(mShooter.setFlywheelsRPSCmd(Rotation2d.fromRotations(20)).andThen(mShooter.setFuelPumpsVoltsCmd(0)));
-
         mDriverController.rightTrigger()
             .onTrue(mIntakeSS.setPivotState(IntakePivotState.INTAKE));
-            // .onFalse(mIntakeSS.setPivotState(IntakePivotState.IDLE));
+            // .onFalse(mIntakeSS.setPivotState(IntakePivotState.IDL8));
 
         mDriverController.rightBumper()
             .onTrue(mIntakeSS.setPivotState(IntakePivotState.IDLE))
             .onFalse(mIntakeSS.setPivotState(IntakePivotState.INTAKE));
 
-
         mDriverController.y()
-            .onTrue(mIntakeSS.setRollerState(IntakeRollerState.INTAKE))
             .onTrue(mConveyorSS.setConveyorState(ConveyorState.INTAKE))
-            .onTrue(mIntakeSS.setRollerState(IntakeRollerState.IDLE))
-            .onTrue(mConveyorSS.setConveyorState(ConveyorState.IDLE));
+            .onFalse(mConveyorSS.setConveyorState(ConveyorState.IDLE));
 
         mDriverController.a()
-            .onTrue(mShooter.setHoodRot(Rotation2d.fromDegrees(20)))
-            .onFalse(mShooter.holdHoodCmd());
+            .onTrue(mIntakeSS.setRollerState(IntakeRollerState.INTAKE))
+            .onFalse(mIntakeSS.setRollerState(IntakeRollerState.IDLE));
 
         mDriverController.b()
-            .onTrue(mShooter.setHoodRot(Rotation2d.fromDegrees(10)))
-            .onFalse(mShooter.holdHoodCmd());
+            .onTrue(mShooter.setFuelPumpsVoltsCmd(10.0))
+            .onFalse(mShooter.setFuelPumpsVoltsCmd(0));
+
     }
 }

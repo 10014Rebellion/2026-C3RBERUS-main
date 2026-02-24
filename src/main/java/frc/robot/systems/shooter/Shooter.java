@@ -3,6 +3,7 @@ package frc.robot.systems.shooter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.hood.HoodSS;
@@ -14,14 +15,21 @@ public class Shooter {
 
   public Shooter(FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelSS) {
     this.mFuelPumpsSS = pFuelPumpSS; this.mHoodSS = pHoodSS; this.mFlywheelSS = pFlywheelSS; // I miss my C++ initializer lists :'(
+
+    mFlywheelSS.setDefaultCommand(setFlywheelsRPSCmd(Rotation2d.fromRotations(85)));
   }
 
   public Command setFlywheelsRPSCmd(Rotation2d pRPS) {
-    return Commands.run(() -> mFlywheelSS.setFlywheelSpeeds(pRPS), mFlywheelSS);
+    return new InstantCommand(() -> mFlywheelSS.setFlywheelSpeeds(pRPS), mFlywheelSS);
   }
 
+  public boolean getIsFlywheelAtGoal() {
+    return mFlywheelSS.atGoal();
+  }
+
+  
   public Command setFlywheelsRPSCmd() {
-    return Commands.run(() -> mFlywheelSS.setFlywheelSpeeds(), mFlywheelSS);
+   return new InstantCommand(() -> mFlywheelSS.setFlywheelSpeeds(), mFlywheelSS);
   }
 
   public Command setFlywheelsVoltsCmd(double pVolts) {
@@ -29,7 +37,7 @@ public class Shooter {
   }
 
   public Command setFuelPumpsVoltsCmd(double pVolts) {
-    return Commands.run(() -> mFuelPumpsSS.setFuelPumpVolts(pVolts), mFuelPumpsSS);
+    return new InstantCommand(() -> mFuelPumpsSS.setFuelPumpVolts(pVolts), mFuelPumpsSS);
   }
 
   public Command setFuelPumpRPSCmd(double pRPS) {

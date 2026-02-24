@@ -22,7 +22,7 @@ public class IntakePivotSS extends SubsystemBase {
     new LoggedTunableNumber("Intake/Pivot/Control/CustomSetpointRot", 0);
 
   public static enum IntakePivotState {
-    INTAKE(() -> Rotation2d.fromRotations(-0.05)),
+    INTAKE(() -> Rotation2d.fromRotations(-0.07)),
     IDLE(() -> Rotation2d.kCCW_Pi_2),
     TUNING(() -> Rotation2d.fromRotations(tPivotCustomSetpointRot.get()));
 
@@ -58,7 +58,7 @@ public class IntakePivotSS extends SubsystemBase {
   public static final LoggedTunableNumber tCustomAmps = new LoggedTunableNumber("Intake/Pivot/Custom/Amps", 0.0);
   public static final LoggedTunableNumber tPivotPositionTolerance = new LoggedTunableNumber("Intake/Pivot/Control/Tolerance", IntakeConstants.PivotConstants.kPivotMotorToleranceRotations);
 
-  private IntakePivotState mIntakePivotState = IntakePivotState.IDLE;
+  private IntakePivotState mIntakePivotState = IntakePivotState.INTAKE;
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
   private Double mAppliedVolts = null;
   private Double mAppliedAmps = null;
