@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
@@ -224,38 +223,28 @@ public class AutonCommands extends SubsystemBase {
     }
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\
-    public SequentialEndingCommandGroup followChoreoPath(String pPathName) {
-        return followChoreoPath(pPathName, false);
-    }
-
     public SequentialEndingCommandGroup followChoreoPath(String pPathName, boolean pIsFirst) {
         PathPlannerPath path = getTraj(pPathName).get();
-        PathPlannerTrajectory ideaTraj = path.getIdealTrajectory(Drive.mRobotConfig).get();
+        PathPlannerTrajectory idealTraj = path.getIdealTrajectory(Drive.mRobotConfig).get();
         return new SequentialEndingCommandGroup(
-            new InstantCommand(() -> {
-                if(pIsFirst) {
-                    mRobotDrive.setPose(AllianceFlipUtil.apply(ideaTraj.sample(0).pose));
-                }
+            Commands.runOnce(() -> {
+                if(pIsFirst) setPoseFromTrajectory(idealTraj);
             }),
-            mRobotDrive.getDriveManager().followPathCommand(path).withTimeout(ideaTraj.getTotalTimeSeconds()),
+            mRobotDrive.getDriveManager().followPathCommand(path)
+                .withTimeout(idealTraj.getTotalTimeSeconds()),
             mRobotDrive.getDriveManager().setToStop()
         );
     }
 
-    public SequentialEndingCommandGroup followChoreoPath(String pPathName, PPHolonomicDriveController pPID) {
-        return followChoreoPath(pPathName, pPID, false);
-    }
-
     public SequentialEndingCommandGroup followChoreoPath(String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst) {
         PathPlannerPath path = getTraj(pPathName).get();
-        PathPlannerTrajectory ideaTraj = path.getIdealTrajectory(Drive.mRobotConfig).get();
+        PathPlannerTrajectory idealTraj = path.getIdealTrajectory(Drive.mRobotConfig).get();
         return new SequentialEndingCommandGroup(
-            new InstantCommand(() -> {
-                if(pIsFirst) {
-                    mRobotDrive.setPose(AllianceFlipUtil.apply(ideaTraj.sample(0).pose));
-                }
+            Commands.runOnce(() -> { 
+                if(pIsFirst) setPoseFromTrajectory(idealTraj);
             }),
-            mRobotDrive.getDriveManager().followPathCommand(path, pPID).withTimeout(ideaTraj.getTotalTimeSeconds()),
+            mRobotDrive.getDriveManager().followPathCommand(path, pPID)
+                .withTimeout(idealTraj.getTotalTimeSeconds()),
             mRobotDrive.getDriveManager().setToStop()
         );
     }
@@ -267,6 +256,10 @@ public class AutonCommands extends SubsystemBase {
             e.printStackTrace();
             return Optional.empty();
         }
+    }
+
+    public void setPoseFromTrajectory(PathPlannerTrajectory idealTraj) {
+        mRobotDrive.setPose(AllianceFlipUtil.apply(idealTraj.sample(0.0).pose));
     }
 
     ///////////////// PATH CHOOSING LOGIC \\\\\\\\\\\\\\\\\\\\\\
