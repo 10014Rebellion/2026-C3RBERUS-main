@@ -147,11 +147,6 @@ public class ShooterConstants {
 
     public static class FlywheelConstants {
 
-        public enum FlywheelState{
-            TORQUE_FOC,
-            BANG_BANG
-        }
-
         public static final double kMaxFlywheelTestedRPS = 112;
         public static final double kToleranceRPS = 3.0;
         public static final double kBangBangTimeout = 0.25;

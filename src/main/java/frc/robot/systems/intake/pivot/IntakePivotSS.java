@@ -193,10 +193,7 @@ public class IntakePivotSS extends SubsystemBase {
     Logger.recordOutput("Intake/Pivot/ffOutput", ffOutput);
     Logger.recordOutput("Intake/Pivot/cos", cos);
 
-    mIntakePivotIO.setMotorRot(
-      pRot, 
-      ffOutput
-    );
+    mIntakePivotIO.setMotorRot(pRot, ffOutput);
   }
 
   public void setPivotRotManual() {
