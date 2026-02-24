@@ -7,7 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public interface EncoderIO {
     @AutoLog
     public static class EncoderInputs {
-      public boolean iIsEncoderConnected = true;
+      public boolean iIsEncoderConnected = false;
       public Rotation2d iEncoderPositionRot = Rotation2d.kZero;
       public Rotation2d iEncoderVelocityRPS = Rotation2d.kZero;
       public String iEncoderMagnetHealth = "";

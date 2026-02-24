@@ -42,13 +42,13 @@ public class FlywheelIOSim implements FlywheelIO{
 
     public void updateInputs(FlywheelInputs pInputs) {
         mFlywheelMotor.update(0.02);
+        pInputs.iIsFlywheelConnected = true;
         pInputs.iFlywheelRotorAccelerationRPSS = (2*Math.PI) / mFlywheelMotor.getAngularAccelerationRadPerSecSq();
         pInputs.iFlywheelMotorVolts = mAppliedVoltage;
         pInputs.iFlywheelStatorCurrentAmps = Math.abs(mFlywheelMotor.getCurrentDrawAmps());
         pInputs.iFlywheelSupplyCurrentAmps = 0.0;
         pInputs.iFlywheelTempCelsius = 0.0;
         pInputs.iFlywheelRotorVelocityRPS = Rotation2d.fromRotations(mFlywheelMotor.getAngularVelocityRPM() / 60.0);
-        pInputs.iIsFlywheelConnected = true;
     }
 
     public void setPDConstants(double pKP, double pKD) {

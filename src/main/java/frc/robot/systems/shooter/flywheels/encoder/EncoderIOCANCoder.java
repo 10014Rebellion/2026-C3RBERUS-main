@@ -20,7 +20,6 @@ public class EncoderIOCANCoder implements EncoderIO{
     public EncoderIOCANCoder(RelativeCANCoderHardware pCANCoderConfig) {
         this.mCANCoder = new CANcoder(pCANCoderConfig.cancoderID(), Constants.kSubsystemsCANBus);
 
-        
         CANcoderConfiguration mCTRConfigCANCoder = new CANcoderConfiguration();
         mCTRConfigCANCoder.MagnetSensor.SensorDirection = pCANCoderConfig.direction();
         this.mCANCoder.getConfigurator().apply(mCTRConfigCANCoder);
@@ -46,7 +45,7 @@ public class EncoderIOCANCoder implements EncoderIO{
             mPosition,
             mVelocity,
             mMagnetHealth
-        ).isOK() && mCANCoder.isConnected();
+        ).isOK();
         pInputs.iEncoderPositionRot = Rotation2d.fromRotations(mPosition.getValueAsDouble());
         pInputs.iEncoderVelocityRPS = Rotation2d.fromRotations(mVelocity.getValueAsDouble());
         pInputs.iEncoderMagnetHealth = mMagnetHealth.getValue().toString();
