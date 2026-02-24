@@ -39,7 +39,19 @@ public class IntakeRollerSS extends SubsystemBase {
   public IntakeRollerSS(IntakeRollerIO pIntakeRollerIO) {
     this.mIntakeRollerIO = pIntakeRollerIO;
   }
+  
+  @Override
+  public void periodic() {
+    mIntakeRollerIO.updateInputs(mIntakeRollerInputs);
+    Logger.processInputs("Intake/Roller", mIntakeRollerInputs);
 
+    if(mIntakeRollerState != null) {
+      Logger.recordOutput("IntakeRoller/DesiredVoltage", mIntakeRollerState.getDesiredVoltge());
+
+      mIntakeRollerIO.setMotorVolts(mIntakeRollerState.getDesiredVoltge());
+    }
+  }
+  
   public Command setIntakeRollerState(IntakeRollerState pIntakeRollerState) {
     return Commands.run(() -> {
       mIntakeRollerState = pIntakeRollerState;
@@ -64,15 +76,4 @@ public class IntakeRollerSS extends SubsystemBase {
     mIntakeRollerIO.stopMotor();
   }
   
-  @Override
-  public void periodic() {
-    mIntakeRollerIO.updateInputs(mIntakeRollerInputs);
-    Logger.processInputs("Intake/Roller", mIntakeRollerInputs);
-
-    if(mIntakeRollerState != null) {
-      Logger.recordOutput("IntakeRoller/DesiredVoltage", mIntakeRollerState.getDesiredVoltge());
-
-      mIntakeRollerIO.setMotorVolts(mIntakeRollerState.getDesiredVoltge());
-    }
-  }
 }

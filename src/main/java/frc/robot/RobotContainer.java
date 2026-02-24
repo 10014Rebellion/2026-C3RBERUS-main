@@ -34,7 +34,6 @@ import frc.robot.systems.shooter.flywheels.FlywheelIOSim;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIOCANCoder;
-import frc.robot.systems.shooter.flywheels.encoder.EncoderIOSim;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIO;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIOKrakenX44;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIOSim;
@@ -129,7 +128,7 @@ public class RobotContainer {
                     new FlywheelsSS(
                         new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
                         new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig),
-                        new EncoderIOSim(ShooterConstants.FlywheelConstants.kCANCoderConfig)
+                        new EncoderIO() {}
                     )
                 );
 

@@ -9,6 +9,8 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.intake.IntakeConstants;
@@ -100,10 +102,83 @@ public class IntakePivotSS extends SubsystemBase {
     }
   }
 
+  public Command setIntakePivotState(IntakePivotState pIntakePivotState){
+    return Commands.run(() -> {
+      setPivotState(pIntakePivotState);
+    }, this);
+  }
+
+  public Command setIntakePivotVolts(double pVolts){
+    return Commands.run(() -> {
+      setPivotVolts(pVolts);
+    }, this);
+  }
+
+  public Command setIntakePivotAmps(double pAmps){
+    return Commands.run(() -> {
+      setPivotAmps(pAmps);
+    }, this);
+  }
+
+  public Command setIntakePivotAmps(){
+    return Commands.run(() -> {
+      setCustomPivotAmps();
+    }, this);
+  }
+
+  public Command setIntakePivotManual(Rotation2d pRot){
+    return Commands.run(() -> {
+      setPivotRotManual(pRot);
+    }, this);
+  }
+
+  public Command setIntakePivotManual(){
+    return Commands.run(() -> {
+      setPivotRotManual();
+    }, this);
+  }
+
+  public Command stopIntakePivot(){
+    return Commands.run(() -> {
+      stopIntakePivot();
+    }, this);
+  }
+  
   public void setPivotState(IntakePivotState pIntakePivotState) {
     mAppliedAmps = null;
     mAppliedVolts = null;
     mIntakePivotState = pIntakePivotState;
+  }
+
+  public void setPivotVolts(double pVolts) {
+    mCurrentRotationalGoal = null;
+    mIntakePivotState = null;
+    mAppliedAmps = null;
+    mAppliedVolts = pVolts;
+    mIntakePivotIO.setMotorVolts(pVolts);
+  }
+
+  public void setPivotAmps(double pAmps) {
+    mCurrentRotationalGoal = null;
+    mIntakePivotState = null;
+    mAppliedVolts = null;
+    mAppliedAmps = pAmps;
+    mIntakePivotIO.setMotorVolts(pAmps);
+  }
+  
+  public void stopPivotMotor() {
+    mCurrentRotationalGoal = null;
+    mIntakePivotState = null;
+    mAppliedAmps = null;
+    mAppliedVolts = 0.0;
+    mIntakePivotIO.stopMotor();
+  }
+
+  public void setPivotRotManual(Rotation2d pRot) {
+    mAppliedAmps = null;
+    mAppliedVolts = null;
+    mIntakePivotState = null;
+    setPivotRot(pRot);
   }
 
   public void setPivotRot(Rotation2d pRot) {
@@ -124,44 +199,14 @@ public class IntakePivotSS extends SubsystemBase {
     );
   }
 
-  public void setPivotRotManually(Rotation2d pRot) {
-    mAppliedAmps = null;
-    mAppliedVolts = null;
-    mIntakePivotState = null;
-    setPivotRot(pRot);
-  }
-
-  public void setPivotRotManually() {
-    setPivotRotManually(Rotation2d.fromRotations(tPivotCustomSetpointRot.getAsDouble()));
-  }
-
-  public void setPivotVolts(double pVolts) {
-    mCurrentRotationalGoal = null;
-    mIntakePivotState = null;
-    mAppliedAmps = null;
-    mAppliedVolts = pVolts;
-    mIntakePivotIO.setMotorVolts(pVolts);
-  }
-
-  public void setPivotAmps(double pAmps) {
-    mCurrentRotationalGoal = null;
-    mIntakePivotState = null;
-    mAppliedVolts = null;
-    mAppliedAmps = pAmps;
-    mIntakePivotIO.setMotorVolts(pAmps);
+  public void setPivotRotManual() {
+    setPivotRotManual(Rotation2d.fromRotations(tPivotCustomSetpointRot.getAsDouble()));
   }
 
   public void setCustomPivotAmps() {
     setPivotAmps(tCustomAmps.get());;
   }
 
-  public void stopPivotMotor() {
-    mCurrentRotationalGoal = null;
-    mIntakePivotState = null;
-    mAppliedAmps = null;
-    mAppliedVolts = 0.0;
-    mIntakePivotIO.stopMotor();
-  }
 
   private void refreshTuneables() {
     LoggedTunableNumber.ifChanged( hashCode(), 
@@ -187,7 +232,7 @@ public class IntakePivotSS extends SubsystemBase {
     mPivotFF.setKa(kA);
   }
 
-  public Rotation2d getIntakePivotRotations(){
+  private Rotation2d getIntakePivotRotations(){
     return mIntakePivotInputs.iIntakePivotRotation;
   }
 

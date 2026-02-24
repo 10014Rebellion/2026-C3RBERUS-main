@@ -6,8 +6,6 @@ package frc.robot.systems.intake;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
@@ -22,7 +20,9 @@ public class Intake {
     this.mIntakeRollerSS = pIntakeRollerSS;
   }
 
-  public Command setRollerState(IntakeRollerState rollerState) {
+
+  // ROLLER COMMANDS //
+  public Command setRollerStateCmd(IntakeRollerState rollerState) {
     return mIntakeRollerSS.setIntakeRollerState(rollerState);
   }
 
@@ -30,35 +30,36 @@ public class Intake {
     return mIntakeRollerSS.setIntakeVoltsManualCmd(pVolts);
   }
   
-  public Command stopRollerMotorManualCmd() {
+  public Command stopRollerCmd() {
     return mIntakeRollerSS.stopIntakeVoltsManualCmd();
   }
 
-  public Command stopPivotMotorCmd() {
-    return new InstantCommand(() -> mIntakePivotSS.stopPivotMotor(), mIntakePivotSS);
+  // PIVOT COMMANDS //
+  public Command setPivotState(IntakePivotState pIntakePivotState) {
+    return mIntakePivotSS.setIntakePivotState(pIntakePivotState);
+  }
+  
+  public Command setPivotAmps(double pAmps){
+    return mIntakePivotSS.setIntakePivotAmps(pAmps);
   }
 
-  public Command setPivotTuneableAmps() {
-    return new InstantCommand(() -> mIntakePivotSS.setCustomPivotAmps(), mIntakePivotSS);
+  public Command setPivotAmps() {
+    return mIntakePivotSS.setIntakePivotAmps();
+  }
+  
+  public Command setPivotRotManualCmd(Rotation2d pRot){
+    return mIntakePivotSS.setIntakePivotManual(pRot);
+  }
+  
+  public Command setPivotRotManualCmd(){
+    return mIntakePivotSS.setIntakePivotManual();
   }
 
-  public Command setPivotState(IntakePivotState intakePivotState) {
-    return Commands.run(() -> mIntakePivotSS.setPivotState(intakePivotState), mIntakePivotSS);
+  public Command setPivotVoltsCmd(double pVolts){
+    return mIntakePivotSS.setIntakePivotVolts(pVolts);
   }
 
-  public Command setPivotVolts(double pVolts) {
-    return Commands.run(() -> mIntakePivotSS.setPivotVolts(pVolts), mIntakePivotSS);
-  }
-
-  public Command setPivotRotManualCmd(Rotation2d pRotSP) {
-    return Commands.run(() -> mIntakePivotSS.setPivotRotManually(pRotSP), mIntakePivotSS);
-  }
-
-  // public Command holdPivotCmd(){
-  //   return new InstantCommand(() -> mIntakePivotSS.holdPivot());
-  // }
-
-  public Command setPivotRotCmd() {
-    return Commands.run(() -> mIntakePivotSS.setPivotRotManually(), mIntakePivotSS);
+  public Command stopPivotCmd() {
+    return mIntakePivotSS.stopIntakePivot();
   }
 }
