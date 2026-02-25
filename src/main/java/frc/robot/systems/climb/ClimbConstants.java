@@ -9,6 +9,7 @@ import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.ElevatorController;
+import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 
@@ -19,7 +20,7 @@ public class ClimbConstants {
         Constants.kSubsystemsCANBus, 
         1 / 5.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
         InvertedValue.CounterClockwise_Positive,
-        NeutralModeValue.Coast,
+        NeutralModeValue.Brake,
         new CurrentLimits(30, 40)
     );
     
@@ -39,6 +40,7 @@ public class ClimbConstants {
 
     public static final ElevatorController kController = new ElevatorController(
         0, 
+        new PDConstants(0, 0),
         new ElevatorFeedforward(.0, 0.0, 0.0), 
         0);
 

@@ -4,7 +4,9 @@ package frc.robot.systems.climb;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -22,6 +24,7 @@ import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 public class ClimbIOKrakenx44 implements ClimbIO {
     private final TalonFX mClimbMotor;
     private final VoltageOut mClimbVoltageControl = new VoltageOut(0.0);
+    private final PositionVoltage mClimbPositionControl = new PositionVoltage(0.0);
     private final PositionSoftLimits mSoftLimits;
 
     private final StatusSignal<AngularVelocity> mClimbVelocityMPS;
@@ -101,13 +104,21 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     }
 
     @Override
-    public void enableBrakeMode(){
-        mClimbMotor.setNeutralMode(NeutralModeValue.Brake);
+    public void setMotorVolts(double pVolts) {
+        mClimbMotor.setControl(mClimbVoltageControl.withOutput(pVolts));
     }
 
     @Override
-    public void setMotorVolts(double pVolts) {
-        mClimbMotor.setControl(mClimbVoltageControl.withOutput(pVolts));
+    public void setMotorPosition(double pPositionM, double pFeedforward) {
+        mClimbMotor.setControl(mClimbPositionControl.withPosition(pPositionM).withFeedForward(pFeedforward).withSlot(0));
+    }
+
+    @Override
+    public void setPDConstants(double pKP, double pKD){
+        Slot0Configs configs = new Slot0Configs();
+        configs.kP = pKP;
+        configs.kD = pKD;
+        mClimbMotor.getConfigurator().apply(configs);
     }
 
     @Override
