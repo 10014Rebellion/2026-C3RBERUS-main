@@ -9,6 +9,8 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -36,7 +38,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     // private final DetachedEncoder mIntakePivotEncoder;
     private final VoltageOut mIntakePivotVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mIntakePivotAmpsControl = new TorqueCurrentFOC(0.0);
-    private final MotionMagicTorqueCurrentFOC mIntakePivotRotationControl = new MotionMagicTorqueCurrentFOC(0.0);
+    private final PositionVoltage mIntakePivotRotationControl = new PositionVoltage(0.0);
     
     private final StatusSignal<Angle> mIntakePivotRotation;
     private final StatusSignal<AngularVelocity> mIntakePivotVelocityRPS;

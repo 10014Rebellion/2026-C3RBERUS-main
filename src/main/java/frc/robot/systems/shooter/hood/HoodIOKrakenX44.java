@@ -120,6 +120,7 @@ public class HoodIOKrakenX44 implements HoodIO{
         pInputs.iHoodSupplyCurrentAmps = mHoodSupplyCurrent.getValueAsDouble();
         pInputs.iHoodStatorCurrentAmps = mHoodStatorCurrent.getValueAsDouble();
         pInputs.iHoodTempCelsius = mHoodTempCelsius.getValueAsDouble();
+        pInputs.iHoodReferenceValue = Rotation2d.fromRotations(mHoodMotor.getClosedLoopReference().getValueAsDouble());
     }
 
     private Rotation2d getPos() {

@@ -2,9 +2,11 @@ package frc.robot.systems.shooter.hood;
 
 import java.util.function.Supplier;
 
+import org.dyn4j.geometry.Rotation;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,10 +22,15 @@ public class HoodSS extends SubsystemBase{
   private static final LoggedTunableNumber tHoodCustomSetpoint = 
     new LoggedTunableNumber("Hood/Control/CustomSetpointDegrees", 0);
 
+  @AutoLogOutput (key="Hood/IncrementAngle")
+  private static Rotation2d incrementAngle = Rotation2d.kZero; 
+
   public static enum HoodState {
     MAX(() -> ShooterConstants.HoodConstants.kHoodLimits.forwardLimit()),
     STOWED(() -> Rotation2d.fromDegrees(0)),
-    MIMD(() -> ShooterConstants.HoodConstants.kHoodLimits.backwardLimit());
+    CUSTOM(() -> incrementAngle),
+    MID(() -> ShooterConstants.HoodConstants.kHoodLimits.forwardLimit().div(2)),
+    MIN(() -> ShooterConstants.HoodConstants.kHoodLimits.backwardLimit());
 
     private Supplier<Rotation2d> mRSupplier;
 
@@ -51,7 +58,9 @@ public class HoodSS extends SubsystemBase{
   private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Hood/Control/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
   private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Hood/Control/Tolerance", HoodConstants.kToleranceRotations);
 
+  @AutoLogOutput(key="Hood/State")
   private HoodState mHoodState = HoodState.STOWED;
+
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
   private Double mAppliedVolts = null;
 
@@ -73,6 +82,28 @@ public class HoodSS extends SubsystemBase{
       mCurrentRotationalGoal = mHoodState.getDesiredRotation();
       setHoodRot(mCurrentRotationalGoal);
     }
+
+    Logger.recordOutput("Hood/EnumVal", mHoodState.getDesiredRotation());
+  }
+
+  public Command incrementAngle() {
+    return Commands.runOnce(() -> {
+      incrementAngle = Rotation2d.fromRotations(MathUtil.clamp(
+        incrementAngle.plus(HoodConstants.kIncrementStepAmount).getRotations(), 
+        HoodConstants.kHoodLimits.backwardLimit().getRotations(), 
+        HoodConstants.kHoodLimits.forwardLimit().getRotations())
+      );
+    }, this).andThen(setHoodStateCmd(HoodState.CUSTOM));
+  }
+
+  public Command decrementAngle() {
+    return Commands.runOnce(() -> {
+      incrementAngle = Rotation2d.fromRotations(MathUtil.clamp(
+        incrementAngle.minus(HoodConstants.kIncrementStepAmount).getRotations(), 
+        HoodConstants.kHoodLimits.backwardLimit().getRotations(), 
+        HoodConstants.kHoodLimits.forwardLimit().getRotations())
+      );
+    }, this).andThen(setHoodStateCmd(HoodState.CUSTOM));
   }
 
   public Command setHoodStateCmd(HoodState pHoodState){

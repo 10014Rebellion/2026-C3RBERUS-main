@@ -22,43 +22,43 @@ public class Intake {
 
   // ROLLER COMMANDS //
   public Command setRollerStateCmd(IntakeRollerState rollerState) {
-    return mIntakeRollerSS.setIntakeRollerState(rollerState);
+    return mIntakeRollerSS.setIntakeRollerStateCmd(rollerState);
   }
 
   public Command setRollerVoltsManualCmd(double pVolts) {
-    return mIntakeRollerSS.setIntakeVoltsManual(pVolts);
+    return mIntakeRollerSS.setIntakeVoltsManualCmd(pVolts);
   }
   
   public Command stopRollerCmd() {
-    return mIntakeRollerSS.stopIntakeVoltsManual();
+    return mIntakeRollerSS.stopIntakeVoltsManualCmd();
   }
 
   // PIVOT COMMANDS //
-  public Command setPivotState(IntakePivotState pIntakePivotState) {
-    return mIntakePivotSS.setIntakePivotState(pIntakePivotState);
+  public Command setPivotStateCmd(IntakePivotState pIntakePivotState) {
+    return mIntakePivotSS.setIntakePivotStateCmd(pIntakePivotState);
   }
   
   public Command setPivotAmps(double pAmps){
-    return mIntakePivotSS.setIntakePivotAmps(pAmps);
+    return mIntakePivotSS.setIntakePivotAmpsCmd(pAmps);
   }
 
   public Command setPivotAmps() {
-    return mIntakePivotSS.setIntakePivotAmps();
+    return mIntakePivotSS.setIntakePivotAmpsCmd();
   }
   
   public Command setPivotRotManualCmd(Rotation2d pRot){
-    return mIntakePivotSS.setIntakePivotManual(pRot);
+    return mIntakePivotSS.setIntakePivotManualCmd(pRot);
   }
   
   public Command setPivotRotManualCmd(){
-    return mIntakePivotSS.setIntakePivotManual();
+    return mIntakePivotSS.setIntakePivotManualCmd();
   }
 
   public Command setPivotVoltsCmd(double pVolts){
-    return mIntakePivotSS.setIntakePivotVolts(pVolts);
+    return mIntakePivotSS.setIntakePivotVoltsCmd(pVolts);
   }
 
   public Command stopPivotCmd() {
-    return mIntakePivotSS.stopIntakePivot();
+    return mIntakePivotSS.stopIntakePivotCmd();
   }
 }

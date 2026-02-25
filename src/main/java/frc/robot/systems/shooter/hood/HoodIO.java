@@ -15,6 +15,7 @@ public interface HoodIO {
     public double iHoodSupplyCurrentAmps = 0.0;
     public double iHoodStatorCurrentAmps = 0.0;
     public double iHoodTempCelsius = 0.0;
+    public Rotation2d iHoodReferenceValue = Rotation2d.kZero;
   }
 
   public default void setPDConstants(double pKP, double pKD) {}

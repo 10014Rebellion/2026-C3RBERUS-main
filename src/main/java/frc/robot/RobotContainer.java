@@ -201,7 +201,7 @@ public class RobotContainer {
     }
 
     private void initBindings() {
-        mButtonBindings.initDriverButtonBindings();
+        mButtonBindings.initBindings();
     }
 
     public Supplier<Command> getAutonomousCommand() {

@@ -121,6 +121,7 @@ public class ShooterConstants {
 
     public static class HoodConstants {
 
+        public static final Rotation2d kIncrementStepAmount = Rotation2d.fromDegrees(1.75);
         public static final double kToleranceRotations = 0.5;
 
         public static final BasicMotorHardware kHoodConfig = new BasicMotorHardware(
@@ -134,14 +135,14 @@ public class ShooterConstants {
 
         public static final ArmControllerMotionMagic kHoodControlConfig = new ArmControllerMotionMagic(
             0, // not currently used
-            new PDConstants(10, 0), // Tuned for C3RBERUS!
+            new PDConstants(5, 0), // Tuned for C3RBERUS!
             new MotionMagicConstants(100, 200, 0),  // Tuned for C3RBERUS!
             new ArmFeedforward(0, 0.03, 0, 0) // Tuned for C3RBERUS!
         );
 
         public static final RotationSoftLimits kHoodLimits = new RotationSoftLimits(
-            Rotation2d.fromDegrees(0.0), 
-            Rotation2d.fromDegrees(24.96) // TUNE ME! 
+            Rotation2d.fromDegrees(0.02), 
+            Rotation2d.fromDegrees(23.3) // TUNE ME! 
         );
     }
 

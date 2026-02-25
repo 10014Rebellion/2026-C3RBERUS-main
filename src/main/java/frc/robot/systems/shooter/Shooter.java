@@ -44,7 +44,7 @@ public class Shooter {
     return mFlywheelSS.stopFlywheelCmd();
   }
 
-  public Command setFuelPumpState(FuelPumpState pState){
+  public Command setFuelPumpStateCmd(FuelPumpState pState){
     return mFuelPumpsSS.setFuelPumpStateCmd(pState);
   }
 
@@ -58,6 +58,14 @@ public class Shooter {
 
   public Command setHoodStateCmd(HoodState pState) {
     return mHoodSS.setHoodStateCmd(pState);
+  }
+
+  public Command incrementHoodCmd() {
+    return mHoodSS.incrementAngle();
+  }
+
+  public Command decrementHoodCmd() {
+    return mHoodSS.decrementAngle();
   }
 
   public Command setHoodRotationCmd(Rotation2d pRot){

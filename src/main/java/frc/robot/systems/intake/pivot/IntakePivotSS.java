@@ -7,6 +7,7 @@ package frc.robot.systems.intake.pivot;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.intake.IntakeConstants;
+import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 
 import static frc.robot.systems.intake.IntakeConstants.PivotConstants.kPivotController;
 
@@ -24,8 +26,8 @@ public class IntakePivotSS extends SubsystemBase {
     new LoggedTunableNumber("Intake/Pivot/Control/CustomSetpointRot", 0);
 
   public static enum IntakePivotState {
-    INTAKE(() -> Rotation2d.fromRotations(-0.07)),
-    IDLE(() -> Rotation2d.kCCW_Pi_2),
+    INTAKE(() -> PivotConstants.kPivotLimits.backwardLimit()),
+    STOWED(() -> PivotConstants.kPivotLimits.forwardLimit()),
     TUNING(() -> Rotation2d.fromRotations(tPivotCustomSetpointRot.get()));
 
     private Supplier<Rotation2d> mRotSupplier;
@@ -60,7 +62,7 @@ public class IntakePivotSS extends SubsystemBase {
   public static final LoggedTunableNumber tCustomAmps = new LoggedTunableNumber("Intake/Pivot/Custom/Amps", 0.0);
   public static final LoggedTunableNumber tPivotPositionTolerance = new LoggedTunableNumber("Intake/Pivot/Control/Tolerance", IntakeConstants.PivotConstants.kPivotMotorToleranceRotations);
 
-  private IntakePivotState mIntakePivotState = IntakePivotState.INTAKE;
+  private IntakePivotState mIntakePivotState = IntakePivotState.STOWED;
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
   private Double mAppliedVolts = null;
   private Double mAppliedAmps = null;
@@ -182,6 +184,7 @@ public class IntakePivotSS extends SubsystemBase {
   }
 
   public void setPivotRot(Rotation2d pRot) {
+    pRot = Rotation2d.fromRotations(MathUtil.clamp(pRot.getRotations(), PivotConstants.kPivotLimits.backwardLimit().getRotations(), PivotConstants.kPivotLimits.forwardLimit().getRotations()));
     mCurrentRotationalGoal = pRot;
     double ffOutput = mPivotFF.calculate(
       mIntakePivotInputs.iIntakePivotRotation.getRadians(), 
