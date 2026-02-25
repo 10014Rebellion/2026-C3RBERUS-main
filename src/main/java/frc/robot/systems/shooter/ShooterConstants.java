@@ -150,7 +150,7 @@ public class ShooterConstants {
 
         public static final double kMaxFlywheelTestedRPS = 112;
         public static final double kToleranceRPS = 3.0;
-        public static final double kBangBangTimeout = 0.25;
+        public static final double kFFDampener = 0.9;
 
         public static final RelativeCANCoderHardware kCANCoderConfig = new RelativeCANCoderHardware(
             50,

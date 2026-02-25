@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.systems.shooter.ShooterConstants;
+import frc.robot.systems.shooter.ShooterConstants.FlywheelConstants;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderInputsAutoLogged;
 import static frc.robot.systems.shooter.ShooterConstants.FlywheelConstants.kFlywheelControlConfig;
@@ -58,8 +58,8 @@ public class FlywheelsSS extends SubsystemBase {
   // private final LoggedTunableNumber tFlywheelMaxAccel = new LoggedTunableNumber("Flywheel/Control/MaxAcceleration", kFlywheelControlConfig.motionMagicConstants().maxAcceleration());
   // private final LoggedTunableNumber tFlywheelMaxJerk = new LoggedTunableNumber("Flywheel/Control/MaxJerk", kFlywheelControlConfig.motionMagicConstants().maxJerk());
 
-  private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Flywheel/Control/Tolerance", ShooterConstants.FlywheelConstants.kToleranceRPS);
-  private final LoggedTunableNumber tFFMultiplier = new LoggedTunableNumber("Flywheel/Control/BangBangMultiplier", 1.0);
+  private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Flywheel/Control/Tolerance", FlywheelConstants.kToleranceRPS);
+  private final LoggedTunableNumber tFFMultiplier = new LoggedTunableNumber("Flywheel/Control/BangBangMultiplier", FlywheelConstants.kFFDampener);
 
   private BangBangController mBangBangController = new BangBangController();
 

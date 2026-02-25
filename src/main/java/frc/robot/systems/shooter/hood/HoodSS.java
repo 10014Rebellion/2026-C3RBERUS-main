@@ -2,7 +2,6 @@ package frc.robot.systems.shooter.hood;
 
 import java.util.function.Supplier;
 
-import org.dyn4j.geometry.Rotation;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -13,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 
