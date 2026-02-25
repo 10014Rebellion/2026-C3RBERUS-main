@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -144,7 +145,12 @@ public class HoodIOKrakenX44 implements HoodIO{
 
     @Override
     public void setMotorPosition(Rotation2d pPosition, double pFeedforward) {
-        mHoodMotor.setControl(mHoodPositionControl.withPosition(pPosition.getRotations()).withFeedForward(pFeedforward)); 
+        mHoodMotor.setControl(mHoodPositionControl.withPosition(
+            MathUtil.clamp(pPosition.getRotations(), 
+                mRotationSoftLimits.backwardLimit().getRotations(), 
+                mRotationSoftLimits.forwardLimit().getRotations()
+            )
+        ).withFeedForward(pFeedforward));
         enforceSoftLimits();  
     }
 

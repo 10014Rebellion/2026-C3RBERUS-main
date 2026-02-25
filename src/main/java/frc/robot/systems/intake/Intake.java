@@ -20,7 +20,6 @@ public class Intake {
     this.mIntakeRollerSS = pIntakeRollerSS;
   }
 
-
   // ROLLER COMMANDS //
   public Command setRollerStateCmd(IntakeRollerState rollerState) {
     return mIntakeRollerSS.setIntakeRollerState(rollerState);

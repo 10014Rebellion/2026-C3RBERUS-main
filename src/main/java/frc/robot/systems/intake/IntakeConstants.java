@@ -44,7 +44,7 @@ public class IntakeConstants {
         );
 
         public static final RotationSoftLimits kPivotLimits = new RotationSoftLimits(
-            Rotation2d.fromRotations(-0.054), // Negative voltage limit
+            Rotation2d.fromRotations(-0.1), // Negative voltage limit
             Rotation2d.fromRotations(0.318) // Positive voltage limit
         );
     }

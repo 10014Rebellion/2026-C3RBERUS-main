@@ -19,7 +19,8 @@ public class ButtonBindings {
     private final Shooter mShooter;
     private final Intake mIntakeSS;
     private final ConveyorSS mConveyorSS;
-    private final FlydigiApex4 mDriverController = new FlydigiApex4(BindingsConstants.kDriverControllerPort);
+    private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
+    private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
 
     public ButtonBindings(Drive pDriveSS, Shooter pShooter, Intake pIntake, ConveyorSS pConveyorSS) {
         this.mDriveSS = pDriveSS;
@@ -35,43 +36,44 @@ public class ButtonBindings {
             .onTrue(mDriveSS.getDriveManager().setToTeleop());
 
         mDriveSS.getDriveManager().acceptJoystickInputs(
-                () -> -mDriverController.getLeftY(),
-                () -> -mDriverController.getLeftX(),
-                () -> -mDriverController.getRightX(),
-                () -> mDriverController.getPOVAngle());
+                () -> -mPilotController.getLeftY(),
+                () -> -mPilotController.getLeftX(),
+                () -> -mPilotController.getRightX(),
+                () -> mPilotController.getPOVAngle());
 
-        mDriverController.startButton().onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
+        mPilotController.startButton().onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
 
-        mDriverController.leftTrigger()
-            .onTrue(mShooter.setFlywheelsRPSCmd(Rotation2d.fromRotations(60)).andThen(mShooter.setFuelPumpsVoltsCmd(10.0)))
-            .onTrue(mShooter.setFlywheelsRPSCmd(Rotation2d.fromRotations(20)).andThen(mShooter.setFuelPumpsVoltsCmd(0)));
-
-
-        mDriverController.leftBumper()
-            .onTrue(mShooter.setFlywheelsRPSCmd(Rotation2d.fromRotations(80)).andThen(mShooter.setFuelPumpsVoltsCmd(10.0)))
-            .onTrue(mShooter.setFlywheelsRPSCmd(Rotation2d.fromRotations(20)).andThen(mShooter.setFuelPumpsVoltsCmd(0)));
-
-        mDriverController.rightTrigger()
+        mPilotController.rightTrigger()
             .onTrue(mIntakeSS.setPivotState(IntakePivotState.INTAKE));
-            // .onFalse(mIntakeSS.setPivotState(IntakePivotState.IDLE));
+            // .onFalse(mIntakeSS.setPivotState(IntakePivotState.IDL8));
 
-        mDriverController.rightBumper()
+        mPilotController.rightBumper()
             .onTrue(mIntakeSS.setPivotState(IntakePivotState.IDLE))
             .onFalse(mIntakeSS.setPivotState(IntakePivotState.INTAKE));
 
-
-        mDriverController.y()
-            .onTrue(mIntakeSS.setRollerState(IntakeRollerState.INTAKE))
+        mPilotController.y()
             .onTrue(mConveyorSS.setConveyorState(ConveyorState.INTAKE))
-            .onTrue(mIntakeSS.setRollerState(IntakeRollerState.IDLE))
-            .onTrue(mConveyorSS.setConveyorState(ConveyorState.IDLE));
+            .onFalse(mConveyorSS.setConveyorState(ConveyorState.IDLE));
 
-        mDriverController.a()
-            .onTrue(mShooter.setHoodRot(Rotation2d.fromDegrees(20)))
-            .onFalse(mShooter.holdHoodCmd());
+        mPilotController.a()
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
-        mDriverController.b()
-            .onTrue(mShooter.setHoodRot(Rotation2d.fromDegrees(10)))
-            .onFalse(mShooter.holdHoodCmd());
+        mPilotController.b()
+            .onTrue(mShooter.setFuelPumpsVoltsCmd(10.0))
+            .onFalse(mShooter.setFuelPumpsVoltsCmd(0));
+
+    }
+
+    public void initPilotBindings() {
+        mDriveSS.getDriveManager().acceptJoystickInputs(
+                () -> -mPilotController.getLeftY(),
+                () -> -mPilotController.getLeftX(),
+                () -> -mPilotController.getRightX(),
+                () -> mPilotController.getPOVAngle());
+        
+        mPilotController.povUp().onTrue(
+            mShooter.setHoodRot()
+        );
     }
 }
