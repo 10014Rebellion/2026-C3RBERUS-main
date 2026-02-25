@@ -72,8 +72,8 @@ public class ButtonBindings {
                 () -> -mPilotController.getRightX(),
                 () -> mPilotController.getPOVAngle());
         
-        mPilotController.povUp().onTrue(
-            mShooter.setHoodRot()
-        );
+        // mPilotController.povUp().onTrue(
+        //     mShooter.setHoodRot()
+        // );
     }
 }
