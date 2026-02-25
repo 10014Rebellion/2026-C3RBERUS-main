@@ -102,45 +102,45 @@ public class IntakePivotSS extends SubsystemBase {
     }
   }
 
-  public Command setIntakePivotState(IntakePivotState pIntakePivotState){
+  public Command setIntakePivotStateCmd(IntakePivotState pIntakePivotState){
     return Commands.run(() -> {
       setPivotState(pIntakePivotState);
     }, this);
   }
 
-  public Command setIntakePivotVolts(double pVolts){
+  public Command setIntakePivotVoltsCmd(double pVolts){
     return Commands.run(() -> {
       setPivotVolts(pVolts);
     }, this);
   }
 
-  public Command setIntakePivotAmps(double pAmps){
+  public Command setIntakePivotAmpsCmd(double pAmps){
     return Commands.run(() -> {
       setPivotAmps(pAmps);
     }, this);
   }
 
-  public Command setIntakePivotAmps(){
+  public Command setIntakePivotAmpsCmd(){
     return Commands.run(() -> {
       setCustomPivotAmps();
     }, this);
   }
 
-  public Command setIntakePivotManual(Rotation2d pRot){
+  public Command setIntakePivotManualCmd(Rotation2d pRot){
     return Commands.run(() -> {
       setPivotRotManual(pRot);
     }, this);
   }
 
-  public Command setIntakePivotManual(){
+  public Command setIntakePivotManualCmd(){
     return Commands.run(() -> {
       setPivotRotManual();
     }, this);
   }
 
-  public Command stopIntakePivot(){
+  public Command stopIntakePivotCmd(){
     return Commands.run(() -> {
-      stopIntakePivot();
+      stopPivotMotor();
     }, this);
   }
   

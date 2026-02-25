@@ -27,11 +27,11 @@ public class Intake {
   }
 
   public Command setRollerVoltsManualCmd(double pVolts) {
-    return mIntakeRollerSS.setIntakeVoltsManualCmd(pVolts);
+    return mIntakeRollerSS.setIntakeVoltsManual(pVolts);
   }
   
   public Command stopRollerCmd() {
-    return mIntakeRollerSS.stopIntakeVoltsManualCmd();
+    return mIntakeRollerSS.stopIntakeVoltsManual();
   }
 
   // PIVOT COMMANDS //

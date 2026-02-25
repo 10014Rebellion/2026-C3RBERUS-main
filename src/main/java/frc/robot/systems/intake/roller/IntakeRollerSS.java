@@ -52,7 +52,7 @@ public class IntakeRollerSS extends SubsystemBase {
     }
   }
   
-  public Command setIntakeRollerState(IntakeRollerState pIntakeRollerState) {
+  public Command setIntakeRollerStateCmd(IntakeRollerState pIntakeRollerState) {
     return Commands.run(() -> {
       mIntakeRollerState = pIntakeRollerState;
     }, this);

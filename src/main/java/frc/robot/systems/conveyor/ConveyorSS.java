@@ -41,7 +41,7 @@ public class ConveyorSS extends SubsystemBase {
     this.mConveyorIO = pConveyorIO;
   }
 
-  public Command setConveyorState(ConveyorState pConveyorState) {
+  public Command setConveyorStateCmd(ConveyorState pConveyorState) {
     return Commands.run(() -> {
       mConveyorState = pConveyorState;
     }, this);

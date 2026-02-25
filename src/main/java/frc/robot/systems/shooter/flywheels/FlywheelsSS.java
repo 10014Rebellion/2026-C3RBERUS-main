@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderInputsAutoLogged;
@@ -95,31 +94,31 @@ public class FlywheelsSS extends SubsystemBase {
 
   }
 
-  public Command setFlywheelPivotState(IntakePivotState pIntakePivotState){
+  public Command setFlywheelStateCmd(FlywheelState pFlywheelState){
     return Commands.run(() -> {
-      setFlywheelPivotState(pIntakePivotState);
+      setFlywheelState(pFlywheelState);
     }, this);
   }
 
-  public Command setFlywheelPivotVolts(double pVolts){
+  public Command setFlywheelVoltsCmd(double pVolts){
     return Commands.run(() -> {
       setFlywheelVolts(pVolts);
     }, this);
   }
 
-  public Command setFlywheelsRPSManual(Rotation2d pRotpS){
+  public Command setFlywheelsRPSManualCmd(Rotation2d pRotpS){
     return Commands.run(() -> {
       setFlywheelStateManual(pRotpS);
     }, this);
   }
 
-  public Command setFlywheelsRPSManual(){
+  public Command setFlywheelsRPSManualCmd(){
     return Commands.run(() -> {
       setFlywheelStateManual();
     }, this);
   }
 
-  public Command stopFlywheel(){
+  public Command stopFlywheelCmd(){
     return Commands.run(() -> {
       stopFlywheels();
     }, this);

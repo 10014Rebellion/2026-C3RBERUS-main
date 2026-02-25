@@ -1,15 +1,41 @@
 package frc.robot.systems.shooter.hood;
 
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
+import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 
 public class HoodSS extends SubsystemBase{
+
+  private static final LoggedTunableNumber tHoodCustomSetpoint = 
+    new LoggedTunableNumber("Hood/Control/CustomSetpointDegrees", 0);
+
+  public static enum HoodState {
+    MAX(() -> ShooterConstants.HoodConstants.kHoodLimits.forwardLimit()),
+    STOWED(() -> Rotation2d.fromDegrees(0)),
+    MIMD(() -> ShooterConstants.HoodConstants.kHoodLimits.backwardLimit());
+
+    private Supplier<Rotation2d> mRSupplier;
+
+    private HoodState(Supplier<Rotation2d> pRSupplier) {
+      mRSupplier = pRSupplier;
+    }
+
+    public Rotation2d getDesiredRotation() {
+      return mRSupplier.get();
+    } 
+  }
+  
   private final HoodIO mHoodIO;
   private final ArmFeedforward mHoodFF;
   private final HoodInputsAutoLogged mHoodInputs = new HoodInputsAutoLogged();
@@ -25,15 +51,100 @@ public class HoodSS extends SubsystemBase{
   private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Hood/Control/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
   private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Hood/Control/Tolerance", HoodConstants.kToleranceRotations);
 
-  private Rotation2d mCurrentRotationalGoal = Rotation2d.fromRotations(0.0);
+  private HoodState mHoodState = HoodState.STOWED;
+  private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
+  private Double mAppliedVolts = null;
 
   public HoodSS(HoodIO pHoodIO) {
     this.mHoodIO = pHoodIO;
     this.mHoodFF = HoodConstants.kHoodControlConfig.feedforward();
   }
+  
+  @Override
+  public void periodic() {
+    mHoodIO.updateInputs(mHoodInputs);
+
+    refreshTuneables();
+    mHoodIO.enforceSoftLimits();
+
+    Logger.processInputs("Hood", mHoodInputs);
+
+    if(mHoodState != null) {
+      mCurrentRotationalGoal = mHoodState.getDesiredRotation();
+      setHoodRot(mCurrentRotationalGoal);
+    }
+  }
+
+  public Command setHoodStateCmd(HoodState pHoodState){
+    return Commands.run(() -> {
+      setHoodState(pHoodState);
+    }, this);
+  }
+
+  public Command setHoodVoltsCmd(double pVolts){
+    return Commands.run(() -> {
+      setHoodVolts(pVolts);
+    }, this);
+  }
+
+  public Command setHoodRotationManualCmd(Rotation2d pRot){
+    return Commands.run(() -> {
+      setHoodRotManual(pRot);
+    }, this);
+  }
+
+  public Command setHoodRotationManualCmd(){
+    return Commands.run(() -> {
+      setHoodRotManual();
+    }, this);
+  }
+
+  public Command holdHoodCmd(){
+    return Commands.run(() -> {
+      setHoodRotManual((mHoodInputs.iHoodAngle));
+    }, this);
+  }
+
+  public Command stopHoodCmd(){
+    return Commands.run(() -> {
+      stopHoodMotor();
+    }, this);
+  }
+
+  public void setHoodState(HoodState pHoodState) {
+    mAppliedVolts = null;
+    mHoodState = pHoodState;
+  }
 
   public void setHoodVolts(double pVolts) {
-    mHoodIO.setMotorVolts(pVolts);
+    mCurrentRotationalGoal = null;
+    mHoodState = null;
+    mAppliedVolts = pVolts;
+    mHoodIO.setMotorVolts(mAppliedVolts);
+  }
+  
+  public void stopHoodMotor() {
+    mCurrentRotationalGoal = null;
+    mHoodState = null;
+    mAppliedVolts = 0.0;
+    mHoodIO.stopMotor();
+  }
+
+  public void setHoodRotManual(Rotation2d pRot) {
+    mAppliedVolts = null;
+    mHoodState = null;
+    setHoodRot(pRot);
+  }
+
+  public void setHoodRotManual() {
+    mAppliedVolts = null;
+    mHoodState = null;
+    setHoodRot(Rotation2d.fromDegrees(tHoodCustomSetpoint.get()));
+  }
+
+  public void setHoodState() {
+    mAppliedVolts = null;
+    mHoodState = null;
   }
 
   public void holdHood() {
@@ -45,9 +156,9 @@ public class HoodSS extends SubsystemBase{
     mCurrentRotationalGoal = pRotSP;
     mHoodIO.setMotorPosition(mCurrentRotationalGoal, mHoodFF.calculate(mCurrentRotationalGoal.getRadians(), mHoodInputs.iHoodVelocityRPS));
   }
-
-  public void stopHoodMotor() {
-    mHoodIO.stopMotor();
+  
+  public Rotation2d getPosition(){
+    return mHoodInputs.iHoodAngle;
   }
 
   private void setFF(double kS, double kG, double kV, double kA) {
@@ -56,11 +167,7 @@ public class HoodSS extends SubsystemBase{
     mHoodFF.setKv(kV);
     mHoodFF.setKa(kA);
   }
-
-  public Rotation2d getPosition(){
-    return mHoodInputs.iHoodAngle;
-  }
-
+  
   @AutoLogOutput(key = "Shooter/Hood/Feedback/ErrorRotation")
   public double getErrorPositionRotations() {
     return mCurrentRotationalGoal.getRotations() - getPosition().getRotations();
@@ -74,16 +181,6 @@ public class HoodSS extends SubsystemBase{
   @AutoLogOutput(key = "Shooter/Hood/Feedback/AtGoal")
   public boolean atGoal() {
     return Math.abs(getErrorPositionRotations()) < tHoodTolerance.get();
-  }
-  
-  @Override
-  public void periodic() {
-    mHoodIO.updateInputs(mHoodInputs);
-
-    refreshTuneables();
-    mHoodIO.enforceSoftLimits();
-
-    Logger.processInputs("Hood", mHoodInputs);
   }
 
   private void refreshTuneables() {
