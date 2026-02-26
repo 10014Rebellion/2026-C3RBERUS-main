@@ -8,8 +8,6 @@ public class SimulationRecords {
         DCMotor kMotor,
         double kCarriageMassKg,
         double kDrumRadiusMeters,
-        double kMinHeightMeters,
-        double kMaxHeightMeters,
         boolean kSimulateGravity,
         double kStartingHeightMeters,
         double kMeasurementStdDevs

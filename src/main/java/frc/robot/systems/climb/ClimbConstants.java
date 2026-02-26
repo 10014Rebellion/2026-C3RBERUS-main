@@ -9,38 +9,38 @@ import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.ElevatorController;
+import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 
 public class ClimbConstants {
     
     public static final BasicMotorHardware kClimbMotorConstants = new BasicMotorHardware(
-        42, // Motor ID // TODO: TUNE ME!
+        0, // Motor ID // TODO: TUNE ME!
         Constants.kSubsystemsCANBus, 
-        1, // Rotor to Mechanism Ratio // TODO: TUNE ME!
+        1 / 5.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
         InvertedValue.CounterClockwise_Positive,
         NeutralModeValue.Brake,
         new CurrentLimits(30, 40)
     );
+    
+    public static final PositionSoftLimits kSoftLimits = new PositionSoftLimits(
+        0, 
+        0.5
+    );
 
     public static final SimulatedElevator kSimElevator = new SimulatedElevator(
         DCMotor.getKrakenX60(1), 
-        20, 
-        5, 
-        0, 
-        20, 
+        9, 
+        1, 
         true, 
         0.0, 
-        0.002
-    );
-
-    public static final PositionSoftLimits kSoftLimits = new PositionSoftLimits(
-        1.0, 
-        0
+        0.001
     );
 
     public static final ElevatorController kController = new ElevatorController(
         0, 
+        new PDConstants(0, 0),
         new ElevatorFeedforward(.0, 0.0, 0.0), 
         0);
 
