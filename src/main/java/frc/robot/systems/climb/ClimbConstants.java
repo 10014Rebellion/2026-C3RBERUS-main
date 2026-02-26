@@ -14,6 +14,14 @@ import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 
 public class ClimbConstants {
+
+    public static final int kRightHookPort = 0;
+    public static final int kLeftHookPort = 0;
+
+    public static final double kRightHookOutPosition = 0.5;
+    public static final double kRightHookInPosition = 0.0;    
+    public static final double kLeftHookOutPosition = 0.5;
+    public static final double kLeftHookInPosition = 0.0;
     
     public static final BasicMotorHardware kClimbMotorConstants = new BasicMotorHardware(
         0, // Motor ID // TODO: TUNE ME!

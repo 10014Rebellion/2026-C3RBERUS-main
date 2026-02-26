@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
+import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
 import frc.robot.systems.drive.Drive;
@@ -20,15 +21,17 @@ public class ButtonBindings {
     private final Drive mDriveSS;
     private final Shooter mShooter;
     private final Intake mIntakeSS;
+    private final ClimbSS mClimbSS;
     private final ConveyorSS mConveyorSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
 
-    public ButtonBindings(Drive pDriveSS, Shooter pShooter, Intake pIntake, ConveyorSS pConveyorSS) {
+    public ButtonBindings(Drive pDriveSS, Shooter pShooter, Intake pIntake, ConveyorSS pConveyorSS, ClimbSS pClimbSS) {
         this.mDriveSS = pDriveSS;
         this.mShooter = pShooter;
         this.mIntakeSS = pIntake;
         this.mConveyorSS = pConveyorSS;
+        this.mClimbSS = pClimbSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.getDriveManager().setToTeleop());
     }
 
@@ -131,6 +134,9 @@ public class ButtonBindings {
         mGunnerController.povLeft()
             .whileTrue(mShooter.decrementHoodCmd());
 
+        mGunnerController.a().whileTrue(mClimbSS.unHookClawsCmd());
+        mGunnerController.b().whileTrue(mClimbSS.hookClawsCmd());
+
         // mGunnerController.leftBumper().whileTrue(mShooter.setFlywheelsRPSCmd(FlywheelState.SHOOT_FAR));
 
         mGunnerController.rightBumper().whileTrue(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY))
@@ -146,6 +152,6 @@ public class ButtonBindings {
 
         new Trigger(() -> (mGunnerController.getLeftY() > 0.5)).whileTrue(mIntakeSS.setPivotVoltsCmd(10)).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
 
-        new Trigger(() -> (mGunnerController.getLeftY() < -0.5)).whileTrue(mIntakeSS.setPivotVoltsCmd(-10)).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
+        new Trigger(() -> (mGunnerController.getLeftY() < -0.5)).whileTrue(mIntakeSS.setPivotVoltsCmd(-4)).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
     }
 }

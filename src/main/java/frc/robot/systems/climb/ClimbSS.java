@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,6 +42,9 @@ public class ClimbSS extends SubsystemBase {
   
   private final ClimbIO mClimbIO;
   private final ClimbInputsAutoLogged mClimbInputs = new ClimbInputsAutoLogged();
+
+  private final Servo mRightServo;
+  private final Servo mLeftServo;
   
   private ElevatorFeedforward mFeedforward;
   
@@ -57,6 +61,8 @@ public class ClimbSS extends SubsystemBase {
 
   public ClimbSS(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits) {
     mClimbIO = pClimbIO;
+    mRightServo = new Servo(ClimbConstants.kRightHookPort);
+    mLeftServo = new Servo(ClimbConstants.kLeftHookPort);
     mFeedforward = ClimbConstants.kController.feedforward();
   }
 
@@ -102,6 +108,20 @@ public class ClimbSS extends SubsystemBase {
   public Command stopClimbCmd(){
     return Commands.run(() -> {
       stopClimbMotor();
+    }, this);
+  }
+
+  public Command unHookClawsCmd(){
+    return Commands.run(() -> {
+      mLeftServo.setAngle(ClimbConstants.kLeftHookOutPosition);
+      mRightServo.setAngle(ClimbConstants.kRightHookOutPosition);
+    }, this);
+  }
+
+  public Command hookClawsCmd(){
+    return Commands.run(() -> {
+      mLeftServo.setAngle(ClimbConstants.kLeftHookInPosition);
+      mRightServo.setAngle(ClimbConstants.kRightHookInPosition);
     }, this);
   }
   

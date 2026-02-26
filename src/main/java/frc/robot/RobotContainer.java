@@ -47,6 +47,9 @@ import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
+import frc.robot.systems.climb.ClimbConstants;
+import frc.robot.systems.climb.ClimbIOKrakenx44;
+import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorConstants;
 import frc.robot.systems.conveyor.ConveyorIO;
@@ -61,6 +64,7 @@ public class RobotContainer {
     private final Shooter mShooter;
     private final ConveyorSS mConveyor;
     private final Intake mIntake;
+    private final ClimbSS mClimbSS;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
@@ -182,9 +186,10 @@ public class RobotContainer {
                 break;
             }
         }
+
+        mClimbSS = new ClimbSS(new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants, ClimbConstants.kSoftLimits), ClimbConstants.kSoftLimits);
         
-    
-        mButtonBindings = new ButtonBindings(mDrive, mShooter, mIntake, mConveyor);
+        mButtonBindings = new ButtonBindings(mDrive, mShooter, mIntake, mConveyor, mClimbSS);
 
         initBindings();
 
