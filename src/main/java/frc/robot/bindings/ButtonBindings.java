@@ -1,6 +1,5 @@
 package frc.robot.bindings;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,10 +10,9 @@ import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
-import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
-import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.Shooter;
+import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS.HoodState;
 
@@ -88,7 +86,16 @@ public class ButtonBindings {
                 () -> -mPilotController.getLeftX(),
                 () -> -mPilotController.getRightX(),
                 () -> mPilotController.getPOVAngle());
-        
+
+        // UNCOMMENT THESE BINDINGS ONCE VISION IS IMPLEMENTED
+        // mPilotController.a()
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), mDriveSS.getDriveManager().getDefaultTurnPointFF()))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        // mPilotController.y()
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(() -> PoseConstants.kClimbPose, ConstraintType.LINEAR)) // TODO: TUNE ME
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
         mPilotController.povUp()
             .whileTrue(mShooter.setHoodStateCmd(HoodState.MID));
         
@@ -102,9 +109,6 @@ public class ButtonBindings {
             .whileTrue(mShooter.decrementHoodCmd());
 
         mPilotController.rightBumper()
-            .whileTrue(mIntakeSS.setPivotRotManualCmd());
-
-        mPilotController.leftTrigger()
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.COMPACT));
 
         mPilotController.leftBumper()
@@ -115,7 +119,33 @@ public class ButtonBindings {
     }
 
     public void initGunnerBindings() {
-        mGunnerController.leftBumper().whileTrue(mShooter.setFlywheelsRPSCmd())
-        .onFalse(mShooter.setFlywheelsVoltsCmd(0));
+        mGunnerController.povUp()
+            .whileTrue(mShooter.setHoodStateCmd(HoodState.MID));
+        
+        mGunnerController.povDown()
+            .whileTrue(mShooter.setHoodStateCmd(HoodState.MIN));
+
+        mGunnerController.povRight()
+            .whileTrue(mShooter.incrementHoodCmd());
+        
+        mGunnerController.povLeft()
+            .whileTrue(mShooter.decrementHoodCmd());
+
+        // mGunnerController.leftBumper().whileTrue(mShooter.setFlywheelsRPSCmd(FlywheelState.SHOOT_FAR));
+
+        mGunnerController.rightBumper().whileTrue(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY))
+            .whileFalse(mShooter.setFlywheelsVoltsCmd(0));
+
+        mGunnerController.leftTrigger()
+            .whileTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.OUTTAKE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.OUTTAKE)))
+            .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE)));
+
+        mGunnerController.rightTrigger()
+            .whileTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE)))
+            .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE)));
+
+        new Trigger(() -> (mGunnerController.getLeftY() > 0.5)).whileTrue(mIntakeSS.setPivotVoltsCmd(10)).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
+
+        new Trigger(() -> (mGunnerController.getLeftY() < -0.5)).whileTrue(mIntakeSS.setPivotVoltsCmd(-10)).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
     }
 }

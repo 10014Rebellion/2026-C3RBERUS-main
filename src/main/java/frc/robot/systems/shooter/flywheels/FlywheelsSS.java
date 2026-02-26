@@ -21,7 +21,7 @@ public class FlywheelsSS extends SubsystemBase {
 
   public static enum FlywheelState {
     SHOOT_FAR(() -> Rotation2d.fromRotations(90)),
-    IDLING(() -> Rotation2d.fromRotations(20)),
+    STANDBY(() -> Rotation2d.fromRotations(20)),
     SHOOT_CLOSE(() -> Rotation2d.fromRotations(70)),
     IDLE(() -> Rotation2d.fromRotations(0));
 
