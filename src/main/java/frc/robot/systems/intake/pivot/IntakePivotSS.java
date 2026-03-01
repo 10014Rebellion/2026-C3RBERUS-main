@@ -13,7 +13,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.IntakeConstants.PivotConstants;
@@ -30,7 +32,7 @@ public class IntakePivotSS extends SubsystemBase {
     // IDLE(null), // when enabled, doesnt do anything
     INTAKE(() -> PivotConstants.kPivotLimits.backwardLimit()),
     STOWED(() -> PivotConstants.kPivotLimits.forwardLimit()),
-    COMPACT(() -> PivotConstants.kPivotLimits.backwardLimit().div(2)),
+    COMPACT(() -> Rotation2d.fromRotations(0.12)),
     TUNING(() -> Rotation2d.fromRotations(tPivotCustomSetpointRot.get()));
 
     private Supplier<Rotation2d> mRotSupplier;
@@ -65,7 +67,9 @@ public class IntakePivotSS extends SubsystemBase {
   public static final LoggedTunableNumber tCustomAmps = new LoggedTunableNumber("Intake/Pivot/Custom/Amps", 0.0);
   public static final LoggedTunableNumber tPivotPositionTolerance = new LoggedTunableNumber("Intake/Pivot/Control/Tolerance", IntakeConstants.PivotConstants.kPivotMotorToleranceRotations);
 
+  @AutoLogOutput(key="Intake/Pivot/State")
   private IntakePivotState mIntakePivotState = null;
+
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
   private Double mAppliedVolts = null;
   private Double mAppliedAmps = null;
@@ -119,6 +123,12 @@ public class IntakePivotSS extends SubsystemBase {
        (getIntakePivotRotations().getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() && !positive)) {
       mIntakePivotIO.stopMotor();
     }
+  }
+
+  public Command trashCompact(){
+    return Commands.sequence(
+      setIntakePivotStateCmd(IntakePivotState.TUNING).withTimeout(0.5),
+      setIntakePivotStateCmd(IntakePivotState.INTAKE).withTimeout(0.5));
   }
 
   public Command setIntakePivotStateCmd(IntakePivotState pIntakePivotState){

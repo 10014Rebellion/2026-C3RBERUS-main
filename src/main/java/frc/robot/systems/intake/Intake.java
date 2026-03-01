@@ -25,6 +25,10 @@ public class Intake {
     return mIntakeRollerSS.setIntakeRollerStateCmd(rollerState);
   }
 
+  public Command trashCompact(){
+    return mIntakePivotSS.trashCompact();
+  }
+
   public Command setRollerVoltsManualCmd(double pVolts) {
     return mIntakeRollerSS.setIntakeVoltsManualCmd(pVolts);
   }

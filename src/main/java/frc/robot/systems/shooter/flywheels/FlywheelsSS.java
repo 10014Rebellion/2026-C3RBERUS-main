@@ -55,7 +55,7 @@ public class FlywheelsSS extends SubsystemBase {
   private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Flywheel/Control/Tolerance", ShooterConstants.FlywheelConstants.kToleranceRPS);
 
   private Rotation2d mCurrentRPSGoal = Rotation2d.kZero;
-  private FlywheelState mFlywheelState = FlywheelState.IDLE;
+  private FlywheelState mFlywheelState = null;
   private Double mAppliedVolts = null;
 
   public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
@@ -191,21 +191,18 @@ public class FlywheelsSS extends SubsystemBase {
     kFlywheelControlConfig.feedforward().setKa(pKA);
   }
 
-  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRotationsPerSec")
-  public double getErrorRotationsPerSec() {
-    return mCurrentRPSGoal.minus(getFlywheelRPS()).getRotations();
-  }
+  // @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRotationsPerSec")
+  // public double getErrorRotationsPerSec() {
+  //   return mCurrentRPSGoal.minus(getFlywheelRPS()).getRotations();
+  // }
 
-  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/CurrentGoal")
-  public Rotation2d getCurrentGoal() {
-    return mCurrentRPSGoal;
-  }
+  // @AutoLogOutput(key = "Shooter/Flywheel/Feedback/CurrentGoal")
+  // public Rotation2d getCurrentGoal() {
+  //   return mCurrentRPSGoal;
+  // }
 
-  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtGoal")
-  public boolean atGoal() {
-    return Math.abs(getErrorRotationsPerSec()) < tFlywheelTolerance.get();
-  }
-  
-
-
+  // @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtGoal")
+  // public boolean atGoal() {
+  //   return Math.abs(getErrorRotationsPerSec()) < tFlywheelTolerance.get();
+  // }
 }

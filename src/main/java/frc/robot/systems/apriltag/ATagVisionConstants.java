@@ -28,13 +28,13 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public class ATagVisionConstants {
     // Best to get these from CAD, or in person.
-    public static final String kFrontLeftCamName = "FrontLeft-OV9281"; // >>> TODO: TUNE ME
-    public static final Orientation kFrontLeftCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
+    public static final String kFrontLeftCamName = "SideLeft-OV9281"; // >>> TODO: TUNE ME
+    public static final Orientation kFrontLeftCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kFrontLeftCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(0.0), // X: inches forward // >>> TODO: TUNE ME
-            Units.inchesToMeters(0.0), // Y: inches left // >>> TODO: TUNE ME
-            Units.inchesToMeters(0.0) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(-13.281), // X: inches forward // >>> TODO: TUNE ME
+            Units.inchesToMeters(-4.298), // Y: inches left // >>> TODO: TUNE ME
+            Units.inchesToMeters(-18.791) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
@@ -44,13 +44,13 @@ public class ATagVisionConstants {
     public static final ATagCameraHardware kFLATagCamHardware = 
         new ATagCameraHardware(kFrontLeftCamName, kFrontLeftCamOrientation, kFrontLeftCamTransform);
 
-    public static final String kFrontRightCamName = "FrontRight-OV9281"; // >>> TODO: TUNE ME
-    public static final Orientation kFrontRightCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
+    public static final String kFrontRightCamName = "SideRight-OV9281"; // >>> TODO: TUNE ME
+    public static final Orientation kFrontRightCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kFrontRightCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(0.0), // X: inches forward // >>> TODO: TUNE ME
-            Units.inchesToMeters(0.0), // Y: inches right // >>> TODO: TUNE ME
-            Units.inchesToMeters(0.0) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(-14.19), // X: inches forward // >>> TODO: TUNE ME
+            Units.inchesToMeters(-9.453), // Y: inches right // >>> TODO: TUNE ME
+            Units.inchesToMeters(-18.791) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME

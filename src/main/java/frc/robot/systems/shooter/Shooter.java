@@ -30,9 +30,9 @@ public class Shooter {
     return mFlywheelSS.setFlywheelsRPSManualCmd(pRPS);
   }
 
-  public boolean getIsFlywheelAtGoal() {
-    return mFlywheelSS.atGoal();
-  }
+  // public boolean getIsFlywheelAtGoal() {
+  //   return mFlywheelSS.atGoal();
+  // }
 
   public boolean getIsHoodAtGoal() {
     return mHoodSS.atGoal();
