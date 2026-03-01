@@ -3,6 +3,9 @@
 package frc.robot.systems.drive;
 
 import static frc.robot.systems.drive.DriveConstants.*;
+
+import java.util.Optional;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -224,9 +227,13 @@ public class Drive extends SubsystemBase {
 
     ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
     /* Sets the desired swerve module states to the robot */
-    public void runSwerve(ChassisSpeeds speeds) {
-        if(speeds == null) return;
-        mDesiredSpeeds = mSpeedErrorController.correctSpeed(getRobotChassisSpeeds(), SwerveHelper.discretize(speeds, tDriftRate.get()));
+    public void runSwerve(Optional<ChassisSpeeds> speeds) {
+        if(speeds.isEmpty()) return;
+        mDesiredSpeeds = mSpeedErrorController.correctSpeed(
+            getRobotChassisSpeeds(), 
+            SwerveHelper.discretize(
+                speeds.get(), 
+                tDriftRate.get()));
 
         /* Logs all the possible drive states, great for debugging */
         SwerveHelper.logPossibleDriveStates(
@@ -274,8 +281,8 @@ public class Drive extends SubsystemBase {
                 /* Feedforward cases based on driveState */
                 double driveAmps = 
                     calculateDriveFeedforward(unOptimizedSetpointStates, i) + SwerveHelper.deadReckoningFeedforward(mAngleDeltas[i]);
-                double desiredAzimuthVelocityRadPS = 
-                    mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i];
+                Rotation2d desiredAzimuthVelocity = Rotation2d.fromRadians(
+                    mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i]);
 
                 // Multiplies by cos(angleError) to stop the drive from going in the wrong direction
                 setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
@@ -283,7 +290,7 @@ public class Drive extends SubsystemBase {
                 optimizedSetpointStates[i] = mModules[i].setDesiredStateWithFF(
                     setpointStates[i], 
                     driveAmps, 
-                    desiredAzimuthVelocityRadPS);
+                    desiredAzimuthVelocity);
 
                 /* Normalized for logging */
                 moduleTorques[i] = new SwerveModuleState(
