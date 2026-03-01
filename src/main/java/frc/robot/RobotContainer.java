@@ -198,7 +198,7 @@ public class RobotContainer {
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDrive.getDriveManager().setDriveProfile(profile));
 
-        autos = new AutonCommands(mDrive, mIntake, mShooter);
+        autos = new AutonCommands(mDrive, mIntake, mConveyor, mShooter);
     }
 
     public Drive getDrivetrain() {

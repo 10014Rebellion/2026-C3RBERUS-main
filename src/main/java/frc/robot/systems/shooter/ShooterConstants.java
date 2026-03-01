@@ -158,7 +158,7 @@ public class ShooterConstants {
             1,
             SensorDirectionValue.Clockwise_Positive
         );
-        ;
+        
 
         public static final BasicMotorHardware kFlywheelLeaderConfig = new BasicMotorHardware(
             51,

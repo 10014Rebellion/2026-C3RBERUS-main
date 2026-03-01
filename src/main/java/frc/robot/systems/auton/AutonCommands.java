@@ -15,28 +15,37 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.commands.SequentialEndingCommandGroup;
+import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.conveyor.ConveyorSS;
+import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
+import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.Shooter;
+import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
+import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.lib.math.AllianceFlipUtil;
 
 public class AutonCommands extends SubsystemBase {
     private final Drive mRobotDrive;
     private final Intake mIntake;
     private final Shooter mShooter;
+    private final ConveyorSS mConveyorSS;
 
     private final SendableChooser<Supplier<Command>> mAutoChooser;
     private final LoggedDashboardChooser<Supplier<Command>> mAutoChooserLogged;
 
-    public AutonCommands(Drive pRobotDrive, Intake pIntake, Shooter pShooter) {
+    public AutonCommands(Drive pRobotDrive, Intake pIntake, ConveyorSS mConveyor, Shooter pShooter) {
         this.mRobotDrive = pRobotDrive;
         this.mIntake = pIntake;
         this.mShooter = pShooter;
+        this.mConveyorSS = mConveyor;
 
         mAutoChooser = new SendableChooser<>();
 
@@ -97,7 +106,7 @@ public class AutonCommands extends SubsystemBase {
             .onTrue(autoPath3);
 
         isPath3Running
-            .onTrue(spinFlywheelsommand());
+            .onTrue(spinFlywheelsCommand());
 
         hasPath3Ended
             .onTrue(shotIndexCommand());
@@ -166,7 +175,7 @@ public class AutonCommands extends SubsystemBase {
 
     ///////////////// SUPERSTRUCTURE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\
     public Command intakeCommand() {
-        return new InstantCommand();
+        return mIntake.setPivotStateCmd(IntakePivotState.INTAKE).alongWith(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE));
     }
 
     public Command deployIntakeCommand() {
@@ -178,15 +187,15 @@ public class AutonCommands extends SubsystemBase {
     }
 
     public Command shotIndexCommand() {
-        return new InstantCommand();
+        return mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE));
     }
     
-    public Command spinFlywheelsommand() {
-        return new InstantCommand();
+    public Command spinFlywheelsCommand() {
+        return mShooter.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE);
     }
 
     public Command turnToHubCommand() {
-        return new InstantCommand();
+        return mRobotDrive.getDriveManager().setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), mRobotDrive.getDriveManager().getDefaultTurnPointFF());
     }
 
     public Command climbCommand() {

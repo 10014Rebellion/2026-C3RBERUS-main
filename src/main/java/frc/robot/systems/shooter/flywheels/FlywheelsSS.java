@@ -80,6 +80,10 @@ public class FlywheelsSS extends SubsystemBase {
       mCurrentRPSGoal = mFlywheelState.getDesiredRotation();
       setFlywheelClosedLoop(mCurrentRPSGoal);
     }
+
+    if(mFlywheelState == null){
+      mCurrentRPSGoal = Rotation2d.fromRotations(-1000);
+    }
     
     // Help conserve some power on the motor), since its a 1 way bearing
     if(mLeaderFlywheelInputs.iFlywheelMotorVolts < 0){
@@ -191,18 +195,18 @@ public class FlywheelsSS extends SubsystemBase {
     kFlywheelControlConfig.feedforward().setKa(pKA);
   }
 
-  // @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRotationsPerSec")
-  // public double getErrorRotationsPerSec() {
-  //   return mCurrentRPSGoal.minus(getFlywheelRPS()).getRotations();
-  // }
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRotationsPerSec")
+  public double getErrorRotationsPerSec() {
+    return mCurrentRPSGoal.minus(getFlywheelRPS()).getRotations();
+  }
 
-  // @AutoLogOutput(key = "Shooter/Flywheel/Feedback/CurrentGoal")
-  // public Rotation2d getCurrentGoal() {
-  //   return mCurrentRPSGoal;
-  // }
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/CurrentGoal")
+  public Rotation2d getCurrentGoal() {
+    return mCurrentRPSGoal;
+  }
 
-  // @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtGoal")
-  // public boolean atGoal() {
-  //   return Math.abs(getErrorRotationsPerSec()) < tFlywheelTolerance.get();
-  // }
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtGoal")
+  public boolean atGoal() {
+    return Math.abs(getErrorRotationsPerSec()) < tFlywheelTolerance.get();
+  }
 }
