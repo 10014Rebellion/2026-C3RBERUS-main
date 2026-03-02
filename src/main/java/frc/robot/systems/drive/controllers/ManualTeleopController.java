@@ -53,11 +53,11 @@ public class ManualTeleopController {
     public ChassisSpeeds computeChassisSpeedsTrigger(
             Rotation2d pRobotAngle, boolean pIsJoystickSniper, boolean pIsJoystickFieldOriented) {
         return computeSpeeds(
-            twoWayDeadbandValue(mXSupplier.getAsDouble(), BindingsConstants.kLeftJoystickDeadband + mDriverProfile.extraXYStickDeadband().get())
+            zeroDeadband(mXSupplier.getAsDouble(), BindingsConstants.kLeftJoystickDeadband + mDriverProfile.extraXYStickDeadband().get())
                 * twoWayDeadbandValue(mRightTriggSupplier.getAsDouble(), BindingsConstants.kTriggerDeadband), 
-            twoWayDeadbandValue(mYSupplier.getAsDouble(), BindingsConstants.kLeftJoystickDeadband + mDriverProfile.extraXYStickDeadband().get())
+            zeroDeadband(mYSupplier.getAsDouble(), BindingsConstants.kLeftJoystickDeadband + mDriverProfile.extraXYStickDeadband().get())
                 * twoWayDeadbandValue(mRightTriggSupplier.getAsDouble(), BindingsConstants.kTriggerDeadband), 
-            twoWayDeadbandValue(mOmegaSupplier.getAsDouble(), BindingsConstants.kRightJoystickDeadband + mDriverProfile.extraRotationDeadband().get())
+            zeroDeadband(mOmegaSupplier.getAsDouble(), BindingsConstants.kRightJoystickDeadband + mDriverProfile.extraRotationDeadband().get())
                 * twoWayDeadbandValue((1.0 - mLeftTriggSupplier.getAsDouble()), BindingsConstants.kTriggerDeadband), 
             pRobotAngle, pIsJoystickSniper, pIsJoystickFieldOriented
         );            
@@ -66,9 +66,9 @@ public class ManualTeleopController {
     public ChassisSpeeds computeChassisSpeedsJoysticks(
             Rotation2d pRobotAngle, boolean pIsJoystickSniper, boolean pIsJoystickFieldOriented) {
         return computeSpeeds(
-            twoWayDeadbandValue(mXSupplier.getAsDouble(), BindingsConstants.kLeftJoystickDeadband + mDriverProfile.extraXYStickDeadband().get()), 
-            twoWayDeadbandValue(mYSupplier.getAsDouble(), BindingsConstants.kLeftJoystickDeadband + mDriverProfile.extraXYStickDeadband().get()), 
-            twoWayDeadbandValue(mOmegaSupplier.getAsDouble(), BindingsConstants.kRightJoystickDeadband + mDriverProfile.extraRotationDeadband().get()),
+            zeroDeadband(mXSupplier.getAsDouble(), BindingsConstants.kLeftJoystickDeadband + mDriverProfile.extraXYStickDeadband().get()), 
+            zeroDeadband(mYSupplier.getAsDouble(), BindingsConstants.kLeftJoystickDeadband + mDriverProfile.extraXYStickDeadband().get()), 
+            zeroDeadband(mOmegaSupplier.getAsDouble(), BindingsConstants.kRightJoystickDeadband + mDriverProfile.extraRotationDeadband().get()),
             pRobotAngle, pIsJoystickSniper, pIsJoystickFieldOriented);
     }
 
@@ -128,6 +128,10 @@ public class ManualTeleopController {
         if(Math.abs(pValue) < pDeadband) return 0;
         if (Math.abs(pValue) > 1.0 - pDeadband) return 1 * Math.signum(pValue);
         return pValue;
+    }
+
+    private double zeroDeadband(double pValue, double pDeadband) {
+        return MathUtil.applyDeadband(pValue, pDeadband);
     }
 
     public ChassisSpeeds computeSniperPOVChassisSpeeds(Rotation2d pRobotAngle, boolean pIsPOVFieldOriented) {

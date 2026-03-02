@@ -44,4 +44,8 @@ public class Shooter {
   public Command setHoodVoltsCmd(double pVolts) {
     return new InstantCommand(() -> mHoodSS.setHoodVolts(pVolts));
   }
+
+  public boolean flywheelsReadyToShoot() {
+    return mFlywheelSS.get
+  }
 }

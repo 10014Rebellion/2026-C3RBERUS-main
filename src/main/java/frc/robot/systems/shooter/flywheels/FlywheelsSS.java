@@ -95,33 +95,6 @@ public class FlywheelsSS extends SubsystemBase {
     refreshTuneables();
     mFollowerFlywheelIO.enforceFollower(); // Sometimes during enable and disable it no longer follows briefly, this scares me, so this is a failsafe
 
-    double ffOutput = mFlywheelFeedforward.calculateWithVelocities(getFlywheelRPS(), mCurrentRPS);
-
-    if(mCurrentState.equals(FlywheelState.TORQUE_FOC)){
-      mLeaderFlywheelIO.setMotorVelAndAccel(mCurrentRPS, 0, ffOutput);
-      mFollowerFlywheelIO.enforceFollower();
-    }
-
-    else{
-      if(getFlywheelRPS() < mCurrentRPS){
-        // Send max voltage until above setpoint //
-        setFlywheelVolts(12.0);
-      }
-
-      boolean inTolerance = Math.abs(getFlywheelRPS() - mCurrentRPS) <= mTolerance;
-      boolean atGoal = mAtGoalDebouncer.calculate(inTolerance);
-
-        if(atGoal){
-          mLeaderFlywheelIO.setMotorVelAndAccel(mCurrentRPS - 30, 0, ffOutput);
-          mFollowerFlywheelIO.enforceFollower();
-        }
-
-        else{
-          mLeaderFlywheelIO.setMotorVelAndAccel(mCurrentRPS + 10, 0, ffOutput);
-          mFollowerFlywheelIO.enforceFollower();  
-        }
-    }
-
     // Help conserve some power on the motor)
     if(mLeaderFlywheelInputs.iFlywheelMotorVolts < 0){
       setFlywheelVolts(0.0);
