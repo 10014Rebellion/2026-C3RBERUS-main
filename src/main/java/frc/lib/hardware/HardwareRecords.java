@@ -64,6 +64,7 @@ public class HardwareRecords {
 
     public static record ElevatorController(
         int slot,
+        PDConstants pdController,
         ElevatorFeedforward feedforward,
         double tolerance
     ) {}

@@ -34,6 +34,8 @@ import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.ShootingPoses;
+import frc.robot.ShootingPoses.ShootingConfig;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVision.VisionObservation;
 import frc.robot.systems.drive.controllers.SpeedErrorController;
@@ -55,6 +57,8 @@ public class Drive extends SubsystemBase {
     private final Field2d mField = new Field2d();
     private final Debouncer mSkidFactorDebouncer = new Debouncer(0.25, DebounceType.kFalling);
     private final Debouncer mCollisionDebouncer = new Debouncer(0.25, DebounceType.kFalling);
+
+    private ShootingConfig mClosestShootingPose = null;
 
     public static RobotConfig mRobotConfig;
     private final SwerveSetpointGenerator mSetpointGenerator;
@@ -135,6 +139,7 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         updateSensorsAndOdometry();
         runSwerve(mDriveManager.computeDesiredSpeedsFromState());
+        getClosestShootingConfig();
     }
 
     private void updateSensorsAndOdometry() {
@@ -435,5 +440,28 @@ public class Drive extends SubsystemBase {
 
     public Module[] getModules() {
         return this.mModules;
+    }
+
+    public double getDistance(Pose2d robotPose, Pose2d otherPose){
+        return robotPose.getTranslation().getDistance(otherPose.getTranslation());
+    }
+
+    public void setClosestShootingConfig(){
+
+        ShootingConfig closestPose = ShootingPoses.kShootingConfigs[0];
+
+        for(ShootingConfig shooterConfig : ShootingPoses.kShootingConfigs){
+            
+
+            if(getDistance(shooterConfig.pose(), getPoseEstimate()) < getDistance(closestPose.pose(), getPoseEstimate())){
+                closestPose = shooterConfig;
+            }
+        }
+
+        mClosestShootingPose =  closestPose;
+    }
+
+    public ShootingConfig getClosestShootingConfig(){
+        return mClosestShootingPose;
     }
 }

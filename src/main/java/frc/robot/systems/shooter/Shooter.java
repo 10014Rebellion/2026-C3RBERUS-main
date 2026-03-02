@@ -1,9 +1,10 @@
 package frc.robot.systems.shooter;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
@@ -20,6 +21,10 @@ public class Shooter {
     this.mFuelPumpsSS = pFuelPumpSS; this.mHoodSS = pHoodSS; this.mFlywheelSS = pFlywheelSS; // I miss my C++ initializer lists :'(
   }
 
+  public Command setShooterConfig(FlywheelState pFlywheelState, HoodState pHoodState){
+    return mFlywheelSS.setFlywheelStateCmd(pFlywheelState).andThen(mHoodSS.setHoodStateCmd(pHoodState));
+  }
+
   public Command setFlywheelStateCmd(FlywheelState pState){
     return mFlywheelSS.setFlywheelStateCmd(pState);
   }
@@ -28,8 +33,12 @@ public class Shooter {
     return mFlywheelSS.setFlywheelsRPSManualCmd(pRPS);
   }
 
-  public boolean getIsFlywheelAtGoal() {
-    return mFlywheelSS.atGoal();
+  // public boolean getIsFlywheelAtGoal() {
+  //   return mFlywheelSS.atGoal();
+  // }
+
+  public boolean getIsHoodAtGoal() {
+    return mHoodSS.atGoal();
   }
   
   public Command setFlywheelsRPSCmd() {
@@ -46,6 +55,10 @@ public class Shooter {
 
   public Command setFuelPumpStateCmd(FuelPumpState pState){
     return mFuelPumpsSS.setFuelPumpStateCmd(pState);
+  }
+
+  public BooleanSupplier isFuelPumpAtSetpoint(){
+    return () -> mFuelPumpsSS.isReadyToShoot();
   }
 
   public Command setFuelPumpVoltsCmd(double pVolts){

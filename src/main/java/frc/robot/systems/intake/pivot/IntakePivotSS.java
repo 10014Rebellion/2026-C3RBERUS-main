@@ -10,8 +10,10 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.intake.IntakeConstants;
@@ -26,8 +28,10 @@ public class IntakePivotSS extends SubsystemBase {
     new LoggedTunableNumber("Intake/Pivot/Control/CustomSetpointRot", 0);
 
   public static enum IntakePivotState {
+    // IDLE(null), // when enabled, doesnt do anything
     INTAKE(() -> PivotConstants.kPivotLimits.backwardLimit()),
     STOWED(() -> PivotConstants.kPivotLimits.forwardLimit()),
+    COMPACT(() -> Rotation2d.fromRotations(0.12)),
     TUNING(() -> Rotation2d.fromRotations(tPivotCustomSetpointRot.get()));
 
     private Supplier<Rotation2d> mRotSupplier;
@@ -40,7 +44,6 @@ public class IntakePivotSS extends SubsystemBase {
       return mRotSupplier.get();
     } 
   }
-
 
   private final IntakePivotIO mIntakePivotIO;
   private final IntakePivotInputsAutoLogged mIntakePivotInputs = new IntakePivotInputsAutoLogged();
@@ -62,7 +65,9 @@ public class IntakePivotSS extends SubsystemBase {
   public static final LoggedTunableNumber tCustomAmps = new LoggedTunableNumber("Intake/Pivot/Custom/Amps", 0.0);
   public static final LoggedTunableNumber tPivotPositionTolerance = new LoggedTunableNumber("Intake/Pivot/Control/Tolerance", IntakeConstants.PivotConstants.kPivotMotorToleranceRotations);
 
-  private IntakePivotState mIntakePivotState = IntakePivotState.STOWED;
+  @AutoLogOutput(key="Intake/Pivot/State")
+  private IntakePivotState mIntakePivotState = null;
+
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
   private Double mAppliedVolts = null;
   private Double mAppliedAmps = null;
@@ -82,9 +87,23 @@ public class IntakePivotSS extends SubsystemBase {
 
     Logger.processInputs("Intake/Pivot", mIntakePivotInputs);
 
+    if(DriverStation.isDisabled()){
+      stopPivotMotor();
+    }
+
+    
     if(mIntakePivotState != null) {
-      mCurrentRotationalGoal = mIntakePivotState.getDesiredRotation();
-      setPivotRot(mCurrentRotationalGoal);
+      // if(mIntakePivotState == IntakePivotState.IDLE) {
+      //   mCurrentRotationalGoal = null;
+      //   setPivotVolts(0);
+      // } else {
+        mCurrentRotationalGoal = mIntakePivotState.getDesiredRotation();
+        setPivotRot(mCurrentRotationalGoal);
+      // }
+    }
+
+    if(mIntakePivotState == null){
+      mCurrentRotationalGoal = Rotation2d.kZero;
     }
   }
 
@@ -102,6 +121,12 @@ public class IntakePivotSS extends SubsystemBase {
        (getIntakePivotRotations().getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() && !positive)) {
       mIntakePivotIO.stopMotor();
     }
+  }
+
+  public Command trashCompact(){
+    return new RepeatCommand(Commands.sequence(
+      setIntakePivotStateCmd(IntakePivotState.COMPACT).withTimeout(0.3),
+      setIntakePivotStateCmd(IntakePivotState.INTAKE).withTimeout(0.3)));
   }
 
   public Command setIntakePivotStateCmd(IntakePivotState pIntakePivotState){
@@ -184,6 +209,10 @@ public class IntakePivotSS extends SubsystemBase {
   }
 
   public void setPivotRot(Rotation2d pRot) {
+    if(pRot == null) {
+      stopPivotMotor();
+      return;
+    }
     pRot = Rotation2d.fromRotations(MathUtil.clamp(pRot.getRotations(), PivotConstants.kPivotLimits.backwardLimit().getRotations(), PivotConstants.kPivotLimits.forwardLimit().getRotations()));
     mCurrentRotationalGoal = pRot;
     double ffOutput = mPivotFF.calculate(

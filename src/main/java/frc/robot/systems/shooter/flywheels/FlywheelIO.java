@@ -25,9 +25,7 @@ public interface FlywheelIO {
 
     public default void setPDConstants(double pKP, double pKD) {}
 
-    public default void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {}
-
-    public default void setMotorVelAndAccel(double pVelocityRPS, double pAccelerationRPSS, double pFeedforward) {}
+    public default void setMotorVel(double pVelocityRPS, double pFeedforward) {}
 
     public default void setMotorVolts(double pVolts) {}
 

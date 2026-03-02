@@ -3,30 +3,30 @@ package frc.robot.systems.climb;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
+import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
+import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 
 public class ClimbIOSim implements ClimbIO{
 
     private double mAppliedVolts;
-    private final BasicMotorHardware mConfig;
     private final ElevatorSim mElevatorSim;
+    private final PositionSoftLimits mSoftLimits;
 
-
-    public ClimbIOSim(BasicMotorHardware pConfig) {
-
-        this.mConfig = pConfig;
+    public ClimbIOSim(SimulatedElevator pConfig, BasicMotorHardware pHardware, PositionSoftLimits pSoftLimits) {
 
         mElevatorSim = new ElevatorSim(
-            ClimbConstants.kSimElevator.kMotor(),
-            ClimbConstants.kClimbMotorConstants.rotorToMechanismRatio(), 
-            ClimbConstants.kSimElevator.kCarriageMassKg(), 
-            ClimbConstants.kSimElevator.kDrumRadiusMeters(), 
-            ClimbConstants.kSimElevator.kMinHeightMeters(),
-            ClimbConstants.kSimElevator.kMaxHeightMeters(),
-            ClimbConstants.kSimElevator.kSimulateGravity(), 
-            ClimbConstants.kSimElevator.kStartingHeightMeters(), 
-            ClimbConstants.kSimElevator.kMeasurementStdDevs());
+            pConfig.kMotor(),
+            pHardware.rotorToMechanismRatio(), 
+            pConfig.kCarriageMassKg(), 
+            pConfig.kDrumRadiusMeters(), 
+            pSoftLimits.backwardLimitM(),
+            pSoftLimits.forwardLimitM(),
+            pConfig.kSimulateGravity(), 
+            pConfig.kStartingHeightMeters(), 
+            pConfig.kMeasurementStdDevs());
 
         mAppliedVolts = 0.0;
+        mSoftLimits = pSoftLimits;
     }
 
     @Override
@@ -40,6 +40,17 @@ public class ClimbIOSim implements ClimbIO{
         pInputs.iClimbStatorCurrentAmps = Math.abs(mElevatorSim.getCurrentDrawAmps());
         pInputs.iClimbTempCelsius = 0.0;
         pInputs.iClimbPositionMeters = mElevatorSim.getPositionMeters();
+    }
+
+    private double getPosition(){
+        return mElevatorSim.getPositionMeters();
+    }
+
+    @Override
+    public void enforceSoftLimits(){
+        double currentPosition = getPosition();
+        if((currentPosition > mSoftLimits.forwardLimitM() && mAppliedVolts > 0) || 
+           (currentPosition < mSoftLimits.backwardLimitM() && mAppliedVolts < 0)) stopMotor();
     }
 
     @Override

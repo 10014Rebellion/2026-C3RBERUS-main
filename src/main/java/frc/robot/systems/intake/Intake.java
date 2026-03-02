@@ -6,6 +6,7 @@ package frc.robot.systems.intake;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
@@ -23,6 +24,10 @@ public class Intake {
   // ROLLER COMMANDS //
   public Command setRollerStateCmd(IntakeRollerState rollerState) {
     return mIntakeRollerSS.setIntakeRollerStateCmd(rollerState);
+  }
+
+  public Command trashCompact(){
+    return mIntakePivotSS.trashCompact();
   }
 
   public Command setRollerVoltsManualCmd(double pVolts) {

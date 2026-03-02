@@ -2,11 +2,10 @@ package frc.robot.systems.shooter.flywheels;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
@@ -27,7 +26,7 @@ import frc.robot.systems.shooter.ShooterConstants.FlywheelConstants;
 public class FlywheelIOKrakenX44 implements FlywheelIO{
     private final TalonFX mFlywheelMotor;
     private final VoltageOut mFlywheelVoltageControl = new VoltageOut(0.0);
-    private final MotionMagicVelocityTorqueCurrentFOC mFlywheelVelocityControl = new MotionMagicVelocityTorqueCurrentFOC(0.0);
+    private final VelocityTorqueCurrentFOC mFlywheelVelocityControl = new VelocityTorqueCurrentFOC(0.0);
     private final StatusSignal<ControlModeValue> mFlywheelControlMode;
     private final StatusSignal<AngularVelocity> mFlywheelVelocityRPS;
     private final StatusSignal<Voltage> mFlywheelVoltage;
@@ -61,9 +60,6 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
 
         FlywheelConfig.Slot0.kP = FlywheelConstants.kFlywheelControlConfig.pdController().kP();
         FlywheelConfig.Slot0.kD = FlywheelConstants.kFlywheelControlConfig.pdController().kD();
-        FlywheelConfig.MotionMagic.MotionMagicCruiseVelocity = FlywheelConstants.kFlywheelControlConfig.motionMagicConstants().maxVelocity();
-        FlywheelConfig.MotionMagic.MotionMagicAcceleration = FlywheelConstants.kFlywheelControlConfig.motionMagicConstants().maxAcceleration();
-        FlywheelConfig.MotionMagic.MotionMagicJerk = FlywheelConstants.kFlywheelControlConfig.motionMagicConstants().maxJerk();
 
         FlywheelConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         FlywheelConfig.CurrentLimits.SupplyCurrentLimit = pHardware.currentLimit().supplyCurrentLimit();
@@ -72,9 +68,15 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
 
         FlywheelConfig.MotorOutput.NeutralMode = pHardware.neutralMode();
         FlywheelConfig.MotorOutput.Inverted = pHardware.direction();
-
+        
         FlywheelConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
         FlywheelConfig.Feedback.SensorToMechanismRatio = pHardware.rotorToMechanismRatio();
+        
+
+        FlywheelConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
+        FlywheelConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0.0;
+        FlywheelConfig.MotorOutput.PeakForwardDutyCycle = 1.0;
+        FlywheelConfig.MotorOutput.PeakReverseDutyCycle = 0.0;
 
         mFlywheelMotor.getConfigurator().apply(FlywheelConfig);
 
@@ -138,23 +140,14 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
     }
 
     @Override 
-    public void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {
-        MotionMagicConfigs motionMagicConfig = new MotionMagicConfigs();
-        motionMagicConfig.MotionMagicCruiseVelocity = pCruiseVel;
-        motionMagicConfig.MotionMagicAcceleration = pMaxAccel;
-        motionMagicConfig.MotionMagicJerk = pMaxJerk;
-        mFlywheelMotor.getConfigurator().apply(motionMagicConfig);
-    }
-
-    @Override 
     public void enforceFollower() {
         if(!isLeader()) mFlywheelMotor.setControl(mFollowerController);
         else Telemetry.reportIssue(new MotorErrors.EnforcingLeaderAsFollower(this));
     }
 
     @Override
-    public void setMotorVelAndAccel(double pVelocityRPS, double pAccelerationRPSS, double pFeedforward) {
-        if(isLeader()) mFlywheelMotor.setControl(mFlywheelVelocityControl.withVelocity(pVelocityRPS).withAcceleration(pAccelerationRPSS).withFeedForward(pFeedforward));
+    public void setMotorVel(double pVelocityRPS, double pFeedforward) {
+        if(isLeader()) mFlywheelMotor.setControl(mFlywheelVelocityControl.withVelocity(pVelocityRPS).withFeedForward(pFeedforward));
         else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 

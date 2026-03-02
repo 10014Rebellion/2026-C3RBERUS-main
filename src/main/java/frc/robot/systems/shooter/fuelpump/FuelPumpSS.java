@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 
@@ -19,6 +18,7 @@ public class FuelPumpSS extends SubsystemBase {
     public static enum FuelPumpState {
     IDLE(() -> 0.0),
     INTAKE(() -> 10.014),
+    UNJAM(() -> -2),
     OUTTAKE(() -> -10.014),
     TUNING(new LoggedTunableNumber("FuelPump/TuneableVoltage", 0.0));
 
@@ -99,6 +99,10 @@ public class FuelPumpSS extends SubsystemBase {
 
   public double getAvgFuelPumpRPS() {
     return (mLeaderFuelPumpInputs.iFuelPumpVelocityRPS + mFollowerFuelPumpInputs.iFuelPumpVelocityRPS) / 2.0;
+  }
+
+  public boolean isReadyToShoot() {
+    return getAvgFuelPumpRPS() >= FuelPumpConstants.kRPSForShooting.getRotations();
   }
   
   public void setFuelPumpRPS(double pDesiredRPS) {
