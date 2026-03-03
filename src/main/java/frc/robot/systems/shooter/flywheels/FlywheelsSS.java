@@ -23,7 +23,8 @@ public class FlywheelsSS extends SubsystemBase {
     SHOOT_FAR(() -> Rotation2d.fromRotations(90)),
     STANDBY(() -> Rotation2d.fromRotations(20)),
     SHOOT_CLOSE(() -> Rotation2d.fromRotations(70)),
-    IDLE(() -> Rotation2d.fromRotations(0));
+    IDLE(() -> Rotation2d.fromRotations(0)),
+    TUNING(() -> Rotation2d.fromRotations(tFlywheelCustomSetpointRPS.get()));
 
     private Supplier<Rotation2d> mRPSSupplier;
 
@@ -56,7 +57,6 @@ public class FlywheelsSS extends SubsystemBase {
 
   private Rotation2d mCurrentRPSGoal = Rotation2d.kZero;
   private FlywheelState mFlywheelState = null;
-  private Double mAppliedVolts = null;
 
   public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
     this.mLeaderFlywheelIO = pLeaderFlywheelIO;
@@ -77,21 +77,9 @@ public class FlywheelsSS extends SubsystemBase {
     Logger.processInputs("Flywheel/Encoder", mEncoderInputs);
 
     if(mFlywheelState != null) {
-      mCurrentRPSGoal = mFlywheelState.getDesiredRotation();
-      setFlywheelClosedLoop(mCurrentRPSGoal);
+      Logger.recordOutput("Flywheel/State", mFlywheelState);
+      setFlywheelClosedLoop(mFlywheelState.getDesiredRotation());
     }
-
-    if(mFlywheelState == null){
-      mCurrentRPSGoal = Rotation2d.fromRotations(-1000);
-    }
-    
-    // Help conserve some power on the motor), since its a 1 way bearing
-    if(mLeaderFlywheelInputs.iFlywheelMotorVolts < 0){
-      setFlywheelVolts(0.0);
-    } else {
-      mFollowerFlywheelIO.enforceFollower(); // Sometimes during enable and disable it no longer follows briefly, this scares me, so this is a failsafe
-    }
-
   }
 
   public Command setFlywheelStateCmd(FlywheelState pFlywheelState){
@@ -106,15 +94,15 @@ public class FlywheelsSS extends SubsystemBase {
     }, this);
   }
 
-  public Command setFlywheelsRPSManualCmd(Rotation2d pRotpS){
+  public Command setFlywheelAmpsCmd(double pAmps){
     return Commands.run(() -> {
-      setFlywheelStateManual(pRotpS);
+      setFlywheelAmps(pAmps);
     }, this);
   }
 
-  public Command setFlywheelsRPSManualCmd(){
+  public Command setFlywheelsVelocityManualCmd(Rotation2d pRotpS){
     return Commands.run(() -> {
-      setFlywheelStateManual();
+      setFlywheelVelocityManual(pRotpS);
     }, this);
   }
 
@@ -124,44 +112,36 @@ public class FlywheelsSS extends SubsystemBase {
     }, this);
   }
 
+  public void setFlywheelState(FlywheelState mState) {
+    mFlywheelState = mState;
+  }
+
   public void setFlywheelVolts(double pVolts) {
-    mCurrentRPSGoal = null;
     mFlywheelState = null;
-    mAppliedVolts = pVolts;
-    mLeaderFlywheelIO.setMotorVolts(mAppliedVolts);
+    mLeaderFlywheelIO.setMotorVolts(pVolts);
     mFollowerFlywheelIO.enforceFollower();
   }
 
-  public void setFlywheelState(FlywheelState mState){
-    mCurrentRPSGoal = mState.getDesiredRotation();
-    mFlywheelState = mState;
-    mAppliedVolts = null;
-    setFlywheelClosedLoop(mCurrentRPSGoal);
+  public void setFlywheelAmps(double pVolts) {
+    mFlywheelState = null;
+    mLeaderFlywheelIO.setMotorAmps(pVolts);
+    mFollowerFlywheelIO.enforceFollower();
   }
 
-  public void setFlywheelStateManual(Rotation2d pRotsPerS){
-    mCurrentRPSGoal = null;
+  public void setFlywheelVelocityManual(Rotation2d pRotsPerS){
     mFlywheelState = null;
-    mAppliedVolts = null;
     setFlywheelClosedLoop(pRotsPerS);
   }
 
-  public void setFlywheelStateManual(){
-    mCurrentRPSGoal = null;
-    mFlywheelState = null;
-    mAppliedVolts = null;
-    setFlywheelClosedLoop(Rotation2d.fromRotations(tFlywheelCustomSetpointRPS.get()));
-  }
-
   public void stopFlywheels(){
-    mCurrentRPSGoal = null;
     mFlywheelState = null;
-    mAppliedVolts = null;
     mLeaderFlywheelIO.stopMotor();
     mFollowerFlywheelIO.enforceFollower();
   }
 
   public void setFlywheelClosedLoop(Rotation2d pRotsPerS){
+    mCurrentRPSGoal = pRotsPerS;
+    Logger.recordOutput("Flywheel/Sigma", mCurrentRPSGoal);
     mLeaderFlywheelIO.setMotorVel(
       pRotsPerS.getRotations(),
       0.85 * kFlywheelControlConfig.feedforward().calculate(pRotsPerS.getRotations()));

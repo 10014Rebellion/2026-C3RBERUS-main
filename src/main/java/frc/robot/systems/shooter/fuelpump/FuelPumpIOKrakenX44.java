@@ -13,6 +13,8 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -112,7 +114,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
             mFuelPumpTempCelsius
         ).isOK();
         pInputs.iFuelPumpControlMode = mFuelPumpControlMode.getValue().toString();
-        pInputs.iFuelPumpVelocityRPS = mFuelPumpVelocityRPS.getValueAsDouble();
+        pInputs.iFuelPumpVelocityRPS = Rotation2d.fromRotations(mFuelPumpVelocityRPS.getValueAsDouble());
         pInputs.iFuelPumpAccelerationRPSS = mFuelPumpAccelerationRPSS.getValueAsDouble();
         pInputs.iFuelPumpMotorVolts = mFuelPumpVoltage.getValueAsDouble();
         pInputs.iFuelPumpSupplyCurrentAmps = mFuelPumpSupplyCurrent.getValueAsDouble();

@@ -57,8 +57,11 @@ public class ConveyorSS extends SubsystemBase {
 
     if(mConveyorState != null) {
       Logger.recordOutput("Conveyor/DesiredVoltage", mConveyorState.getDesiredVoltge());
+      Logger.recordOutput("Conveyor/State", mConveyorState);
       
       mConveyorIO.setMotorVolts(mConveyorState.getDesiredVoltge());
+    } else {
+      Logger.recordOutput("Conveyor/State", "Invalid");
     }
   }
   

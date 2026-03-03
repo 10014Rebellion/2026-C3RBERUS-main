@@ -8,6 +8,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -76,7 +78,7 @@ public class ConveyorIOKrakenX44 implements ConveyorIO {
             mConveyorStatorCurrent,
             mConveyorTempCelsius
         ).isOK();
-        pInputs.iConveyorVelocityMPS = mConveyorVelocityMPS.getValueAsDouble();
+        pInputs.iConveyorRPS = Rotation2d.fromDegrees(mConveyorVelocityMPS.getValueAsDouble());
         pInputs.iConveyorAccelerationMPSS = mConveyorAccelerationMPSS.getValueAsDouble();
         pInputs.iConveyorMotorVolts = mConveyorVoltage.getValueAsDouble();
         pInputs.iConveyorSupplyCurrentAmps = mConveyorSupplyCurrent.getValueAsDouble();

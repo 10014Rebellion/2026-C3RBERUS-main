@@ -123,6 +123,9 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
                     }));
                 
+                FlywheelIOSim leaderSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
+                FlywheelIOSim followerSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);;
+
                 mShooter = new Shooter(
                     new FuelPumpSS(
                         new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
@@ -130,8 +133,8 @@ public class RobotContainer {
                     ),
                     new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
                     new FlywheelsSS(
-                        new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
-                        new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig),
+                        leaderSim,
+                        followerSim,
                         new EncoderIO() {}
                     )
                 );

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 
@@ -28,7 +29,8 @@ public class HoodSS extends SubsystemBase{
     STOWED(() -> Rotation2d.fromDegrees(0)),
     CUSTOM(() -> incrementAngle),
     MID(() -> ShooterConstants.HoodConstants.kHoodLimits.forwardLimit().div(2)),
-    MIN(() -> ShooterConstants.HoodConstants.kHoodLimits.backwardLimit());
+    MIN(() -> ShooterConstants.HoodConstants.kHoodLimits.backwardLimit()),
+    TUNING(() -> Rotation2d.fromRotations(tHoodCustomSetpoint.get()));
 
     private Supplier<Rotation2d> mRSupplier;
 
@@ -60,7 +62,7 @@ public class HoodSS extends SubsystemBase{
   private HoodState mHoodState = HoodState.STOWED;
 
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
-  private Double mAppliedVolts = null;
+  private int desiredDirection = 0;
 
   public HoodSS(HoodIO pHoodIO) {
     this.mHoodIO = pHoodIO;
@@ -72,22 +74,33 @@ public class HoodSS extends SubsystemBase{
     mHoodIO.updateInputs(mHoodInputs);
 
     refreshTuneables();
-    mHoodIO.enforceSoftLimits();
+    enforceSoftLimits();
 
     Logger.processInputs("Hood", mHoodInputs);
 
     if(mHoodState != null) {
       mCurrentRotationalGoal = mHoodState.getDesiredRotation();
       setHoodRot(mCurrentRotationalGoal);
-    }
 
-    Logger.recordOutput("Hood/EnumVal", mHoodState.getDesiredRotation());
+      Logger.recordOutput("Hood/EnumVal", mHoodState.getDesiredRotation());
+    }
+  }
+
+  public void enforceSoftLimits() {
+    if(
+      (mHoodInputs.iHoodAngle.getRotations() > IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRotations() 
+        && desiredDirection == 1 ) 
+        || 
+      (mHoodInputs.iHoodAngle.getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() 
+        && desiredDirection == -1)) {
+        mHoodIO.stopMotor();
+      }
   }
 
   public Command incrementAngle() {
     return Commands.runOnce(() -> {
       incrementAngle = Rotation2d.fromRotations(MathUtil.clamp(
-        incrementAngle.plus(HoodConstants.kIncrementStepAmount).getRotations(), 
+        mHoodInputs.iHoodAngle.plus(HoodConstants.kIncrementStepAmount).getRotations(), 
         HoodConstants.kHoodLimits.backwardLimit().getRotations(), 
         HoodConstants.kHoodLimits.forwardLimit().getRotations())
       );
@@ -97,7 +110,7 @@ public class HoodSS extends SubsystemBase{
   public Command decrementAngle() {
     return Commands.runOnce(() -> {
       incrementAngle = Rotation2d.fromRotations(MathUtil.clamp(
-        incrementAngle.minus(HoodConstants.kIncrementStepAmount).getRotations(), 
+        mHoodInputs.iHoodAngle.minus(HoodConstants.kIncrementStepAmount).getRotations(), 
         HoodConstants.kHoodLimits.backwardLimit().getRotations(), 
         HoodConstants.kHoodLimits.forwardLimit().getRotations())
       );
@@ -141,39 +154,26 @@ public class HoodSS extends SubsystemBase{
   }
 
   public void setHoodState(HoodState pHoodState) {
-    mAppliedVolts = null;
     mHoodState = pHoodState;
   }
 
   public void setHoodVolts(double pVolts) {
-    mCurrentRotationalGoal = null;
     mHoodState = null;
-    mAppliedVolts = pVolts;
-    mHoodIO.setMotorVolts(mAppliedVolts);
+    desiredDirection = toDirection(pVolts);
+    mHoodIO.setMotorVolts(pVolts);
   }
   
   public void stopHoodMotor() {
-    mCurrentRotationalGoal = null;
-    mHoodState = null;
-    mAppliedVolts = 0.0;
     mHoodIO.stopMotor();
   }
 
   public void setHoodRotManual(Rotation2d pRot) {
-    mAppliedVolts = null;
     mHoodState = null;
     setHoodRot(pRot);
   }
 
   public void setHoodRotManual() {
-    mAppliedVolts = null;
-    mHoodState = null;
-    setHoodRot(Rotation2d.fromDegrees(tHoodCustomSetpoint.get()));
-  }
-
-  public void setHoodState() {
-    mAppliedVolts = null;
-    mHoodState = null;
+    setHoodRotManual(Rotation2d.fromDegrees(tHoodCustomSetpoint.get()));
   }
 
   public void holdHood() {
@@ -183,11 +183,18 @@ public class HoodSS extends SubsystemBase{
 
   public void setHoodRot(Rotation2d pRotSP) {
     mCurrentRotationalGoal = pRotSP;
+    desiredDirection = toDirection(getErrorPositionRotations());
     mHoodIO.setMotorPosition(mCurrentRotationalGoal, mHoodFF.calculate(mCurrentRotationalGoal.getRadians(), mHoodInputs.iHoodVelocityRPS));
   }
   
   public Rotation2d getPosition(){
     return mHoodInputs.iHoodAngle;
+  }
+
+  public int toDirection(double val) {
+    if(val > 0) return 1;
+    if(val < 0) return -1;
+    else return 0;
   }
 
   private void setFF(double kS, double kG, double kV, double kA) {

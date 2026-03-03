@@ -25,9 +25,9 @@ public class IntakePivotIOSim implements IntakePivotIO {
             pConfig.rotorToMechanismRatio(), 
             0.05, 
             Units.inchesToMeters(18), 
-            IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRadians(), 
             IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRadians(), 
-            true,
+            IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRadians(), 
+            false,
             IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRadians());
 
         mIntakePivotController = new PIDController(PivotConstants.kPivotController.pdController().kP(), 0.0, PivotConstants.kPivotController.pdController().kD());

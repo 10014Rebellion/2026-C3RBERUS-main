@@ -4,11 +4,13 @@ package frc.robot.systems.conveyor;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public interface ConveyorIO {
     @AutoLog
     public static class ConveyorInputs {
       public boolean iIsConveyorConnected = false;
-      public double iConveyorVelocityMPS = 0.0;
+      public Rotation2d iConveyorRPS = Rotation2d.kZero;
       public double iConveyorAccelerationMPSS = 0.0;
       public double iConveyorMotorVolts = 0.0;
       public double iConveyorSupplyCurrentAmps = 0.0;

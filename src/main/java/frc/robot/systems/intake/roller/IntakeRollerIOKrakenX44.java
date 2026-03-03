@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -73,7 +74,7 @@ public class IntakeRollerIOKrakenX44 implements IntakeRollerIO{
             mIntakeRollerTempCelsius
 
         ).isOK();
-        pInputs.iIntakeRollerVelocityMPS = mIntakeRollerVelocityMPS.getValueAsDouble();
+        pInputs.iIntakeRollerRPS = Rotation2d.fromRotations(mIntakeRollerVelocityMPS.getValueAsDouble());
         pInputs.iIntakeRollerAccelerationMPSS = mIntakeRollerAccelerationMPSS.getValueAsDouble();
         pInputs.iIntakeRollerMotorVolts = mIntakeRollerVoltage.getValueAsDouble();
         pInputs.iIntakeRollerSupplyCurrentAmps = mIntakeRollerSupplyCurrent.getValueAsDouble();

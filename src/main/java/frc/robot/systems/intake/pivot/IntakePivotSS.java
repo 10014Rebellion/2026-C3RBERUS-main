@@ -66,12 +66,10 @@ public class IntakePivotSS extends SubsystemBase {
   public static final LoggedTunableNumber tPivotPositionTolerance = new LoggedTunableNumber("Intake/Pivot/Control/Tolerance", IntakeConstants.PivotConstants.kPivotMotorToleranceRotations);
 
   @AutoLogOutput(key="Intake/Pivot/State")
-  private IntakePivotState mIntakePivotState = null;
+  private IntakePivotState mIntakePivotState = IntakePivotState.INTAKE;
 
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
-  private Double mAppliedVolts = null;
-  private Double mAppliedAmps = null;
-
+  private int desiredDirection = 0;
   
   public IntakePivotSS(IntakePivotIO pIntakePivotIO) {
     this.mIntakePivotIO = pIntakePivotIO;
@@ -90,37 +88,22 @@ public class IntakePivotSS extends SubsystemBase {
     if(DriverStation.isDisabled()){
       stopPivotMotor();
     }
-
     
     if(mIntakePivotState != null) {
-      // if(mIntakePivotState == IntakePivotState.IDLE) {
-      //   mCurrentRotationalGoal = null;
-      //   setPivotVolts(0);
-      // } else {
         mCurrentRotationalGoal = mIntakePivotState.getDesiredRotation();
         setPivotRot(mCurrentRotationalGoal);
-      // }
-    }
-
-    if(mIntakePivotState == null){
-      mCurrentRotationalGoal = Rotation2d.kZero;
     }
   }
 
   public void enforceSoftLimits() {
-    boolean positive;
-    if(mAppliedVolts != null) {
-      positive = mAppliedVolts > 0;
-    } else if(mAppliedAmps != null) {
-      positive = mAppliedAmps > 0;
-    } else {
-      positive = getErrorRotations().getRotations() > 0;
-    }
-
-    if((getIntakePivotRotations().getRotations() > IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRotations() && positive) || 
-       (getIntakePivotRotations().getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() && !positive)) {
-      mIntakePivotIO.stopMotor();
-    }
+    if(
+      (getIntakePivotRotations().getRotations() > IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRotations() 
+        && desiredDirection == 1 ) 
+        || 
+      (getIntakePivotRotations().getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() 
+        && desiredDirection == -1)) {
+        mIntakePivotIO.stopMotor();
+      }
   }
 
   public Command trashCompact(){
@@ -159,12 +142,6 @@ public class IntakePivotSS extends SubsystemBase {
     }, this);
   }
 
-  public Command setIntakePivotManualCmd(){
-    return Commands.run(() -> {
-      setPivotRotManual();
-    }, this);
-  }
-
   public Command stopIntakePivotCmd(){
     return Commands.run(() -> {
       stopPivotMotor();
@@ -172,49 +149,46 @@ public class IntakePivotSS extends SubsystemBase {
   }
   
   public void setPivotState(IntakePivotState pIntakePivotState) {
-    mAppliedAmps = null;
-    mAppliedVolts = null;
     mIntakePivotState = pIntakePivotState;
   }
 
-  public void setPivotVolts(double pVolts) {
-    mCurrentRotationalGoal = null;
-    mIntakePivotState = null;
-    mAppliedAmps = null;
-    mAppliedVolts = pVolts;
-    mIntakePivotIO.setMotorVolts(pVolts);
-  }
-
-  public void setPivotAmps(double pAmps) {
-    mCurrentRotationalGoal = null;
-    mIntakePivotState = null;
-    mAppliedVolts = null;
-    mAppliedAmps = pAmps;
-    mIntakePivotIO.setMotorVolts(pAmps);
-  }
-  
-  public void stopPivotMotor() {
-    mCurrentRotationalGoal = null;
-    mIntakePivotState = null;
-    mAppliedAmps = null;
-    mAppliedVolts = 0.0;
-    mIntakePivotIO.stopMotor();
-  }
-
   public void setPivotRotManual(Rotation2d pRot) {
-    mAppliedAmps = null;
-    mAppliedVolts = null;
     mIntakePivotState = null;
     setPivotRot(pRot);
   }
 
+  public void setPivotVolts(double pVolts) {
+    mIntakePivotState = null;
+    desiredDirection = toDirection(pVolts);
+    mIntakePivotIO.setMotorVolts(pVolts);
+  }
+
+  public void setPivotAmps(double pAmps) {
+    mIntakePivotState = null;
+    desiredDirection = toDirection(pAmps);
+    mIntakePivotIO.setMotorVolts(pAmps);
+  }
+
+  public void setCustomPivotAmps() {
+    setPivotAmps(tCustomAmps.get());;
+  }
+  
+  public void stopPivotMotor() {
+    desiredDirection = 0;
+    mIntakePivotIO.stopMotor();
+  }
+
   public void setPivotRot(Rotation2d pRot) {
-    if(pRot == null) {
-      stopPivotMotor();
-      return;
-    }
-    pRot = Rotation2d.fromRotations(MathUtil.clamp(pRot.getRotations(), PivotConstants.kPivotLimits.backwardLimit().getRotations(), PivotConstants.kPivotLimits.forwardLimit().getRotations()));
-    mCurrentRotationalGoal = pRot;
+    Logger.recordOutput("IntakePivot/Setpoint/Non-limited", pRot);
+
+    pRot = Rotation2d.fromRotations(
+      MathUtil.clamp(
+        pRot.getRotations(), 
+        PivotConstants.kPivotLimits.backwardLimit().getRotations(), 
+        PivotConstants.kPivotLimits.forwardLimit().getRotations()));
+
+    Logger.recordOutput("IntakePivot/Setpoint/Limited", pRot);
+
     double ffOutput = mPivotFF.calculate(
       mIntakePivotInputs.iIntakePivotRotation.getRadians(), 
       mIntakePivotInputs.iIntakeClosedLoopReferenceSlope.getRadians()
@@ -226,16 +200,15 @@ public class IntakePivotSS extends SubsystemBase {
     Logger.recordOutput("Intake/Pivot/cos", cos);
 
     mIntakePivotIO.setMotorRot(pRot, ffOutput);
+
+    desiredDirection = toDirection(getErrorRotations().getDegrees());
   }
 
-  public void setPivotRotManual() {
-    setPivotRotManual(Rotation2d.fromRotations(tPivotCustomSetpointRot.getAsDouble()));
+  public int toDirection(double val) {
+    if(val > 0) return 1;
+    if(val < 0) return -1;
+    else return 0;
   }
-
-  public void setCustomPivotAmps() {
-    setPivotAmps(tCustomAmps.get());;
-  }
-
 
   private void refreshTuneables() {
     LoggedTunableNumber.ifChanged( hashCode(), 

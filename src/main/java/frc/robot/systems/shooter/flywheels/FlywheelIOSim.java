@@ -1,5 +1,7 @@
 package frc.robot.systems.shooter.flywheels;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -42,8 +44,9 @@ public class FlywheelIOSim implements FlywheelIO{
 
     public void updateInputs(FlywheelInputs pInputs) {
         mFlywheelMotor.update(0.02);
+        pInputs.iIsLeader = !mIsFollower;
         pInputs.iIsFlywheelConnected = true;
-        pInputs.iFlywheelRotorAccelerationRPSS = (2*Math.PI) / mFlywheelMotor.getAngularAccelerationRadPerSecSq();
+        pInputs.iFlywheelRotorAccelerationRPSS = 0.0;
         pInputs.iFlywheelMotorVolts = mAppliedVoltage;
         pInputs.iFlywheelStatorCurrentAmps = Math.abs(mFlywheelMotor.getCurrentDrawAmps());
         pInputs.iFlywheelSupplyCurrentAmps = 0.0;
@@ -60,17 +63,13 @@ public class FlywheelIOSim implements FlywheelIO{
     }
 
     public void setMotorVelAndAccel(double pVelocityRPS, double pAccelerationRPSS, double pFeedforward) {
-        setMotorVolts(mFlywheelController.calculate(mFlywheelMotor.getAngularVelocityRPM() * 60.0, pVelocityRPS) + pFeedforward);
+        Logger.recordOutput("Flywheel/PIDVOltage", mFlywheelController.calculate(mFlywheelMotor.getAngularVelocityRPM() / 60.0, pVelocityRPS) + pFeedforward);
+        setMotorVolts(mFlywheelController.calculate(mFlywheelMotor.getAngularVelocityRPM() / 60.0, pVelocityRPS) + pFeedforward);
     }
 
     // Inverts voltage if follower as the rest of the close loop control runs of this same method //
     public void setMotorVolts(double pVolts) {
         mAppliedVoltage = MathUtil.clamp(pVolts, -12.0, 12.0);
-
-        if(mIsFollower){
-            mAppliedVoltage *= -1;
-        }
-
         mFlywheelMotor.setInputVoltage(mAppliedVoltage);
     }
 

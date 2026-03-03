@@ -5,6 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,6 +27,7 @@ import frc.robot.systems.shooter.ShooterConstants.FlywheelConstants;
 public class FlywheelIOKrakenX44 implements FlywheelIO{
     private final TalonFX mFlywheelMotor;
     private final VoltageOut mFlywheelVoltageControl = new VoltageOut(0.0);
+    private final TorqueCurrentFOC mFlywheelAmpControl = new TorqueCurrentFOC(0.0);
     private final VelocityTorqueCurrentFOC mFlywheelVelocityControl = new VelocityTorqueCurrentFOC(0.0);
     private final StatusSignal<ControlModeValue> mFlywheelControlMode;
     private final StatusSignal<AngularVelocity> mFlywheelVelocityRPS;
@@ -154,6 +156,12 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
     @Override
     public void setMotorVolts(double pVolts) {
         if(isLeader()) mFlywheelMotor.setControl(mFlywheelVoltageControl.withOutput(pVolts));
+        else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
+    }
+
+    @Override
+    public void setMotorAmps(double pAmps) {
+        if(isLeader()) mFlywheelMotor.setControl(mFlywheelAmpControl.withOutput(pAmps));
         else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 

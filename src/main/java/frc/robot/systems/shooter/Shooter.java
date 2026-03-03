@@ -30,7 +30,7 @@ public class Shooter {
   }
 
   public Command setFlywheelRPSCmd(Rotation2d pRPS) {
-    return mFlywheelSS.setFlywheelsRPSManualCmd(pRPS);
+    return mFlywheelSS.setFlywheelsVelocityManualCmd(pRPS);
   }
 
   public boolean getIsFlywheelAtGoal() {
@@ -42,11 +42,15 @@ public class Shooter {
   }
   
   public Command setFlywheelsRPSCmd() {
-    return mFlywheelSS.setFlywheelsRPSManualCmd();
+    return mFlywheelSS.setFlywheelStateCmd(FlywheelState.TUNING);
   }
 
   public Command setFlywheelsVoltsCmd(double pVolts) {
     return mFlywheelSS.setFlywheelVoltsCmd(pVolts);
+  }
+
+  public Command setFlywheelsAmpsCmd(double pAmps) {
+    return mFlywheelSS.setFlywheelAmpsCmd(pAmps);
   }
 
   public Command stopFlywheelCmd(){

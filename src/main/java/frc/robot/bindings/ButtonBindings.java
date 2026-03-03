@@ -50,34 +50,34 @@ public class ButtonBindings {
         new Trigger(() -> DriverStation.isTeleopEnabled())
             .onTrue(mDriveSS.getDriveManager().setToTeleop());
 
-        mPilotController.a()
-            .onTrue(
-                mDriveSS.getDriveManager().setToGenericAutoAlign(
-                    () -> new Pose2d(5, 5, Rotation2d.kCW_90deg), 
-                    ConstraintType.LINEAR))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.a()
+        //     .onTrue(
+        //         mDriveSS.getDriveManager().setToGenericAutoAlign(
+        //             () -> new Pose2d(5, 5, Rotation2d.kCW_90deg), 
+        //             ConstraintType.LINEAR))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        mPilotController.b()
-            .onTrue(
-                mDriveSS.getDriveManager().setToGenericLineAlign(
-                    () -> new Pose2d(1.5, 2.5, Rotation2d.kZero), 
-                    () -> Rotation2d.k180deg, 
-                    () -> 1.0, 
-                    () -> false))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.b()
+        //     .onTrue(
+        //         mDriveSS.getDriveManager().setToGenericLineAlign(
+        //             () -> new Pose2d(1.5, 2.5, Rotation2d.kZero), 
+        //             () -> Rotation2d.k180deg, 
+        //             () -> 1.0, 
+        //             () -> false))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        mPilotController.x()
-            .onTrue(
-                mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                    () -> GameGoalPoseChooser.turnFromHub(
-                        mDriveSS.getPoseEstimate()), 
-                    () -> GameGoalPoseChooser.getHub()
-                ))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.x()
+        //     .onTrue(
+        //         mDriveSS.getDriveManager().setToGenericHeadingAlign(
+        //             () -> GameGoalPoseChooser.turnFromHub(
+        //                 mDriveSS.getPoseEstimate()), 
+        //             () -> GameGoalPoseChooser.getHub()
+        //         ))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        mPilotController.y()
-            .onTrue(mDriveSS.getDriveManager().setToSysIDCharacterization())
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.y()
+        //     .onTrue(mDriveSS.getDriveManager().setToSysIDCharacterization())
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         // mDriveSS.getDriveManager().acceptJoystickInputs(
         //         () -> -mPilotController.getLeftY(),
@@ -179,14 +179,14 @@ public class ButtonBindings {
         mPilotController.povLeft()
             .whileTrue(mShooter.decrementHoodCmd());
 
-        mPilotController.rightBumper()
+        mPilotController.leftBumper()
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.COMPACT))
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
 
-        mPilotController.leftBumper()
+        mPilotController.leftTrigger()
             .whileTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.STOWED));
 
-        mPilotController.leftTrigger()
+        mPilotController.rightTrigger()
             .whileTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE).alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE)))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
     }

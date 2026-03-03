@@ -2,12 +2,15 @@ package frc.robot.systems.shooter.fuelpump;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public interface FuelPumpIO {
     @AutoLog
     public static class FuelPumpInputs {
+      public boolean iIsFuelPumpLeader = true;
       public boolean iIsFuelPumpConnected = false;
       public String iFuelPumpControlMode = "";
-      public double iFuelPumpVelocityRPS = 0.0;
+      public Rotation2d iFuelPumpVelocityRPS = Rotation2d.kZero;
       public double iFuelPumpAccelerationRPSS = 0.0;
       public double iFuelPumpMotorVolts = 0.0;
       public double iFuelPumpSupplyCurrentAmps = 0.0;
