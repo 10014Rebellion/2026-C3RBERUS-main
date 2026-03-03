@@ -4,7 +4,7 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
-   "Max":{
+   "MaxA":{
     "dimension":"LinAcc",
     "var":{
      "exp":"8 m / s ^ 2",
