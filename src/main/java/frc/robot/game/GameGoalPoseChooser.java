@@ -36,8 +36,8 @@ public class GameGoalPoseChooser {
                 Math.atan2(hubCenter.getY() - robotPose.getY(), hubCenter.getX() - robotPose.getX()));
 
         Rotation2d finalAngle = angleFromhubCenter;
-        if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red))
-            finalAngle = angleFromhubCenter.plus(Rotation2d.k180deg).times(-1.0);
+        // if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red))
+        //     finalAngle = angleFromhubCenter.plus(Rotation2d.k180deg).times(-1.0);
         Logger.recordOutput("Drive/GoalPoseAngle", finalAngle);
         return finalAngle;
     }
