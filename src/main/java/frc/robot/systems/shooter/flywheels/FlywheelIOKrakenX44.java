@@ -146,8 +146,8 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
     }
 
     @Override
-    public void setMotorVel(double pVelocityRPS, double pFeedforward) {
-        if(isLeader()) mFlywheelMotor.setControl(mFlywheelVelocityControl.withVelocity(pVelocityRPS).withFeedForward(pFeedforward));
+    public void setMotorVel(double pVelocityRPS) {
+        if(isLeader()) mFlywheelMotor.setControl(mFlywheelVelocityControl.withVelocity(pVelocityRPS));
         else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 

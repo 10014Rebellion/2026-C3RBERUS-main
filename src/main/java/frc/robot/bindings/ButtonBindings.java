@@ -187,7 +187,20 @@ public class ButtonBindings {
             .whileTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.STOWED));
 
         mPilotController.leftTrigger()
-            .whileTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE).alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE)))
+            .whileTrue(mIntakeSS.setPivotStateCmd(
+                IntakePivotState.INTAKE)
+                    .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+                    .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.SLOW_OUTTAKE)))
+            .onFalse(
+                mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE)
+                    .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE)));
+
+        mPilotController.rightTrigger()
+            .whileTrue(
+                mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)
+                    .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
+                    .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.OUTTAKE))
+                    .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.OUTTAKE)))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
     }
 
@@ -211,7 +224,7 @@ public class ButtonBindings {
         mGunnerController.leftBumper().whileTrue(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY))
             .whileFalse(mShooter.setFlywheelsVoltsCmd(0));
 
-        mGunnerController.rightBumper().whileTrue(mShooter.setFlywheelStateCmd(FlywheelState.SHOOT_FAR))
+        mGunnerController.rightBumper().whileTrue(mShooter.setFlywheelStateCmd(FlywheelState.TUNING))
             .whileFalse(mShooter.setFlywheelsVoltsCmd(0));
 
         mGunnerController.leftTrigger()
@@ -221,14 +234,14 @@ public class ButtonBindings {
         mGunnerController.rightTrigger()
             .whileTrue(
                 new SequentialCommandGroup(
-                    mShooter.setFuelPumpStateCmd(FuelPumpState.UNJAM).withTimeout(0.2),
+                    mShooter.setFuelPumpStateCmd(FuelPumpState.UNJAM).withTimeout(0.4),
                     mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.UNJAM)).until(mShooter.isFuelPumpAtSetpoint()),
                     mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE)
-                )
+                ).alongWith(mIntakeSS.trashCompact())
             )
-            .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE)));
+            .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE)).alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)));
 
-        new Trigger(() -> (mGunnerController.getRightY() < -0.25)).onTrue(mIntakeSS.trashCompact()).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
+        // new Trigger(() -> (mGunnerController.getRightY() < -0.25)).onTrue(mIntakeSS.trashCompact()).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
 
         // new Trigger(() -> (mGunnerController.getRightY() < -0.5)).whileTrue(mIntakeSS.setPivotVoltsCmd(-4)).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
     }
