@@ -144,7 +144,7 @@ public class FlywheelsSS extends SubsystemBase {
     Logger.recordOutput("Flywheel/Sigma", mCurrentRPSGoal);
     mLeaderFlywheelIO.setMotorVel(
       pRotsPerS.getRotations(),
-      0.85 * kFlywheelControlConfig.feedforward().calculate(pRotsPerS.getRotations()));
+      0.0);
     mFollowerFlywheelIO.enforceFollower();
   }
 
