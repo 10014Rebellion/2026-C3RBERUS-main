@@ -29,17 +29,17 @@ import edu.wpi.first.wpilibj.RobotBase;
 public class ATagVisionConstants {
     // Best to get these from CAD, or in person.
     public static final String kFrontLeftCamName = "SideLeft-OV9281"; // >>> TODO: TUNE ME
-    public static final Orientation kFrontLeftCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
+    public static final Orientation kFrontLeftCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
     public static final Transform3d kFrontLeftCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(-13.281), // X: inches forward // >>> TODO: TUNE ME
-            Units.inchesToMeters(-4.298), // Y: inches left // >>> TODO: TUNE ME
-            Units.inchesToMeters(-18.791) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(-4.375), // Y: inches left // >>> TODO: TUNE ME
+            Units.inchesToMeters(14.0), // X: inches forward // >>> TODO: TUNE ME
+            Units.inchesToMeters(19.125) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(0.0), // Pitch: upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(5), // Pitch: upward tilt // >>> TODO: TUNE ME
+            Units.degreesToRadians(36) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kFLATagCamHardware = 
         new ATagCameraHardware(kFrontLeftCamName, kFrontLeftCamOrientation, kFrontLeftCamTransform);
@@ -48,46 +48,46 @@ public class ATagVisionConstants {
     public static final Orientation kFrontRightCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kFrontRightCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(-14.19), // X: inches forward // >>> TODO: TUNE ME
-            Units.inchesToMeters(-9.453), // Y: inches right // >>> TODO: TUNE ME
-            Units.inchesToMeters(-18.791) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(-4.375), // Y: inches right // >>> TODO: TUNE ME
+            Units.inchesToMeters(-13.25), // X: inches forward // >>> TODO: TUNE ME
+            Units.inchesToMeters(19.125) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(0.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(5.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
+            Units.degreesToRadians(-18.18) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kFRATagCamHardware = 
         new ATagCameraHardware(kFrontRightCamName, kFrontRightCamOrientation, kFrontRightCamTransform);
 
     public static final String kBackLeftCamName = "BackLeft-OV9281"; // >>> TODO: TUNE ME
-    public static final Orientation kBackLeftCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
+    public static final Orientation kBackLeftCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kBackLeftCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(0.0), // X: inches forward // >>> TODO: TUNE ME
-            Units.inchesToMeters(0.0), // Y: inches left // >>> TODO: TUNE ME
-            Units.inchesToMeters(0.0) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(-9.4375), // X: inches back // >>> TODO: TUNE ME
+            Units.inchesToMeters(14.0), // Y: inches right // >>> TODO: TUNE ME
+            Units.inchesToMeters(19.125) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(0.0), // Pitch: upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(5.0), // Pitch: upward tilt // >>> TODO: TUNE ME
+            Units.degreesToRadians(117) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kBLATagCamHardware = 
         new ATagCameraHardware(kBackLeftCamName, kBackLeftCamOrientation, kBackLeftCamTransform);
 
     public static final String kBackRightCamName = "BackRight-OV9281"; // >>> TODO: TUNE ME
-    public static final Orientation kBackRightCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
+    public static final Orientation kBackRightCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kBackRightCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(0.0), // X: inches forward // >>> TODO: TUNE ME
-            Units.inchesToMeters(0.0), // Y: inches right // >>> TODO: TUNE ME
-            Units.inchesToMeters(0.0) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(-9.625), // Y: inches right // >>> TODO: TUNE ME
+            Units.inchesToMeters(-14.0), // X: inches forward // >>> TODO: TUNE ME
+            Units.inchesToMeters(19.125) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(0.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(5.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
+            Units.degreesToRadians(-117) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kBRATagCamHardware = 
         new ATagCameraHardware(kBackRightCamName, kBackRightCamOrientation, kBackRightCamTransform);

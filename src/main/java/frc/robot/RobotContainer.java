@@ -48,6 +48,7 @@ import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.climb.ClimbConstants;
+import frc.robot.systems.climb.ClimbIO;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.conveyor.ConveyorSS;
@@ -81,7 +82,12 @@ public class RobotContainer {
                         new Module("BR", new ModuleIOKraken(kBackRightHardware))
                     },
                     new GyroIOPigeon2(),
-                    new ATagVision(new ATagCameraIO[]{}));
+                    new ATagVision(new ATagCameraIOPV[]{
+                        new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
+                    }));
 
                 mShooter = new Shooter(
                     new FuelPumpSS(
@@ -190,7 +196,7 @@ public class RobotContainer {
             }
         }
 
-        mClimbSS = new ClimbSS(new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants, ClimbConstants.kSoftLimits), ClimbConstants.kSoftLimits);
+        mClimbSS = new ClimbSS(new ClimbIO(){}, ClimbConstants.kSoftLimits);
         
         mButtonBindings = new ButtonBindings(mDrive, mShooter, mIntake, mConveyor, mClimbSS);
 

@@ -72,7 +72,7 @@ public class ShooterConstants {
     public static class FuelPumpConstants {
 
         public static final double kToleranceRPS = 3.0;
-        public static final Rotation2d kRPSForShooting = Rotation2d.fromRotations(60);
+        public static final Rotation2d kRPSForShooting = Rotation2d.fromRotations(85);
 
         public enum FuelPumpStates {
             DISCONNECTED(null),

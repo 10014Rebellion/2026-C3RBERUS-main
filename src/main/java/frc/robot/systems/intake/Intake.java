@@ -26,7 +26,7 @@ public class Intake {
   }
 
   public Command trashCompact(){
-    return mIntakePivotSS.trashCompact();
+    return (mIntakePivotSS.trashCompact());
   }
 
   public Command setRollerVoltsManualCmd(double pVolts) {

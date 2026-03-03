@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 
 public class FlywheelsSS extends SubsystemBase {
 
-  private static final LoggedTunableNumber tFlywheelCustomSetpointRPS = 
+  public static final LoggedTunableNumber tFlywheelCustomSetpointRPS = 
     new LoggedTunableNumber("Flywheel/Control/CustomSetpointRPS", 0);
 
   public static enum FlywheelState {
@@ -24,7 +24,7 @@ public class FlywheelsSS extends SubsystemBase {
     STANDBY(() -> Rotation2d.fromRotations(20)),
     SHOOT_CLOSE(() -> Rotation2d.fromRotations(70)),
     IDLE(() -> Rotation2d.fromRotations(0)),
-    TUNING(() -> Rotation2d.fromRotations(tFlywheelCustomSetpointRPS.get()));
+    TUNING(() -> Rotation2d.fromRotations(tFlywheelCustomSetpointRPS.getAsDouble()));
 
     private Supplier<Rotation2d> mRPSSupplier;
 

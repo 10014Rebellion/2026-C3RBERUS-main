@@ -31,7 +31,7 @@ public class IntakePivotSS extends SubsystemBase {
     // IDLE(null), // when enabled, doesnt do anything
     INTAKE(() -> PivotConstants.kPivotLimits.backwardLimit()),
     STOWED(() -> PivotConstants.kPivotLimits.forwardLimit()),
-    COMPACT(() -> Rotation2d.fromRotations(0.12)),
+    COMPACT(() -> Rotation2d.fromRotations(0.15)),
     TUNING(() -> Rotation2d.fromRotations(tPivotCustomSetpointRot.get()));
 
     private Supplier<Rotation2d> mRotSupplier;
@@ -108,7 +108,7 @@ public class IntakePivotSS extends SubsystemBase {
 
   public Command trashCompact(){
     return new RepeatCommand(Commands.sequence(
-      setIntakePivotStateCmd(IntakePivotState.COMPACT).withTimeout(0.3),
+      setIntakePivotStateCmd(IntakePivotState.TUNING).withTimeout(0.3),
       setIntakePivotStateCmd(IntakePivotState.INTAKE).withTimeout(0.3)));
   }
 

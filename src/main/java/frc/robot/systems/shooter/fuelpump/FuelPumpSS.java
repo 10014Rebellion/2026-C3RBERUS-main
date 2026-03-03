@@ -18,6 +18,7 @@ public class FuelPumpSS extends SubsystemBase {
     INTAKE(() -> 10.014),
     UNJAM(() -> -2),
     OUTTAKE(() -> -10.014),
+    SLOW_OUTTAKE(() -> -4),
     TUNING(new LoggedTunableNumber("FuelPump/TuneableVoltage", 0.0));
 
     private DoubleSupplier mVoltage;
