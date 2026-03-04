@@ -46,6 +46,7 @@ public class IntakeRollerSS extends SubsystemBase {
     Logger.processInputs("Intake/Roller", mIntakeRollerInputs);
 
     if(mIntakeRollerState != null) {
+      Logger.recordOutput("IntakeRoller/State", mIntakeRollerState);
       Logger.recordOutput("IntakeRoller/DesiredVoltage", mIntakeRollerState.getDesiredVoltge());
 
       mIntakeRollerIO.setMotorVolts(mIntakeRollerState.getDesiredVoltge());

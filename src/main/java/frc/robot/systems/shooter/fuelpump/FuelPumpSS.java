@@ -70,6 +70,7 @@ public class FuelPumpSS extends SubsystemBase {
     Logger.processInputs("FuelPump/Follower", mFollowerFuelPumpInputs);
 
     if(mFuelPumpState != null) {
+      Logger.recordOutput("FuelPump/State", mFuelPumpState);      
       Logger.recordOutput("FuelPump/DesiredVoltage", mFuelPumpState.getDesiredVoltge());
 
       setFuelPumpVolts(mFuelPumpState.getDesiredVoltge());
