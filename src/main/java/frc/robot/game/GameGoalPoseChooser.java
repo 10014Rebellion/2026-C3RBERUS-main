@@ -4,6 +4,8 @@ package frc.robot.game;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.lib.math.AllianceFlipUtil;
@@ -31,7 +33,7 @@ public class GameGoalPoseChooser {
 
     /* Accoumts for rotation from reef, and offsets for red-side logic */
     public static Rotation2d turnFromHub(Pose2d robotPose) {
-        Pose2d hubCenter = AllianceFlipUtil.apply(FieldConstants.kHubPose);
+        Pose2d hubCenter = getHub();
         Rotation2d angleFromhubCenter = Rotation2d.fromRadians(
                 Math.atan2(hubCenter.getY() - robotPose.getY(), hubCenter.getX() - robotPose.getX()));
 
@@ -82,5 +84,17 @@ public class GameGoalPoseChooser {
             (!(robotPose.getY() > FieldConstants.kFieldYM / 2.0)
                 &&
             !DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue));
+    }
+
+    public static Pose2d getHubPresetPose(Pose2d robotPose, double distance) {
+        Rotation2d hubRotation = turnFromHub(robotPose);
+        Pose2d hubPose = getHub();
+
+        return hubPose.transformBy(
+            new Transform2d(
+                new Translation2d(
+                    distance, 
+                    hubRotation.unaryMinus()), 
+                hubRotation));
     }
 }

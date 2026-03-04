@@ -154,6 +154,14 @@ public class ButtonBindings {
             .onTrue(mDriveSS.getDriveManager().setToLinearTest())
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
+        mPilotController.b()
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> GameGoalPoseChooser.getHubPresetPose(
+                    mDriveSS.getPoseEstimate(), 
+                    5), 
+                ConstraintType.LINEAR))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
         mDriveSS.getDriveManager().acceptJoystickInputs(
                 () -> -mPilotController.getLeftY(),
                 () -> -mPilotController.getLeftX(),
