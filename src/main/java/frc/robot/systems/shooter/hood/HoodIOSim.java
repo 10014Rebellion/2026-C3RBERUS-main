@@ -36,7 +36,7 @@ public class HoodIOSim implements HoodIO {
         pInputs.iHoodStatorCurrentAmps = Math.abs(mHoodMotor.getCurrentDrawAmps());
         pInputs.iHoodSupplyCurrentAmps = 0.0;
         pInputs.iHoodTempCelsius = 0.0;
-        pInputs.iHoodVelocityRPS = mHoodMotor.getAngularVelocityRPM() * 60.0;
+        pInputs.iHoodVelocityRotPS = mHoodMotor.getAngularVelocityRPM() * 60.0;
         pInputs.iIsHoodConnected = true;
     }
 

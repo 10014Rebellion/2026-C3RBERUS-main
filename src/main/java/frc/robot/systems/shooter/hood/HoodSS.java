@@ -13,12 +13,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 
 public class HoodSS extends SubsystemBase{
-
-  private static final LoggedTunableNumber tHoodTuneableSetpointDeg = new LoggedTunableNumber("Hood/Control/TuneableSetpointDegrees", 0);
-
-  @AutoLogOutput (key="Hood/IncrementAngle")
-  private static Rotation2d mCustomAngle = Rotation2d.kZero; 
-
   public static enum HoodStates {
     STOPPED, // At rest
     OPEN_LOOP, // Via voltage out
@@ -27,18 +21,18 @@ public class HoodSS extends SubsystemBase{
     CUSTOM_SETPOINT, // Via increment/decrement
     TUNEABLE_SETPOINT // Via NT
   }
-
+  
   public static enum HoodClosedSetpoints {
     MAX(() -> HoodConstants.kHoodLimits.forwardLimit()),
     MID(() -> HoodConstants.kHoodLimits.forwardLimit().div(2)),
     MIN(() -> HoodConstants.kHoodLimits.backwardLimit());
-
+    
     private Supplier<Rotation2d> mRotSupplier;
-
+    
     private HoodClosedSetpoints(Supplier<Rotation2d> pRotSupplier) {
       this.mRotSupplier = pRotSupplier;
     }
-
+    
     public Rotation2d getRot() {
       return mRotSupplier.get();
     } 
@@ -58,20 +52,22 @@ public class HoodSS extends SubsystemBase{
   private final LoggedTunableNumber tHoodMaxAccel = new LoggedTunableNumber("Hood/Profile/MaxAcceleration", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration());
   private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Hood/Profile/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
   private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Hood/Control/Tolerance", HoodConstants.kToleranceRotations);
+  private static final LoggedTunableNumber tHoodTuneableSetpointDeg = new LoggedTunableNumber("Hood/Control/TuneableSetpointDegrees", 0);
   
   @AutoLogOutput(key = "Shooter/Hood/States/CurrentState")
   private HoodStates mCurrentHoodState = HoodStates.STOPPED;
 
-  private Optional<Rotation2d> mGoalAngle = Optional.empty();
+  private Optional<Rotation2d> oGoalAngle = Optional.empty();
   
   public HoodSS(HoodIO pHoodIO) {
     this.mHoodIO = pHoodIO;
     this.mHoodFF = HoodConstants.kHoodControlConfig.feedforward();
 
+    
     this.setDefaultCommand(
       Commands.run(() -> {
-        if (mGoalAngle.isPresent()) {
-          mHoodIO.setMotorPosition(mGoalAngle.get()); // closed loop, holds with kG
+        if (oGoalAngle.isPresent()) {
+          mHoodIO.setMotorPosition(oGoalAngle.get(), mHoodFF.calculate(mHoodInputs.iHoodAngle.getRadians(), mHoodInputs.iHoodVelocityRotPS * 2 * Math.PI)); // closed loop, holds with kG
         } else {
           mHoodIO.setMotorVolts(0.0); // open loop stop
           mCurrentHoodState = HoodStates.STOPPED;
@@ -85,12 +81,12 @@ public class HoodSS extends SubsystemBase{
   }
 
   private void clearGoal(HoodStates pNewState) {
-    this.mGoalAngle = Optional.empty();
+    this.oGoalAngle = Optional.empty();
     this.mCurrentHoodState = pNewState;
   }
 
   public void setGoal(Rotation2d pGoal, HoodStates pNewState) {
-    this.mGoalAngle = Optional.of(clampRotToSoftLimits(pGoal));
+    this.oGoalAngle = Optional.of(clampRotToSoftLimits(pGoal));
     this.mCurrentHoodState = pNewState;
   }
 
@@ -110,15 +106,15 @@ public class HoodSS extends SubsystemBase{
     return Commands.runOnce(() -> setGoal(mHoodInputs.iHoodAngle.minus(HoodConstants.kIncrementStepAmount), HoodStates.CUSTOM_SETPOINT), this);
   }
 
-  public Command setHoodVoltsCmd(double pVolts){
+  public Command setHoodVoltsCmdNoEnd(double pVolts){
     return Commands.runOnce(() -> clearGoal(HoodStates.OPEN_LOOP))
       .andThen(Commands.run(() -> mHoodIO.setMotorVolts(pVolts), this));
   }
 
-  public Command setHoodTuneableCmd() {
+  public Command setHoodTuneableCmdNoEnd() {
     return Commands.run(() -> {
       setGoal(Rotation2d.fromDegrees(tHoodTuneableSetpointDeg.getAsDouble()), HoodStates.TUNEABLE_SETPOINT);
-      mHoodIO.setMotorPosition(mGoalAngle.get());
+      mHoodIO.setMotorPosition(getCurrentGoal(), mHoodFF.calculate(mHoodInputs.iHoodAngle.getRadians(), mHoodInputs.iHoodVelocityRotPS * 2 * Math.PI));
     }, this);
   }
 
@@ -136,12 +132,12 @@ public class HoodSS extends SubsystemBase{
 
   @AutoLogOutput(key = "Shooter/Hood/Feedback/CurrentGoal")
   public Rotation2d getCurrentGoal() {
-    return mGoalAngle.orElse(mHoodInputs.iHoodAngle);
+    return oGoalAngle.orElse(mHoodInputs.iHoodAngle);
   }
 
   @AutoLogOutput(key = "Shooter/Hood/Feedback/HasGoal")
   public boolean hasGoal() {
-    return mGoalAngle.isPresent();
+    return oGoalAngle.isPresent();
   }
 
   @AutoLogOutput(key = "Shooter/Hood/Feedback/AtGoal")
@@ -159,20 +155,11 @@ public class HoodSS extends SubsystemBase{
     );
   }
 
-  private void enforceSoftLimits() {
-    double currentRot = mHoodInputs.iHoodAngle.getRotations();
-    if( (currentRot > HoodConstants.kHoodLimits.forwardLimit().getRotations() && mHoodInputs.iHoodMotorVolts > 0) ||
-        (currentRot < HoodConstants.kHoodLimits.backwardLimit().getRotations() && mHoodInputs.iHoodMotorVolts < 0)) {
-      mHoodIO.stopMotor();
-    }
-  }
-
   @Override
   public void periodic() {
     mHoodIO.updateInputs(mHoodInputs);
 
     refreshTuneables();
-    enforceSoftLimits();
 
     Logger.processInputs("Hood", mHoodInputs);
   }

@@ -9,7 +9,7 @@ public interface HoodIO {
     public boolean iIsHoodConnected = false;
     public String iHoodControlMode = "";
     public Rotation2d iHoodAngle = Rotation2d.kZero;
-    public double iHoodVelocityRPS = 0.0;
+    public double iHoodVelocityRotPS = 0.0;
     public double iHoodAccelerationRPSS = 0.0;
     public double iHoodMotorVolts = 0.0;
     public double iHoodSupplyCurrentAmps = 0.0;
@@ -23,8 +23,6 @@ public interface HoodIO {
   public default void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {}
 
   public default void updateInputs(HoodInputs pInputs) {}
-
-  public default void setMotorPosition(Rotation2d pRotationSP) {}
 
   public default void setMotorPosition(Rotation2d pRotationSP, double pArbFF) {}
 

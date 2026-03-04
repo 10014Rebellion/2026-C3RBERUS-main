@@ -39,7 +39,7 @@ public class HoodIOKrakenX44 implements HoodIO{
     public HoodIOKrakenX44(BasicMotorHardware pMotorHardware, ArmControllerMotionMagic pController, RotationSoftLimits pSoftLimits) {
         this.mHoodMotor = new TalonFX(pMotorHardware.motorID(), pMotorHardware.canBus());
         this.mRotationSoftLimits = pSoftLimits;
-        
+
         TalonFXConfiguration HoodConfig = new TalonFXConfiguration();
 
         HoodConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -110,7 +110,7 @@ public class HoodIOKrakenX44 implements HoodIO{
         ).isOK();
         pInputs.iHoodControlMode = mHoodControlMode.getValue().toString();
         pInputs.iHoodAngle = getPos();
-        pInputs.iHoodVelocityRPS = mHoodVelocityRPS.getValueAsDouble();
+        pInputs.iHoodVelocityRotPS = mHoodVelocityRPS.getValueAsDouble();
         pInputs.iHoodAccelerationRPSS = mHoodAccelerationRPSS.getValueAsDouble();
         pInputs.iHoodMotorVolts = mHoodVoltage.getValueAsDouble();
         pInputs.iHoodSupplyCurrentAmps = mHoodSupplyCurrent.getValueAsDouble();
@@ -140,9 +140,6 @@ public class HoodIOKrakenX44 implements HoodIO{
         mHoodMotor.getConfigurator().apply(motionMagicConfig);
     }
 
-    public void setMotorPosition(Rotation2d pSetpoint) {
-        setMotorPosition(pSetpoint, 0);
-    }
     @Override
     public void setMotorPosition(Rotation2d pSetpoint, double pArbFF) {
         mHoodMotor.setControl(mHoodPositionControl.withPosition(pSetpoint.getRotations()).withFeedForward(pArbFF));
