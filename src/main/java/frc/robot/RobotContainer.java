@@ -24,9 +24,7 @@ import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.roller.IntakeRollerIO;
 import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
-import frc.robot.systems.shooter.Shooter;
 import frc.robot.systems.shooter.ShooterConstants;
-import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelIO;
 import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
@@ -39,6 +37,7 @@ import frc.robot.systems.shooter.fuelpump.FuelPumpIOKrakenX44;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIOSim;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.hood.HoodSS;
+import frc.robot.systems.shooter.hood.HoodConstants;
 import frc.robot.systems.shooter.hood.HoodIO;
 import frc.robot.systems.shooter.hood.HoodIOKrakenX44;
 import frc.robot.systems.shooter.hood.HoodIOSim;
@@ -61,14 +60,16 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     private final Drive mDrive;
-    private final Shooter mShooter;
+    private final FuelPumpSS mFuelPumpSS;
+    private final HoodSS mHoodSS;
+    private final FlywheelsSS mFlywheelsSS;
     private final ConveyorSS mConveyor;
     private final Intake mIntake;
     private final ClimbSS mClimbSS;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
-    private final AutonCommands autos;
+    // private final AutonCommands autos;
 
     public RobotContainer() {
         switch (Constants.kCurrentMode) {
@@ -88,17 +89,18 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
                     }));
 
-                mShooter = new Shooter(
-                    new FuelPumpSS(
+                
+                mFuelPumpSS = new FuelPumpSS(
                         new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpLeaderConfig), 
                         new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpFollowerConfig)
-                    ),
-                    new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
-                    new FlywheelsSS(
+                );
+                
+                mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig ,HoodConstants.kHoodLimits));
+
+                mFlywheelsSS = new FlywheelsSS(
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig),
                         new EncoderIOCANCoder(ShooterConstants.FlywheelConstants.kCANCoderConfig)
-                    )
                 );
 
                 mIntake = new Intake(
@@ -136,17 +138,18 @@ public class RobotContainer {
                 FlywheelIOSim leaderSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
                 FlywheelIOSim followerSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);;
 
-                mShooter = new Shooter(
-                    new FuelPumpSS(
-                        new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
-                        new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig)
-                    ),
-                    new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
-                    new FlywheelsSS(
-                        leaderSim,
-                        followerSim,
-                        new EncoderIO() {}
-                    )
+                
+                mFuelPumpSS = new FuelPumpSS(
+                    new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
+                    new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig)
+                );
+
+                mHoodSS = new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits));
+
+                mFlywheelsSS = new FlywheelsSS(
+                    leaderSim,
+                    followerSim,
+                    new EncoderIO() {}
                 );
 
                 mIntake = new Intake(
@@ -177,17 +180,18 @@ public class RobotContainer {
                         new ATagCameraIO() {}
                     }));
 
-                 mShooter = new Shooter(
-                    new FuelPumpSS(
-                        new FuelPumpIO() {}, 
-                        new FuelPumpIO() {}
-                    ),
-                    new HoodSS(new HoodIO() {}),
-                    new FlywheelsSS(
-                        new FlywheelIO() {},
-                        new FlywheelIO() {},
-                        new EncoderIO() {}
-                    )
+                
+                mFuelPumpSS = new FuelPumpSS(
+                    new FuelPumpIO() {}, 
+                    new FuelPumpIO() {}
+                );
+                
+                mHoodSS = new HoodSS(new HoodIO() {});
+                
+                mFlywheelsSS = new FlywheelsSS(
+                    new FlywheelIO() {},
+                    new FlywheelIO() {},
+                    new EncoderIO() {}
                 );
 
                 mIntake = new Intake(
@@ -202,7 +206,7 @@ public class RobotContainer {
 
         mClimbSS = new ClimbSS(new ClimbIO(){}, ClimbConstants.kSoftLimits);
         
-        mButtonBindings = new ButtonBindings(mDrive, mShooter, mIntake, mConveyor, mClimbSS);
+        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake, mConveyor, mClimbSS);
 
         initBindings();
 
@@ -211,7 +215,7 @@ public class RobotContainer {
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDrive.getDriveManager().setDriveProfile(profile));
 
-        autos = new AutonCommands(mDrive, mIntake, mConveyor, mShooter);
+        // autos = new AutonCommands(mDrive, mIntake, mConveyor, mShooter);
     }
 
     public Drive getDrivetrain() {
@@ -223,7 +227,7 @@ public class RobotContainer {
     }
 
     public Supplier<Command> getAutonomousCommand() {
-        return autos.getAuto();
+        return null;
     }
 
     public Command getDriverProfileCommand() {

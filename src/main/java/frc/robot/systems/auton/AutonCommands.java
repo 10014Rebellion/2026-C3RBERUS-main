@@ -23,30 +23,25 @@ import frc.robot.commands.AutoEvent;
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.conveyor.ConveyorSS;
-import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
-import frc.robot.systems.shooter.Shooter;
-import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
-import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
-import frc.robot.systems.shooter.hood.HoodSS.HoodState;
 import frc.lib.math.AllianceFlipUtil;
 
 public class AutonCommands extends SubsystemBase {
     private final Drive mRobotDrive;
     private final Intake mIntake;
-    private final Shooter mShooter;
+    // private final Shooter mShooter;
     private final ConveyorSS mConveyorSS;
 
     private final SendableChooser<Supplier<Command>> mAutoChooser;
     private final LoggedDashboardChooser<Supplier<Command>> mAutoChooserLogged;
 
-    public AutonCommands(Drive pRobotDrive, Intake pIntake, ConveyorSS mConveyor, Shooter pShooter) {
+    public AutonCommands(Drive pRobotDrive, Intake pIntake, ConveyorSS mConveyor) {
         this.mRobotDrive = pRobotDrive;
         this.mIntake = pIntake;
-        this.mShooter = pShooter;
+        // this.mShooter = pShooter;
         this.mConveyorSS = mConveyor;
 
         mAutoChooser = new SendableChooser<>();
@@ -102,146 +97,146 @@ public class AutonCommands extends SubsystemBase {
         Trigger isPath6Running = auto.loggedCondition(path6Name+"/isRunning", () -> autoPath6Shoot.isRunning(), true);
         Trigger hasPath6Ended = auto.loggedCondition(path6Name+"/hasEnded", () -> autoPath6Shoot.hasEnded(), true);
 
-        autoActivted
-            .onTrue(autoPath1)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
-            .onTrue(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY));
+        // autoActivted
+        //     .onTrue(autoPath1)
+        //     .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+        //     .onTrue(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY));
 
-        intakingRange
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE))
-            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+        // intakingRange
+        //     .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
+        //     .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE))
+        //     .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
+        //     .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
-        shootingRange
-            .onTrue(mShooter.setFlywheelStateCmd(FlywheelState.SHOOT_FAR))
-            .onTrue(mShooter.setHoodStateCmd(HoodState.MAX))
-            .onFalse(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY))
-            .onFalse(mShooter.setHoodStateCmd(HoodState.MIN));
+        // shootingRange
+        //     .onTrue(mShooter.setFlywheelStateCmd(FlywheelState.SHOOT_FAR))
+        //     .onTrue(mShooter.setHoodStateCmd(HoodState.MAX))
+        //     .onFalse(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY))
+        //     .onFalse(mShooter.setHoodStateCmd(HoodState.MIN));
 
-        hasPath1Ended
-            .onTrue(autoPath2Shoot);
+        // hasPath1Ended
+        //     .onTrue(autoPath2Shoot);
 
-        /* Shooting Logic*/
-        hasPath2Ended
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
+        // /* Shooting Logic*/
+        // hasPath2Ended
+        //     .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+        //         () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+        //         () -> GameGoalPoseChooser.getHub()));
 
-        SequentialEndingCommandGroup path2FPShooting = 
-            new SequentialEndingCommandGroup(
-                mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(1.0),
-                mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE));
+        // SequentialEndingCommandGroup path2FPShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(1.0),
+        //         mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE));
 
-        SequentialEndingCommandGroup path2IShooting = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(1.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
+        // SequentialEndingCommandGroup path2IShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(1.0),
+        //         mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
-        SequentialEndingCommandGroup path2CShooting = 
-            new SequentialEndingCommandGroup(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(1.0),
-                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+        // SequentialEndingCommandGroup path2CShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(1.0),
+        //         mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
-        hasPath2Ended.and(
-            new Trigger(
-                () -> mShooter.getIsHoodAtGoal() && 
-                mShooter.getIsFlywheelAtGoal() && 
-                mRobotDrive.getDriveManager().inHeadingTolerance()))
-            .onTrue(path2FPShooting)
-            .onTrue(path2IShooting)
-            .onTrue(path2CShooting)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.COMPACT));
+        // hasPath2Ended.and(
+        //     new Trigger(
+        //         () -> mShooter.getIsHoodAtGoal() && 
+        //         mShooter.getIsFlywheelAtGoal() && 
+        //         mRobotDrive.getDriveManager().inHeadingTolerance()))
+        //     .onTrue(path2FPShooting)
+        //     .onTrue(path2IShooting)
+        //     .onTrue(path2CShooting)
+        //     .onTrue(mIntake.setPivotStateCmd(IntakePivotState.COMPACT));
 
-        auto.loggedCondition(
-            "Path2/ShootingHasEnded", 
-            () -> path2CShooting.hasEnded() 
-                && path2FPShooting.hasEnded()
-                && path2IShooting.hasEnded(), true)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
-            .onTrue(autoPath3);
+        // auto.loggedCondition(
+        //     "Path2/ShootingHasEnded", 
+        //     () -> path2CShooting.hasEnded() 
+        //         && path2FPShooting.hasEnded()
+        //         && path2IShooting.hasEnded(), true)
+        //     .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+        //     .onTrue(autoPath3);
 
-        hasPath3Ended
-            .onTrue(autoPath4Shoot);
+        // hasPath3Ended
+        //     .onTrue(autoPath4Shoot);
 
-        hasPath4Ended
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
+        // hasPath4Ended
+        //     .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+        //         () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+        //         () -> GameGoalPoseChooser.getHub()));
 
-        SequentialEndingCommandGroup path4FPShooting = 
-            new SequentialEndingCommandGroup(
-                mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(1.0),
-                mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE));
+        // SequentialEndingCommandGroup path4FPShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(1.0),
+        //         mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE));
 
-        SequentialEndingCommandGroup path4IShooting = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(1.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
+        // SequentialEndingCommandGroup path4IShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(1.0),
+        //         mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
-        SequentialEndingCommandGroup path4CShooting = 
-            new SequentialEndingCommandGroup(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(1.0),
-                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+        // SequentialEndingCommandGroup path4CShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(1.0),
+        //         mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
-        hasPath4Ended.and(
-            new Trigger(
-                () -> mShooter.getIsHoodAtGoal() && 
-                mShooter.getIsFlywheelAtGoal() && 
-                mRobotDrive.getDriveManager().inHeadingTolerance()))
-            .onTrue(path4FPShooting)
-            .onTrue(path4IShooting)
-            .onTrue(path4CShooting)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.COMPACT));
+        // hasPath4Ended.and(
+        //     new Trigger(
+        //         () -> mShooter.getIsHoodAtGoal() && 
+        //         mShooter.getIsFlywheelAtGoal() && 
+        //         mRobotDrive.getDriveManager().inHeadingTolerance()))
+        //     .onTrue(path4FPShooting)
+        //     .onTrue(path4IShooting)
+        //     .onTrue(path4CShooting)
+        //     .onTrue(mIntake.setPivotStateCmd(IntakePivotState.COMPACT));
 
-        auto.loggedCondition(
-            "Path4/ShootingHasEnded", 
-            () -> path4CShooting.hasEnded() 
-                && path4FPShooting.hasEnded()
-                && path4IShooting.hasEnded(), true)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
-            .onTrue(autoPath5);
+        // auto.loggedCondition(
+        //     "Path4/ShootingHasEnded", 
+        //     () -> path4CShooting.hasEnded() 
+        //         && path4FPShooting.hasEnded()
+        //         && path4IShooting.hasEnded(), true)
+        //     .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+        //     .onTrue(autoPath5);
 
-        hasPath5Ended
-            .onTrue(autoPath6Shoot);
+        // hasPath5Ended
+        //     .onTrue(autoPath6Shoot);
 
-        hasPath6Ended
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
+        // hasPath6Ended
+        //     .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+        //         () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+        //         () -> GameGoalPoseChooser.getHub()));
 
-        SequentialEndingCommandGroup path6FPShooting = 
-            new SequentialEndingCommandGroup(
-                mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(1.0),
-                mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE));
+        // SequentialEndingCommandGroup path6FPShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(1.0),
+        //         mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE));
 
-        SequentialEndingCommandGroup path6IShooting = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(1.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
+        // SequentialEndingCommandGroup path6IShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(1.0),
+        //         mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
-        SequentialEndingCommandGroup path6CShooting = 
-            new SequentialEndingCommandGroup(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(1.0),
-                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+        // SequentialEndingCommandGroup path6CShooting = 
+        //     new SequentialEndingCommandGroup(
+        //         mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(1.0),
+        //         mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
-        hasPath6Ended.and(
-            new Trigger(
-                () -> mShooter.getIsHoodAtGoal() && 
-                mShooter.getIsFlywheelAtGoal() && 
-                mRobotDrive.getDriveManager().inHeadingTolerance()))
-            .onTrue(path6FPShooting)
-            .onTrue(path6IShooting)
-            .onTrue(path6CShooting)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.COMPACT));
+        // hasPath6Ended.and(
+        //     new Trigger(
+        //         () -> mShooter.getIsHoodAtGoal() && 
+        //         mShooter.getIsFlywheelAtGoal() && 
+        //         mRobotDrive.getDriveManager().inHeadingTolerance()))
+        //     .onTrue(path6FPShooting)
+        //     .onTrue(path6IShooting)
+        //     .onTrue(path6CShooting)
+        //     .onTrue(mIntake.setPivotStateCmd(IntakePivotState.COMPACT));
 
-        auto.loggedCondition(
-            "Path6/ShootingHasEnded", 
-            () -> path6CShooting.hasEnded() 
-                && path6FPShooting.hasEnded()
-                && path6IShooting.hasEnded(), true)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
-            .onTrue(endAuto(auto));
+        // auto.loggedCondition(
+        //     "Path6/ShootingHasEnded", 
+        //     () -> path6CShooting.hasEnded() 
+        //         && path6FPShooting.hasEnded()
+        //         && path6IShooting.hasEnded(), true)
+        //     .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+        //     .onTrue(endAuto(auto));
         return auto;
     }
 
@@ -310,13 +305,13 @@ public class AutonCommands extends SubsystemBase {
         return new InstantCommand();
     }
 
-    public Command shotIndexCommand() {
-        return mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE));
-    }
+    // public Command shotIndexCommand() {
+    //     return mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE));
+    // }
     
-    public Command spinFlywheelsCommand() {
-        return mShooter.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE);
-    }
+    // public Command spinFlywheelsCommand() {
+    //     return mShooter.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE);
+    // }
 
     public Command turnToHubCommand() {
         return mRobotDrive.getDriveManager().setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), mRobotDrive.getDriveManager().getDefaultTurnPointFF());

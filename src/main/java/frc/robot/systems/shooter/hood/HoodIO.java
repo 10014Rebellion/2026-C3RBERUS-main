@@ -24,9 +24,9 @@ public interface HoodIO {
 
   public default void updateInputs(HoodInputs pInputs) {}
 
-  public default void setMotorPosition(Rotation2d pRotationSP, double pFeedforward) {}
+  public default void setMotorPosition(Rotation2d pRotationSP) {}
 
-  public default void enforceSoftLimits() {}
+  public default void setMotorPosition(Rotation2d pRotationSP, double pArbFF) {}
 
   public default void setMotorVolts(double pVolts) {}
 

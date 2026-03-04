@@ -11,8 +11,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -20,9 +18,9 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
-import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 
 public class HoodIOKrakenX44 implements HoodIO{
     private final TalonFX mHoodMotor;
@@ -38,10 +36,10 @@ public class HoodIOKrakenX44 implements HoodIO{
     private final StatusSignal<Temperature> mHoodTempCelsius;
     private final RotationSoftLimits mRotationSoftLimits;
 
-    public HoodIOKrakenX44(BasicMotorHardware pMotorHardware, RotationSoftLimits pSoftLimits) {
+    public HoodIOKrakenX44(BasicMotorHardware pMotorHardware, ArmControllerMotionMagic pController, RotationSoftLimits pSoftLimits) {
         this.mHoodMotor = new TalonFX(pMotorHardware.motorID(), pMotorHardware.canBus());
         this.mRotationSoftLimits = pSoftLimits;
-
+        
         TalonFXConfiguration HoodConfig = new TalonFXConfiguration();
 
         HoodConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -56,20 +54,18 @@ public class HoodIOKrakenX44 implements HoodIO{
         HoodConfig.Feedback.RotorToSensorRatio = 1;
         HoodConfig.Feedback.SensorToMechanismRatio = pMotorHardware.rotorToMechanismRatio();
 
+        HoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        HoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mRotationSoftLimits.forwardLimit().getRotations();
+        HoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        HoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mRotationSoftLimits.backwardLimit().getRotations();
+
         HoodConfig.MotionMagic.MotionMagicAcceleration = 0.0;
         HoodConfig.MotionMagic.MotionMagicCruiseVelocity = 0.0;
         HoodConfig.MotionMagic.MotionMagicJerk = 0.0;
 
         HoodConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-        HoodConfig.Slot0.kP = HoodConstants.kHoodControlConfig.pdController().kP();
-        HoodConfig.Slot0.kD = HoodConstants.kHoodControlConfig.pdController().kD();
-        HoodConfig.Slot0.kS = HoodConstants.kHoodControlConfig.feedforward().getKs();
-        HoodConfig.Slot0.kG = HoodConstants.kHoodControlConfig.feedforward().getKg();
-        HoodConfig.Slot0.kV = HoodConstants.kHoodControlConfig.feedforward().getKv();
-        HoodConfig.Slot0.kA = HoodConstants.kHoodControlConfig.feedforward().getKa();
-        HoodConfig.MotionMagic.MotionMagicCruiseVelocity = HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity();
-        HoodConfig.MotionMagic.MotionMagicAcceleration = HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration();
-        HoodConfig.MotionMagic.MotionMagicJerk = HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk();
+        HoodConfig.Slot0.kP = pController.pdController().kP();
+        HoodConfig.Slot0.kD = pController.pdController().kD();
 
         mHoodMotor.getConfigurator().apply(HoodConfig);
 
@@ -144,28 +140,20 @@ public class HoodIOKrakenX44 implements HoodIO{
         mHoodMotor.getConfigurator().apply(motionMagicConfig);
     }
 
+    public void setMotorPosition(Rotation2d pSetpoint) {
+        setMotorPosition(pSetpoint, 0);
+    }
     @Override
-    public void setMotorPosition(Rotation2d pPosition, double pFeedforward) {
-        mHoodMotor.setControl(mHoodPositionControl.withPosition(
-            MathUtil.clamp(pPosition.getRotations(), 
-                mRotationSoftLimits.backwardLimit().getRotations(), 
-                mRotationSoftLimits.forwardLimit().getRotations()
-            )
-        ).withFeedForward(pFeedforward));
-        enforceSoftLimits();  
+    public void setMotorPosition(Rotation2d pSetpoint, double pArbFF) {
+        mHoodMotor.setControl(mHoodPositionControl.withPosition(pSetpoint.getRotations()).withFeedForward(pArbFF));
     }
 
-    @Override
-    public void enforceSoftLimits() {
-        double currentRotation = getPos().getRotations();
-        if((currentRotation > mRotationSoftLimits.forwardLimit().getRotations() && mHoodVoltage.getValueAsDouble() > 0) || 
-           (currentRotation < mRotationSoftLimits.backwardLimit().getRotations() && mHoodVoltage.getValueAsDouble() < 0)) stopMotor();
-    }
-
+    /*
+     * When called, it should be run periodically
+     */
     @Override
     public void setMotorVolts(double pVolts) {
         mHoodMotor.setControl(mHoodVoltageControl.withOutput(pVolts));
-        enforceSoftLimits();
     }
 
     @Override

@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.DashboardConstants;
 import frc.robot.game.TransitionTracker;
-import frc.robot.systems.shooter.ShotCalculator;
+// import frc.robot.systems.shooter.ShotCalculator;
 
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -31,7 +31,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        ShotCalculator.getInstance().clearShootingParameters();
+        // ShotCalculator.getInstance().clearShootingParameters();
         CommandScheduler.getInstance().run();
     }
 

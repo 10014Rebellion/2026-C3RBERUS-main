@@ -14,12 +14,12 @@ import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 public class FuelPumpSS extends SubsystemBase {
 
   public static enum FuelPumpState {
-    IDLE(() -> 0.0),
+    STOPPED(() -> 0.0),
     INTAKE(() -> 10.014),
     UNJAM(() -> -2),
     OUTTAKE(() -> -10.014),
     SLOW_OUTTAKE(() -> -4),
-    TUNING(new LoggedTunableNumber("FuelPump/TuneableVoltage", 0.0));
+    TUNING(null);
 
     private DoubleSupplier mVoltage;
 
@@ -39,19 +39,7 @@ public class FuelPumpSS extends SubsystemBase {
   private final FuelPumpInputsAutoLogged mLeaderFuelPumpInputs = new FuelPumpInputsAutoLogged();
   private final FuelPumpInputsAutoLogged mFollowerFuelPumpInputs = new FuelPumpInputsAutoLogged();
 
-  private final LoggedTunableNumber tFuelPumpKP = new LoggedTunableNumber("FuelPump/Control/kP", FuelPumpConstants.kFuelPumpControlConfig.pdController().kP());
-  private final LoggedTunableNumber tFuelPumpKD = new LoggedTunableNumber("FuelPump/Control/kD", FuelPumpConstants.kFuelPumpControlConfig.pdController().kD());
-
-  private final LoggedTunableNumber tFuelPumpKS = new LoggedTunableNumber("FuelPump/Control/kS", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKs());
-  private final LoggedTunableNumber tFuelPumpKV = new LoggedTunableNumber("FuelPump/Control/kV", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKv());
-  private final LoggedTunableNumber tFuelPumpKA = new LoggedTunableNumber("FuelPump/Control/kA", FuelPumpConstants.kFuelPumpControlConfig.feedforward().getKa());
-  
-  // private final LoggedTunableNumber tFuelPumpTolerance = new LoggedTunableNumber("FuelPump/Control/Tolerance", ShooterConstants.FuelPumpConstants.kToleranceRPS);
-  
-  private SimpleMotorFeedforward mFuelPumpFeedForward = FuelPumpConstants.kFuelPumpControlConfig.feedforward();
-  
-  // private Rotation2d mCurrentRPSGoal = Rotation2d.kZero;
-  private FuelPumpState mFuelPumpState = FuelPumpState.IDLE;
+  private FuelPumpState mFuelPumpState = FuelPumpState.STOPPED;
   
   public FuelPumpSS(FuelPumpIO pLeaderFuelPumpIO, FuelPumpIO pFollowerFuelPumpIO) {
     this.mLeaderFuelPumpIO = pLeaderFuelPumpIO;
@@ -63,18 +51,10 @@ public class FuelPumpSS extends SubsystemBase {
     mLeaderFuelPumpIO.updateInputs(mLeaderFuelPumpInputs);
     mFollowerFuelPumpIO.updateInputs(mFollowerFuelPumpInputs);
 
-    refreshTuneables();
     mFollowerFuelPumpIO.enforceFollower();
 
     Logger.processInputs("FuelPump/Leader", mLeaderFuelPumpInputs);
     Logger.processInputs("FuelPump/Follower", mFollowerFuelPumpInputs);
-
-    if(mFuelPumpState != null) {
-      Logger.recordOutput("FuelPump/State", mFuelPumpState);      
-      Logger.recordOutput("FuelPump/DesiredVoltage", mFuelPumpState.getDesiredVoltge());
-
-      setFuelPumpVolts(mFuelPumpState.getDesiredVoltge());
-    }
   }
 
   public Command setFuelPumpStateCmd(FuelPumpState pFuelPumpState) {
@@ -102,13 +82,6 @@ public class FuelPumpSS extends SubsystemBase {
   public boolean isReadyToShoot() {
     return getAvgFuelPumpRPS().getRotations() >= FuelPumpConstants.kRPSForShooting.getRotations();
   }
-  
-  // public void setFuelPumpRPS(double pDesiredRPS) {
-  //   mCurrentRPSGoal = Rotation2d.fromRotations(pDesiredRPS);
-  //   double calculatedFF = mFuelPumpFeedForward.calculateWithVelocities(getAvgFuelPumpRPS(), pDesiredRPS);
-  //   mLeaderFuelPumpIO.setMotorVelocity(pDesiredRPS, calculatedFF);
-  //   mFollowerFuelPumpIO.enforceFollower();
-  // }
 
   public void setFuelPumpVolts(double pVolts) {
     mLeaderFuelPumpIO.setMotorVolts(pVolts);
@@ -130,39 +103,5 @@ public class FuelPumpSS extends SubsystemBase {
   private void setBothPDConstants(double pKP, double pKD) {
     mLeaderFuelPumpIO.setPDConstants(0, pKP, pKD);
     mFollowerFuelPumpIO.setPDConstants(0, pKP, pKD);
-  }
-
-  private void setFF(double pKS, double pKV, double pKA){
-    mFuelPumpFeedForward.setKs(pKS);
-    mFuelPumpFeedForward.setKv(pKV);
-    mFuelPumpFeedForward.setKa(pKA);
-  }
-
-  // @AutoLogOutput(key = "Shooter/FuelPump/Feedback/ErrorRotationsPerSec")
-  // public double getErrorRotationsPerSec() {
-  //   return mCurrentRPSGoal.getRotations() - getAvgFuelPumpRPS();
-  // }
-
-  // @AutoLogOutput(key = "Shooter/FuelPump/Feedback/CurrentGoal")
-  // public Rotation2d getCurrentGoal() {
-  //   return mCurrentRPSGoal;
-  // }
-
-  // @AutoLogOutput(key = "Shooter/FuelPump/Feedback/AtGoal")
-  // public boolean atGoal() {
-  //   return Math.abs(getErrorRotationsPerSec()) < tFuelPumpTolerance.get();
-  // }
-
-
-  private void refreshTuneables() {
-    LoggedTunableNumber.ifChanged( hashCode(), 
-      () -> setBothPDConstants(tFuelPumpKP.get(), tFuelPumpKD.get()), 
-      tFuelPumpKP, tFuelPumpKD
-    );
-  
-    LoggedTunableNumber.ifChanged( hashCode(), 
-      () -> setFF(tFuelPumpKS.get(), tFuelPumpKV.get(), tFuelPumpKA.get()), 
-      tFuelPumpKS, tFuelPumpKV, tFuelPumpKA
-    );
   }
 }

@@ -8,7 +8,6 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
-import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 
 public class HoodIOSim implements HoodIO {
 

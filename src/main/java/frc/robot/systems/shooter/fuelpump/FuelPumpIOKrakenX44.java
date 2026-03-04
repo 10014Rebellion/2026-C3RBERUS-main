@@ -23,7 +23,6 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.telemetry.Telemetry;
 import frc.robot.logging.MotorErrors;
-import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 
 public class FuelPumpIOKrakenX44 implements FuelPumpIO{
@@ -62,9 +61,6 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
         FuelPumpConfig.Voltage.PeakForwardVoltage = 12;
         FuelPumpConfig.Voltage.PeakReverseVoltage = -12;
 
-        FuelPumpConfig.Slot0.kP = FuelPumpConstants.kFuelPumpControlConfig.pdController().kP();
-        FuelPumpConfig.Slot0.kD = FuelPumpConstants.kFuelPumpControlConfig.pdController().kD();
-
         FuelPumpConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         FuelPumpConfig.CurrentLimits.SupplyCurrentLimit = pHardware.currentLimit().supplyCurrentLimit();
         FuelPumpConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -77,8 +73,6 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
         FuelPumpConfig.Feedback.SensorToMechanismRatio = pHardware.rotorToMechanismRatio();
 
         mFuelPumpMotor.getConfigurator().apply(FuelPumpConfig);
-
-        setPDConstants(FuelPumpConstants.kFuelPumpControlConfig.slot(), FuelPumpConstants.kFuelPumpControlConfig.pdController().kP(), FuelPumpConstants.kFuelPumpControlConfig.pdController().kD());
 
         mFuelPumpControlMode = mFuelPumpMotor.getControlMode();
         mFuelPumpVelocityRPS = mFuelPumpMotor.getVelocity();
