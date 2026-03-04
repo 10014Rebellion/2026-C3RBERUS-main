@@ -8,11 +8,14 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.fasterxml.jackson.databind.node.POJONode;
+
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.tuning.LoggedTunableNumber;
@@ -43,48 +46,20 @@ public class ClimbSS extends SubsystemBase {
   private final ClimbIO mClimbIO;
   private final ClimbInputsAutoLogged mClimbInputs = new ClimbInputsAutoLogged();
 
-  // private final Servo mRightServo;
-  // private final Servo mLeftServo;
-  
-  private ElevatorFeedforward mFeedforward;
-  
-  private static final LoggedTunableNumber tKS = new LoggedTunableNumber("Climb/Control/kS", ClimbConstants.kController.feedforward().getKs());
-  private static final LoggedTunableNumber tKV = new LoggedTunableNumber("Climb/Control/kV", ClimbConstants.kController.feedforward().getKv());
-  private static final LoggedTunableNumber tKG = new LoggedTunableNumber("Climb/Control/kG", ClimbConstants.kController.feedforward().getKg());
-  private static final LoggedTunableNumber tKP = new LoggedTunableNumber("Climb/Control/kP", ClimbConstants.kController.pdController().kP());
-  private static final LoggedTunableNumber tKD = new LoggedTunableNumber("Climb/Control/kD", ClimbConstants.kController.pdController().kD());
-
-  private ClimbState mClimbGoal = null;
-  private Double mCurrentClimbGoalPositionMeters = 0.0;
-  private Double mAppliedVolts = null;
-
+  private final Servo mServo;
 
   public ClimbSS(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits) {
     mClimbIO = pClimbIO;
-    // mRightServo = new Servo(ClimbConstants.kRightHookPort);
-    // mLeftServo = new Servo(ClimbConstants.kLeftHookPort);
-    mFeedforward = ClimbConstants.kController.feedforward();
+    mServo = new Servo(ClimbConstants.kHookPort);
   }
 
   @Override
   public void periodic() {
     mClimbIO.updateInputs(mClimbInputs);
 
-    refreshTuneables();
     mClimbIO.enforceSoftLimits();
 
     Logger.processInputs("Climb", mClimbInputs);
-
-    if(mClimbGoal != null) {
-      mCurrentClimbGoalPositionMeters = mClimbGoal.getGoalMeters();
-      setClimbPositionMeters(mCurrentClimbGoalPositionMeters);
-    }
-  }
-
-  public Command setClimbStateCmd(ClimbState pState){
-    return Commands.run(() -> {
-      setClimbState(pState);
-    }, this);
   }
 
   public Command setClimbVoltsCmd(double pVolts){
@@ -93,16 +68,24 @@ public class ClimbSS extends SubsystemBase {
     }, this);
   }
 
-  public Command setClimbPositionManualCmd(double pPosition){
-    return Commands.run(() -> {
-      setClimbMotorManual(pPosition);
-    }, this);
+  public Command setClimbState(ClimbState pState){
+    return setClimbPositionManualCmd(pState.getGoalMeters());
   }
 
-  public Command setClimbPositionManualCmd(){
-    return Commands.run(() -> {
-      setClimbMotorManual();
-    }, this);
+  public FunctionalCommand setClimbPositionManualCmd(double pPosition) {
+    return new FunctionalCommand(
+      () -> {},
+      () -> {
+        if (getClimbPosition() < pPosition)
+          setClimbVolts(5.0);
+
+        if (getClimbPosition() > pPosition)
+          setClimbVolts(0);
+        
+      }, (interrupted) -> {
+        setClimbVolts(0.0);
+      }, 
+      () -> atGoal(pPosition));
   }
 
   public Command stopClimbCmd(){
@@ -111,71 +94,31 @@ public class ClimbSS extends SubsystemBase {
     }, this);
   }
 
-  // public Command unHookClawsCmd(){
-  //   return Commands.run(() -> {
-  //     mLeftServo.setAngle(ClimbConstants.kLeftHookOutPosition);
-  //     mRightServo.setAngle(ClimbConstants.kRightHookOutPosition);
-  //   }, this);
-  // }
-
-  // public Command hookClawsCmd(){
-  //   return Commands.run(() -> {
-  //     mLeftServo.setAngle(ClimbConstants.kLeftHookInPosition);
-  //     mRightServo.setAngle(ClimbConstants.kRightHookInPosition);
-  //   }, this);
-  // }
-  
-  public void setClimbState(ClimbState pClimbState){
-    mAppliedVolts = null;
-    mClimbGoal = pClimbState;
+  public Command unHookClawsCmd(){
+    return Commands.run(() -> {
+      mServo.setAngle(ClimbConstants.kHookOutPosition);
+    }, this);
   }
 
-  public void setClimbVolts(double pVolts){
-    mCurrentClimbGoalPositionMeters = null;
-    mAppliedVolts = pVolts;
-    mClimbGoal = null;
-    mClimbIO.setMotorVolts(mAppliedVolts);
+  public Command hookClawsCmd(){
+    return Commands.run(() -> {
+      mServo.setAngle(ClimbConstants.kHookInPosition);
+    }, this);
   }
 
   public void stopClimbMotor(){
-    mCurrentClimbGoalPositionMeters = null;
-    mAppliedVolts = null;
-    mClimbGoal = null;
     mClimbIO.stopMotor();
   }
 
-  public void setClimbMotorManual(double pPositionMeters){
-    mAppliedVolts = null;
-    mClimbGoal = null;
-    setClimbPositionMeters(pPositionMeters);
+  public void setClimbVolts(double pVolts){
+    mClimbIO.setMotorVolts(pVolts);
   }
 
-  public void setClimbMotorManual(){
-    mAppliedVolts = null;
-    mClimbGoal = null;
-    setClimbPositionMeters(tElevatorCustomSetpointMeters.get());
+  public double getClimbPosition(){
+    return mClimbInputs.iClimbPositionMeters;
   }
 
-  public void setClimbPositionMeters(double pPosition){
-    mClimbIO.setMotorPosition(pPosition, mFeedforward.calculate(mClimbInputs.iClimbVelocityMPS));
-  }
-
-  public void setFF(double pKS, double pKG, double pKV){
-    mFeedforward.setKs(pKS);
-    mFeedforward.setKg(pKG);
-    mFeedforward.setKv(pKV);
-  }
-
-  public void refreshTuneables(){
-    LoggedTunableNumber.ifChanged(
-      hashCode(), 
-      () -> setFF(tKS.get(), tKG.get(), tKV.get()), 
-      tKG, tKS, tKV);
-
-    LoggedTunableNumber.ifChanged(
-      hashCode(), 
-      () -> mClimbIO.setPDConstants(tKP.get(), tKD.get()), 
-      tKP, tKD);
-
+  public boolean atGoal(double pGoal){
+    return Math.abs(pGoal - getClimbPosition()) < 0.01;
   }
 }

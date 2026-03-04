@@ -8,25 +8,20 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
-import frc.lib.hardware.HardwareRecords.ElevatorController;
-import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 
 public class ClimbConstants {
 
-    public static final int kRightHookPort = 0;
-    public static final int kLeftHookPort = 0;
+    public static final int kHookPort = 0;
 
-    public static final double kRightHookOutPosition = 0.5;
-    public static final double kRightHookInPosition = 0.0;    
-    public static final double kLeftHookOutPosition = 0.5;
-    public static final double kLeftHookInPosition = 0.0;
+    public static final double kHookOutPosition = 0.5;
+    public static final double kHookInPosition = 0.0;    
     
     public static final BasicMotorHardware kClimbMotorConstants = new BasicMotorHardware(
-        0, // Motor ID // TODO: TUNE ME!
+        60, // Motor ID // TODO: TUNE ME!
         Constants.kSubsystemsCANBus, 
-        1 / 5.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
+        16.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
         InvertedValue.CounterClockwise_Positive,
         NeutralModeValue.Brake,
         new CurrentLimits(30, 40)
@@ -45,11 +40,4 @@ public class ClimbConstants {
         0.0, 
         0.001
     );
-
-    public static final ElevatorController kController = new ElevatorController(
-        0, 
-        new PDConstants(0, 0),
-        new ElevatorFeedforward(.0, 0.0, 0.0), 
-        0);
-
 }
