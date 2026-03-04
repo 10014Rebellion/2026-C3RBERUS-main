@@ -137,7 +137,7 @@ public class ShooterConstants {
 
         public static final ArmControllerMotionMagic kHoodControlConfig = new ArmControllerMotionMagic(
             0, // not currently used
-            new PDConstants(5, 0), // Tuned for C3RBERUS!
+            new PDConstants(10, 0), // Tuned for C3RBERUS!
             new MotionMagicConstants(100, 200, 0),  // Tuned for C3RBERUS!
             new ArmFeedforward(0, 0.03, 0, 0) // Tuned for C3RBERUS!
         );
