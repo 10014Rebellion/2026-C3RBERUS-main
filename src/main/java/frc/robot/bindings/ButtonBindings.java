@@ -150,6 +150,10 @@ public class ButtonBindings {
         // new Trigger(mConveyorSS::isConveyerJammed)
         // .onTrue(rumbleDriverController().withTimeout(0.8));
 
+        mPilotController.a()
+            .onTrue(mDriveSS.getDriveManager().setToLinearTest())
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
         mDriveSS.getDriveManager().acceptJoystickInputs(
                 () -> -mPilotController.getLeftY(),
                 () -> -mPilotController.getLeftX(),
@@ -183,8 +187,8 @@ public class ButtonBindings {
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.COMPACT))
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
 
-        mPilotController.leftTrigger()
-            .whileTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.STOWED));
+        mPilotController.rightBumper()
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.STOWED));
 
         mPilotController.leftTrigger()
             .whileTrue(mIntakeSS.setPivotStateCmd(
@@ -201,7 +205,10 @@ public class ButtonBindings {
                     .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
                     .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.OUTTAKE))
                     .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.OUTTAKE)))
-            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE)
+                .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)
+                .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE))
+                .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))));
     }
 
     public void initGunnerBindings() {

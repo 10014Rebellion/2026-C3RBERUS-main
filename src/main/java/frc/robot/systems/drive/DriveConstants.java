@@ -81,8 +81,8 @@ public class DriveConstants {
 
     public static final double kDriveStatorAmpLimit = 80.0; 
     public static final double kDriveFOCAmpLimit = 80.0;
-    public static final double kDriveSupplyAmpLimit = 80.0;
-    public static final double kDriveSupplyAmpLowerLimit = 60.0;
+    public static final double kDriveSupplyAmpLimit = 60.0;
+    public static final double kDriveSupplyAmpLowerLimit = 45.0;
     public static final double kDriveSupplyAmpLowerLimitTime = 0.25;
 
     public static final double kAzimuthStatorAmpLimit = 40.0;
@@ -92,8 +92,8 @@ public class DriveConstants {
     public static final ModuleControlConfig kModuleControllerConfigs = !Constants.isSim()
         // kV is generally 0 for FOC control, so double check in ModuleIOKraken to see whether kV should be applied
         ? new ModuleControlConfig(
-            new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(1.0, 0.0, 1.0), // DRIVE // TODO: TUNE ME
-            new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(0.03, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
+            new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(5.5, 0.0, 1.0), // DRIVE // TODO: TUNE ME
+            new PIDController(10.0, 0.0, 0.0), new SimpleMotorFeedforward(0.03, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
         : new ModuleControlConfig(
             new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005), // TODO: TUNE ME
             new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.5)); // TODO: TUNE ME

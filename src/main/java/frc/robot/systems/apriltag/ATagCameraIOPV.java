@@ -90,7 +90,7 @@ public class ATagCameraIOPV implements ATagCameraIO {
             Optional<EstimatedRobotPose> latestEstimatedRobotPose = mPoseEstimator.estimateCoprocMultiTagPose(latestValidResult);
 
             if (latestEstimatedRobotPose.isEmpty()){
-                DriverStation.reportWarning("Multi Tag CoProcessor Failed for: " + mCamName, true);
+                // DriverStation.reportWarning("Multi Tag CoProcessor Failed for: " + mCamName, false);
 
                 latestEstimatedRobotPose = mPoseEstimator.estimateClosestToReferencePose(
                     latestValidResult, GeomUtil.toPose3d(pLastRobotPose));
