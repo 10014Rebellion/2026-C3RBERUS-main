@@ -49,7 +49,6 @@ import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.climb.ClimbConstants;
 import frc.robot.systems.climb.ClimbIO;
-import frc.robot.systems.climb.ClimbIOKrakenx44;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorConstants;
@@ -62,14 +61,14 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     private final Drive mDrive;
-    // private final Shooter mShooter;
-    // private final ConveyorSS mConveyor;
-    // private final Intake mIntake;
-    // private final ClimbSS mClimbSS;
+    private final Shooter mShooter;
+    private final ConveyorSS mConveyor;
+    private final Intake mIntake;
+    private final ClimbSS mClimbSS;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
-    // private final AutonCommands autos;
+    private final AutonCommands autos;
 
     public RobotContainer() {
         switch (Constants.kCurrentMode) {
@@ -89,28 +88,28 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
                     }));
 
-                // mShooter = new Shooter(
-                //     new FuelPumpSS(
-                //         new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpLeaderConfig), 
-                //         new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpFollowerConfig)
-                //     ),
-                //     new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
-                //     new FlywheelsSS(
-                //         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
-                //         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig),
-                //         new EncoderIOCANCoder(ShooterConstants.FlywheelConstants.kCANCoderConfig)
-                //     )
-                // );
+                mShooter = new Shooter(
+                    new FuelPumpSS(
+                        new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpLeaderConfig), 
+                        new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpFollowerConfig)
+                    ),
+                    new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
+                    new FlywheelsSS(
+                        new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
+                        new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig),
+                        new EncoderIOCANCoder(ShooterConstants.FlywheelConstants.kCANCoderConfig)
+                    )
+                );
 
-                // mIntake = new Intake(
-                //     new IntakePivotSS(new IntakePivotIOKrakenX44(
-                //         IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                //         IntakeConstants.PivotConstants.kPivotEncoderConfig,
-                //         IntakeConstants.PivotConstants.kPivotLimits)),
-                //     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
-                // );
+                mIntake = new Intake(
+                    new IntakePivotSS(new IntakePivotIOKrakenX44(
+                        IntakeConstants.PivotConstants.kPivotMotorConfig, 
+                        IntakeConstants.PivotConstants.kPivotEncoderConfig,
+                        IntakeConstants.PivotConstants.kPivotLimits)),
+                    new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
+                );
 
-                // mConveyor = new ConveyorSS(new ConveyorIOKrakenX44(ConveyorConstants.kConveyorMotorConstants));
+                mConveyor = new ConveyorSS(new ConveyorIOKrakenX44(ConveyorConstants.kConveyorMotorConstants));
                 break;
             }
             case SIM: {
@@ -134,31 +133,31 @@ public class RobotContainer {
 
                     }));
                 
-                // FlywheelIOSim leaderSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
-                // FlywheelIOSim followerSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);;
+                FlywheelIOSim leaderSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
+                FlywheelIOSim followerSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);;
 
-                // mShooter = new Shooter(
-                //     new FuelPumpSS(
-                //         new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
-                //         new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig)
-                //     ),
-                //     new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
-                //     new FlywheelsSS(
-                //         leaderSim,
-                //         followerSim,
-                //         new EncoderIO() {}
-                //     )
-                // );
+                mShooter = new Shooter(
+                    new FuelPumpSS(
+                        new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
+                        new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig)
+                    ),
+                    new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits)),
+                    new FlywheelsSS(
+                        leaderSim,
+                        followerSim,
+                        new EncoderIO() {}
+                    )
+                );
 
-                // mIntake = new Intake(
-                //     new IntakePivotSS(new IntakePivotIOSim(
-                //         IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                //         IntakeConstants.PivotConstants.kPivotEncoderConfig,
-                //         IntakeConstants.PivotConstants.kPivotLimits)),
-                //     new IntakeRollerSS(new IntakeRollerIO() {})
-                // );
+                mIntake = new Intake(
+                    new IntakePivotSS(new IntakePivotIOSim(
+                        IntakeConstants.PivotConstants.kPivotMotorConfig, 
+                        IntakeConstants.PivotConstants.kPivotEncoderConfig,
+                        IntakeConstants.PivotConstants.kPivotLimits)),
+                    new IntakeRollerSS(new IntakeRollerIO() {})
+                );
 
-                // mConveyor = new ConveyorSS(new ConveyorIOSim());
+                mConveyor = new ConveyorSS(new ConveyorIOSim());
                 break;
             }
 
@@ -178,32 +177,32 @@ public class RobotContainer {
                         new ATagCameraIO() {}
                     }));
 
-                //  mShooter = new Shooter(
-                //     new FuelPumpSS(
-                //         new FuelPumpIO() {}, 
-                //         new FuelPumpIO() {}
-                //     ),
-                //     new HoodSS(new HoodIO() {}),
-                //     new FlywheelsSS(
-                //         new FlywheelIO() {},
-                //         new FlywheelIO() {},
-                //         new EncoderIO() {}
-                //     )
-                // );
+                 mShooter = new Shooter(
+                    new FuelPumpSS(
+                        new FuelPumpIO() {}, 
+                        new FuelPumpIO() {}
+                    ),
+                    new HoodSS(new HoodIO() {}),
+                    new FlywheelsSS(
+                        new FlywheelIO() {},
+                        new FlywheelIO() {},
+                        new EncoderIO() {}
+                    )
+                );
 
-                // mIntake = new Intake(
-                //     new IntakePivotSS(new IntakePivotIO() {}),
-                //     new IntakeRollerSS(new IntakeRollerIO() {})
-                // );
+                mIntake = new Intake(
+                    new IntakePivotSS(new IntakePivotIO() {}),
+                    new IntakeRollerSS(new IntakeRollerIO() {})
+                );
 
-                // mConveyor = new ConveyorSS(new ConveyorIO() {});
+                mConveyor = new ConveyorSS(new ConveyorIO() {});
                 break;
             }
         }
 
-        // mClimbSS = new ClimbSS(new ClimbIO(){}, ClimbConstants.kSoftLimits);
+        mClimbSS = new ClimbSS(new ClimbIO(){}, ClimbConstants.kSoftLimits);
         
-        mButtonBindings = new ButtonBindings(mDrive);
+        mButtonBindings = new ButtonBindings(mDrive, mShooter, mIntake, mConveyor, mClimbSS);
 
         initBindings();
 
@@ -212,7 +211,7 @@ public class RobotContainer {
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDrive.getDriveManager().setDriveProfile(profile));
 
-        // autos = new AutonCommands(mDrive, mIntake, mConveyor, mShooter);
+        autos = new AutonCommands(mDrive, mIntake, mConveyor, mShooter);
     }
 
     public Drive getDrivetrain() {
@@ -224,7 +223,7 @@ public class RobotContainer {
     }
 
     public Supplier<Command> getAutonomousCommand() {
-        return null;
+        return autos.getAuto();
     }
 
     public Command getDriverProfileCommand() {

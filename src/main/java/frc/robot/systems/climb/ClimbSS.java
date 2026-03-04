@@ -7,10 +7,6 @@ package frc.robot.systems.climb;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
-
-import com.fasterxml.jackson.databind.node.POJONode;
-
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;

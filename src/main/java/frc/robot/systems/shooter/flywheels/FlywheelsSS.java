@@ -77,8 +77,9 @@ public class FlywheelsSS extends SubsystemBase {
     Logger.processInputs("Flywheel/Encoder", mEncoderInputs);
 
     if(mFlywheelState != null) {
-      Logger.recordOutput("Flywheel/State", mFlywheelState);
-      setFlywheelClosedLoop(mFlywheelState.getDesiredRotation());
+      if(mFlywheelState.equals(FlywheelState.IDLE)) setFlywheelVolts(0.0);
+       else {Logger.recordOutput("Flywheel/State", mFlywheelState);
+      setFlywheelClosedLoop(mFlywheelState.getDesiredRotation()); }
     }
   }
 

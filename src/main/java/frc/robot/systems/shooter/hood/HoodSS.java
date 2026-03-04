@@ -30,7 +30,7 @@ public class HoodSS extends SubsystemBase{
     CUSTOM(() -> incrementAngle),
     MID(() -> ShooterConstants.HoodConstants.kHoodLimits.forwardLimit().div(2)),
     MIN(() -> ShooterConstants.HoodConstants.kHoodLimits.backwardLimit()),
-    TUNING(() -> Rotation2d.fromRotations(tHoodCustomSetpoint.get()));
+    TUNING(() -> Rotation2d.fromDegrees(tHoodCustomSetpoint.get()));
 
     private Supplier<Rotation2d> mRSupplier;
 
@@ -74,7 +74,7 @@ public class HoodSS extends SubsystemBase{
     mHoodIO.updateInputs(mHoodInputs);
 
     refreshTuneables();
-    enforceSoftLimits();
+    // enforceSoftLimits();
 
     Logger.processInputs("Hood", mHoodInputs);
 
@@ -99,21 +99,13 @@ public class HoodSS extends SubsystemBase{
 
   public Command incrementAngle() {
     return Commands.runOnce(() -> {
-      incrementAngle = Rotation2d.fromRotations(MathUtil.clamp(
-        mHoodInputs.iHoodAngle.plus(HoodConstants.kIncrementStepAmount).getRotations(), 
-        HoodConstants.kHoodLimits.backwardLimit().getRotations(), 
-        HoodConstants.kHoodLimits.forwardLimit().getRotations())
-      );
+      incrementAngle = mHoodInputs.iHoodAngle.plus(HoodConstants.kIncrementStepAmount);
     }, this).andThen(setHoodStateCmd(HoodState.CUSTOM));
   }
 
   public Command decrementAngle() {
     return Commands.runOnce(() -> {
-      incrementAngle = Rotation2d.fromRotations(MathUtil.clamp(
-        mHoodInputs.iHoodAngle.minus(HoodConstants.kIncrementStepAmount).getRotations(), 
-        HoodConstants.kHoodLimits.backwardLimit().getRotations(), 
-        HoodConstants.kHoodLimits.forwardLimit().getRotations())
-      );
+      incrementAngle = mHoodInputs.iHoodAngle.minus(HoodConstants.kIncrementStepAmount);
     }, this).andThen(setHoodStateCmd(HoodState.CUSTOM));
   }
 

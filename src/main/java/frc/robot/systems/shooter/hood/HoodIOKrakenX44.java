@@ -5,9 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
@@ -29,7 +27,7 @@ import frc.robot.systems.shooter.ShooterConstants.HoodConstants;
 public class HoodIOKrakenX44 implements HoodIO{
     private final TalonFX mHoodMotor;
     private final VoltageOut mHoodVoltageControl = new VoltageOut(0.0);
-    private final MotionMagicTorqueCurrentFOC mHoodPositionControl = new MotionMagicTorqueCurrentFOC(0.0);
+    private final PositionDutyCycle mHoodPositionControl = new PositionDutyCycle(0.0);
     private final StatusSignal<ControlModeValue> mHoodControlMode;
     private final StatusSignal<Angle> mHoodPosition;
     private final StatusSignal<AngularVelocity> mHoodVelocityRPS;

@@ -3,7 +3,6 @@ package frc.robot.systems.climb;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
