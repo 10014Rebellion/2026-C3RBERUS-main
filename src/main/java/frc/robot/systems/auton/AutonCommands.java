@@ -348,7 +348,7 @@ public class AutonCommands extends SubsystemBase {
             if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)) {
                 return mRobotDrive.getPoseEstimate().getX() > 5.0;
             } else {
-                return mRobotDrive.getPoseEstimate().getX() > AllianceFlipUtil.applyX(5.0);
+                return mRobotDrive.getPoseEstimate().getX() < AllianceFlipUtil.applyX(5.0);
             }
         }, 
         true);

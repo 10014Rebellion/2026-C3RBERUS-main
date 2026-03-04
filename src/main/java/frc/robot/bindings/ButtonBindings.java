@@ -49,7 +49,13 @@ public class ButtonBindings {
         initPilotBindings();
         initGunnerBindings();
         new Trigger(() -> DriverStation.isTeleopEnabled())
-            .onTrue(mDriveSS.getDriveManager().setToTeleop());
+            .onTrue(mDriveSS.getDriveManager().setToTeleop())
+            .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY))
+            .onTrue(mShooter.setHoodStateCmd(HoodState.MIN))
+            .onTrue(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE));
 
         // mPilotController.a()
         //     .onTrue(
