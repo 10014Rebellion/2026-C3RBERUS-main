@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
+import frc.lib.math.AllianceFlipUtil;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
@@ -158,7 +159,21 @@ public class ButtonBindings {
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
                 () -> GameGoalPoseChooser.getHubPresetPose(
                     mDriveSS.getPoseEstimate(), 
-                    5), 
+                    2.25), 
+                ConstraintType.LINEAR))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        mPilotController.x()
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> GameGoalPoseChooser.getHubPresetPose(
+                    mDriveSS.getPoseEstimate(), 
+                    2.9), 
+                ConstraintType.LINEAR))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        mPilotController.y()
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> AllianceFlipUtil.apply(new Pose2d(3.25, 4.02, Rotation2d.kZero)), 
                 ConstraintType.LINEAR))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
