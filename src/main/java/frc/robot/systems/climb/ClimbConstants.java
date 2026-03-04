@@ -8,8 +8,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
-import frc.lib.hardware.HardwareRecords.ElevatorController;
-import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 
@@ -21,10 +19,10 @@ public class ClimbConstants {
     public static final double kHookInPosition = 0.0;    
     
     public static final BasicMotorHardware kClimbMotorConstants = new BasicMotorHardware(
-        0, // Motor ID // TODO: TUNE ME!
+        60, // Motor ID // TODO: TUNE ME!
         Constants.kSubsystemsCANBus, 
-        1 / 16.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
-        InvertedValue.Clockwise_Positive,
+        16.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
+        InvertedValue.CounterClockwise_Positive,
         NeutralModeValue.Brake,
         new CurrentLimits(30, 40)
     );
