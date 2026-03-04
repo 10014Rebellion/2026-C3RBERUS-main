@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
@@ -51,11 +52,15 @@ public class ButtonBindings {
         new Trigger(() -> DriverStation.isTeleopEnabled())
             .onTrue(mDriveSS.getDriveManager().setToTeleop())
             .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY))
-            .onTrue(mShooter.setHoodStateCmd(HoodState.MIN))
             .onTrue(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE));
+
+        // ACTIVE MECHANISMS
+        new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
+            .onTrue(mShooter.setHoodStateCmd(HoodState.MIN))
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
+
 
         // mPilotController.a()
         //     .onTrue(
