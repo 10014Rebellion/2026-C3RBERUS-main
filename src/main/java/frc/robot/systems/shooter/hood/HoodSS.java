@@ -54,7 +54,6 @@ public class HoodSS extends SubsystemBase{
   private final LoggedTunableNumber tHoodKG = new LoggedTunableNumber("Hood/FF/kG", HoodConstants.kHoodControlConfig.feedforward().getKg());
   private final LoggedTunableNumber tHoodKV = new LoggedTunableNumber("Hood/FF/kV", HoodConstants.kHoodControlConfig.feedforward().getKv());
   private final LoggedTunableNumber tHoodKA = new LoggedTunableNumber("Hood/FF/kA", HoodConstants.kHoodControlConfig.feedforward().getKa());
-  private final LoggedTunableNumber tHoodArbFF = new LoggedTunableNumber("Hood/FF/kArbFF", 0);
   private final LoggedTunableNumber tHoodCruiseVel = new LoggedTunableNumber("Hood/Profile/CruiseVel", HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity());
   private final LoggedTunableNumber tHoodMaxAccel = new LoggedTunableNumber("Hood/Profile/MaxAcceleration", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration());
   private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Hood/Profile/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
