@@ -90,11 +90,10 @@ public class GameGoalPoseChooser {
         Rotation2d hubRotation = turnFromHub(robotPose);
         Pose2d hubPose = getHub();
 
-        return hubPose.transformBy(
-            new Transform2d(
-                new Translation2d(
-                    distance, 
-                    hubRotation.unaryMinus()), 
-                hubRotation));
+        return new Pose2d(
+            hubPose.getX() - distance * hubRotation.getCos(),
+            hubPose.getY() - distance * hubRotation.getSin(),
+            turnFromHub(robotPose)
+        );
     }
 }
