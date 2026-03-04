@@ -139,7 +139,7 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         updateSensorsAndOdometry();
         runSwerve(mDriveManager.computeDesiredSpeedsFromState());
-        getClosestShootingConfig();
+        // getClosestShootingConfig();
     }
 
     private void updateSensorsAndOdometry() {
