@@ -85,7 +85,8 @@ public class ClimbSS extends SubsystemBase {
       }, (interrupted) -> {
         setClimbVolts(0.0);
       }, 
-      () -> atGoal(pPosition));
+      () -> atGoal(pPosition),
+      this);
   }
 
   public Command stopClimbCmd(){

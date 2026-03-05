@@ -27,8 +27,8 @@ public class ClimbConstants {
     );
     
     public static final PositionSoftLimits kSoftLimits = new PositionSoftLimits(
-        0.01, 
-        2.5
+        0.00, 
+        2.583
     );
 
     public static final SimulatedElevator kSimElevator = new SimulatedElevator(

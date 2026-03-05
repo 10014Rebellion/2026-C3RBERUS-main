@@ -104,9 +104,9 @@ public class ButtonBindings {
     public void initPilotBindings() {
         mPilotController.startButton().onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
 
-        mPilotController.a()
-            .onTrue(DriveCharacterizationCommands.runDriveAmpCharacterization(80, mDriveSS))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.a()
+        //     .onTrue(DriveCharacterizationCommands.runDriveAmpCharacterization(80, mDriveSS))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         // mPilotController.b()
         //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
@@ -215,7 +215,7 @@ public class ButtonBindings {
             .whileTrue((mIntakeSS.trashCompact()))
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
 
-        new Trigger(() -> (mGunnerController.getLeftY() < -0.25)).onTrue(mClimbSS.setClimbVoltsCmd(3)).onFalse(mClimbSS.setClimbVoltsCmd(0));
+        new Trigger(() -> (mGunnerController.getLeftY() < -0.25)).onTrue(mClimbSS.setClimbPositionManualCmd(2.47)).onFalse(mClimbSS.setClimbVoltsCmd(0));
         new Trigger(() -> (mGunnerController.getLeftY() > 0.25)).onTrue(mClimbSS.setClimbVoltsCmd(-10)).onFalse(mClimbSS.setClimbVoltsCmd(0));
     }
 }
