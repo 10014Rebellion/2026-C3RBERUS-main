@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.hardware.HardwareRecords.MotionMagicConstants;
+import frc.lib.hardware.HardwareRecords.MotionMagicFOCControllerFF;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
@@ -94,10 +95,11 @@ public class ShooterConstants {
             MotorAlignmentValue.Opposed
         );
 
-        public static final SimpleController kFlywheelControlConfig = new SimpleController(
+        public static final MotionMagicFOCControllerFF kFlywheelControlConfig = new MotionMagicFOCControllerFF(
             0,
-            new PDConstants(999999.0, 0), // Tuned for C3RBERUS!
-            new SimpleMotorFeedforward(0.0, 0.0, 0) // Tuned for C3RBERUS!
+            new PDConstants(9.0, 0), // Tuned for C3RBERUS!
+            new SimpleMotorFeedforward(0.37, 0.0, 0), // Tuned for C3RBERUS!
+            new MotionMagicConstants(0.0, 1000, 10000)
         );
     }
 }

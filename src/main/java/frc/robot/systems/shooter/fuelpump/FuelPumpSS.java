@@ -15,7 +15,7 @@ public class FuelPumpSS extends SubsystemBase {
 
   public static enum FuelPumpState {
     STOPPED(() -> 0.0),
-    INTAKE(() -> 10.014),
+    INTAKE(() -> 11.0),
     UNJAM(() -> -2),
     OUTTAKE(() -> -10.014),
     SLOW_OUTTAKE(() -> -4),
@@ -53,6 +53,8 @@ public class FuelPumpSS extends SubsystemBase {
 
     mFollowerFuelPumpIO.enforceFollower();
 
+    if(mFuelPumpState != null) Logger.recordOutput("FuelPump/State", mFuelPumpState);
+
     Logger.processInputs("FuelPump/Leader", mLeaderFuelPumpInputs);
     Logger.processInputs("FuelPump/Follower", mFollowerFuelPumpInputs);
   }
@@ -60,6 +62,7 @@ public class FuelPumpSS extends SubsystemBase {
   public Command setFuelPumpStateCmd(FuelPumpState pFuelPumpState) {
     return Commands.run(() -> {
       mFuelPumpState = pFuelPumpState;
+      mLeaderFuelPumpIO.setMotorVolts(pFuelPumpState.getDesiredVoltge());
     }, this);
   }
 
