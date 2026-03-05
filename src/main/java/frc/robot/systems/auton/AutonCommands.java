@@ -179,7 +179,8 @@ public class AutonCommands extends SubsystemBase {
         autoActivted
             .onTrue(autoPath1)
             .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY));
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
+            .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
