@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -26,7 +27,7 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     private final VoltageOut mClimbVoltageControl = new VoltageOut(0.0);
     private final PositionDutyCycle mClimbPositionControl = new PositionDutyCycle(0.0);
 
-    private final RotationSoftLimits mSoftLimits;
+    private final PositionSoftLimits mSoftLimits;
 
     private final StatusSignal<AngularVelocity> mClimbVelocityMPS;
     private final StatusSignal<Voltage> mClimbVoltage;
@@ -37,7 +38,7 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     private final StatusSignal<Angle> mClimbPosition;
     private final StatusSignal<Double> mClosedLoopReference;
 
-    public ClimbIOKrakenx44(BasicMotorHardware pConfig, RotationSoftLimits pSoftLimits) {
+    public ClimbIOKrakenx44(BasicMotorHardware pConfig, PositionSoftLimits pSoftLimits) {
         mClimbMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
         var ClimbConfig = new TalonFXConfiguration();
 
@@ -54,7 +55,10 @@ public class ClimbIOKrakenx44 implements ClimbIO {
 
         ClimbConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
         ClimbConfig.Feedback.SensorToMechanismRatio = pConfig.rotorToMechanismRatio();
-
+        
+        
+        mClimbMotor.getConfigurator().apply(ClimbConfig);
+        
         mClimbVelocityMPS = mClimbMotor.getVelocity();
         mClimbAccelerationMPSS = mClimbMotor.getAcceleration();
         mClimbVoltage = mClimbMotor.getMotorVoltage();
@@ -64,7 +68,7 @@ public class ClimbIOKrakenx44 implements ClimbIO {
         mClimbPosition = mClimbMotor.getPosition();
         mClosedLoopReference = mClimbMotor.getClosedLoopReference();
 
-        mClimbMotor.getConfigurator().apply(ClimbConfig);
+        mClimbMotor.setPosition(0.0);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0, 
@@ -74,9 +78,11 @@ public class ClimbIOKrakenx44 implements ClimbIO {
             mClimbSupplyCurrent,
             mClimbStatorCurrent,
             mClimbTempCelsius,
-            mClimbPosition);
-        mClimbMotor.optimizeBusUtilization();
+            mClimbPosition,
+            mClosedLoopReference);
 
+        // mClimbMotor.setPosition(0.0);
+        mClimbMotor.optimizeBusUtilization();
         mSoftLimits = pSoftLimits;
     }
 
@@ -86,9 +92,11 @@ public class ClimbIOKrakenx44 implements ClimbIO {
             mClimbVelocityMPS,
             mClimbAccelerationMPSS,
             mClimbVoltage,
+            mClimbPosition,
             mClimbSupplyCurrent,
             mClimbStatorCurrent,
-            mClimbTempCelsius
+            mClimbTempCelsius,
+            mClosedLoopReference
         ).isOK();
         pInputs.iClimbVelocityMPS = mClimbVelocityMPS.getValueAsDouble();
         pInputs.iClimbAccelerationMPSS = mClimbAccelerationMPSS.getValueAsDouble();
@@ -107,9 +115,6 @@ public class ClimbIOKrakenx44 implements ClimbIO {
 
     @Override
     public void enforceSoftLimits(){
-        double currentPosition = mClimbPosition.getValueAsDouble();
-        if((currentPosition > mSoftLimits.forwardLimit().getRotations() && mClimbVoltage.getValueAsDouble() > 0) || 
-           (currentPosition < mSoftLimits.backwardLimit().getRotations() && mClimbVoltage.getValueAsDouble() < 0)) stopMotor();
     }
 
     @Override

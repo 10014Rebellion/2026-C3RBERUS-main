@@ -79,7 +79,7 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key="Drive/Swerve/PreviousDriveAmps")
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
-    private final boolean kUseGenerator = true;
+    private final boolean kUseGenerator = false;
     private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
 
     private DriveManager mDriveManager;
@@ -312,7 +312,7 @@ public class Drive extends SubsystemBase {
         }
 
         // mPrevSetpointStates = optimizedSetpointStates;
-        Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
+        // Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(optimizedSetpointStates));
         Telemetry.log("Drive/Odometry/FieldSetpointChassisSpeed", ChassisSpeeds.fromRobotRelativeSpeeds(

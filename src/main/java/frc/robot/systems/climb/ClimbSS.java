@@ -53,7 +53,11 @@ public class ClimbSS extends SubsystemBase {
   public void periodic() {
     mClimbIO.updateInputs(mClimbInputs);
 
-    mClimbIO.enforceSoftLimits();
+    // mClimbIO.enforceSoftLimits();
+
+    double currentPosition = mClimbInputs.iClimbPositionMeters;
+    if((currentPosition > ClimbConstants.kSoftLimits.forwardLimitM() && mClimbInputs.iClimbMotorVolts > 0) || 
+       (currentPosition < ClimbConstants.kSoftLimits.backwardLimitM() && mClimbInputs.iClimbMotorVolts < 0)) mClimbIO.stopMotor();
 
     Logger.processInputs("Climb", mClimbInputs);
   }

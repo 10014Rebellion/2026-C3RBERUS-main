@@ -21,14 +21,14 @@ public class ClimbConstants {
         60, // Motor ID // TODO: TUNE ME!
         Constants.kSubsystemsCANBus, 
         16.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
-        InvertedValue.CounterClockwise_Positive,
+        InvertedValue.Clockwise_Positive,
         NeutralModeValue.Brake,
         new CurrentLimits(30, 40)
     );
     
     public static final PositionSoftLimits kSoftLimits = new PositionSoftLimits(
-        0, 
-        0.5
+        0.01, 
+        2.5
     );
 
     public static final SimulatedElevator kSimElevator = new SimulatedElevator(
