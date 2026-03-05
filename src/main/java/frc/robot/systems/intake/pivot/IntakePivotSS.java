@@ -25,14 +25,14 @@ import java.util.function.Supplier;
 
 public class IntakePivotSS extends SubsystemBase {
   public static final LoggedTunableNumber tPivotCustomSetpointRot = 
-    new LoggedTunableNumber("Intake/Pivot/Control/CustomSetpointRot", 0);
+    new LoggedTunableNumber("Intake/Pivot/Control/CustomSetpointDeg", 0);
 
   public static enum IntakePivotState {
     // IDLE(null), // when enabled, doesnt do anything
     INTAKE(() -> PivotConstants.kPivotLimits.backwardLimit()),
     STOWED(() -> PivotConstants.kPivotLimits.forwardLimit()),
-    COMPACT(() -> Rotation2d.fromRotations(0.15)),
-    TUNING(() -> Rotation2d.fromRotations(tPivotCustomSetpointRot.get()));
+    COMPACT(() -> Rotation2d.fromDegrees(45)),
+    TUNING(() -> Rotation2d.fromDegrees(tPivotCustomSetpointRot.get()));
 
     private Supplier<Rotation2d> mRotSupplier;
 

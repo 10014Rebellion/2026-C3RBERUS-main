@@ -25,6 +25,8 @@ public class HoodSS extends SubsystemBase{
   public static enum HoodClosedSetpoints {
     MAX(() -> HoodConstants.kHoodLimits.forwardLimit()),
     MID(() -> HoodConstants.kHoodLimits.forwardLimit().div(2)),
+    CLOSE_SHOT(() -> Rotation2d.fromDegrees(5.0)),
+    BUMP_SHOT(() -> Rotation2d.fromDegrees(10.0)),
     MIN(() -> HoodConstants.kHoodLimits.backwardLimit());
     
     private Supplier<Rotation2d> mRotSupplier;
@@ -67,7 +69,7 @@ public class HoodSS extends SubsystemBase{
     this.setDefaultCommand(
       Commands.run(() -> {
         if (oGoalAngle.isPresent()) {
-          mHoodIO.setMotorPosition(oGoalAngle.get(), mHoodFF.calculate(mHoodInputs.iHoodAngle.getRadians(), mHoodInputs.iHoodVelocityRotPS * 2 * Math.PI)); // closed loop, holds with kG
+          mHoodIO.setMotorPosition(oGoalAngle.get(), mHoodFF.calculate(mHoodInputs.iHoodAngle.getRadians(), 0.0)); // closed loop, holds with kG
         } else {
           mHoodIO.setMotorVolts(0.0); // open loop stop
           mCurrentHoodState = HoodStates.STOPPED;
@@ -78,6 +80,10 @@ public class HoodSS extends SubsystemBase{
 
   public HoodStates getHoodState() {
     return mCurrentHoodState;
+  }
+
+  public void clearGoalWithoutStateChange() {
+    this.oGoalAngle = Optional.empty();
   }
 
   private void clearGoal(HoodStates pNewState) {
@@ -114,7 +120,7 @@ public class HoodSS extends SubsystemBase{
   public Command setHoodTuneableCmdNoEnd() {
     return Commands.run(() -> {
       setGoal(Rotation2d.fromDegrees(tHoodTuneableSetpointDeg.getAsDouble()), HoodStates.TUNEABLE_SETPOINT);
-      mHoodIO.setMotorPosition(getCurrentGoal(), mHoodFF.calculate(mHoodInputs.iHoodAngle.getRadians(), mHoodInputs.iHoodVelocityRotPS * 2 * Math.PI));
+      mHoodIO.setMotorPosition(getCurrentGoal(), mHoodFF.calculate(mHoodInputs.iHoodAngle.getRadians(), 0.0));
     }, this);
   }
 
@@ -160,6 +166,7 @@ public class HoodSS extends SubsystemBase{
     mHoodIO.updateInputs(mHoodInputs);
 
     refreshTuneables();
+    Logger.recordOutput("Hood/Debugging/TuneableSetpointDeg", tHoodTuneableSetpointDeg.getAsDouble());
 
     Logger.processInputs("Hood", mHoodInputs);
   }

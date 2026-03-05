@@ -4,6 +4,8 @@ package frc.robot.systems.climb;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public interface ClimbIO {
     @AutoLog
     public static class ClimbInputs {
@@ -15,6 +17,7 @@ public interface ClimbIO {
       public double iClimbStatorCurrentAmps = 0.0;
       public double iClimbTempCelsius = 0.0;
       public double iClimbPositionMeters = 0.0;
+      public double iClimbReferenceValue = 0.0;
     }
 
     public default void updateInputs(ClimbInputs pInputs) {}

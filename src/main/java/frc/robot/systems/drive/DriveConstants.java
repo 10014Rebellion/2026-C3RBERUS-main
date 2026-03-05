@@ -51,7 +51,7 @@ public class DriveConstants {
 
     /* DRIVEBASE TUNING / ODOMETRY / MISC*/
     public static final CANBus kCANBus = new CANBus("underworld"); // Tuned for C3RBERUS!
-    public static final boolean isCANFD = true; 
+    public static final boolean isCANFD = false; 
     public static final double kOdometryFrequency = isCANFD ? 250.0 : 100.0;
     static final Lock kOdometryLock = new ReentrantLock(); 
 
@@ -82,8 +82,8 @@ public class DriveConstants {
     public static final double kDriveStatorAmpLimit = 80.0; 
     public static final double kDriveFOCAmpLimit = 80.0;
     public static final double kDriveSupplyAmpLimit = 60.0;
-    public static final double kDriveSupplyAmpLowerLimit = 45.0;
-    public static final double kDriveSupplyAmpLowerLimitTime = 0.25;
+    // public static final double kDriveSupplyAmpLowerLimit = 45.0;
+    // public static final double kDriveSupplyAmpLowerLimitTime = 0.25;
 
     public static final double kAzimuthStatorAmpLimit = 40.0;
     public static final double kAzimuthSupplyAmpLimit = 40.0;

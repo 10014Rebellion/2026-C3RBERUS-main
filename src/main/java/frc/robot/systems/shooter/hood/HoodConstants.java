@@ -20,7 +20,7 @@ public class HoodConstants {
     public static final BasicMotorHardware kHoodConfig = new BasicMotorHardware(
         55, // Motor CAN ID
         Constants.kSubsystemsCANBus, // CANBus
-        24.269269, // Rotor to Mechanism Gear Ratio
+        133.0 / 9.0, // Rotor to Mechanism Gear Ratio
         InvertedValue.Clockwise_Positive, // Direction
         NeutralModeValue.Brake, // Neutral Mode 
         new CurrentLimits(

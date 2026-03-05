@@ -69,7 +69,7 @@ public class RobotContainer {
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
-    // private final AutonCommands autos;
+    private final AutonCommands autos;
 
     public RobotContainer() {
         switch (Constants.kCurrentMode) {
@@ -215,7 +215,7 @@ public class RobotContainer {
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDrive.getDriveManager().setDriveProfile(profile));
 
-        // autos = new AutonCommands(mDrive, mIntake, mConveyor, mShooter);
+        autos = new AutonCommands(mDrive, mIntake, mConveyor, mFuelPumpSS, mHoodSS, mFlywheelsSS);
     }
 
     public Drive getDrivetrain() {
@@ -227,7 +227,7 @@ public class RobotContainer {
     }
 
     public Supplier<Command> getAutonomousCommand() {
-        return null;
+        return autos.getAuto();
     }
 
     public Command getDriverProfileCommand() {

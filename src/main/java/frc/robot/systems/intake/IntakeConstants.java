@@ -39,7 +39,7 @@ public class IntakeConstants {
         // WITH POSITION VOLTAGE
          public static final ArmControllerMotionMagic kPivotController = new ArmControllerMotionMagic(
             0, 
-            new PDConstants(22, 1.2), 
+            new PDConstants(19, 0.0), 
             new MotionMagicConstants(0, 0, 0), // NOT USED
             new ArmFeedforward(0.5, 0.6, 0, 0)
         );

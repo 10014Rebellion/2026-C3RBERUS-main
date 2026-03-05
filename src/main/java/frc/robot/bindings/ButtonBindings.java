@@ -1,24 +1,18 @@
 package frc.robot.bindings;
-
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.game.GameGoalPoseChooser;
-
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.math.AllianceFlipUtil;
+import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
 import frc.robot.systems.drive.Drive;
-import frc.robot.systems.drive.controllers.PoseConstants;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
@@ -28,6 +22,7 @@ import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
+import frc.robot.systems.shooter.hood.HoodSS.HoodClosedSetpoints;
 
 public class ButtonBindings {
     private final Drive mDriveSS;
@@ -39,6 +34,8 @@ public class ButtonBindings {
     private final ConveyorSS mConveyorSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
+
+    private final CommandGenericHID mHID = new CommandGenericHID(2);
 
     public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, ConveyorSS pConveyorSS, ClimbSS pClimbSS) {
         this.mDriveSS = pDriveSS;
@@ -56,6 +53,7 @@ public class ButtonBindings {
 
         initPilotBindings();
         initGunnerBindings();
+        initButtonBoard();
 
         // new Trigger(() -> DriverStation.isTeleopEnabled())
         //     .onTrue(mDriveSS.getDriveManager().setToTeleop()
@@ -68,6 +66,26 @@ public class ButtonBindings {
         // new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
         //     .onTrue(mShooter.setHoodStateCmd(HoodState.MIN)
         //         .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)));
+    }
+
+    public void initButtonBoard() {
+        mHID.button(3)
+            .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.TUNING_VELOCITY))
+            .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
+
+        mHID.button(4)
+            .whileTrue(mHoodSS.setHoodTuneableCmdNoEnd())
+            .onFalse(Commands.runOnce(() -> mHoodSS.clearGoalWithoutStateChange(), mHoodSS));
+
+        mHID.button(9)
+            .onTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE)
+                .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.CONVEY_TO_INDEX))
+                .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+                .alongWith(mIntakeSS.trashCompact()))
+            .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED)
+                .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)
+                .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+                .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))));
     }
 
     public Command rumbleDriverController(){
@@ -83,27 +101,27 @@ public class ButtonBindings {
     public void initPilotBindings() {
         mPilotController.startButton().onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
 
-        mPilotController.a()
-            .onTrue(mDriveSS.getDriveManager().setToLinearTest())
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.a()
+        //     .onTrue(mDriveSS.getDriveManager().setToLinearTest())
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        // mPilotController.b()
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+        //         () -> GameGoalPoseChooser.getHubPresetPose(
+        //             mDriveSS.getPoseEstimate(), 
+        //             2.25), 
+        //         ConstraintType.LINEAR))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        // mPilotController.x()
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+        //         () -> GameGoalPoseChooser.getHubPresetPose(
+        //             mDriveSS.getPoseEstimate(), 
+        //             2.9), 
+        //         ConstraintType.LINEAR))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         mPilotController.b()
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> GameGoalPoseChooser.getHubPresetPose(
-                    mDriveSS.getPoseEstimate(), 
-                    2.25), 
-                ConstraintType.LINEAR))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
-
-        mPilotController.x()
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> GameGoalPoseChooser.getHubPresetPose(
-                    mDriveSS.getPoseEstimate(), 
-                    2.9), 
-                ConstraintType.LINEAR))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
-
-        mPilotController.y()
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
                 () -> AllianceFlipUtil.apply(new Pose2d(3.25, 4.02, Rotation2d.kZero)), 
                 ConstraintType.LINEAR))
@@ -117,95 +135,81 @@ public class ButtonBindings {
 
         mPilotController.startButton().onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
 
-        mPilotController.a()
-            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), mDriveSS.getDriveManager().getDefaultTurnPointFF()))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.a()
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), mDriveSS.getDriveManager().getDefaultTurnPointFF()))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        mPilotController.y()
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(() -> PoseConstants.kClimbPose, ConstraintType.LINEAR)) // TODO: TUNE ME
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.y()
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(() -> PoseConstants.kClimbPose, ConstraintType.LINEAR)) // TODO: TUNE ME
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        // mPilotController.povUp()
-        //     .whileTrue(mShooter.setHoodStateCmd(HoodState.MID));
+        mPilotController.povUp()
+            .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MID));
         
-        // mPilotController.povDown()
-        //     .whileTrue(mShooter.setHoodStateCmd(HoodState.MIN));
+        mPilotController.povDown()
+            .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
 
-        // mPilotController.povRight()
-        //     .whileTrue(mShooter.incrementHoodCmd());
+        mPilotController.povRight()
+            .whileTrue(mHoodSS.incrementAngleCmd());
         
-        // mPilotController.povLeft()
-        //     .whileTrue(mShooter.decrementHoodCmd());
+        mPilotController.povLeft()
+            .whileTrue(mHoodSS.decrementAngleCmd());
 
         mPilotController.leftBumper()
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.COMPACT))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         mPilotController.rightBumper()
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.STOWED));
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE).alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE)))
+            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE).alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE)));
+          
+        mPilotController.leftTrigger()
+            .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.TUNING_VELOCITY))
+            .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
 
-        // mPilotController.leftTrigger()
-        //     .whileTrue(mIntakeSS.setPivotStateCmd(
-        //         IntakePivotState.INTAKE)
-        //             .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-        //             .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.SLOW_OUTTAKE)))
-        //     .onFalse(
-        //         mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE)
-        //             .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE)));
+        mPilotController.y()
+            .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.TUNING_VELOCITY))
+            .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
+            .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .whileFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
 
-        // mPilotController.rightTrigger()
-        //     .whileTrue(
-        //         mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)
-        //             .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-        //             .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE))
-        //             .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE)))
-        //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE)
-        //         .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)
-        //         .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE))
-        //         .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))));
+        mPilotController.rightTrigger().whileTrue(
+            new SequentialCommandGroup(
+                // mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.UNJAM).withTimeout(0.4),
+                // mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.UNJAM)).until(()->mFuelPumpSS.isReadyToShoot()),
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).until(()->mFuelPumpSS.isReadyToShoot()),
+                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE)
+            )
+        )
+        .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).alongWith(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED)).alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)));
     }
 
     public void initGunnerBindings() {
-        // mGunnerController.povUp()
-        //     .whileTrue(mShooter.setHoodStateCmd(HoodState.TUNING));
 
-        // mGunnerController.povUp()
-        //     .whileTrue(mShooter.setHoodStateCmd(HoodState.MID));
+        mGunnerController.povUp()
+            .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MAX));
         
-        // mGunnerController.povDown()
-        //     .whileTrue(mShooter.setHoodStateCmd(HoodState.MIN));
+        mGunnerController.povDown()
+            .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
 
-        // mGunnerController.povRight()
-        //     .whileTrue(mShooter.incrementHoodCmd());
+        mGunnerController.povRight()
+            .whileTrue(mHoodSS.incrementAngleCmd());
         
-        // mGunnerController.povLeft()
-        //     .whileTrue(mShooter.decrementHoodCmd());
+        mGunnerController.povLeft()
+            .whileTrue(mHoodSS.decrementAngleCmd());;
 
         mGunnerController.a().whileTrue(mClimbSS.unHookClawsCmd());
         mGunnerController.b().whileTrue(mClimbSS.hookClawsCmd());
 
-        // mGunnerController.leftBumper().whileTrue(mShooter.setFlywheelStateCmd(FlywheelState.STANDBY))
-        //     .whileFalse(mShooter.setFlywheelsVoltsCmd(0));
+        mGunnerController.leftBumper().onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.STOWED));
+        mGunnerController.rightBumper().onTrue(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
 
-        // mGunnerController.rightBumper().whileTrue(mShooter.setFlywheelStateCmd(FlywheelState.TUNING))
-        //     .whileFalse(mShooter.setFlywheelsVoltsCmd(0));
+        mGunnerController.leftTrigger()
+            .whileTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.OUTTAKE))
+            .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED));
 
-        // mGunnerController.leftTrigger()
-        //     .whileTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.OUTTAKE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.OUTTAKE)))
-        //     .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE)));
-
-        // mGunnerController.rightTrigger()
-        //     .whileTrue(
-        //         new SequentialCommandGroup(
-        //             mShooter.setFuelPumpStateCmd(FuelPumpState.UNJAM).withTimeout(0.4),
-        //             mShooter.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.UNJAM)).until(mShooter.isFuelPumpAtSetpoint()),
-        //             mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE)
-        //         ).alongWith(mIntakeSS.trashCompact())
-        //     )
-        //     .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE)).alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)));
-
-        new Trigger(() -> (mGunnerController.getRightY() < -0.25)).onTrue(mIntakeSS.trashCompact()).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
-
-        new Trigger(() -> (mGunnerController.getRightY() < -0.5)).whileTrue(mIntakeSS.setPivotVoltsCmd(-4)).onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
+        mGunnerController.rightTrigger()
+            .whileTrue((mIntakeSS.trashCompact()))
+            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE));
     }
 }
