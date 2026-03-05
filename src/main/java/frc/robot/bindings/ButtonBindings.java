@@ -1,6 +1,7 @@
 package frc.robot.bindings;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -26,6 +27,7 @@ import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
 import frc.robot.systems.shooter.hood.HoodSS.HoodClosedSetpoints;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ButtonBindings {
     private final Drive mDriveSS;
@@ -57,18 +59,21 @@ public class ButtonBindings {
         initPilotBindings();
         initGunnerBindings();
         initButtonBoard();
+        initTriggers();
+    }
 
-        // new Trigger(() -> DriverStation.isTeleopEnabled())
-        //     .onTrue(mDriveSS.getDriveManager().setToTeleop()
-        //         .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
-        //         .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-        //         .alongWith(mShooter.setFlywheelStateCmd(FlywheelState.IDLE))
-        //         .alongWith(mShooter.setFuelPumpStateCmd(FuelPumpState.IDLE))
-        //     );
+    public void initTriggers() {
+        new Trigger(() -> DriverStation.isTeleopEnabled())
+            .onTrue(mDriveSS.getDriveManager().setToTeleop()
+                .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
+                .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+                .alongWith(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+                .alongWith(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
+            );
         
-        // new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
-        //     .onTrue(mShooter.setHoodStateCmd(HoodState.MIN)
-        //         .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)));
+        new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
+            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN)
+                .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)));
     }
 
     public void initButtonBoard() {
