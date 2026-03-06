@@ -39,8 +39,8 @@ public class FlywheelsSS extends SubsystemBase {
     SNOW_BLOW(() -> 12.0, ControlType.VOLTAGE),
     TUNING(tFlywheelCustomVolts, ControlType.VOLTAGE),
     TUNING_VELOCITY(tFlywheelCustomVelocity, ControlType.VELOCITY),
-    SHOOT_CLOSE_VELOCITY(() -> 93.3, ControlType.VELOCITY),
-    SHOOT_MID_VELOCITY(() -> 0.0, ControlType.VELOCITY),
+    SHOOT_CLOSE_VELOCITY(() -> 105.0, ControlType.VELOCITY),
+    SHOOT_MID_VELOCITY(() -> 105.0, ControlType.VELOCITY),
     SHOOT_FAR_VELOCITY(() -> 0.0, ControlType.VELOCITY);
 
     private DoubleSupplier mControlSupplier;

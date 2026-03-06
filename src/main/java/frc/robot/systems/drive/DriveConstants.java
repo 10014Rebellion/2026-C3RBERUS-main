@@ -46,7 +46,7 @@ public class DriveConstants {
     public static final PathConstraints kAutoConstraints = new PathConstraints(
             kMaxLinearSpeedMPS, kMaxLinearAccelerationMPSS, kMaxRotationSpeedRadiansPS, kMaxRotationAccelRadiansPS);
 
-    public static final PIDConstants kPPTranslationPID = new PIDConstants(1.0, 0.0, 0.01); // TODO: TUNE ME
+    public static final PIDConstants kPPTranslationPID = new PIDConstants(5.0, 0.0, 0.01); // TODO: TUNE ME
     public static final PIDConstants kPPRotationPID = new PIDConstants(0.8, 0.0, 0.0); // TODO: TUNE ME
 
     /* DRIVEBASE TUNING / ODOMETRY / MISC*/

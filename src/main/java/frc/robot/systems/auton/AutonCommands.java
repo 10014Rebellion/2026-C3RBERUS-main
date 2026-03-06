@@ -96,9 +96,10 @@ public class AutonCommands extends SubsystemBase {
         Trigger hasPath2Ended = auto.loggedCondition(path2ShootingName+"/hasEnded", () -> autoPath2Shoot.hasEnded(), true);
 
         autoActivted
-            .onTrue(autoPath1)
+            .onTrue(Commands.waitSeconds(1.5).andThen(autoPath1))
             .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY));
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
+            .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
@@ -107,7 +108,7 @@ public class AutonCommands extends SubsystemBase {
             .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
         shootingRange
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE))
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
             .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
             .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
             .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
@@ -177,7 +178,7 @@ public class AutonCommands extends SubsystemBase {
         Trigger hasPath2Ended = auto.loggedCondition(path2ShootingName+"/hasEnded", () -> autoPath2Shoot.hasEnded(), true);
 
         autoActivted
-            .onTrue(autoPath1)
+            .onTrue(Commands.waitSeconds(2.5).andThen(autoPath1))
             .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
@@ -189,7 +190,7 @@ public class AutonCommands extends SubsystemBase {
             .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
         shootingRange
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE))
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
             .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
             .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
             .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));

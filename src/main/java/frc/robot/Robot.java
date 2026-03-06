@@ -17,6 +17,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.ctre.phoenix6.SignalLogger;
+
 public class Robot extends LoggedRobot {
     private Command mAutonomousCommand;
     private RobotContainer mRobotContainer;
@@ -104,6 +106,7 @@ public class Robot extends LoggedRobot {
                 // Running on a real robot, log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(new WPILOGWriter());
                 Logger.addDataReceiver(new NT4Publisher());
+                SignalLogger.stop();
                 break;
 
             case SIM:

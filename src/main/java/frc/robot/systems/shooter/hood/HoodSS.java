@@ -25,7 +25,8 @@ public class HoodSS extends SubsystemBase{
   public static enum HoodClosedSetpoints {
     MAX(() -> HoodConstants.kHoodLimits.forwardLimit()),
     MID(() -> HoodConstants.kHoodLimits.forwardLimit().div(2)),
-    CLOSE_SHOT(() -> Rotation2d.fromDegrees(3.0)),
+    CLOSE_SHOT(() -> Rotation2d.fromDegrees(2.0)),
+    TOWER_SHOT(() -> Rotation2d.fromDegrees(10.0)),
     BUMP_SHOT(() -> Rotation2d.fromDegrees(10.0)),
     MIN(() -> HoodConstants.kHoodLimits.backwardLimit());
     

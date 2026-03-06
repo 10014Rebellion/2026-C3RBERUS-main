@@ -16,7 +16,7 @@ import frc.lib.tuning.LoggedTunableNumber;
 public class IntakeRollerSS extends SubsystemBase {
   public static enum IntakeRollerState {
     IDLE(() -> 0.0),
-    INTAKE(() -> 10.014),
+    INTAKE(() -> 11.014),
     OUTTAKE(() -> -10.014),
     TUNING(new LoggedTunableNumber("Intake/TuneableVoltage", 0.0));
 
