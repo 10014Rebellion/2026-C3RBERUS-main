@@ -12,7 +12,7 @@ import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 
 public class ClimbConstants {
 
-    public static final int kHookPort = 0;
+    public static final int kHookPort = 4;
 
     public static final double kHookOutPosition = 0.5;
     public static final double kHookInPosition = 0.0;    

@@ -131,7 +131,9 @@ public class ButtonBindings {
 
         mPilotController.b()
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> AllianceFlipUtil.apply(new Pose2d(3.25, 4.02, Rotation2d.kZero)), 
+                () -> AllianceFlipUtil.apply(new Pose2d(
+                    3.351194381713867 - 0.1, 
+                    4.036095142364502, Rotation2d.kZero)), 
                 ConstraintType.LINEAR))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
@@ -175,6 +177,7 @@ public class ButtonBindings {
             .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SNOW_BLOW))
             .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
 
+        /* TODO: TUNE */
         mPilotController.y()
             .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE))
             // .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
@@ -185,7 +188,7 @@ public class ButtonBindings {
             new SequentialCommandGroup(
                 // mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.UNJAM).withTimeout(0.4),
                 // mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.UNJAM)).until(()->mFuelPumpSS.isReadyToShoot()),
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).until(()->mFuelPumpSS.isReadyToShoot()),
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).until(() -> mFuelPumpSS.isReadyToShoot()),
                 mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE)
             )
         )
@@ -204,7 +207,7 @@ public class ButtonBindings {
             .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT));
         
         mGunnerController.povLeft()
-            .whileTrue(mHoodSS.decrementAngleCmd());;
+            .whileTrue(mHoodSS.decrementAngleCmd());
 
         mGunnerController.a().whileTrue(mClimbSS.unHookClawsCmd());
         mGunnerController.b().whileTrue(mClimbSS.hookClawsCmd());
@@ -222,5 +225,14 @@ public class ButtonBindings {
 
         new Trigger(() -> (mGunnerController.getLeftY() < -0.25)).onTrue(mClimbSS.setClimbPositionManualCmd(2.47)).onFalse(mClimbSS.setClimbVoltsCmd(0));
         new Trigger(() -> (mGunnerController.getLeftY() > 0.25)).onTrue(mClimbSS.setClimbVoltsCmd(-10)).onFalse(mClimbSS.setClimbVoltsCmd(0));
+    }
+
+    public void testBindings() {
+        // if(!DriverStation.isFMSAttached()) {
+        //     mPilotController.x()
+        //         .onTrue(Commands.runOnce(() -> mDriveSS.setPose(AllianceFlipUtil.apply(new Pose2d(
+        //             3.351194381713867, 
+        //             4.036095142364502, Rotation2d.kZero)))));
+        // }
     }
 }

@@ -53,6 +53,14 @@ public class ClimbSS extends SubsystemBase {
   public void periodic() {
     mClimbIO.updateInputs(mClimbInputs);
 
+    Logger.recordOutput("Climb/ServoPosition", mServo.getPosition());
+    Logger.recordOutput("Climb/ServoSpeed", mServo.getSpeed());
+    Logger.recordOutput("Climb/ServoBoundMin", mServo.getBoundsMicroseconds().max);
+    Logger.recordOutput("Climb/ServoBoundMax", mServo.getBoundsMicroseconds().min);
+    Logger.recordOutput("Climb/ServoTime", mServo.getPulseTimeMicroseconds());
+    Logger.recordOutput("Climb/ServoHandle", mServo.getHandle());
+    Logger.recordOutput("Climb/ServoChannel", mServo.getChannel());
+
     // mClimbIO.enforceSoftLimits();
 
     double currentPosition = mClimbInputs.iClimbPositionMeters;
@@ -97,7 +105,7 @@ public class ClimbSS extends SubsystemBase {
 
   public Command unHookClawsCmd(){
     return Commands.run(() -> {
-      mServo.setAngle(ClimbConstants.kHookOutPosition);
+      mServo.setPosition(0.8);
     }, this);
   }
 
@@ -106,7 +114,6 @@ public class ClimbSS extends SubsystemBase {
       mServo.setAngle(ClimbConstants.kHookInPosition);
     }, this);
   }
-
   public void stopClimbMotor(){
     mClimbIO.stopMotor();
   }

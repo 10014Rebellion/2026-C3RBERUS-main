@@ -97,9 +97,9 @@ public class ShooterConstants {
 
         public static final MotionMagicFOCControllerFF kFlywheelControlConfig = new MotionMagicFOCControllerFF(
             0,
-            new PDConstants(9.0, 0), // Tuned for C3RBERUS!
-            new SimpleMotorFeedforward(0.37, 0.0, 0), // Tuned for C3RBERUS!
-            new MotionMagicConstants(0.0, 1000, 10000)
+            new PDConstants(10.0, 0), // Tuned for C3RBERUS!
+            new SimpleMotorFeedforward(0.37, 0.13, 0), // Tuned for C3RBERUS!
+            new MotionMagicConstants(0.0, 1000.0, 0.0)
         );
     }
 }

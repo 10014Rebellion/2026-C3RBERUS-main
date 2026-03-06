@@ -20,7 +20,7 @@ public class HoodConstants {
     public static final BasicMotorHardware kHoodConfig = new BasicMotorHardware(
         55, // Motor CAN ID
         Constants.kSubsystemsCANBus, // CANBus
-        133.0 / 9.0, // Rotor to Mechanism Gear Ratio
+        (133.0 / 9.0) * (20.0 / 12.0), // Rotor to Mechanism Gear Ratio
         InvertedValue.Clockwise_Positive, // Direction
         NeutralModeValue.Brake, // Neutral Mode 
         new CurrentLimits(
@@ -31,13 +31,13 @@ public class HoodConstants {
 
     public static final ArmControllerMotionMagic kHoodControlConfig = new ArmControllerMotionMagic(
         0, // not currently used
-        new PDConstants(5, 0), // Tuned for C3RBERUS!
-        new MotionMagicConstants(0, 0, 0),  // Tuned for C3RBERUS!
-        new ArmFeedforward(0, 0.03, 0, 0) // Tuned for C3RBERUS!
+        new PDConstants(22, 0), // Tuned for C3RBERUS!
+        new MotionMagicConstants(100, 1000, 0),  // Tuned for C3RBERUS!
+        new ArmFeedforward(0, 0.06, 0, 0) // Tuned for C3RBERUS!
     );
 
     public static final RotationSoftLimits kHoodLimits = new RotationSoftLimits(
         Rotation2d.fromDegrees(0.02), 
-        Rotation2d.fromDegrees(23.3) // Tuned for C3RBERUS!
+        Rotation2d.fromDegrees(21.2) // Tuned for C3RBERUS!
     );
 }

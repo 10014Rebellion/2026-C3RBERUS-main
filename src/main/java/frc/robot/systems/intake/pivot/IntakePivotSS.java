@@ -31,7 +31,7 @@ public class IntakePivotSS extends SubsystemBase {
     // IDLE(null), // when enabled, doesnt do anything
     INTAKE(() -> PivotConstants.kPivotLimits.backwardLimit()),
     STOWED(() -> PivotConstants.kPivotLimits.forwardLimit()),
-    COMPACT(() -> Rotation2d.fromDegrees(45)),
+    COMPACT(() -> Rotation2d.fromDegrees(25)),
     TUNING(() -> Rotation2d.fromDegrees(tPivotCustomSetpointRot.get()));
 
     private Supplier<Rotation2d> mRotSupplier;
@@ -66,7 +66,7 @@ public class IntakePivotSS extends SubsystemBase {
   public static final LoggedTunableNumber tPivotPositionTolerance = new LoggedTunableNumber("Intake/Pivot/Control/Tolerance", IntakeConstants.PivotConstants.kPivotMotorToleranceRotations);
 
   @AutoLogOutput(key="Intake/Pivot/State")
-  private IntakePivotState mIntakePivotState = IntakePivotState.INTAKE;
+  private IntakePivotState mIntakePivotState = null;
 
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
   private int desiredDirection = 0;
@@ -90,6 +90,7 @@ public class IntakePivotSS extends SubsystemBase {
     }
     
     if(mIntakePivotState != null) {
+        Logger.recordOutput("IntakePivot/State", mIntakePivotState);
         mCurrentRotationalGoal = mIntakePivotState.getDesiredRotation();
         setPivotRot(mCurrentRotationalGoal);
     }
@@ -108,7 +109,7 @@ public class IntakePivotSS extends SubsystemBase {
 
   public Command trashCompact(){
     return new RepeatCommand(Commands.sequence(
-      setIntakePivotStateCmd(IntakePivotState.TUNING).withTimeout(0.3),
+      setIntakePivotStateCmd(IntakePivotState.COMPACT).withTimeout(0.3),
       setIntakePivotStateCmd(IntakePivotState.INTAKE).withTimeout(0.3)));
   }
 

@@ -38,7 +38,10 @@ public class FlywheelsSS extends SubsystemBase {
     IDLE(() -> 0.0, ControlType.VOLTAGE),
     SNOW_BLOW(() -> 12.0, ControlType.VOLTAGE),
     TUNING(tFlywheelCustomVolts, ControlType.VOLTAGE),
-    TUNING_VELOCITY(tFlywheelCustomVelocity, ControlType.VELOCITY);
+    TUNING_VELOCITY(tFlywheelCustomVelocity, ControlType.VELOCITY),
+    SHOOT_CLOSE_VELOCITY(() -> 93.3, ControlType.VELOCITY),
+    SHOOT_MID_VELOCITY(() -> 0.0, ControlType.VELOCITY),
+    SHOOT_FAR_VELOCITY(() -> 0.0, ControlType.VELOCITY);
 
     private DoubleSupplier mControlSupplier;
     private ControlType pControlType;
@@ -67,6 +70,10 @@ public class FlywheelsSS extends SubsystemBase {
   private final LoggedTunableNumber tFlywheelKS = new LoggedTunableNumber("Flywheel/Control/kS", kFlywheelControlConfig.feedforward().getKs());
   private final LoggedTunableNumber tFlywheelKV = new LoggedTunableNumber("Flywheel/Control/kV", kFlywheelControlConfig.feedforward().getKv());
   private final LoggedTunableNumber tFlywheelKA = new LoggedTunableNumber("Flywheel/Control/kA", kFlywheelControlConfig.feedforward().getKa());
+
+  private final LoggedTunableNumber tFlywheelKMaxVel = new LoggedTunableNumber("Flywheel/Control/MaxVel", kFlywheelControlConfig.motionMagicConstants().maxVelocity());
+  private final LoggedTunableNumber tFlywheelKMaxAccel = new LoggedTunableNumber("Flywheel/Control/MaxAccel", kFlywheelControlConfig.motionMagicConstants().maxAcceleration());
+  private final LoggedTunableNumber tFlywheelKMaxJerk = new LoggedTunableNumber("Flywheel/Control/MaxJerk", kFlywheelControlConfig.motionMagicConstants().maxJerk());
 
   private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Flywheel/Control/Tolerance", ShooterConstants.FlywheelConstants.kToleranceRPS);
 
@@ -167,11 +174,11 @@ public class FlywheelsSS extends SubsystemBase {
 
   public void setFlywheelClosedLoop(Rotation2d pRotsPerS){
     mCurrentRPSGoal = pRotsPerS;
-    Logger.recordOutput("Flywheel/Sigma", mCurrentRPSGoal);
+    Logger.recordOutput("Flywheel/Control/FunctionSetpoint", mCurrentRPSGoal);
     mLeaderFlywheelIO.setMotorVelAndAccel(
       pRotsPerS.getRotations(),
       0.0,
-      kFlywheelControlConfig.feedforward().calculateWithVelocities(getFlywheelRPS().getRotations(), pRotsPerS.getRotations()));
+      kFlywheelControlConfig.feedforward().calculate(getFlywheelRPS().getRotations()));
     mFollowerFlywheelIO.enforceFollower();
   }
 
@@ -191,8 +198,8 @@ public class FlywheelsSS extends SubsystemBase {
     );
 
     LoggedTunableNumber.ifChanged( hashCode(), 
-      () -> setFF(tFlywheelKS.get(), tFlywheelKV.get(), tFlywheelKA.get()),
-      tFlywheelKS, tFlywheelKV, tFlywheelKA
+      () -> mLeaderFlywheelIO.setMotionMagicConstants(tFlywheelKMaxVel.get(), tFlywheelKMaxAccel.get(), tFlywheelKMaxJerk.get()),
+      tFlywheelKMaxVel, tFlywheelKMaxAccel, tFlywheelKMaxJerk
     );
 
     LoggedTunableNumber.ifChanged( hashCode(), 
