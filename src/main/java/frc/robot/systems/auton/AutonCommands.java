@@ -199,13 +199,14 @@ public class AutonCommands extends SubsystemBase {
 
         autoActivted
             .onTrue(autoPath1)
-            .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
+            // .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE))
+            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
             .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
@@ -281,13 +282,14 @@ public class AutonCommands extends SubsystemBase {
 
         autoActivted
             .onTrue(autoPath1)
-            .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
+            // .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE))
+            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
             .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
