@@ -66,7 +66,7 @@ public class IntakePivotSS extends SubsystemBase {
   public static final LoggedTunableNumber tPivotPositionTolerance = new LoggedTunableNumber("Intake/Pivot/Control/Tolerance", IntakeConstants.PivotConstants.kPivotMotorToleranceRotations);
 
   @AutoLogOutput(key="Intake/Pivot/State")
-  private IntakePivotState mIntakePivotState = IntakePivotState.INTAKE;
+  private IntakePivotState mIntakePivotState = null;
 
   private Rotation2d mCurrentRotationalGoal = Rotation2d.kZero;
   private int desiredDirection = 0;

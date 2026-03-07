@@ -68,6 +68,7 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser("LeftFullPath", () -> leftFullPath());
         tryToAddPathToChooser("RightFullPath", () -> rightFullPath());
         tryToAddPathToChooser("Troll", () -> troll());
+        tryToAddPathToChooser("DisruptLeft", () -> disruptLeft());
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     }
@@ -75,6 +76,25 @@ public class AutonCommands extends SubsystemBase {
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
     public Command backUpAuton() {
         return new InstantCommand();
+    }
+
+    public Command disruptLeft() {
+        AutoEvent auto = new AutoEvent("Disruptleft", this);
+
+        Trigger autoActivated = auto.getIsRunningTrigger();
+
+        String path1ShootingName = "ITL_IFL";
+        SequentialEndingCommandGroup autoPath1 = followChoreoPath(path1ShootingName, true);
+        Trigger isPath1Running = auto.loggedCondition(path1ShootingName+"/isRunning", () -> autoPath1.isRunning(), true);
+        Trigger hasPath1Ended = auto.loggedCondition(path1ShootingName+"/hasEnded", () -> autoPath1.hasEnded(), true);
+
+        autoActivated
+            .onTrue(autoPath1);
+
+        hasPath1Ended
+            .onTrue(endAuto(auto));
+
+        return auto;
     }
 
     public Command troll() {
@@ -179,7 +199,7 @@ public class AutonCommands extends SubsystemBase {
 
         autoActivted
             .onTrue(autoPath1)
-            .onTrue(Commands.waitSeconds(1.0).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
+            .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
@@ -260,8 +280,8 @@ public class AutonCommands extends SubsystemBase {
         Trigger hasPath2Ended = auto.loggedCondition(path2ShootingName+"/hasEnded", () -> autoPath2Shoot.hasEnded(), true);
 
         autoActivted
-            .onTrue(Commands.waitSeconds(2.5).andThen(autoPath1))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(autoPath1)
+            .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
