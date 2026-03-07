@@ -96,8 +96,8 @@ public class AutonCommands extends SubsystemBase {
         Trigger hasPath2Ended = auto.loggedCondition(path2ShootingName+"/hasEnded", () -> autoPath2Shoot.hasEnded(), true);
 
         autoActivted
-            .onTrue(Commands.waitSeconds(1.5).andThen(autoPath1))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(autoPath1)
+            .onTrue(Commands.waitSeconds(1.0).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 

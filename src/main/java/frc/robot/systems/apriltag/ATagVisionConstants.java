@@ -55,7 +55,7 @@ public class ATagVisionConstants {
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(5.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(-36 + 180) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(-36) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kFRATagCamHardware = 
         new ATagCameraHardware(kFrontRightCamName, kFrontRightCamOrientation, kFrontRightCamTransform);
