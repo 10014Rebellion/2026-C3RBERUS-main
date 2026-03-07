@@ -67,6 +67,7 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser("FirstAuto", () -> autoTest("FirstAuto","FirstPath", "SecondPath"));
         tryToAddPathToChooser("LeftFullPath", () -> leftFullPath());
         tryToAddPathToChooser("RightFullPath", () -> rightFullPath());
+        tryToAddPathToChooser("Troll", () -> troll());
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     }
@@ -74,6 +75,87 @@ public class AutonCommands extends SubsystemBase {
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
     public Command backUpAuton() {
         return new InstantCommand();
+    }
+
+    public Command troll() {
+        AutoEvent auto = new AutoEvent("Troll", this);
+
+        Trigger autoActivted = auto.getIsRunningTrigger();
+
+        Trigger intakingRange = inIntakeRange(auto);
+        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
+        Trigger scoreReady = auto.condition(shootingRange);
+
+        String path1ShootingName = "TOWER_SHOOT";
+        SequentialEndingCommandGroup autoPath1 = followChoreoPath(path1ShootingName, true);
+        Trigger isPath1Running = auto.loggedCondition(path1ShootingName+"/isRunning", () -> autoPath1.isRunning(), true);
+        Trigger hasPath1Ended = auto.loggedCondition(path1ShootingName+"/hasEnded", () -> autoPath1.hasEnded(), true);
+
+        String path2Name = "OVER_BUMP";
+        SequentialEndingCommandGroup autoPath2 = followChoreoPath(path2Name, false);
+        Trigger isPath2Running = auto.loggedCondition(path2Name+"/isRunning", () -> autoPath2.isRunning(), true);
+        Trigger hasPath2Ended = auto.loggedCondition(path2Name+"/hasEnded", () -> autoPath2.hasEnded(), true);
+
+        String path3Name = "TROLL";
+        SequentialEndingCommandGroup autoPath3 = followChoreoPath(path3Name, false);
+        Trigger isPath3Running = auto.loggedCondition(path3Name+"/isRunning", () -> autoPath3.isRunning(), true);
+        Trigger hasPath3Ended = auto.loggedCondition(path3Name+"/hasEnded", () -> autoPath3.hasEnded(), true);
+
+        shootingRange
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
+            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
+            .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
+
+        autoActivted
+            .onTrue(autoPath1)
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.STOWED))
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
+            .onTrue(Commands.runOnce(() -> wantToShoot = false));
+
+        hasPath1Ended
+            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+            () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+            () -> GameGoalPoseChooser.getHub()))
+            .onTrue(Commands.runOnce(() -> wantToShoot = true));
+
+        SequentialEndingCommandGroup path1FPShooting = 
+            new SequentialEndingCommandGroup(
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(2.5),
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.01));
+
+        SequentialEndingCommandGroup path1IShooting = 
+            new SequentialEndingCommandGroup(
+                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(2.5),
+                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.01));
+
+        SequentialEndingCommandGroup path1CShooting = 
+            new SequentialEndingCommandGroup(
+                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(2.5),
+                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.01));
+
+        hasPath1Ended.and(shootingRange.debounce(1.0))
+            .onTrue(path1FPShooting)
+            .onTrue(path1IShooting)
+            .onTrue(path1CShooting);
+
+        auto.loggedCondition(
+            "Path1/ShootingHasEnded", 
+            () -> path1CShooting.hasEnded() 
+                && path1FPShooting.hasEnded()
+                && path1IShooting.hasEnded(), true)
+            .onTrue(Commands.runOnce(() -> wantToShoot = false))
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onTrue(autoPath2);
+
+        hasPath2Ended
+            .onTrue(autoPath3);
+
+        hasPath3Ended
+            .onTrue(endAuto(auto))
+            .onTrue(mRobotDrive.getDriveManager().setToTeleop());
+
+        return auto;
     }
 
     public Command rightFullPath() {

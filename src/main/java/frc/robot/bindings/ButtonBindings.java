@@ -200,16 +200,14 @@ public class ButtonBindings {
                 mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE)).alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             )
         )
-        .onFalse(
-            mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE)
-                .alongWith(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
+        .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
+                .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
                 // .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE))
-                .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+                .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
                 // .alongWith(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN))
                 // .alongWith(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
-                .alongWith(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
-                .alongWith(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN))
-            );
+                .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
+                .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
     }
 
     public void initGunnerBindings() {
@@ -253,8 +251,22 @@ public class ButtonBindings {
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mClimbSS.setClimbVoltsCmd(0));
         
-        new Trigger(() -> mGunnerController.getRightY() < -0.25).onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE)).onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
-        new Trigger(() -> mGunnerController.getRightY() > 0.25).onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE)).onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+        new Trigger(
+            () -> mGunnerController.getRightY() < -0.25)
+                .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+                .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE))
+                .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+                .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+
+        new Trigger(
+            () -> mGunnerController.getRightY() > 0.25)
+                .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
+                .onTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.OUTTAKE))
+                .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.OUTTAKE))
+
+                .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+                .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
+                .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
     }
 
