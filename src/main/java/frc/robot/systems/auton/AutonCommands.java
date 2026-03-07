@@ -95,6 +95,16 @@ public class AutonCommands extends SubsystemBase {
         Trigger isPath2Running = auto.loggedCondition(path2ShootingName+"/isRunning", () -> autoPath2Shoot.isRunning(), true);
         Trigger hasPath2Ended = auto.loggedCondition(path2ShootingName+"/hasEnded", () -> autoPath2Shoot.hasEnded(), true);
 
+        String path3Name = "STL_IBR";
+        SequentialEndingCommandGroup autoPath3 = followChoreoPath(path3Name, true);
+        Trigger isPath3Running = auto.loggedCondition(path3Name+"/isRunning", () -> autoPath3.isRunning(), true);
+        Trigger hasPath3Ended = auto.loggedCondition(path3Name+"/hasEnded", () -> autoPath3.hasEnded(), true);
+
+        String path4ShootingName = "IBR_S";
+        SequentialEndingCommandGroup autoPath4Shoot = followChoreoPath(path4ShootingName, false);
+        Trigger isPath4Running = auto.loggedCondition(path4ShootingName+"/isRunning", () -> autoPath4Shoot.isRunning(), true);
+        Trigger hasPath4Ended = auto.loggedCondition(path4ShootingName+"/hasEnded", () -> autoPath4Shoot.hasEnded(), true);
+
         autoActivted
             .onTrue(autoPath1)
             .onTrue(Commands.waitSeconds(1.0).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
@@ -125,18 +135,18 @@ public class AutonCommands extends SubsystemBase {
 
         SequentialEndingCommandGroup path2FPShooting = 
             new SequentialEndingCommandGroup(
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(5.0),
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(3.0),
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.01));
 
         SequentialEndingCommandGroup path2IShooting = 
             new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
+                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(3.0),
+                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.01));
 
         SequentialEndingCommandGroup path2CShooting = 
             new SequentialEndingCommandGroup(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(5.0),
-                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.1));
+                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(3.0),
+                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.01));
 
         hasPath2Ended.and(shootingRange.debounce(0.5))
             .onTrue(path2FPShooting)
@@ -149,6 +159,48 @@ public class AutonCommands extends SubsystemBase {
             () -> path2CShooting.hasEnded() 
                 && path2FPShooting.hasEnded()
                 && path2IShooting.hasEnded(), true)
+            .onTrue(Commands.runOnce(() -> wantToShoot = false))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onTrue(mRobotDrive.getDriveManager().setToTeleop())
+            .onTrue(autoPath3);
+
+        hasPath3Ended
+            .onTrue(autoPath4Shoot);
+
+        /* Shooting Logic*/
+        hasPath4Ended
+            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+                () -> GameGoalPoseChooser.getHub()))
+            .onTrue(Commands.runOnce(() -> wantToShoot = true));
+
+        SequentialEndingCommandGroup path4FPShooting = 
+            new SequentialEndingCommandGroup(
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(3.0),
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+
+        SequentialEndingCommandGroup path4IShooting = 
+            new SequentialEndingCommandGroup(
+                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(3.0),
+                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
+
+        SequentialEndingCommandGroup path4CShooting = 
+            new SequentialEndingCommandGroup(
+                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(3.0),
+                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.1));
+
+        hasPath4Ended.and(shootingRange.debounce(0.5))
+            .onTrue(path4FPShooting)
+            .onTrue(path4IShooting)
+            .onTrue(path4CShooting)
+            .onTrue(mIntake.trashCompact());
+
+        auto.loggedCondition(
+            "Path4/ShootingHasEnded", 
+            () -> path4CShooting.hasEnded() 
+                && path4FPShooting.hasEnded()
+                && path4IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
@@ -177,9 +229,19 @@ public class AutonCommands extends SubsystemBase {
         Trigger isPath2Running = auto.loggedCondition(path2ShootingName+"/isRunning", () -> autoPath2Shoot.isRunning(), true);
         Trigger hasPath2Ended = auto.loggedCondition(path2ShootingName+"/hasEnded", () -> autoPath2Shoot.hasEnded(), true);
 
+        String path3Name = "STL_IBL";
+        SequentialEndingCommandGroup autoPath3 = followChoreoPath(path3Name, true);
+        Trigger isPath3Running = auto.loggedCondition(path3Name+"/isRunning", () -> autoPath3.isRunning(), true);
+        Trigger hasPath3Ended = auto.loggedCondition(path3Name+"/hasEnded", () -> autoPath3.hasEnded(), true);
+
+        String path4ShootingName = "IBL_S";
+        SequentialEndingCommandGroup autoPath4Shoot = followChoreoPath(path4ShootingName, false);
+        Trigger isPath4Running = auto.loggedCondition(path4ShootingName+"/isRunning", () -> autoPath4Shoot.isRunning(), true);
+        Trigger hasPath4Ended = auto.loggedCondition(path4ShootingName+"/hasEnded", () -> autoPath4Shoot.hasEnded(), true);
+
         autoActivted
-            .onTrue(Commands.waitSeconds(2.5).andThen(autoPath1))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(autoPath1)
+            .onTrue(Commands.waitSeconds(1.0).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
@@ -207,18 +269,18 @@ public class AutonCommands extends SubsystemBase {
 
         SequentialEndingCommandGroup path2FPShooting = 
             new SequentialEndingCommandGroup(
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(5.0),
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(3.0),
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.01));
 
         SequentialEndingCommandGroup path2IShooting = 
             new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
+                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(3.0),
+                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.01));
 
         SequentialEndingCommandGroup path2CShooting = 
             new SequentialEndingCommandGroup(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(5.0),
-                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.1));
+                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(3.0),
+                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.01));
 
         hasPath2Ended.and(shootingRange.debounce(0.5))
             .onTrue(path2FPShooting)
@@ -231,6 +293,48 @@ public class AutonCommands extends SubsystemBase {
             () -> path2CShooting.hasEnded() 
                 && path2FPShooting.hasEnded()
                 && path2IShooting.hasEnded(), true)
+            .onTrue(Commands.runOnce(() -> wantToShoot = false))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onTrue(mRobotDrive.getDriveManager().setToTeleop())
+            .onTrue(autoPath3);
+
+        hasPath3Ended
+            .onTrue(autoPath4Shoot);
+
+        /* Shooting Logic*/
+        hasPath4Ended
+            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+                () -> GameGoalPoseChooser.getHub()))
+            .onTrue(Commands.runOnce(() -> wantToShoot = true));
+
+        SequentialEndingCommandGroup path4FPShooting = 
+            new SequentialEndingCommandGroup(
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(3.0),
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+
+        SequentialEndingCommandGroup path4IShooting = 
+            new SequentialEndingCommandGroup(
+                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(3.0),
+                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
+
+        SequentialEndingCommandGroup path4CShooting = 
+            new SequentialEndingCommandGroup(
+                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(3.0),
+                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.1));
+
+        hasPath4Ended.and(shootingRange.debounce(0.5))
+            .onTrue(path4FPShooting)
+            .onTrue(path4IShooting)
+            .onTrue(path4CShooting)
+            .onTrue(mIntake.trashCompact());
+
+        auto.loggedCondition(
+            "Path4/ShootingHasEnded", 
+            () -> path4CShooting.hasEnded() 
+                && path4FPShooting.hasEnded()
+                && path4IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
