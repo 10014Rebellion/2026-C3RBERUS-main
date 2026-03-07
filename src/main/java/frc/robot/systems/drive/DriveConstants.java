@@ -37,10 +37,10 @@ public class DriveConstants {
     public static final double kMaxLinearSpeedMPS = 4.0; // TODO: TUNE ME
     public static final double kMaxLinearAccelerationMPSS = 12.0; // TODO: TUNE ME
 
-    public static final double kMaxRotationSpeedRadiansPS = kMaxLinearSpeedMPS / kDrivebaseRadiusMeters; // TODO: TUNE ME
+    public static final double kMaxRotationSpeedRadiansPS = 360; // TODO: TUNE ME
     public static final double kMaxRotationAccelRadiansPS = Math.toRadians(360) * 10; // TODO: TUNE ME
  
-    public static final double kMaxAzimuthAngularRadiansPS = Math.toRadians(1200); // TODO: TUNE ME
+    public static final double kMaxAzimuthAngularRadiansPS = Math.toRadians(360 * 10); // TODO: TUNE ME
 
     /* Plugged into setpoint generator */
     public static final PathConstraints kAutoConstraints = new PathConstraints(
@@ -79,9 +79,9 @@ public class DriveConstants {
 
     public static final double kPeakVoltage = 12.0;
 
-    public static final double kDriveStatorAmpLimit = 80.0; 
-    public static final double kDriveFOCAmpLimit = 80.0;
-    public static final double kDriveSupplyAmpLimit = 60.0;
+    public static final double kDriveStatorAmpLimit = 120.0; 
+    public static final double kDriveFOCAmpLimit = 120.0;
+    public static final double kDriveSupplyAmpLimit = 80.0;
     // public static final double kDriveSupplyAmpLowerLimit = 45.0;
     // public static final double kDriveSupplyAmpLowerLimitTime = 0.25;
 

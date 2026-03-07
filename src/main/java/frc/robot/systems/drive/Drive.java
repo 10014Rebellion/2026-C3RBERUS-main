@@ -79,7 +79,7 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key="Drive/Swerve/PreviousDriveAmps")
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
-    private final boolean kUseGenerator = false;
+    private final boolean kUseGenerator = true;
     private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
 
     private DriveManager mDriveManager;
