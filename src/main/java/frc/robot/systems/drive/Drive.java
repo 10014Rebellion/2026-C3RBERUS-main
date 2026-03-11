@@ -40,6 +40,8 @@ import frc.robot.systems.drive.controllers.SpeedErrorController;
 import frc.robot.systems.drive.gyro.GyroIO;
 import frc.robot.systems.drive.gyro.GyroInputsAutoLogged;
 import frc.robot.systems.drive.modules.Module;
+import frc.robot.systems.robotdetection.RDetect;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -47,7 +49,8 @@ public class Drive extends SubsystemBase {
     private final Module[] mModules;
     private final GyroIO mGyro;
     private final GyroInputsAutoLogged mGyroInputs = new GyroInputsAutoLogged();
-    private final ATagVision mVision;
+    private final ATagVision mAprilTag;
+    private final RDetect mRobotDetection;
 
     private Rotation2d mRobotRotation;
     private final SwerveDriveOdometry mOdometry;
@@ -92,10 +95,11 @@ public class Drive extends SubsystemBase {
     public static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
     public static final LoggedTunableNumber tAzimuthCharacterizationAmps = new LoggedTunableNumber("Drive/AzimuthCharacterizationAmps", 0);
     
-    public Drive(Module[] modules, GyroIO gyro, ATagVision vision) {
+    public Drive(Module[] modules, GyroIO gyro, ATagVision aTagDetection, RDetect robotDetection) {
         this.mModules = modules;
         this.mGyro = gyro;
-        this.mVision = vision;
+        this.mAprilTag = aTagDetection;
+        this.mRobotDetection = robotDetection;
 
         mRobotRotation = mGyroInputs.iYawPosition;
 
@@ -204,8 +208,8 @@ public class Drive extends SubsystemBase {
         double visionFactor = skidFactor + gyroFactor;
         
         /* VISION */
-        mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
-        VisionObservation[] observations = mVision.getVisionObservations();
+        mAprilTag.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
+        VisionObservation[] observations = mAprilTag.getVisionObservations();
         for (VisionObservation observation : observations) {
             if (observation.hasObserved()) {
                 mPoseEstimator.addVisionMeasurement(
@@ -216,6 +220,8 @@ public class Drive extends SubsystemBase {
 
             Telemetry.logVisionObservationStdDevs(observation);
         }
+
+        mRobotDetection.periodic(mPoseEstimator.getEstimatedPosition(), getOdometryPose());
 
         /* For logging purposes */
         mOdometry.update(mRobotRotation, getModulePositions());
