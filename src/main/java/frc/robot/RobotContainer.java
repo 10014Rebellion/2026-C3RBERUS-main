@@ -24,6 +24,9 @@ import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.roller.IntakeRollerIO;
 import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
+import frc.robot.systems.robotdetection.RDetect;
+import frc.robot.systems.robotdetection.RDetectCameraIOPV;
+import frc.robot.systems.robotdetection.RDetectionConstants;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelIO;
@@ -88,7 +91,9 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
                         new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
-                    }));
+                    }),
+                    new RDetect(new RDetectCameraIOPV[]{
+                        new RDetectCameraIOPV(RDetectionConstants.kLeftCamera)}));
 
                 
                 mFuelPumpSS = new FuelPumpSS(
@@ -134,7 +139,10 @@ public class RobotContainer {
                         new ATagCameraIO() {}, 
                         new ATagCameraIO() {}
 
-                    }));
+                    }),
+                    new RDetect(new RDetectCameraIOPV[]{
+                        new RDetectCameraIOPV(RDetectionConstants.kLeftCamera),
+                        new RDetectCameraIOPV(RDetectionConstants.kRightCamera)}));
                 
                 FlywheelIOSim leaderSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
                 FlywheelIOSim followerSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);;
@@ -179,7 +187,8 @@ public class RobotContainer {
                         new ATagCameraIO() {}, 
                         new ATagCameraIO() {}, 
                         new ATagCameraIO() {}
-                    }));
+                    }),
+                    new RDetect(new RDetectCameraIOPV[]{}));
 
                 
                 mFuelPumpSS = new FuelPumpSS(
