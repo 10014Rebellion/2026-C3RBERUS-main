@@ -96,7 +96,7 @@ public class RobotContainer {
                         new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpFollowerConfig)
                 );
                 
-                mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig ,HoodConstants.kHoodLimits));
+                mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig));
 
                 mFlywheelsSS = new FlywheelsSS(
                         new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),

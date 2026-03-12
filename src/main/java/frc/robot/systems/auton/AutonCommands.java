@@ -33,7 +33,6 @@ import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
-import frc.robot.systems.shooter.hood.HoodSS.HoodClosedSetpoints;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.lib.math.AllianceFlipUtil;
 
@@ -123,9 +122,9 @@ public class AutonCommands extends SubsystemBase {
 
         shootingRange
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
             .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
-            .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         autoActivted
             .onTrue(autoPath1)
@@ -212,9 +211,9 @@ public class AutonCommands extends SubsystemBase {
 
         shootingRange
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
             .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
-            .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         hasPath1Ended
             .onTrue(autoPath2Shoot);
@@ -295,9 +294,9 @@ public class AutonCommands extends SubsystemBase {
 
         shootingRange
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
             .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
-            .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         hasPath1Ended
             .onTrue(autoPath2Shoot);

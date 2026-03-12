@@ -14,7 +14,7 @@ import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 import frc.robot.Constants;
 
 public class HoodConstants {
-    public static final Rotation2d kIncrementStepAmount = Rotation2d.fromDegrees(2);
+    public static final Rotation2d kAdjustStepAmount = Rotation2d.fromDegrees(2);
     public static final double kToleranceRotations = 0.5;
 
     public static final BasicMotorHardware kHoodConfig = new BasicMotorHardware(

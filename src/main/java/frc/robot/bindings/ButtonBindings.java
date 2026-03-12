@@ -11,10 +11,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.math.AllianceFlipUtil;
-import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.climb.ClimbSS;
-import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.conveyor.ConveyorSS;
 import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
 import frc.robot.systems.drive.Drive;
@@ -27,9 +25,7 @@ import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
-import frc.robot.systems.shooter.hood.HoodSS.HoodClosedSetpoints;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ButtonBindings {
     private final Drive mDriveSS;
@@ -74,30 +70,28 @@ public class ButtonBindings {
             );
         
         new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN)
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN)
                 .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)));
     }
 
     public void initButtonBoard() {
-        // mHID.button(3)
-        //     .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.TUNING))
-        //     .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
+        mHID.button(3)
+            .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.TUNING))
+            .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
 
-        // mHID.button(4)
-        //     .whileTrue(mHoodSS.setHoodTuneableCmdNoEnd())
-        //     .onFalse(Commands.runOnce(() -> mHoodSS.clearGoalWithoutStateChange(), mHoodSS));
+        mHID.button(4)
+            .whileTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT))
+            .whileFalse(mHoodSS.setStateCmd(HoodStates.HOLD_POSITION));
 
-        // mHID.button(9)
-        //     .onTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE)
-        //         .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.CONVEY_TO_INDEX))
-        //         .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-        //         .alongWith(mIntakeSS.trashCompact()))
-                
-        //     .onalongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))))
-        //     .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED)
-        //         .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)
-        //         .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-        //         .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))));
+        mHID.button(9)
+            .onTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE)
+                .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.CONVEY_TO_INDEX))
+                .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+                .alongWith(mIntakeSS.trashCompact()))
+            .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED)
+                .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)
+                .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+                .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))));
     }
 
     public Command rumbleDriverController(){
@@ -158,19 +152,19 @@ public class ButtonBindings {
         //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         mPilotController.povUp()
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY));
         
         mPilotController.povDown()
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.TOWER_SHOT))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.TOWER_SHOT))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_MID_VELOCITY));
 
         mPilotController.povRight()
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MAX))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MAX))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SNOW_BLOW));
         
         mPilotController.povLeft()
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
 
         mPilotController.leftBumper()
@@ -188,9 +182,9 @@ public class ButtonBindings {
         /* TODO: TUNE */
         mPilotController.y()
             .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
-            // .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.CLOSE_SHOT))
+            // .whileTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
             .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY));
-            // .whileFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
+            // .whileFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         mPilotController.rightTrigger().whileTrue(
             new SequentialCommandGroup(
@@ -204,26 +198,28 @@ public class ButtonBindings {
                 .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
                 // .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE))
                 .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-                // .alongWith(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN))
+                // .alongWith(mHoodSS.setStateCmd(HoodStates.MIN))
                 // .alongWith(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
                 .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
-                .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
+                .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
     }
 
     public void initGunnerBindings() {
 
         mGunnerController.povUp()
-            .onTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MAX))
-            .onFalse(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MAX))
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
         
         // mGunnerController.povDown()
-        //     .whileTrue(mHoodSS.setGoalCmd(HoodClosedSetpoints.MIN));
+        //     .whileTrue(mHoodSS.setStateCmd(HoodStates.MIN));
 
         mGunnerController.povRight()
-            .whileTrue(mHoodSS.incrementAngleCmd());
+            .whileTrue(mHoodSS.setStateCmd(HoodStates.INCREMENTING))
+            .whileFalse(mHoodSS.setStateCmd(HoodStates.HOLD_POSITION));
         
         mGunnerController.povLeft()
-            .whileTrue(mHoodSS.decrementAngleCmd());
+            .whileTrue(mHoodSS.setStateCmd(HoodStates.DECREMENTING))
+            .whileFalse(mHoodSS.setStateCmd(HoodStates.HOLD_POSITION));
 
         mGunnerController.a().whileTrue(mClimbSS.unHookClawsCmd());
         mGunnerController.b().whileTrue(mClimbSS.hookClawsCmd());
