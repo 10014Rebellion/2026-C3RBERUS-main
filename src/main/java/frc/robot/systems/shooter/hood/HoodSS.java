@@ -12,14 +12,23 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.tuning.LoggedTunableNumber;
 
-public class HoodSS extends SubsystemBase{
+public class HoodSS extends SubsystemBase {
+  public static LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Hood/Voltage", 0.0);
+  public static LoggedTunableNumber tTuningAmp = new LoggedTunableNumber("Hood/Amp", 0.0);
+
+  public static LoggedTunableNumber tTuningMin = new LoggedTunableNumber("Hood")
+
   public static enum HoodStates {
     STOPPED, // At rest
-    OPEN_LOOP, // Via voltage out
-    DEFINED_SETPOINT, // Going to a setpoint from the closed loop enums
-    CONSTANT_SETPOINT, // Going to a setpoint passed in as a number
-    CUSTOM_SETPOINT, // Via increment/decrement
-    TUNEABLE_SETPOINT // Via NT
+    TUNING_VOLTAGE,
+    TUNING_AMPS,
+    MAX,
+    MID,
+    MIN,
+    CLOSE_SHOT,
+    TOWER_SHOT,
+    BUMP_SHOT,
+    INVALID
   }
   
   public static enum HoodClosedSetpoints {
@@ -74,6 +83,15 @@ public class HoodSS extends SubsystemBase{
         } else {
           mHoodIO.setMotorVolts(0.0); // open loop stop
           mCurrentHoodState = HoodStates.STOPPED;
+        }
+
+        switch (mCurrentHoodState) {
+          case value:
+            
+            break;
+        
+          default:
+            break;
         }
       }, this)
     );

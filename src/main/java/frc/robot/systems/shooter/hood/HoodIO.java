@@ -16,6 +16,8 @@ public interface HoodIO {
     public double iHoodStatorCurrentAmps = 0.0;
     public double iHoodTempCelsius = 0.0;
     public Rotation2d iHoodReferenceValue = Rotation2d.kZero;
+    public Rotation2d iHoodReferenceValueSlope = Rotation2d.kZero;
+
   }
 
   public default void setPDConstants(double pKP, double pKD) {}
@@ -27,6 +29,8 @@ public interface HoodIO {
   public default void setMotorPosition(Rotation2d pRotationSP, double pArbFF) {}
 
   public default void setMotorVolts(double pVolts) {}
+
+  public default void setMotorAmps(double pAmps) {}
 
   public default void stopMotor() {}
 }
