@@ -48,8 +48,12 @@ import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.climb.ClimbConstants;
+import frc.robot.systems.climb.ClimbIO;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
+import frc.robot.systems.climb.ClimbIOSim;
 import frc.robot.systems.climb.ClimbSS;
+import frc.robot.systems.climb.ServoIO;
+import frc.robot.systems.climb.ServoIOPWM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -105,6 +109,13 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
+                mClimbSS = new ClimbSS(
+                    new ClimbIOKrakenx44(
+                        ClimbConstants.kClimbMotorConstants, 
+                        ClimbConstants.kSoftLimits),
+                        new ServoIOPWM(ClimbConstants.kHookPort), 
+                        ClimbConstants.kSoftLimits);
+
                 break;
             }
             case SIM: {
@@ -121,11 +132,6 @@ public class RobotContainer {
                         new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
                         new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
                         new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
-                        // new ATagCameraIO() {}, 
-                        // new ATagCameraIO() {}, 
-                        // new ATagCameraIO() {}, 
-                        // new ATagCameraIO() {}
-
                     }));
                 
                 FlywheelIOSim leaderSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
@@ -151,6 +157,14 @@ public class RobotContainer {
                         IntakeConstants.PivotConstants.kPivotEncoderConfig)),
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
+
+                mClimbSS = new ClimbSS(
+                    new ClimbIOSim(
+                        ClimbConstants.kSimElevator, 
+                        ClimbConstants.kClimbMotorConstants, 
+                        ClimbConstants.kSoftLimits),
+                    new ServoIO() {}, 
+                    ClimbConstants.kSoftLimits);
 
                 break;
             }
@@ -190,11 +204,14 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
+                mClimbSS = new ClimbSS(
+                    new ClimbIO() {},
+                    new ServoIO() {}, 
+                    ClimbConstants.kSoftLimits);
+
                 break;
             }
         }
-
-        mClimbSS = new ClimbSS(new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants, ClimbConstants.kSoftLimits), ClimbConstants.kSoftLimits);
         
         mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake, mClimbSS);
 

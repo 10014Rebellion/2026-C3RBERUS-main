@@ -4,129 +4,111 @@
 
 package frc.robot.systems.climb;
 
-import java.util.function.DoubleSupplier;
-
 import org.littletonrobotics.junction.Logger;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Servo;
+
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
-import frc.lib.tuning.LoggedTunableNumber;
 
 public class ClimbSS extends SubsystemBase {
-
-  public static final LoggedTunableNumber tElevatorCustomSetpointMeters = 
-    new LoggedTunableNumber("Climb/Control/CustomSetpointRot", 0);
-  
-  public enum ClimbState {
-    STOW(() -> Units.inchesToMeters(0)),
-    MID(() -> Units.inchesToMeters(0)),
-    HIGH(() -> Units.inchesToMeters(0)),
-    /** Custom setpoint that can be modified over network tables; Useful for debugging */
-    TUNING(() -> tElevatorCustomSetpointMeters.get());
-    
-    private DoubleSupplier goalMeters;
-    
-    ClimbState(DoubleSupplier goalMeters) {
-      this.goalMeters = goalMeters;
+    public enum ClimbState {
+        UP,
+        DOWN,
+        STAY,
+        STAY_ROBOT,
+        IDLE,
+        INVALID;
     }
-    
-    public double getGoalMeters() {
-      return this.goalMeters.getAsDouble();
-    }
-  }
   
-  private final ClimbIO mClimbIO;
-  private final ClimbInputsAutoLogged mClimbInputs = new ClimbInputsAutoLogged();
+    private final ClimbIO mClimbIO;
+    private final ClimbInputsAutoLogged mClimbInputs = new ClimbInputsAutoLogged();
 
-  private final Servo mServo;
+    private final ServoIO mServo;
 
-  public ClimbSS(ClimbIO pClimbIO, PositionSoftLimits pSoftLimits) {
-    mClimbIO = pClimbIO;
-    mServo = new Servo(ClimbConstants.kHookPort);
-  }
+    private ClimbState mClimbState = ClimbState.IDLE;
+    private int mDesiredDirection = 0;
+    private boolean mLimitEnforced = false;
 
-  @Override
-  public void periodic() {
-    mClimbIO.updateInputs(mClimbInputs);
+    public ClimbSS(ClimbIO pClimbIO, ServoIO pServo, PositionSoftLimits pSoftLimits) {
+        mClimbIO = pClimbIO;
+        mServo = pServo;
+    }
 
-    Logger.recordOutput("Climb/ServoPosition", mServo.getPosition());
-    Logger.recordOutput("Climb/ServoSpeed", mServo.getSpeed());
-    Logger.recordOutput("Climb/ServoBoundMin", mServo.getBoundsMicroseconds().max);
-    Logger.recordOutput("Climb/ServoBoundMax", mServo.getBoundsMicroseconds().min);
-    Logger.recordOutput("Climb/ServoTime", mServo.getPulseTimeMicroseconds());
-    Logger.recordOutput("Climb/ServoHandle", mServo.getHandle());
-    Logger.recordOutput("Climb/ServoChannel", mServo.getChannel());
+    @Override
+    public void periodic() {
+        mClimbIO.updateInputs(mClimbInputs);
+        Logger.processInputs("Climb", mClimbInputs);
+        Logger.recordOutput("Climb/LimitsEnforced", mLimitEnforced);
+        executeState();
+    }
 
-    // mClimbIO.enforceSoftLimits();
+    public void initialState(ClimbState pClimbState) {
+        mClimbState = pClimbState;
+    }
 
-    double currentPosition = mClimbInputs.iClimbPositionMeters;
-    if((currentPosition > ClimbConstants.kSoftLimits.forwardLimitM() && mClimbInputs.iClimbMotorVolts > 0) || 
-       (currentPosition < ClimbConstants.kSoftLimits.backwardLimitM() && mClimbInputs.iClimbMotorVolts < 0)) mClimbIO.stopMotor();
+    public void executeState() {
+        switch (mClimbState) {
+            case UP, DOWN, STAY, STAY_ROBOT -> {
+                mClimbIO.setMotorVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
+                mServo.setPosition(ClimbConstants.kHookOutPosition);
+            }
+            case IDLE -> {
+                mClimbIO.setMotorVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
+                mServo.setPosition(ClimbConstants.kHookInPosition);
+            } case INVALID -> {}
+            default  -> {}
+        }
+    }
 
-    Logger.processInputs("Climb", mClimbInputs);
-  }
+    public Command setStateCmd(ClimbState pState) {
+        return new FunctionalCommand(
+            () -> initialState(pState), 
+            () -> {}, 
+            (interrupted) -> {}, 
+            () -> false, 
+            this);
+    }
 
-  public Command setClimbVoltsCmd(double pVolts){
-    return Commands.run(() -> {
-      setClimbVolts(pVolts);
-    }, this);
-  }
+    public Command goUpTillClimbHeightThenStay() {
+        return setStateCmd(ClimbState.UP)
+            .until(() -> mClimbInputs.iClimbPositionMeters > ClimbConstants.kClimbHeight)
+            .andThen(setStateCmd(ClimbState.STAY));
+    }
 
-  public Command setClimbState(ClimbState pState){
-    return setClimbPositionManualCmd(pState.getGoalMeters());
-  }
+    public Command goDownTillClimbedThenStayClimbed() {
+        return setStateCmd(ClimbState.DOWN)
+            .until(() -> mClimbInputs.iClimbPositionMeters < ClimbConstants.kClimbedHeight)
+            .andThen(setStateCmd(ClimbState.STAY_ROBOT));
+    }
 
-  public FunctionalCommand setClimbPositionManualCmd(double pPosition) {
-    return new FunctionalCommand(
-      () -> {},
-      () -> {
-        if (getClimbPosition() < pPosition)
-          setClimbVolts(5.0);
+    public void setClimbVolts(double pVolts) {
+        mDesiredDirection = toDirection(pVolts);
+        mClimbIO.setMotorVolts(pVolts);
+        enforceSoftLimits();
+    }
 
-        if (getClimbPosition() > pPosition)
-          setClimbVolts(0);
-        
-      }, (interrupted) -> {
-        setClimbVolts(0.0);
-      }, 
-      () -> atGoal(pPosition),
-      this);
-  }
+    public boolean atGoal(double pGoal) {
+        return Math.abs(pGoal - mClimbInputs.iClimbPositionMeters) < 0.01;
+    }
 
-  public Command stopClimbCmd(){
-    return Commands.run(() -> {
-      stopClimbMotor();
-    }, this);
-  }
+    public void enforceSoftLimits() {
+        if(
+        (mClimbInputs.iClimbPositionMeters > ClimbConstants.kSoftLimits.forwardLimitM()
+            && mDesiredDirection == 1 ) 
+            || 
+        (mClimbInputs.iClimbPositionMeters < ClimbConstants.kSoftLimits.backwardLimitM() 
+            && mDesiredDirection == -1)) {
+                mLimitEnforced = true;
+                mClimbIO.stopMotor();
+        } else {
+            mLimitEnforced = false;
+        }
+    }
 
-  public Command unHookClawsCmd(){
-    return Commands.run(() -> {
-      mServo.setPosition(0.8);
-    }, this);
-  }
-
-  public Command hookClawsCmd(){
-    return Commands.run(() -> {
-      mServo.setAngle(ClimbConstants.kHookInPosition);
-    }, this);
-  }
-  public void stopClimbMotor(){
-    mClimbIO.stopMotor();
-  }
-
-  public void setClimbVolts(double pVolts){
-    mClimbIO.setMotorVolts(pVolts);
-  }
-
-  public double getClimbPosition(){
-    return mClimbInputs.iClimbPositionMeters;
-  }
-
-  public boolean atGoal(double pGoal){
-    return Math.abs(pGoal - getClimbPosition()) < 0.01;
-  }
+    public int toDirection(double val) {
+        if(val > 0) return 1;
+        if(val < 0) return -1;
+        else return 0;
+    }
 }

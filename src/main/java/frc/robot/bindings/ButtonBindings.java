@@ -13,6 +13,7 @@ import frc.lib.controllers.FlydigiApex4;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.climb.ClimbSS;
+import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.Intake;
@@ -49,9 +50,9 @@ public class ButtonBindings {
 
 
     public void initBindings() {
-        // initPilotBindings();
-        // initGunnerBindings();
-        initButtonBoard();
+        initPilotBindings();
+        initGunnerBindings();
+        // initButtonBoard();
         initTriggers();
     }
 
@@ -88,11 +89,11 @@ public class ButtonBindings {
         //         .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE)
         //         .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
         //         .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))));
-        // mDriveSS.getDriveManager().acceptJoystickInputs(
-        //     () -> -mPilotController.getLeftY(),
-        //     () -> -mPilotController.getLeftX(),
-        //     () -> -mPilotController.getRightX(),
-        //     () -> mPilotController.getPOVAngle());
+        mDriveSS.getDriveManager().acceptJoystickInputs(
+            () -> -mPilotController.getLeftY(),
+            () -> -mPilotController.getLeftX(),
+            () -> -mPilotController.getRightX(),
+            () -> mPilotController.getPOVAngle());
             
         // mPilotController.a()
         //     .onTrue(mIntakeSS.trashCompact())
@@ -115,6 +116,13 @@ public class ButtonBindings {
         // mPilotController.y()
         //     .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.TUNING_AMPS))
         //     .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INVALID));
+
+        // mPilotController.a()
+        //     .onTrue(mClimbSS.goUpTillClimbHeightThenStay());
+        
+        // mPilotController.b()
+        //     .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed())
+        //     .onFalse(mClimbSS.setStateCmd(ClimbState.STAY));
     }
 
     public Command rumbleDriverController(){
@@ -241,8 +249,8 @@ public class ButtonBindings {
         mGunnerController.povLeft()
             .whileTrue(mHoodSS.decrementAngleCmd());
 
-        mGunnerController.a().whileTrue(mClimbSS.unHookClawsCmd());
-        mGunnerController.b().whileTrue(mClimbSS.hookClawsCmd());
+        // mGunnerController.a().whileTrue(mClimbSS.unHookClawsCmd());
+        // mGunnerController.b().whileTrue(mClimbSS.hookClawsCmd());
 
         mGunnerController.leftBumper().onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
         mGunnerController.rightBumper().onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
@@ -255,17 +263,17 @@ public class ButtonBindings {
             .whileTrue((mIntakeSS.trashCompact()))
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
 
-        new Trigger(() -> (mGunnerController.getLeftY() < -0.25))
-            .onTrue(mClimbSS.setClimbPositionManualCmd(2.47))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mClimbSS.setClimbVoltsCmd(0));
+        // new Trigger(() -> (mGunnerController.getLeftY() < -0.25))
+        //     .onTrue(mClimbSS.setClimbPositionManualCmd(2.47))
+        //     .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW))
+        //     .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+        //     .onFalse(mClimbSS.setClimbVoltsCmd(0));
         
-        new Trigger(() -> (mGunnerController.getLeftY() > 0.25))
-            .onTrue(mClimbSS.setClimbVoltsCmd(-10))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mClimbSS.setClimbVoltsCmd(0));
+        // new Trigger(() -> (mGunnerController.getLeftY() > 0.25))
+        //     .onTrue(mClimbSS.setClimbVoltsCmd(-10))
+        //     .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW))
+        //     .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+        //     .onFalse(mClimbSS.setClimbVoltsCmd(0));
         
         new Trigger(
             () -> mGunnerController.getRightY() < -0.25)
