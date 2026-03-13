@@ -1,5 +1,6 @@
 package frc.robot.systems.climb;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Servo;
 
@@ -7,7 +8,7 @@ public class ServoIOPWM implements ServoIO {
     private final Servo mServo;
 
     public ServoIOPWM(int id) {
-        mServo = new Servo(ClimbConstants.kHookPort);
+        mServo = new Servo(id);
     }
 
     @Override
@@ -15,8 +16,8 @@ public class ServoIOPWM implements ServoIO {
         pInputs.iUsingServo = true;
         pInputs.iServoPosition = mServo.getPosition();
         pInputs.iServoSpeed = mServo.getSpeed();
-        pInputs.iServoBoundMin = mServo.getBoundsMicroseconds().max;
-        pInputs.iServoBoundMax = mServo.getBoundsMicroseconds().min;
+        pInputs.iServoBoundMin = mServo.getBoundsMicroseconds().min;
+        pInputs.iServoBoundMax = mServo.getBoundsMicroseconds().max;
         pInputs.iServoTime = mServo.getPulseTimeMicroseconds();
         pInputs.iServoHandle = mServo.getHandle();
         pInputs.iServoChannel = mServo.getChannel();
@@ -24,7 +25,7 @@ public class ServoIOPWM implements ServoIO {
 
     @Override
     public void setPosition(Rotation2d pRots) {
-        mServo.setPosition(pRots.getRotations());
+        mServo.setPosition(MathUtil.clamp(pRots.getRotations(), 0.0, 1.0));
     }
 
 }

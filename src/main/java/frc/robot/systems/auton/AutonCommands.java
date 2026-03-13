@@ -225,7 +225,7 @@ public class AutonCommands extends SubsystemBase {
         hasPath2Ended.and(shootingRange.debounce(0.5))
             .onTrue(path2FPShooting)
             .onTrue(path2IShooting)
-            .onTrue(mIntake.trashCompact());
+            .onTrue(mIntake.trashCompactPivotContinuous());
 
         auto.loggedCondition(
             "Path2/ShootingHasEnded", 
@@ -299,7 +299,7 @@ public class AutonCommands extends SubsystemBase {
         hasPath2Ended.and(shootingRange.debounce(0.5))
             .onTrue(path2FPShooting)
             .onTrue(path2IShooting)
-            .onTrue(mIntake.trashCompact());
+            .onTrue(mIntake.trashCompactPivotContinuous());
 
         auto.loggedCondition(
             "Path2/ShootingHasEnded", 

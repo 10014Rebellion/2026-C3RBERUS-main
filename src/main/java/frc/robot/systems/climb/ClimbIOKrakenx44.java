@@ -17,7 +17,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 
 public class ClimbIOKrakenx44 implements ClimbIO {
     private final TalonFX mClimbMotor;
@@ -33,7 +32,7 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     private final StatusSignal<Angle> mClimbPosition;
     private final StatusSignal<Double> mClosedLoopReference;
 
-    public ClimbIOKrakenx44(BasicMotorHardware pConfig, PositionSoftLimits pSoftLimits) {
+    public ClimbIOKrakenx44(BasicMotorHardware pConfig) {
         mClimbMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
         var ClimbConfig = new TalonFXConfiguration();
 

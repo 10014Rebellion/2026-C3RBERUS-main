@@ -52,9 +52,9 @@ public class IntakeConstants {
                 :
             new ArmControllerMotionMagic(
                 0, 
-                new PDConstants(3, 0.0), 
+                new PDConstants(20, 0.0), 
                 new MotionMagicConstants(300.0, 300.0, 0), // NOT USED
-                new ArmFeedforward(0.0, 3.0, 0, 0)
+                new ArmFeedforward(0.0, 1.65, 0, 0)
             );
 
         public static final RotationSoftLimits kPivotLimits = new RotationSoftLimits(
@@ -69,28 +69,28 @@ public class IntakeConstants {
         public static final LoggedTunableNumber tPivotTuningAmp = new LoggedTunableNumber("Intake/Tuning/TuneAmperage", 0.0);
 
         public static final LoggedTunableNumber tStowSetpointDeg  = new LoggedTunableNumber(
-            "Hood/Setpoint/StowSetpointDegrees", 114.48);
+            "Intake/Setpoint/StowSetpointDegrees", 114.48);
         public static final Supplier<Rotation2d> kStowSetpointSup = () -> Rotation2d.fromDegrees(tStowSetpointDeg.get());
 
         public static final LoggedTunableNumber tCompactSetpointDeg  = new LoggedTunableNumber(
-            "Hood/Setpoint/CompactSetpointDegrees", 25.0);
+            "Intake/Setpoint/CompactSetpointDegrees", 25.0);
         public static final Supplier<Rotation2d> kCompactSetpointSup = () -> Rotation2d.fromDegrees(tCompactSetpointDeg.get());
 
         public static final LoggedTunableNumber tIntakeSetpointDeg  = new LoggedTunableNumber(
-            "Hood/Setpoint/IntakeSetpointDegrees", -24.48);
+            "Intake/Setpoint/IntakeSetpointDegrees", -24.48);
         public static final Supplier<Rotation2d> kIntakeSetpointSup = () -> Rotation2d.fromDegrees(tIntakeSetpointDeg.get());
 
         public static final LoggedTunableNumber tTuningShotSetpointDeg  = new LoggedTunableNumber(
-            "Hood/Setpoint/TuningShotSetpointDegrees", 0.0);
+            "Intake/Setpoint/TuningShotSetpointDegrees", 0.0);
         public static final Supplier<Rotation2d> kTuningShotSetpointSup = () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get());
 
-        public static final HashMap<IntakePivotStates, Supplier<Rotation2d>> kStateToSetpointMapHood = new HashMap<IntakePivotStates, Supplier<Rotation2d>>();
+        public static final HashMap<IntakePivotStates, Supplier<Rotation2d>> kStateToSetpointMapIntake = new HashMap<IntakePivotStates, Supplier<Rotation2d>>();
 
         static {
-            kStateToSetpointMapHood.put(IntakePivotStates.STOW, kStowSetpointSup);
-            kStateToSetpointMapHood.put(IntakePivotStates.COMPACT, kCompactSetpointSup);
-            kStateToSetpointMapHood.put(IntakePivotStates.INTAKE, kIntakeSetpointSup);
-            kStateToSetpointMapHood.put(IntakePivotStates.TUNING_SETPOINT, kTuningShotSetpointSup);
+            kStateToSetpointMapIntake.put(IntakePivotStates.STOW, kStowSetpointSup);
+            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT, kCompactSetpointSup);
+            kStateToSetpointMapIntake.put(IntakePivotStates.INTAKE, kIntakeSetpointSup);
+            kStateToSetpointMapIntake.put(IntakePivotStates.TUNING_SETPOINT, kTuningShotSetpointSup);
         }
     }
 

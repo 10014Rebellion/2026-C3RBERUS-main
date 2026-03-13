@@ -89,14 +89,14 @@ public class ButtonBindings {
         //         .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE)
         //         .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
         //         .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))));
-        mDriveSS.getDriveManager().acceptJoystickInputs(
-            () -> -mPilotController.getLeftY(),
-            () -> -mPilotController.getLeftX(),
-            () -> -mPilotController.getRightX(),
-            () -> mPilotController.getPOVAngle());
+        // mDriveSS.getDriveManager().acceptJoystickInputs(
+        //     () -> -mPilotController.getLeftY(),
+        //     () -> -mPilotController.getLeftX(),
+        //     () -> -mPilotController.getRightX(),
+        //     () -> mPilotController.getPOVAngle());
             
         // mPilotController.a()
-        //     .onTrue(mIntakeSS.trashCompact())
+        //     .onTrue(mIntakeSS.trashCompactPivotContinuous())
         //     .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
         //     .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
         //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
@@ -118,7 +118,8 @@ public class ButtonBindings {
         //     .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INVALID));
 
         // mPilotController.a()
-        //     .onTrue(mClimbSS.goUpTillClimbHeightThenStay());
+        //     .onTrue(mClimbSS.goUpTillClimbHeightThenStay())
+        //     .onFalse(mClimbSS.setStateCmd(ClimbState.STAY));;
         
         // mPilotController.b()
         //     .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed())
@@ -260,7 +261,7 @@ public class ButtonBindings {
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         mGunnerController.rightTrigger()
-            .whileTrue((mIntakeSS.trashCompact()))
+            .whileTrue((mIntakeSS.trashCompactPivotContinuous()))
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
 
         // new Trigger(() -> (mGunnerController.getLeftY() < -0.25))

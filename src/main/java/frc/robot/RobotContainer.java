@@ -110,11 +110,8 @@ public class RobotContainer {
                 );
 
                 mClimbSS = new ClimbSS(
-                    new ClimbIOKrakenx44(
-                        ClimbConstants.kClimbMotorConstants, 
-                        ClimbConstants.kSoftLimits),
-                        new ServoIOPWM(ClimbConstants.kHookPort), 
-                        ClimbConstants.kSoftLimits);
+                    new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants),
+                    new ServoIOPWM(ClimbConstants.kHookPort));
 
                 break;
             }
@@ -163,8 +160,7 @@ public class RobotContainer {
                         ClimbConstants.kSimElevator, 
                         ClimbConstants.kClimbMotorConstants, 
                         ClimbConstants.kSoftLimits),
-                    new ServoIO() {}, 
-                    ClimbConstants.kSoftLimits);
+                    new ServoIO() {});
 
                 break;
             }
@@ -206,8 +202,7 @@ public class RobotContainer {
 
                 mClimbSS = new ClimbSS(
                     new ClimbIO() {},
-                    new ServoIO() {}, 
-                    ClimbConstants.kSoftLimits);
+                    new ServoIO() {});
 
                 break;
             }

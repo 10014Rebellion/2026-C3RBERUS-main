@@ -22,7 +22,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
             SingleJointedArmSim.estimateMOI(PivotConstants.kArmLengthMeters, PivotConstants.kArmMass), 
             PivotConstants.kArmLengthMeters, 
             PivotConstants.kPivotLimits.backwardLimit().getRadians(), 
-            PivotConstants.kPivotLimits.backwardLimit().getRadians(), 
+            PivotConstants.kPivotLimits.forwardLimit().getRadians(), 
             true, 
             0.0, 
             0.0001, 0.0001);

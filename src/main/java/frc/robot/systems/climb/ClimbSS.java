@@ -9,7 +9,6 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
 
 public class ClimbSS extends SubsystemBase {
     public enum ClimbState {
@@ -30,7 +29,7 @@ public class ClimbSS extends SubsystemBase {
     private int mDesiredDirection = 0;
     private boolean mLimitEnforced = false;
 
-    public ClimbSS(ClimbIO pClimbIO, ServoIO pServo, PositionSoftLimits pSoftLimits) {
+    public ClimbSS(ClimbIO pClimbIO, ServoIO pServo) {
         mClimbIO = pClimbIO;
         mServo = pServo;
     }
@@ -43,18 +42,18 @@ public class ClimbSS extends SubsystemBase {
         executeState();
     }
 
-    public void initialState(ClimbState pClimbState) {
+    public void initiateState(ClimbState pClimbState) {
         mClimbState = pClimbState;
     }
 
     public void executeState() {
         switch (mClimbState) {
             case UP, DOWN, STAY, STAY_ROBOT -> {
-                mClimbIO.setMotorVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
+                setClimbVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
                 mServo.setPosition(ClimbConstants.kHookOutPosition);
             }
             case IDLE -> {
-                mClimbIO.setMotorVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
+                setClimbVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
                 mServo.setPosition(ClimbConstants.kHookInPosition);
             } case INVALID -> {}
             default  -> {}
@@ -63,7 +62,7 @@ public class ClimbSS extends SubsystemBase {
 
     public Command setStateCmd(ClimbState pState) {
         return new FunctionalCommand(
-            () -> initialState(pState), 
+            () -> initiateState(pState), 
             () -> {}, 
             (interrupted) -> {}, 
             () -> false, 

@@ -17,7 +17,7 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
     public IntakeRollerIOSim() {
         kIntakeRoller = new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(1), 
+                DCMotor.getKrakenX60(1), 
                 0.5,
                 IntakeConstants.RollerConstants.kRollerMotorConfig.rotorToMechanismRatio()), 
             DCMotor.getKrakenX60(1).withReduction(IntakeConstants.RollerConstants.kRollerMotorConfig.rotorToMechanismRatio()), 

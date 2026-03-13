@@ -106,7 +106,7 @@ public class IntakePivotSS extends SubsystemBase {
             } case TUNING_AMPS -> {
                 setIntakeAmps(IntakeConstants.PivotConstants.tPivotTuningAmp.get());
             } case STOW, COMPACT, INTAKE, TUNING_SETPOINT -> {
-                setIntakePosition(IntakeConstants.PivotConstants.kStateToSetpointMapHood.get(mCurrentIntakeState).get());
+                setIntakePosition(IntakeConstants.PivotConstants.kStateToSetpointMapIntake.get(mCurrentIntakeState).get());
             } case INVALID -> {}
             default -> {
                 Telemetry.reportIssue(null);

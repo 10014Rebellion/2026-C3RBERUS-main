@@ -43,7 +43,7 @@ public class ClimbIOSim implements ClimbIO{
 
     @Override
     public void setMotorVolts(double pVolts){
-        mAppliedVolts = MathUtil.clamp(12.0, -12.0, pVolts);
+        mAppliedVolts = MathUtil.clamp(pVolts, -12.0, 12.0);
         mElevatorSim.setInputVoltage(mAppliedVolts);
     }
 
