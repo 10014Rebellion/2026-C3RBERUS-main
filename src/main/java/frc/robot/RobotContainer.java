@@ -23,6 +23,7 @@ import frc.robot.systems.intake.pivot.IntakePivotIOSim;
 import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.roller.IntakeRollerIO;
 import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
+import frc.robot.systems.intake.roller.IntakeRollerIOSim;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
 import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
@@ -47,7 +48,6 @@ import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.climb.ClimbConstants;
-import frc.robot.systems.climb.ClimbIO;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
 import frc.robot.systems.climb.ClimbSS;
 
@@ -101,8 +101,7 @@ public class RobotContainer {
                 mIntake = new Intake(
                     new IntakePivotSS(new IntakePivotIOKrakenX44(
                         IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                        IntakeConstants.PivotConstants.kPivotEncoderConfig,
-                        IntakeConstants.PivotConstants.kPivotLimits)),
+                        IntakeConstants.PivotConstants.kPivotEncoderConfig)),
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
@@ -149,9 +148,8 @@ public class RobotContainer {
                 mIntake = new Intake(
                     new IntakePivotSS(new IntakePivotIOSim(
                         IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                        IntakeConstants.PivotConstants.kPivotEncoderConfig,
-                        IntakeConstants.PivotConstants.kPivotLimits)),
-                    new IntakeRollerSS(new IntakeRollerIO() {})
+                        IntakeConstants.PivotConstants.kPivotEncoderConfig)),
+                    new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
                 break;

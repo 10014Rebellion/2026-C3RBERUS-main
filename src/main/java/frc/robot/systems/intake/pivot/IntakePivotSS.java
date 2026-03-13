@@ -21,42 +21,43 @@ public class IntakePivotSS extends SubsystemBase {
         STOW,
         COMPACT,
         INTAKE,
-        TUNING_SETPOINT
+        TUNING_SETPOINT,
+        INVALID
     }
 
     private final IntakePivotIO mIntakePivotIO;
     private final ArmFeedforward mIntakeFF;
     private final IntakePivotInputsAutoLogged mIntakeInputs = new IntakePivotInputsAutoLogged();
 
-    private final LoggedTunableNumber tIntakeKP = new LoggedTunableNumber("Shooter/Intake/Control/PID/kP", 
+    private final LoggedTunableNumber tIntakeKP = new LoggedTunableNumber("Intake/Control/PID/kP", 
         IntakeConstants.PivotConstants.kPivotController.pdController().kP());
-    private final LoggedTunableNumber tIntakeKD = new LoggedTunableNumber("Shooter/Intake/Control/PID/kD", 
+    private final LoggedTunableNumber tIntakeKD = new LoggedTunableNumber("Intake/Control/PID/kD", 
         IntakeConstants.PivotConstants.kPivotController.pdController().kD());
-    private final LoggedTunableNumber tIntakeKS = new LoggedTunableNumber("Shooter/Intake/Control/FF/kS", 
+    private final LoggedTunableNumber tIntakeKS = new LoggedTunableNumber("Intake/Control/FF/kS", 
         IntakeConstants.PivotConstants.kPivotController.feedforward().getKs());
-    private final LoggedTunableNumber tIntakeKG = new LoggedTunableNumber("Shooter/Intake/Control/FF/kG", 
+    private final LoggedTunableNumber tIntakeKG = new LoggedTunableNumber("Intake/Control/FF/kG", 
         IntakeConstants.PivotConstants.kPivotController.feedforward().getKg());
-    private final LoggedTunableNumber tIntakeKV = new LoggedTunableNumber("Shooter/Intake/Control/FF/kV", 
+    private final LoggedTunableNumber tIntakeKV = new LoggedTunableNumber("Intake/Control/FF/kV", 
         IntakeConstants.PivotConstants.kPivotController.feedforward().getKv());
-    private final LoggedTunableNumber tIntakeKA = new LoggedTunableNumber("Shooter/Intake/Control/FF/kA", 
+    private final LoggedTunableNumber tIntakeKA = new LoggedTunableNumber("Intake/Control/FF/kA", 
         IntakeConstants.PivotConstants.kPivotController.feedforward().getKa());
-    private final LoggedTunableNumber tIntakeCruiseVel = new LoggedTunableNumber("Shooter/Intake/Control/Profile/CruiseVel", 
+    private final LoggedTunableNumber tIntakeCruiseVelDPS = new LoggedTunableNumber("Intake/Control/Profile/CruiseVelDPS", 
         IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxVelocity());
-    private final LoggedTunableNumber tIntakeMaxAccel = new LoggedTunableNumber("Shooter/Intake/Control/Profile/MaxAcceleration", 
+    private final LoggedTunableNumber tIntakeMaxAccelDPSS = new LoggedTunableNumber("Intake/Control/Profile/MaxAccelerationDPSS", 
         IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxAcceleration());
-    private final LoggedTunableNumber tIntakeMaxJerk = new LoggedTunableNumber("Shooter/Intake/Control/Profile/MaxJerk", 
+    private final LoggedTunableNumber tIntakeMaxJerkDPSSS = new LoggedTunableNumber("Intake/Control/Profile/MaxJerkDPSSS", 
         IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxJerk());
-    private final LoggedTunableNumber tIntakeTolerance = new LoggedTunableNumber("Shooter/Intake/Control/ToleranceDegrees", 
+    private final LoggedTunableNumber tIntakeTolerance = new LoggedTunableNumber("Intake/Control/ToleranceDegrees", 
         IntakeConstants.PivotConstants.kPivotMotorToleranceRotations.getDegrees());
   
-    @AutoLogOutput(key = "Shooter/Intake/States/CurrentState")
+    @AutoLogOutput(key = "IntakePivot/States/CurrentState")
     private IntakePivotStates mCurrentIntakeState = IntakePivotStates.STOPPED;
 
-    @AutoLogOutput(key = "Shooter/Intake/RotationGoal/CurrentGoal")
+    @AutoLogOutput(key = "IntakePivot/RotationGoal/CurrentGoal")
     private Rotation2d mGoalAngle = Rotation2d.kZero;
     private int mDesiredDirection = 0;
 
-    @AutoLogOutput(key = "Shooter/Intake/LimitsEnforced")
+    @AutoLogOutput(key = "Intake/LimitsEnforced")
     private boolean mLimitEnforced = false;
   
     public IntakePivotSS(IntakePivotIO pIntakePivotIO) {
@@ -80,6 +81,17 @@ public class IntakePivotSS extends SubsystemBase {
     @SuppressWarnings("incomplete-switch")
     private void initializeState(IntakePivotStates pStateToInit) {
         mCurrentIntakeState = pStateToInit;
+        switch (mCurrentIntakeState) {
+            case STOPPED -> {
+            } case TUNING_VOLTAGE -> {
+            } case TUNING_AMPS -> {
+            } case STOW, COMPACT, INTAKE, TUNING_SETPOINT -> {
+                mIntakePivotIO.resetPPID();
+            } case INVALID -> {}
+            default -> {
+                Telemetry.reportIssue(null);
+            }
+        }
     }
 
     /*
@@ -95,12 +107,12 @@ public class IntakePivotSS extends SubsystemBase {
                 setIntakeAmps(IntakeConstants.PivotConstants.tPivotTuningAmp.get());
             } case STOW, COMPACT, INTAKE, TUNING_SETPOINT -> {
                 setIntakePosition(IntakeConstants.PivotConstants.kStateToSetpointMapHood.get(mCurrentIntakeState).get());
-            } default -> {
+            } case INVALID -> {}
+            default -> {
                 Telemetry.reportIssue(null);
             }
         }
     }
-
     /*
      * Performs variable updates or parameter resets when a state ends, SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
@@ -122,6 +134,7 @@ public class IntakePivotSS extends SubsystemBase {
         );
     }
 
+    /* SETTERS */
     private void setState(IntakePivotStates pNewState) {
         endState(mCurrentIntakeState);
         mCurrentIntakeState = pNewState;
@@ -138,7 +151,7 @@ public class IntakePivotSS extends SubsystemBase {
         mGoalAngle = pRot;
 
         double ffOutput = mIntakeFF.calculate(
-            mIntakeInputs.iEncoderPosition.getRadians(), 
+            mIntakeInputs.iIntakePivotRotation.getRadians(), 
             mIntakeInputs.iIntakeClosedLoopReferenceSlope.getRadians()
         );
 
@@ -162,26 +175,6 @@ public class IntakePivotSS extends SubsystemBase {
         enforceSoftLimits();
     }
 
-    public void enforceSoftLimits() {
-        if(
-        (mIntakeInputs.iEncoderPosition.getRotations() > IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRotations()
-            && mDesiredDirection == 1 ) 
-            || 
-        (mIntakeInputs.iEncoderPosition.getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() 
-            && mDesiredDirection == -1)) {
-                mLimitEnforced = true;
-                mIntakePivotIO.stopMotor();
-        } else {
-            mLimitEnforced = false;
-        }
-    }
-
-    public int toDirection(double val) {
-        if(val > 0) return 1;
-        if(val < 0) return -1;
-        else return 0;
-    }
-
     private void setFF(double kS, double kG, double kV, double kA) {
         mIntakeFF.setKs(kS);
         mIntakeFF.setKg(kG);
@@ -189,6 +182,7 @@ public class IntakePivotSS extends SubsystemBase {
         mIntakeFF.setKa(kA);
     }
 
+    /* GETTERS */
     public IntakePivotStates getIntakeState() {
         return mCurrentIntakeState;
     }
@@ -208,6 +202,7 @@ public class IntakePivotSS extends SubsystemBase {
         return Math.abs(getErrorPositionRotations()) < tIntakeTolerance.get();
     }
 
+    /* LOGICCC */
     private Rotation2d clampRotToSoftLimits(Rotation2d pRotToClamp) {
         return Rotation2d.fromRotations(
             MathUtil.clamp(
@@ -230,8 +225,31 @@ public class IntakePivotSS extends SubsystemBase {
         );
   
         LoggedTunableNumber.ifChanged( hashCode(), 
-            () -> mIntakePivotIO.setMotionMagicConstants(tIntakeCruiseVel.get(), tIntakeMaxAccel.get(), tIntakeMaxJerk.get()), 
-            tIntakeCruiseVel, tIntakeMaxAccel, tIntakeMaxJerk
+            () -> mIntakePivotIO.setMotionMagicConstants(
+                tIntakeCruiseVelDPS.get() / 360.0, 
+                tIntakeMaxAccelDPSS.get() / 360.0, 
+                tIntakeMaxJerkDPSSS.get() / 360.0), 
+            tIntakeCruiseVelDPS, tIntakeMaxAccelDPSS, tIntakeMaxJerkDPSSS
         );
+    }
+
+    public void enforceSoftLimits() {
+        if(
+        (mIntakeInputs.iEncoderPosition.getRotations() > IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRotations()
+            && mDesiredDirection == 1 ) 
+            || 
+        (mIntakeInputs.iEncoderPosition.getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() 
+            && mDesiredDirection == -1)) {
+                mLimitEnforced = true;
+                mIntakePivotIO.stopMotor();
+        } else {
+            mLimitEnforced = false;
+        }
+    }
+
+    public int toDirection(double val) {
+        if(val > 0) return 1;
+        if(val < 0) return -1;
+        else return 0;
     }
 }

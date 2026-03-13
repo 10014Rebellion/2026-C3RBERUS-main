@@ -4,6 +4,7 @@
 
 package frc.robot.systems.intake.roller;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,6 +25,7 @@ public class IntakeRollerSS extends SubsystemBase {
     private final IntakeRollerIO mIntakeRollerIO;
     private final IntakeRollerInputsAutoLogged mIntakeRollerInputs = new IntakeRollerInputsAutoLogged();
 
+    @AutoLogOutput(key="IntakeRoller/State")
     private IntakeRollerState mIntakeRollerState = IntakeRollerState.IDLE;
 
     public IntakeRollerSS(IntakeRollerIO pIntakeRollerIO) {
@@ -40,10 +42,12 @@ public class IntakeRollerSS extends SubsystemBase {
 
     public void executeState() {
         switch (mIntakeRollerState) {
-            case IDLE, INTAKE, OUTTAKE, TUNING:
-                IntakeConstants.RollerConstants.kStateToIntakeVoltage.get(mIntakeRollerState);
-            case INVALID:
-            default:
+            case IDLE, INTAKE, OUTTAKE, TUNING -> {
+                mIntakeRollerIO.setMotorVolts(
+                    IntakeConstants.RollerConstants.kStateToIntakeVoltage.get(mIntakeRollerState).get());
+            } 
+            case INVALID -> {}
+            default -> {}
         }
     }
   

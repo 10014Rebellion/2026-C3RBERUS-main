@@ -24,7 +24,7 @@ import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
+import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
@@ -123,7 +123,7 @@ public class AutonCommands extends SubsystemBase {
 
         autoActivted
             .onTrue(autoPath1)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.STOWED))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.STOW))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
@@ -193,7 +193,7 @@ public class AutonCommands extends SubsystemBase {
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
+            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
             .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
         shootingRange
@@ -232,7 +232,7 @@ public class AutonCommands extends SubsystemBase {
             () -> path2FPShooting.hasEnded()
                 && path2IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
             .onTrue(mRobotDrive.getDriveManager().setToTeleop())
             .onTrue(endAuto(auto));
@@ -267,7 +267,7 @@ public class AutonCommands extends SubsystemBase {
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
+            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
             .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
         shootingRange
@@ -306,7 +306,7 @@ public class AutonCommands extends SubsystemBase {
             () -> path2FPShooting.hasEnded()
                 && path2IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
             .onTrue(mRobotDrive.getDriveManager().setToTeleop())
             .onTrue(endAuto(auto));
@@ -368,11 +368,11 @@ public class AutonCommands extends SubsystemBase {
 
     ///////////////// SUPERSTRUCTURE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\
     public Command intakeCommand() {
-        return mIntake.setPivotStateCmd(IntakePivotState.INTAKE).alongWith(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE));
+        return mIntake.setPivotStateCmd(IntakePivotStates.INTAKE).alongWith(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE));
     }
 
     public Command deployIntakeCommand() {
-        return mIntake.setPivotStateCmd(IntakePivotState.INTAKE);
+        return mIntake.setPivotStateCmd(IntakePivotStates.INTAKE);
     }
 
     public Command bindexCommand() {

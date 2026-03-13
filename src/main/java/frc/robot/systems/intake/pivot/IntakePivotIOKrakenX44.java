@@ -8,7 +8,7 @@ import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -35,7 +35,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     // private final DetachedEncoder mIntakePivotEncoder;
     private final VoltageOut mIntakePivotVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mIntakePivotAmpsControl = new TorqueCurrentFOC(0.0);
-    private final PositionVoltage mIntakePivotRotationControl = new PositionVoltage(0.0);
+    private final MotionMagicVoltage mIntakePivotRotationControl = new MotionMagicVoltage(0.0);
     
     private final StatusSignal<Angle> mIntakePivotRotation;
     private final StatusSignal<AngularVelocity> mIntakePivotVelocityRPS;
@@ -169,6 +169,11 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     @Override
     public void setMotorAmps(double pAmps){
         mIntakePivotMotor.setControl(mIntakePivotAmpsControl.withOutput(pAmps));
+    }
+
+    @Override
+    public void resetPPID() {
+        /* Does nothing at this point in time */
     }
 
     @Override

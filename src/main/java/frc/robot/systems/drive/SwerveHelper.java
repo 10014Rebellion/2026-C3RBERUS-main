@@ -2,7 +2,7 @@ package frc.robot.systems.drive;
 
 import edu.wpi.first.math.Vector;
 
-import com.pathplanner.lib.pathfinding.Pathfinding;
+// import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
@@ -29,7 +29,7 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.math.EqualsUtil;
 import frc.lib.pathplanner.SwerveSetpoint;
-import frc.lib.swerve.LocalADStarAK;
+// import frc.lib.swerve.LocalADStarAK;
 import frc.lib.telemetry.Telemetry;
 
 public class SwerveHelper {
@@ -262,7 +262,7 @@ public class SwerveHelper {
     }
 
     public static void setUpPathPlanner() {
-        Pathfinding.setPathfinder(new LocalADStarAK());
+        // Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback((activePath) ->
             Telemetry.log("Drive/Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
         PathPlannerLogging.setLogTargetPoseCallback(
