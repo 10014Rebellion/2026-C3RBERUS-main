@@ -32,7 +32,6 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private final CANdi mEncoder;
     private final StatusSignal<Angle> mIntakeEncoderAbsolutePosition;
 
-    // private final DetachedEncoder mIntakePivotEncoder;
     private final VoltageOut mIntakePivotVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mIntakePivotAmpsControl = new TorqueCurrentFOC(0.0);
     private final MotionMagicVoltage mIntakePivotRotationControl = new MotionMagicVoltage(0.0);
@@ -98,12 +97,15 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0, 
+            mIntakePivotRotation,
             mIntakePivotVelocityRPS,
             mIntakePivotAccelerationRPSS, 
             mIntakePivotVoltage,
             mIntakePivotSupplyCurrent,
             mIntakePivotStatorCurrent,
-            mIntakePivotTempCelsius
+            mIntakePivotTempCelsius,
+            mIntakePivotReferencePosition,
+            mIntakePivotReferencePositionSlope
         );
 
         mIntakePivotMotor.optimizeBusUtilization();
@@ -127,8 +129,6 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         ).isOK();
         pInputs.iIntakePivotRotation = 
             Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
-            // .minus(mOffset);
-        // mPivotPos = Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
         pInputs.iIntakePivotVelocityRPS = Rotation2d.fromRotations(mIntakePivotVelocityRPS.getValueAsDouble());
         pInputs.iIntakePivotAccelerationRPSS = Rotation2d.fromRotations(mIntakePivotAccelerationRPSS.getValueAsDouble());
         pInputs.iIntakePivotMotorVolts = mIntakePivotVoltage.getValueAsDouble();
@@ -137,12 +137,9 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         pInputs.iIntakePivotTempCelsius = mIntakePivotTempCelsius.getValueAsDouble();
         pInputs.iIntakeClosedLoopReference = 
             Rotation2d.fromRotations(mIntakePivotReferencePosition.getValueAsDouble());
-            // .minus(mOffset);
         pInputs.iIntakeClosedLoopReferenceSlope = 
             Rotation2d.fromRotations(mIntakePivotReferencePositionSlope.getValueAsDouble());
-            // .minus(mOffset);
     }
-
 
     @Override 
     public void setPDConstants(double pKP, double pKD) {
