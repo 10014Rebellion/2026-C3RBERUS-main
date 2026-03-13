@@ -57,7 +57,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     @Override
     public void setMotorVolts(double pVolts) {
         mAppliedVolts = MathUtil.clamp(pVolts, -12.0, 12.0);
-        mArmSim.setInputVoltage(pVolts);
+        mArmSim.setInputVoltage(mAppliedVolts);
     }
 
     @Override

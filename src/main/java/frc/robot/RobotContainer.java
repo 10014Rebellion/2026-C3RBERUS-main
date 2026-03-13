@@ -52,8 +52,8 @@ import frc.robot.systems.climb.ClimbIO;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
 import frc.robot.systems.climb.ClimbIOSim;
 import frc.robot.systems.climb.ClimbSS;
-import frc.robot.systems.climb.ServoIO;
-import frc.robot.systems.climb.ServoIOPWM;
+import frc.robot.systems.climb.AngularServoIO;
+import frc.robot.systems.climb.AngularServoIOPWM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -111,7 +111,7 @@ public class RobotContainer {
 
                 mClimbSS = new ClimbSS(
                     new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants),
-                    new ServoIOPWM(ClimbConstants.kHookPort));
+                    new AngularServoIOPWM(ClimbConstants.kHookPort));
 
                 break;
             }
@@ -160,7 +160,7 @@ public class RobotContainer {
                         ClimbConstants.kSimElevator, 
                         ClimbConstants.kClimbMotorConstants, 
                         ClimbConstants.kSoftLimits),
-                    new ServoIO() {});
+                    new AngularServoIO() {});
 
                 break;
             }
@@ -202,7 +202,7 @@ public class RobotContainer {
 
                 mClimbSS = new ClimbSS(
                     new ClimbIO() {},
-                    new ServoIO() {});
+                    new AngularServoIO() {});
 
                 break;
             }

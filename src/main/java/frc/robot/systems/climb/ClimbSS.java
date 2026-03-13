@@ -23,13 +23,13 @@ public class ClimbSS extends SubsystemBase {
     private final ClimbIO mClimbIO;
     private final ClimbInputsAutoLogged mClimbInputs = new ClimbInputsAutoLogged();
 
-    private final ServoIO mServo;
+    private final AngularServoIO mServo;
 
     private ClimbState mClimbState = ClimbState.IDLE;
     private int mDesiredDirection = 0;
     private boolean mLimitEnforced = false;
 
-    public ClimbSS(ClimbIO pClimbIO, ServoIO pServo) {
+    public ClimbSS(ClimbIO pClimbIO, AngularServoIO pServo) {
         mClimbIO = pClimbIO;
         mServo = pServo;
     }

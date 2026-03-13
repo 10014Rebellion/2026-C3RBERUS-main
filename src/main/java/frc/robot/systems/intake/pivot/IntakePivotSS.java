@@ -47,7 +47,7 @@ public class IntakePivotSS extends SubsystemBase {
         IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxAcceleration());
     private final LoggedTunableNumber tIntakeMaxJerkDPSSS = new LoggedTunableNumber("Intake/Control/Profile/MaxJerkDPSSS", 
         IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxJerk());
-    private final LoggedTunableNumber tIntakeTolerance = new LoggedTunableNumber("Intake/Control/ToleranceDegrees", 
+    private final LoggedTunableNumber tIntakeToleranceDegrees = new LoggedTunableNumber("Intake/Control/ToleranceDegrees", 
         IntakeConstants.PivotConstants.kPivotMotorToleranceRotations.getDegrees());
   
     @AutoLogOutput(key = "IntakePivot/States/CurrentState")
@@ -159,7 +159,7 @@ public class IntakePivotSS extends SubsystemBase {
 
         mIntakePivotIO.setMotorPosition(pRot, ffOutput);
 
-        mDesiredDirection = toDirection(getErrorPositionRotations());
+        mDesiredDirection = toDirection(getErrorPosition().getDegrees());
         enforceSoftLimits();
     }
 
@@ -187,19 +187,19 @@ public class IntakePivotSS extends SubsystemBase {
         return mCurrentIntakeState;
     }
   
-    @AutoLogOutput(key = "Shooter/Intake/Feedback/ErrorRotation")
-    public double getErrorPositionRotations() {
-        return getCurrentGoal().getRotations() - mIntakeInputs.iIntakePivotRotation.getRotations();
+    @AutoLogOutput(key = "Intake/Feedback/ErrorRotation")
+    public Rotation2d getErrorPosition() {
+        return Rotation2d.fromRotations(getCurrentGoal().getRotations() - mIntakeInputs.iIntakePivotRotation.getRotations());
     }
 
-    @AutoLogOutput(key = "Shooter/Intake/Feedback/CurrentGoal")
+    @AutoLogOutput(key = "Intake/Feedback/CurrentGoal")
     public Rotation2d getCurrentGoal() {
         return mGoalAngle;    
     }
 
-    @AutoLogOutput(key = "Shooter/Intake/Feedback/AtGoal")
+    @AutoLogOutput(key = "Intake/Feedback/AtGoal")
     public boolean atGoal() {
-        return Math.abs(getErrorPositionRotations()) < tIntakeTolerance.get();
+        return Math.abs(getErrorPosition().getDegrees()) < tIntakeToleranceDegrees.get();
     }
 
     /* LOGICCC */

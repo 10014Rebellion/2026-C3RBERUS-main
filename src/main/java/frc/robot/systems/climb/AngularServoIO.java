@@ -4,7 +4,7 @@ import org.littletonrobotics.junction.AutoLog;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
-public interface ServoIO {
+public interface AngularServoIO {
     @AutoLog
     public static class ServoIOInputs {
         boolean iUsingServo = false;

@@ -4,10 +4,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Servo;
 
-public class ServoIOPWM implements ServoIO {
+public class AngularServoIOPWM implements AngularServoIO {
     private final Servo mServo;
 
-    public ServoIOPWM(int id) {
+    public AngularServoIOPWM(int id) {
         mServo = new Servo(id);
     }
 
