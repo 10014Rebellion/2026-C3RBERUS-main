@@ -38,16 +38,16 @@ public class HoodSS extends SubsystemBase {
     private final ArmFeedforward mHoodFF;
     private final HoodInputsAutoLogged mHoodInputs = new HoodInputsAutoLogged();
   
-    private final LoggedTunableNumber tHoodKP = new LoggedTunableNumber("Hood/Control/PID/kP", HoodConstants.kHoodControlConfig.pdController().kP());
-    private final LoggedTunableNumber tHoodKD = new LoggedTunableNumber("Hood/Control/PID/kD", HoodConstants.kHoodControlConfig.pdController().kD());
-    private final LoggedTunableNumber tHoodKS = new LoggedTunableNumber("Hood/Control/FF/kS", HoodConstants.kHoodControlConfig.feedforward().getKs());
-    private final LoggedTunableNumber tHoodKG = new LoggedTunableNumber("Hood/Control/FF/kG", HoodConstants.kHoodControlConfig.feedforward().getKg());
-    private final LoggedTunableNumber tHoodKV = new LoggedTunableNumber("Hood/Control/FF/kV", HoodConstants.kHoodControlConfig.feedforward().getKv());
-    private final LoggedTunableNumber tHoodKA = new LoggedTunableNumber("Hood/Control/FF/kA", HoodConstants.kHoodControlConfig.feedforward().getKa());
-    private final LoggedTunableNumber tHoodCruiseVel = new LoggedTunableNumber("Hood/Control/Profile/CruiseVel", HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity());
-    private final LoggedTunableNumber tHoodMaxAccel = new LoggedTunableNumber("Hood/Control/Profile/MaxAcceleration", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration());
-    private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Hood/Control/Profile/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
-    private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Hood/Control/Tolerance", HoodConstants.kToleranceRotations);
+    private final LoggedTunableNumber tHoodKP = new LoggedTunableNumber("Shooter/Hood/Control/PID/kP", HoodConstants.kHoodControlConfig.pdController().kP());
+    private final LoggedTunableNumber tHoodKD = new LoggedTunableNumber("Shooter/Hood/Control/PID/kD", HoodConstants.kHoodControlConfig.pdController().kD());
+    private final LoggedTunableNumber tHoodKS = new LoggedTunableNumber("Shooter/Hood/Control/FF/kS", HoodConstants.kHoodControlConfig.feedforward().getKs());
+    private final LoggedTunableNumber tHoodKG = new LoggedTunableNumber("Shooter/Hood/Control/FF/kG", HoodConstants.kHoodControlConfig.feedforward().getKg());
+    private final LoggedTunableNumber tHoodKV = new LoggedTunableNumber("Shooter/Hood/Control/FF/kV", HoodConstants.kHoodControlConfig.feedforward().getKv());
+    private final LoggedTunableNumber tHoodKA = new LoggedTunableNumber("Shooter/Hood/Control/FF/kA", HoodConstants.kHoodControlConfig.feedforward().getKa());
+    private final LoggedTunableNumber tHoodCruiseVel = new LoggedTunableNumber("Shooter/Hood/Control/Profile/CruiseVel", HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity());
+    private final LoggedTunableNumber tHoodMaxAccel = new LoggedTunableNumber("Shooter/Hood/Control/Profile/MaxAcceleration", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration());
+    private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Shooter/Hood/Control/Profile/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
+    private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Shooter/Hood/Control/Tolerance", HoodConstants.kToleranceRotations);
   
     @AutoLogOutput(key = "Shooter/Hood/States/CurrentState")
     private HoodStates mCurrentHoodState = HoodStates.STOPPED;

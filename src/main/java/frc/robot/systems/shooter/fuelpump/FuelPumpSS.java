@@ -12,24 +12,11 @@ import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
 
 public class FuelPumpSS extends SubsystemBase {
-
   public static enum FuelPumpState {
-    STOPPED(() -> 0.0),
-    INTAKE(() -> 11.0),
-    UNJAM(() -> -2),
-    OUTTAKE(() -> -10.014),
-    SLOW_OUTTAKE(() -> -4),
-    TUNING(null);
-
-    private DoubleSupplier mVoltage;
-
-    private FuelPumpState(DoubleSupplier pVoltage) {
-      mVoltage = pVoltage;
-    }
-
-    public double getDesiredVoltge() {
-      return mVoltage.getAsDouble();
-    } 
+    STOPPED,
+    TUNING_VOLT,
+    INTAKE_VOLT,
+    OUTTAKE_VOLT,    
   }
 
 
