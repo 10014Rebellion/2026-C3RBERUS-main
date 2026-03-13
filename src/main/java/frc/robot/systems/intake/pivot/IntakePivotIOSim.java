@@ -55,7 +55,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
         mIntakePivotMotor.setInputVoltage(pVolts);
     }   
 
-    public void setMotorRot(Rotation2d pRot, double feedforward) {
+    public void setMotorPosition(Rotation2d pRot, double feedforward) {
         setMotorVolts(mIntakePivotController.calculate(getPos().getRotations(), pRot.getRotations()) + feedforward);
     }
 

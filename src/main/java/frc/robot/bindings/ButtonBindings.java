@@ -11,12 +11,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.math.AllianceFlipUtil;
-import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.climb.ClimbSS;
-import frc.robot.systems.climb.ClimbSS.ClimbState;
-import frc.robot.systems.conveyor.ConveyorSS;
-import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.Intake;
@@ -28,8 +24,6 @@ import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
 import frc.robot.systems.shooter.hood.HoodSS.HoodClosedSetpoints;
-import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ButtonBindings {
     private final Drive mDriveSS;
@@ -38,19 +32,17 @@ public class ButtonBindings {
     private final FlywheelsSS mFlywheelsSS;
     private final Intake mIntakeSS;
     private final ClimbSS mClimbSS;
-    private final ConveyorSS mConveyorSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
 
     private final CommandGenericHID mHID = new CommandGenericHID(2);
 
-    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, ConveyorSS pConveyorSS, ClimbSS pClimbSS) {
+    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, ClimbSS pClimbSS) {
         this.mDriveSS = pDriveSS;
         this.mFuelPumpSS = pFuelPumpSS;
         this.mHoodSS = pHoodSS;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mIntakeSS = pIntake;
-        this.mConveyorSS = pConveyorSS;
         this.mClimbSS = pClimbSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.getDriveManager().setToTeleop());
     }
@@ -67,7 +59,6 @@ public class ButtonBindings {
     public void initTriggers() {
         new Trigger(() -> DriverStation.isTeleopEnabled())
             .onTrue(mDriveSS.getDriveManager().setToTeleop()
-                .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
                 .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
                 .alongWith(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
                 .alongWith(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
@@ -196,11 +187,10 @@ public class ButtonBindings {
             new SequentialCommandGroup(
                 // mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.UNJAM).withTimeout(0.4),
                 // mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.UNJAM)).until(()->mFuelPumpSS.isReadyToShoot()),
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE)).alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE)
+                .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             )
         )
-        .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
                 .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
                 // .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE))
                 .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
@@ -254,19 +244,15 @@ public class ButtonBindings {
         new Trigger(
             () -> mGunnerController.getRightY() < -0.25)
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-                .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE))
-                .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-                .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+                .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         new Trigger(
             () -> mGunnerController.getRightY() > 0.25)
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
                 .onTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.OUTTAKE))
-                .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.OUTTAKE))
 
                 .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-                .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
-                .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+                .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED));
 
     }
 

@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.robot.systems.conveyor.ConveyorConstants;
+import frc.robot.systems.intake.IntakeConstants;
 
 public class IntakeRollerIOSim implements IntakeRollerIO {
   private final double kLoopPeriodSec = 0.02;
@@ -19,8 +19,9 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
       LinearSystemId.createDCMotorSystem(
         DCMotor.getKrakenX60Foc(1), 
         0.5,
-        ConveyorConstants.kConveyorMotorConstants.rotorToMechanismRatio()), 
-      DCMotor.getKrakenX60Foc(1));;
+        IntakeConstants.RollerConstants.kRollerMotorConfig.rotorToMechanismRatio()), 
+      DCMotor.getKrakenX60(1).withReduction(IntakeConstants.RollerConstants.kRollerMotorConfig.rotorToMechanismRatio()), 
+      0.0);
   }
 
   @Override

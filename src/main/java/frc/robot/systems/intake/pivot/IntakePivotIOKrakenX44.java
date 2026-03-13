@@ -23,7 +23,6 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
-import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 import frc.robot.Constants;
 import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 
@@ -48,19 +47,14 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private final StatusSignal<Temperature> mIntakePivotTempCelsius;
     private final StatusSignal<Double> mIntakePivotReferencePosition;
     private final StatusSignal<Double> mIntakePivotReferencePositionSlope;
-
-    private final RotationSoftLimits mLimits;
-    private Rotation2d mPivotPos = Rotation2d.kZero;
     
-    public IntakePivotIOKrakenX44(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig, RotationSoftLimits pLimits) {
+    public IntakePivotIOKrakenX44(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig) {
         mEncoder = new CANdi(pEncoderConfig.canID(), Constants.kSubsystemsCANBus);
         CANdiConfiguration mEncoderConfiguration = new CANdiConfiguration();
         mEncoderConfiguration.PWM1.AbsoluteSensorOffset = -pEncoderConfig.offset().getRotations();
         mEncoder.getConfigurator().apply(mEncoderConfiguration);
 
         mIntakeEncoderAbsolutePosition = mEncoder.getPWM1Position();
-
-        this.mLimits = pLimits;
 
         // Motor
         mIntakePivotMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
@@ -134,7 +128,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         pInputs.iIntakePivotRotation = 
             Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
             // .minus(mOffset);
-        mPivotPos = Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
+        // mPivotPos = Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
         pInputs.iIntakePivotVelocityRPS = Rotation2d.fromRotations(mIntakePivotVelocityRPS.getValueAsDouble());
         pInputs.iIntakePivotAccelerationRPSS = Rotation2d.fromRotations(mIntakePivotAccelerationRPSS.getValueAsDouble());
         pInputs.iIntakePivotMotorVolts = mIntakePivotVoltage.getValueAsDouble();
@@ -170,7 +164,6 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     @Override
     public void setMotorVolts(double pVolts) {
         mIntakePivotMotor.setControl(mIntakePivotVoltageControl.withOutput(pVolts));
-        enforceSoftLimits();
     }
 
     @Override
@@ -179,17 +172,8 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     }
 
     @Override
-    public void setMotorRot(Rotation2d pRot, double feedforward) {
+    public void setMotorPosition(Rotation2d pRot, double feedforward) {
         mIntakePivotMotor.setControl(mIntakePivotRotationControl.withPosition(pRot.getRotations()).withFeedForward(feedforward));
-        enforceSoftLimits();
-    }
-    
-
-    @Override
-    public void enforceSoftLimits() {
-        double currentRotation = mPivotPos.getRotations();
-        if((currentRotation > mLimits.forwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() > 0) || 
-           (currentRotation < mLimits.backwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() < 0)) stopMotor();
     }
 
     @Override

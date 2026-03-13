@@ -50,11 +50,6 @@ import frc.robot.systems.climb.ClimbConstants;
 import frc.robot.systems.climb.ClimbIO;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
 import frc.robot.systems.climb.ClimbSS;
-import frc.robot.systems.conveyor.ConveyorSS;
-import frc.robot.systems.conveyor.ConveyorConstants;
-import frc.robot.systems.conveyor.ConveyorIO;
-import frc.robot.systems.conveyor.ConveyorIOKrakenX44;
-import frc.robot.systems.conveyor.ConveyorIOSim;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -64,7 +59,6 @@ public class RobotContainer {
     private final FuelPumpSS mFuelPumpSS;
     private final HoodSS mHoodSS;
     private final FlywheelsSS mFlywheelsSS;
-    private final ConveyorSS mConveyor;
     private final Intake mIntake;
     private final ClimbSS mClimbSS;
 
@@ -112,7 +106,6 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
-                mConveyor = new ConveyorSS(new ConveyorIOKrakenX44(ConveyorConstants.kConveyorMotorConstants));
                 break;
             }
             case SIM: {
@@ -125,14 +118,14 @@ public class RobotContainer {
                     },
                     new GyroIO() {},
                     new ATagVision(new ATagCameraIO[]{
-                        // new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
-                        // new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
-                        // new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
-                        // new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}
+                        new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
+                        // new ATagCameraIO() {}, 
+                        // new ATagCameraIO() {}, 
+                        // new ATagCameraIO() {}, 
+                        // new ATagCameraIO() {}
 
                     }));
                 
@@ -161,7 +154,6 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
-                mConveyor = new ConveyorSS(new ConveyorIOSim());
                 break;
             }
 
@@ -200,14 +192,13 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
-                mConveyor = new ConveyorSS(new ConveyorIO() {});
                 break;
             }
         }
 
         mClimbSS = new ClimbSS(new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants, ClimbConstants.kSoftLimits), ClimbConstants.kSoftLimits);
         
-        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake, mConveyor, mClimbSS);
+        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake, mClimbSS);
 
         initBindings();
         initBaseTriggers();
@@ -217,7 +208,7 @@ public class RobotContainer {
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDrive.getDriveManager().setDriveProfile(profile));
 
-        autos = new AutonCommands(mDrive, mIntake, mConveyor, mFuelPumpSS, mHoodSS, mFlywheelsSS);
+        autos = new AutonCommands(mDrive, mIntake, mFuelPumpSS, mHoodSS, mFlywheelsSS);
     }
 
     public Drive getDrivetrain() {

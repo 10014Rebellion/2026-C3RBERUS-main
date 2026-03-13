@@ -31,13 +31,11 @@ public interface IntakePivotIO {
 
     public default void setMotorAmps(double pAmps) {}
 
-    public default void setMotorRot(Rotation2d pRot, double feedforward) {}
+    public default void setMotorPosition(Rotation2d pRot, double feedforward) {}
 
     public default void setPDConstants(double pKP, double pKD) {}
 
     public default void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {}
-
-    public default void enforceSoftLimits() {}
 
     public default void stopMotor() {}
 
