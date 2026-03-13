@@ -155,7 +155,6 @@ public class ModuleIOKraken implements ModuleIO {
         mAzimuthStatorCurrent = mAzimuthMotor.getStatorCurrent();
         mAzimuthSupplyCurrent = mAzimuthMotor.getSupplyCurrent();
         mAzimuthTorqueCurrent = mAzimuthMotor.getTorqueCurrent();
-
         mAzimuthTemp = mAzimuthMotor.getDeviceTemp();
 
         BaseStatusSignal.setUpdateFrequencyForAll(

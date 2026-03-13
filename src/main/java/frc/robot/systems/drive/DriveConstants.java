@@ -19,10 +19,10 @@ import frc.robot.Constants;
 public class DriveConstants {
 
     ///////////////////// DRIVE BASE \\\\\\\\\\\\\\\\\\\\\\\
-    public static final double kRobotWidthXMeters = Units.inchesToMeters(27.75); // TODO: TUNE ME
-    public static final double kRobotWidthYMeters = Units.inchesToMeters(32.75); // TODO: TUNE ME
-    public static final double kTrackWidthXMeters = Units.inchesToMeters(25.0); // Track Width (front to front / back to back) // TODO: TUNE ME
-    public static final double kTrackWidthYMeters = Units.inchesToMeters(30.0); // Wheelbase (Left to left / right to right) // TODO: TUNE ME
+    public static final double kRobotWidthXMeters = Units.inchesToMeters(27.75);
+    public static final double kRobotWidthYMeters = Units.inchesToMeters(32.75);
+    public static final double kTrackWidthXMeters = Units.inchesToMeters(25.0); // Track Width (front to front / back to back)
+    public static final double kTrackWidthYMeters = Units.inchesToMeters(30.0); // Wheelbase (Left to left / right to right)
     public static final Translation2d[] kModuleTranslations = new Translation2d[] {
         new Translation2d(kTrackWidthXMeters / 2.0, kTrackWidthYMeters / 2.0),
         new Translation2d(kTrackWidthXMeters / 2.0, -kTrackWidthYMeters / 2.0),
@@ -34,8 +34,8 @@ public class DriveConstants {
     public static final double kDrivebaseRadiusMeters = Math.hypot(kTrackWidthXMeters / 2.0, kTrackWidthYMeters / 2.0);
 
     /* DRIVEBASE CONSTRAINTS */
-    public static final double kMaxLinearSpeedMPS = 4.0; // TODO: TUNE ME
-    public static final double kMaxLinearAccelerationMPSS = 12.0; // TODO: TUNE ME
+    public static final double kMaxLinearSpeedMPS = 3.5; // TODO: TUNE ME
+    public static final double kMaxLinearAccelerationMPSS = 10.0; // TODO: TUNE ME
 
     public static final double kMaxRotationSpeedRadiansPS = kMaxLinearSpeedMPS / kDrivebaseRadiusMeters; // TODO: TUNE ME
     public static final double kMaxRotationAccelRadiansPS = Math.toRadians(360) * 10; // TODO: TUNE ME
@@ -68,10 +68,10 @@ public class DriveConstants {
     ///////////////////// MODULES \\\\\\\\\\\\\\\\\\\\\\\
     /* GENERAL SWERVE MODULE CONSTANTS */
     public static final boolean kTurnMotorInvert = false;
-    public static final double kCANCoderToMechanismRatio = 1; // TODO: TUNE ME
-    public static final double kAzimuthMotorGearing = 25.464 / 1.0; // TODO: TUNE ME
-    public static final double kDriveMotorGearing = 4.50 / 1.0; // TODO: TUNE ME
-    public static final double kWheelRadiusMeters = Units.inchesToMeters(1.4175); // TODO: TUNE ME
+    public static final double kCANCoderToMechanismRatio = 1;
+    public static final double kAzimuthMotorGearing = 25.464 / 1.0;
+    public static final double kDriveMotorGearing = 5.50 / 1.0;
+    public static final double kWheelRadiusMeters = Units.inchesToMeters(1.4175);
     public static final double kWheelCircumferenceMeters = 2 * Math.PI * kWheelRadiusMeters;
     public static final double kWheelInertia = 125.0 / 4.0;
 
@@ -95,8 +95,8 @@ public class DriveConstants {
             new PIDController(150.0, 0.0, 0.0), new SimpleMotorFeedforward(5.5, 0.0, 1.0), // DRIVE // TODO: TUNE ME
             new PIDController(7.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
         : new ModuleControlConfig(
-            new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005), // TODO: TUNE ME
-            new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.5)); // TODO: TUNE ME
+            new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005),
+            new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.5));
 
     /* MODULE SPECIFIC CONSTANTS */
     public static final int kPigeonCANID = 5; // TODO: TUNE ME

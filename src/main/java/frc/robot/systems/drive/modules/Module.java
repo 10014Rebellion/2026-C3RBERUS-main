@@ -202,8 +202,8 @@ public class Module {
     /* Sets desired accel for feedforwards
      * @pararm Rotation2d Desired angular velocity for feedforward
      */
-    public void setAccelFeedforward(double pAmperage) {
-        this.mAccelFeedforward = pAmperage;
+    public void setAccelFeedforward(double pFeedforward) {
+        this.mAccelFeedforward = pFeedforward;
     }
 
     /* Sets azimuth rotation goal

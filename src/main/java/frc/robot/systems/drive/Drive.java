@@ -79,7 +79,7 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key="Drive/Swerve/PreviousDriveAmps")
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
-    private final boolean kUseGenerator = false;
+    private final boolean kUseGenerator = true;
     private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
 
     private DriveManager mDriveManager;
@@ -135,7 +135,6 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         updateSensorsAndOdometry();
         runSwerve(mDriveManager.computeDesiredSpeedsFromState());
-        // getClosestShootingConfig();
     }
 
     private void updateSensorsAndOdometry() {
@@ -312,7 +311,7 @@ public class Drive extends SubsystemBase {
         }
 
         // mPrevSetpointStates = optimizedSetpointStates;
-        // Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
+        if(kUseGenerator) Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(optimizedSetpointStates));
         Telemetry.log("Drive/Odometry/FieldSetpointChassisSpeed", ChassisSpeeds.fromRobotRelativeSpeeds(
@@ -437,27 +436,4 @@ public class Drive extends SubsystemBase {
     public Module[] getModules() {
         return this.mModules;
     }
-
-    public double getDistance(Pose2d robotPose, Pose2d otherPose){
-        return robotPose.getTranslation().getDistance(otherPose.getTranslation());
-    }
-
-    // public void setClosestShootingConfig(){
-
-    //     ShootingConfig closestPose = ShootingPoses.kShootingConfigs[0];
-
-    //     for(ShootingConfig shooterConfig : ShootingPoses.kShootingConfigs){
-            
-
-    //         if(getDistance(shooterConfig.pose(), getPoseEstimate()) < getDistance(closestPose.pose(), getPoseEstimate())){
-    //             closestPose = shooterConfig;
-    //         }
-    //     }
-
-    //     mClosestShootingPose =  closestPose;
-    // }
-
-    // public ShootingConfig getClosestShootingConfig(){
-    //     return mClosestShootingPose;
-    // }
 }
