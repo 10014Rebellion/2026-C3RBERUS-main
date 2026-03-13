@@ -15,33 +15,6 @@ import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 
 public class HoodSS extends SubsystemBase {
-    public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Hood/TuneVoltage", 0.0);
-    public static final LoggedTunableNumber tTuningAmp = new LoggedTunableNumber("Hood/TuneAmperage", 0.0);
-
-    public static final LoggedTunableNumber tMaxSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MinSetpointDegrees", 0.0);
-    public static final Supplier<Rotation2d> kMaxSetpointSup = () -> Rotation2d.fromDegrees(tMaxSetpointDeg.get());
-
-    public static final LoggedTunableNumber tMidSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MidSetpointDegrees", 0.0);
-    public static final Supplier<Rotation2d> kMidSetpointSup = () -> Rotation2d.fromDegrees(tMidSetpointDeg.get());
-
-    public static final LoggedTunableNumber tMinSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MaxSetpointDegrees", 0.0);
-    public static final Supplier<Rotation2d> kMinSetpointSup = () -> Rotation2d.fromDegrees(tMinSetpointDeg.get());
-
-    public static final LoggedTunableNumber tCloseShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/CloseShotSetpointDegrees", 0.0);
-    public static final Supplier<Rotation2d> kCloseShotSetpointSup = () -> Rotation2d.fromDegrees(tCloseShotSetpointDeg.get());
-
-    public static final LoggedTunableNumber tTowerShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/TowerShotSetpointDegrees", 0.0);
-    public static final Supplier<Rotation2d> kTowerShotSetpointSup = () -> Rotation2d.fromDegrees(tTowerShotSetpointDeg.get());
-
-    public static final LoggedTunableNumber tBumpShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/BumpShotSetpointDegrees", 0.0);
-    public static final Supplier<Rotation2d> kBumpShotSetpointSup = () -> Rotation2d.fromDegrees(tBumpShotSetpointDeg.get());
-
-    public static final LoggedTunableNumber tTuningShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/TuningShotSetpointDegrees", 0.0);
-    public static final Supplier<Rotation2d> kTuningShotSetpointSup = () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get());
-
-    public static final LoggedTunableNumber tIncrementSpeedDPS = new LoggedTunableNumber("Hood/IncrementSpeedDPS", 1.0);
-    public static final Supplier<Rotation2d> tIncrementSpeedSup = () -> Rotation2d.fromDegrees(tIncrementSpeedDPS.get());
-
     public static enum HoodStates {
         STOPPED, // At rest
         TUNING_VOLTAGE,
@@ -57,6 +30,7 @@ public class HoodSS extends SubsystemBase {
         STEP_INCREMENT,
         STEP_DECREMENT,
         HOLD_POSITION,
+        AUTO_SHOOT,
         TUNING_SETPOINT
     }
 
@@ -107,7 +81,13 @@ public class HoodSS extends SubsystemBase {
     private void initializeState(HoodStates pStateToInit) {
         switch (pStateToInit) {
             case HOLD_POSITION -> {
-                setHoodPosition(mHoodInputs.iHoodAngle);
+                HoodConstants.setHoodAngleSetpoint(mHoodInputs.iHoodAngle);
+            } case STEP_INCREMENT -> {
+                HoodConstants.setHoodAngleSetpoint(mHoodInputs.iHoodAngle.plus(HoodConstants.kAdjustStepAmount));
+            } case STEP_DECREMENT -> {
+                HoodConstants.setHoodAngleSetpoint(mHoodInputs.iHoodAngle.minus(HoodConstants.kAdjustStepAmount));
+            } default -> {
+                Telemetry.reportIssue(null);
             }
         }
     }
@@ -117,36 +97,24 @@ public class HoodSS extends SubsystemBase {
      */
     private void executeState() {
         switch (mCurrentHoodState) {
-              case STOPPED -> {
+            case STOPPED -> {
                 mHoodIO.stopMotor();
             } case TUNING_VOLTAGE -> {
-                setHoodVoltage(tTuningVoltage.get());
+                setHoodVoltage(HoodConstants.tTuningVoltage.get());
             } case TUNING_AMPS -> {
-                setHoodAmps(tTuningAmp.get());
-            } case MAX -> {
-                setHoodPosition(kMaxSetpointSup.get());
-            } case MID -> {
-                setHoodPosition(kMidSetpointSup.get());
-            } case MIN -> {
-                setHoodPosition(kMinSetpointSup.get());
-            } case CLOSE_SHOT -> {
-                setHoodPosition(kCloseShotSetpointSup.get());
-            } case BUMP_SHOT -> {
-                setHoodPosition(kBumpShotSetpointSup.get());
-            } case TOWER_SHOT -> {
-                setHoodPosition(kTowerShotSetpointSup.get());
+                setHoodAmps(HoodConstants.tTuningAmp.get());
+            } case MAX, MID, CLOSE_SHOT, BUMP_SHOT, TOWER_SHOT, TUNING_SETPOINT, HOLD_POSITION, STEP_INCREMENT, STEP_DECREMENT, AUTO_SHOOT -> {
+                setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
             } case INCREMENTING -> {
-                setHoodPosition(mHoodInputs.iHoodAngle.plus(Rotation2d.fromDegrees(tIncrementSpeedDPS.get() * 0.02)));
+                HoodConstants.setRotationalIncrementSetpoint(
+                    mHoodInputs.iHoodAngle.plus(
+                        Rotation2d.fromDegrees(HoodConstants.tIncrementSpeedDPS.get() * 0.02)));
+                setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
             } case DECREMENTING -> {
-                setHoodPosition(mHoodInputs.iHoodAngle.minus(Rotation2d.fromDegrees(tIncrementSpeedDPS.get() * 0.02)));
-            } case STEP_INCREMENT -> {
-                setHoodPosition(mHoodInputs.iHoodAngle.plus(HoodConstants.kAdjustStepAmount));
-            } case STEP_DECREMENT -> {
-                setHoodPosition(mHoodInputs.iHoodAngle.minus(HoodConstants.kAdjustStepAmount));
-            } case TUNING_SETPOINT -> {
-                setHoodPosition(kTuningShotSetpointSup.get());
-            } case HOLD_POSITION -> {
-                setHoodPosition(mGoalAngle);
+                HoodConstants.setRotationalIncrementSetpoint(
+                    mHoodInputs.iHoodAngle.minus(
+                        Rotation2d.fromDegrees(HoodConstants.tIncrementSpeedDPS.get() * 0.02)));
+                setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
             } default -> {
                 Telemetry.reportIssue(null);
             }
@@ -215,7 +183,6 @@ public class HoodSS extends SubsystemBase {
         mDesiredDirection = toDirection(pAmps);
         mHoodIO.setMotorAmps(pAmps);
         enforceSoftLimits();
-
     }
 
     public void enforceSoftLimits() {
