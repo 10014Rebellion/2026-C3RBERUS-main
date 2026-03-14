@@ -35,7 +35,9 @@ import frc.robot.systems.drive.PhoenixOdometryThread;
 
 public class ModuleIOKraken implements ModuleIO {
     private final TalonFX mDriveMotor;
-    private final VelocityTorqueCurrentFOC mDriveControl = new VelocityTorqueCurrentFOC(0.0);
+    private final VelocityTorqueCurrentFOC mDriveControl = 
+        new VelocityTorqueCurrentFOC(0.0)
+            .withUpdateFreqHz(0.0);
     private final VoltageOut mDriveVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mDriveAmpControl = new TorqueCurrentFOC(0.0);
     private final double mDriveAppliedVolts = 0.0;
@@ -50,7 +52,8 @@ public class ModuleIOKraken implements ModuleIO {
     private final StatusSignal<AngularAcceleration> mDriveAccelerationMPSS;
 
     private final TalonFX mAzimuthMotor;
-    private final PositionDutyCycle mAzimuthPositionControl = new PositionDutyCycle(0.0);
+    private final PositionDutyCycle mAzimuthPositionControl = new PositionDutyCycle(0.0)
+        .withUpdateFreqHz(0.0);
     // private final PositionTorqueCurrentFOC mAzimuthPositionControl = new PositionTorqueCurrentFOC(0.0);
     private final VoltageOut mAzimuthVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mAzimuthAmpControl = new TorqueCurrentFOC(0.0);
@@ -177,8 +180,8 @@ public class ModuleIOKraken implements ModuleIO {
             mAzimuthVoltage,
             mAzimuthTemp);
 
-        mDriveMotor.optimizeBusUtilization();
-        mAzimuthMotor.optimizeBusUtilization();
+        mDriveMotor.optimizeBusUtilization(0);
+        mAzimuthMotor.optimizeBusUtilization(0);
 
         timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
         turnPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(mAzimuthPosition.clone());
@@ -194,7 +197,8 @@ public class ModuleIOKraken implements ModuleIO {
             mDriveSupplyCurrent,
             mDriveStatorCurrent,
             mDriveTorqueCurrent,
-            mDriveTempCelsius).isOK();
+            mDriveTempCelsius,
+            mDriveAccelerationMPSS).isOK();
         pInputs.iDrivePositionM = (mDrivePositionM.getValueAsDouble());
         pInputs.iDriveVelocityMPS = (mDriveVelocityMPS.getValueAsDouble());
         pInputs.iDriveAppliedVolts = mDriveAppliedVolts;

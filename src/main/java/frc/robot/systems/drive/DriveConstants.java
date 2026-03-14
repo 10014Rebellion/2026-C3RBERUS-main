@@ -95,7 +95,7 @@ public class DriveConstants {
             new PIDController(150.0, 0.0, 0.0), new SimpleMotorFeedforward(5.5, 0.0, 1.0), // DRIVE // TODO: TUNE ME
             new PIDController(7.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
         : new ModuleControlConfig(
-            new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005),
+            new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 3.0, 0.005),
             new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.5));
 
     /* MODULE SPECIFIC CONSTANTS */
