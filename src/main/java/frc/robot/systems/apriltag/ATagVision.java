@@ -5,21 +5,14 @@ package frc.robot.systems.apriltag;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.game.FieldConstants;
 
-import static frc.robot.systems.apriltag.ATagVisionConstants.KUseSingleTagTransform;
 import static frc.robot.systems.apriltag.ATagVisionConstants.kAmbiguityThreshold;
 import static frc.robot.systems.apriltag.ATagVisionConstants.kMultiStdDevs;
 import static frc.robot.systems.apriltag.ATagVisionConstants.kSingleStdDevs;
 
-import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class ATagVision {
@@ -38,8 +31,6 @@ public class ATagVision {
         for (int i = 0; i < pCameras.length; i++) {
             mCamerasData[i] = new AprilTagIOInputsAutoLogged();
         }
-
-        Telemetry.log("Vision/UseSingleTagTransform", KUseSingleTagTransform);
     }
 
     public void periodic(Pose2d pLastRobotPose, Pose2d pSimOdomPose) {
@@ -68,7 +59,7 @@ public class ATagVision {
         for (int i = 0; i < pCamData.iLatestTagTransforms.length; i++) {
             if (pCamData.iLatestTagTransforms[i] != null && pCamData.iLatestTagAmbiguities[i] < kAmbiguityThreshold) {
                 totalDistance +=
-                        pCamData.iLatestTagTransforms[i].getTranslation().getNorm();
+                    pCamData.iLatestTagTransforms[i].getTranslation().getNorm();
                 usableTags++;
             }
         }
@@ -84,7 +75,7 @@ public class ATagVision {
             return processSingleTagObservation(pCamData, avgDist, xyScalar);
         } else {
             return makeVisionObservation(
-                    pCamData.iLatestEstimatedRobotPose.toPose2d(), tMultiXYStdev.get() * xyScalar, pCamData);
+                pCamData.iLatestEstimatedRobotPose.toPose2d(), tMultiXYStdev.get() * xyScalar, pCamData);
         }
     }
 
@@ -94,27 +85,9 @@ public class ATagVision {
             return makeUntrustedObservation(pCamData);
         }
 
-        Pose2d pose;
-        if (KUseSingleTagTransform) {
-            Optional<Pose3d> tagPoseOpt = FieldConstants.kApriltagLayout.getTagPose(pCamData.iSingleTagAprilTagID);
-            if (tagPoseOpt.isEmpty()) {
-                DriverStation.reportWarning("<<< COULD NOT FIND TAG ON FIELD! >>>", true);
-                return makeUntrustedObservation(pCamData);
-            }
-            pose = tagPoseOpt
-                .get().toPose2d()
-                .plus(toTransform2d(pCamData.iCameraToApriltag.inverse()))
-                .plus(toTransform2d(pCamData.iCameraToRobot));
-        } else {
-            pose = pCamData.iLatestEstimatedRobotPose.toPose2d();
-        }
+        Pose2d pose = pCamData.iLatestEstimatedRobotPose.toPose2d();
 
         return makeVisionObservation(pose, tSingleXYStdev.get() * pXYScalar, pCamData);
-    }
-
-    private Transform2d toTransform2d(Transform3d pTransform) {
-        return new Transform2d(
-            pTransform.getX(), pTransform.getY(), pTransform.getRotation().toRotation2d());
     }
 
     public void logVisionObservation(VisionObservation pObservation, String pState) {

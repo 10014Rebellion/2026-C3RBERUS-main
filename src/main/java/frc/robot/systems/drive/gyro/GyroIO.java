@@ -10,7 +10,9 @@ public interface GyroIO {
     public static class GyroInputs {
         public boolean iConnected = false;
         public Rotation2d iYawPosition = new Rotation2d();
-        public Rotation2d iYawVelocityPS = Rotation2d.fromDegrees(0.0);
+        public Rotation2d iYawVelocityPS = Rotation2d.kZero;
+        public Rotation2d iPitchPosition = Rotation2d.kZero;
+        public Rotation2d iRollPosition = Rotation2d.kZero;
         public double iAccXG = 0.0;
         public double iAccYG = 0.0;
         public double iAccZG = 0.0;

@@ -4,9 +4,6 @@ package frc.robot.systems.drive.modules;
 
 import static frc.robot.systems.drive.DriveConstants.kModuleControllerConfigs;
 
-import java.util.Optional;
-import java.util.OptionalDouble;
-
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -33,11 +30,11 @@ public class Module {
 
     private final String kModuleName;
 
-    private OptionalDouble mVelocitySetpointMPS = OptionalDouble.empty();
+    private double mVelocitySetpointMPS = 0.0;
     private double mAccelFeedforward = 0.0;
     private SimpleMotorFeedforward mDriveFF = DriveConstants.kModuleControllerConfigs.driveFF();
 
-    private Optional<Rotation2d> mAzimuthSetpointAngle = Optional.empty();
+    private Rotation2d mAzimuthSetpointAngle = Rotation2d.kZero;
     private Rotation2d mAzimuthSetpointAngularVelocity = Rotation2d.kZero;
     private SimpleMotorFeedforward mAzimuthFF = DriveConstants.kModuleControllerConfigs.azimuthFF();
 
@@ -63,85 +60,36 @@ public class Module {
         odometryPositions = new SwerveModulePosition[sampleCount];
         for (int i = 0; i < sampleCount; i++) {
             odometryPositions[i] = new SwerveModulePosition(
-                mInputs.odometryDrivePositionsM[i], 
-                mInputs.odometryTurnPositions[i]);
+                mInputs.odometryDrivePositionsM[i], mInputs.odometryTurnPositions[i]);
         }
-
-        if (mVelocitySetpointMPS.isPresent()) {
-            double ffOutput = 
-                  mDriveFF.getKs() * Math.signum(mVelocitySetpointMPS.getAsDouble())
-                + mDriveFF.getKv() * mVelocitySetpointMPS.getAsDouble()
-                + mDriveFF.getKa() * mAccelFeedforward;
-
-            mIO.setDriveVelocity(mVelocitySetpointMPS.getAsDouble(), ffOutput);
-
-            Logger.recordOutput("Drive/" + kModuleName + "/VelocitySetpointMPS", mVelocitySetpointMPS.getAsDouble());
-            Logger.recordOutput("Drive/" + kModuleName + (
-                (DriveConstants.kUseVoltageFeedforward) ? 
-                    "/AmperageFeedforward" : "/VoltageFeedforward"), 
-                mAccelFeedforward);
-            Logger.recordOutput("Drive/" + kModuleName + "/ffOutput", ffOutput);
-        }
-        
-        if (mAzimuthSetpointAngle.isPresent()) {
-            double ffOutput = mAzimuthFF.calculate(mAzimuthSetpointAngularVelocity.getRadians());
-            mIO.setAzimuthPosition(mAzimuthSetpointAngle.get(), ffOutput);
-
-            Logger.recordOutput("Drive/" + kModuleName + "/SimpleFeedforwardAzimuth", ffOutput);
-            Logger.recordOutput("Drive/" + kModuleName + "/DesiredAzimuthRotationSpeed", mAzimuthSetpointAngularVelocity);
-        }
-        
 
         if (DriverStation.isDisabled()) stop();
 
         LoggedTunableNumber.ifChanged(
             hashCode(),
             () -> {
-                mIO.setDrivePID(
-                    tDriveP.get(), 
-                    0.0, 
-                    tDriveD.get());
-            },
-            tDriveP,
-            tDriveD
-        );
+                mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get());
+            }, tDriveP, tDriveD);
 
         LoggedTunableNumber.ifChanged(
             hashCode(),
             () -> {
                 mDriveFF = new SimpleMotorFeedforward(
-                    tDriveS.get(), 
-                    tDriveV.get(), 
-                    tDriveA.get());
-            },
-            tDriveS,
-            tDriveV,
-            tDriveA
-        );
+                    tDriveS.get(), tDriveV.get(), tDriveA.get());
+            }, tDriveS, tDriveV, tDriveA);
 
         LoggedTunableNumber.ifChanged(
             hashCode(),
             () -> {
-                mIO.setAzimuthPID(
-                    tTurnP.get(), 
-                    0.0, 
-                    tTurnD.get());
-            },
-            tTurnP,
-            tTurnD
-        );
+                mIO.setAzimuthPID(tTurnP.get(), 0.0, tTurnD.get());
+            }, tTurnP, tTurnD);
 
         LoggedTunableNumber.ifChanged(
             hashCode(),
             () -> {
                 mAzimuthFF = new SimpleMotorFeedforward(
-                    tTurnS.get(), 
-                    tTurnV.get(), 
-                    0.0);
-            },
-            tTurnS,
-            tTurnV
-        );
+                    tTurnS.get(), tTurnV.get(), 0.0);
+            }, tTurnS, tTurnV);
     }
 
     /* Sets the desired setpoint of the module with FF. Disables the all FF include velocity FF
@@ -165,11 +113,9 @@ public class Module {
      * @param state the desired velocity and rotation of the module
      * @param Feedforward The amperage added to the PID from FF, also enables the PID
      */
-    public SwerveModuleState setDesiredStateWithFF(SwerveModuleState pState, double pFeedforward, Rotation2d pAzimuthSetpointAngularVelocity) {
-        setDesiredVelocity(OptionalDouble.of(pState.speedMetersPerSecond));
-        setAccelFeedforward(pFeedforward);
-        setDesiredRotation(Optional.of(pState.angle));
-        setDesiredAzimuthVelocity(pAzimuthSetpointAngularVelocity);
+    public SwerveModuleState setDesiredStateWithFF(SwerveModuleState pState, double pAccelFeedforward, Rotation2d pAzimuthSetpointAngularVelocity) {
+        setDriveVelocity(pState.speedMetersPerSecond, pAccelFeedforward);
+        setAzimuthRotation(pState.angle, pAzimuthSetpointAngularVelocity);
         return getDesiredState();
     }
 
@@ -187,37 +133,41 @@ public class Module {
      * @param azimuthRotation Rotation at which the robot is running characterization voltage at
      */
     public void runCharacterization(double pInputVolts, Rotation2d pAzimuthRotation) {
-        setDesiredRotation(Optional.of(pAzimuthRotation));
-        setDesiredVelocity(OptionalDouble.empty());
+        setDesiredRotation(pAzimuthRotation);
         setDriveVoltage(pInputVolts);
     }
 
-    /* Sets the velocity of the module
-     * @param velocitySetpoint the velocity setpoint
-     */
-    public void setDesiredVelocity(OptionalDouble pVelocitySetpoint) {
-        mVelocitySetpointMPS = pVelocitySetpoint;
+    /* Sets drive velocity */
+    public void setDriveVelocity(double pVelocitySetpointMPS, double pAccelFeedforward) {
+        setDesiredVelocity(pVelocitySetpointMPS);
+        setAccelFeedforward(pAccelFeedforward);
+
+        double ffDriveOutput = 
+                mDriveFF.getKs() * Math.signum(mVelocitySetpointMPS)
+            + mDriveFF.getKv() * mVelocitySetpointMPS
+            + mDriveFF.getKa() * mAccelFeedforward;
+
+        mIO.setDriveVelocity(mVelocitySetpointMPS, ffDriveOutput);
+
+        Logger.recordOutput("Drive/" + kModuleName + "/VelocitySetpointMPS", mVelocitySetpointMPS);
+        Logger.recordOutput("Drive/" + kModuleName + (
+            (DriveConstants.kUseVoltageFeedforward) ? 
+                "/AmperageFeedforward" : "/VoltageFeedforward"), 
+            mAccelFeedforward);
+        Logger.recordOutput("Drive/" + kModuleName + "/ffDriveOutput", ffDriveOutput);
     }
 
-    /* Sets desired accel for feedforwards
-     * @pararm Rotation2d Desired angular velocity for feedforward
-     */
-    public void setAccelFeedforward(double pAmperage) {
-        this.mAccelFeedforward = pAmperage;
-    }
+    /* Sets Azimuth Rotation*/
+    public void setAzimuthRotation(Rotation2d pAzimuthSetpointAngle, Rotation2d pAzimuthSetpointAngularVelocity) {
+        setDesiredRotation(pAzimuthSetpointAngle);
+        setDesiredAzimuthVelocity(pAzimuthSetpointAngularVelocity);
 
-    /* Sets azimuth rotation goal
-     * @pararm Rotation2d angleSetpoint
-     */
-    public void setDesiredRotation(Optional<Rotation2d> pAngleSetpoint) {
-        mAzimuthSetpointAngle = pAngleSetpoint;
-    }
+        double ffAzimuthOutput = mAzimuthFF.calculate(mAzimuthSetpointAngularVelocity.getRadians());
+        mIO.setAzimuthPosition(mAzimuthSetpointAngle, ffAzimuthOutput);
 
-    /* Sets azimuth rotation goal
-     * @pararm Rotation2d Desired angular velocity for feedforward
-     */
-    public void setDesiredAzimuthVelocity(Rotation2d pAzimuthSetpointAngularVelocity) {
-        mAzimuthSetpointAngularVelocity = pAzimuthSetpointAngularVelocity;
+        Logger.recordOutput("Drive/" + kModuleName + "/AzimuthSetpointAngle", mAzimuthSetpointAngle);
+        Logger.recordOutput("Drive/" + kModuleName + "/ffAzimuthOutput", ffAzimuthOutput);
+        Logger.recordOutput("Drive/" + kModuleName + "/DesiredAzimuthRotationSpeed", mAzimuthSetpointAngularVelocity);
     }
 
     /* Sets drive motor's voltage
@@ -256,11 +206,7 @@ public class Module {
 
     /* Gets the setpoint state of the module(speed and rotation) */
     public SwerveModuleState getDesiredState() {
-        return (mVelocitySetpointMPS.isEmpty() || mAzimuthSetpointAngle.isEmpty()) 
-            ? new SwerveModuleState()
-            : new SwerveModuleState(
-                mVelocitySetpointMPS.getAsDouble(), 
-                mAzimuthSetpointAngle.get());
+        return new SwerveModuleState(mVelocitySetpointMPS, mAzimuthSetpointAngle);
     }
 
     /* Gets the physical state of the module(speed and rotation) */
@@ -293,5 +239,33 @@ public class Module {
 
     public String getModuleName() {
         return kModuleName;
+    }
+
+    /* Sets the velocity of the module
+     * @param velocitySetpoint the velocity setpoint
+     */
+    private void setDesiredVelocity(double pVelocitySetpoint) {
+        mVelocitySetpointMPS = pVelocitySetpoint;
+    }
+
+    /* Sets desired accel for feedforwards
+     * @pararm Rotation2d Desired angular velocity for feedforward
+     */
+    private void setAccelFeedforward(double pAccelFeedforward) {
+        mAccelFeedforward = pAccelFeedforward;
+    }
+
+    /* Sets azimuth rotation goal
+     * @pararm Rotation2d angleSetpoint
+     */
+    private void setDesiredRotation(Rotation2d pAngleSetpoint) {
+        mAzimuthSetpointAngle = pAngleSetpoint;
+    }
+
+    /* Sets azimuth rotation goal
+     * @pararm Rotation2d Desired angular velocity for feedforward
+     */
+    private void setDesiredAzimuthVelocity(Rotation2d pAzimuthSetpointAngularVelocity) {
+        mAzimuthSetpointAngularVelocity = pAzimuthSetpointAngularVelocity;
     }
 }
