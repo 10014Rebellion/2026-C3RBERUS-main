@@ -180,8 +180,8 @@ public class ModuleIOKraken implements ModuleIO {
             mAzimuthVoltage,
             mAzimuthTemp);
 
-        mDriveMotor.optimizeBusUtilization(0);
-        mAzimuthMotor.optimizeBusUtilization(0);
+        mDriveMotor.optimizeBusUtilization(0.0);
+        mAzimuthMotor.optimizeBusUtilization(0.0);
 
         timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
         turnPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(mAzimuthPosition.clone());

@@ -226,10 +226,9 @@ public class SwerveHelper {
         return ratio;
     }
 
-    public static double skidRatio(ChassisSpeeds speeds) {
+    public static double skidRatio(ChassisSpeeds speeds, ChassisSpeeds rotSpeeds) {
         SwerveModuleState[] deltas = kKinematics.toSwerveModuleStates(speeds);
-        ChassisSpeeds rotationalSpeeds = new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond);
-        SwerveModuleState[] rotationalModuleStates = kKinematics.toSwerveModuleStates(rotationalSpeeds);
+        SwerveModuleState[] rotationalModuleStates = kKinematics.toSwerveModuleStates(rotSpeeds);
 
         double[] moduleTranslationMagnitudes = new double[4];
         for(int i = 0; i < 4; i++) {

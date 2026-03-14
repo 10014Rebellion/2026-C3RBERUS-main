@@ -40,7 +40,7 @@ public class DriveConstants {
     public static final double kMaxRotationSpeedRadiansPS = kMaxLinearSpeedMPS / kDrivebaseRadiusMeters; // TODO: TUNE ME
     public static final double kMaxRotationAccelRadiansPS = Math.toRadians(360) * 10; // TODO: TUNE ME
  
-    public static final double kMaxAzimuthAngularRadiansPS = Math.toRadians(1200); // TODO: TUNE ME
+    public static final double kMaxAzimuthAngularRadiansPS = 8.5 * 2 * Math.PI; // TODO: TUNE ME
 
     /* Plugged into setpoint generator */
     public static final PathConstraints kAutoConstraints = new PathConstraints(

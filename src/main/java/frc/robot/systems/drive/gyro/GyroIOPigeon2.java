@@ -2,6 +2,8 @@
 
 package frc.robot.systems.drive.gyro;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+
 import java.util.Queue;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -42,7 +44,7 @@ public class GyroIOPigeon2 implements GyroIO {
         yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(mYaw.clone());
 
-        mGyro.optimizeBusUtilization();
+        mGyro.optimizeBusUtilization(0.0);
     }
 
     @Override
@@ -54,7 +56,7 @@ public class GyroIOPigeon2 implements GyroIO {
             mYawAccelerationY,
             mYawAccelerationZ).equals(StatusCode.OK);
         pInputs.iYawPosition = Rotation2d.fromDegrees(mYaw.getValueAsDouble());
-        pInputs.iYawVelocityPS = Rotation2d.fromDegrees(mYawVelocity.getValueAsDouble());
+        pInputs.iYawVelocityPS = Rotation2d.fromDegrees(mYawVelocity.getValue().in(DegreesPerSecond));
         pInputs.iAccXG = mYawAccelerationX.getValueAsDouble();
         pInputs.iAccYG = mYawAccelerationY.getValueAsDouble();
         pInputs.iAccZG = mYawAccelerationZ.getValueAsDouble();
