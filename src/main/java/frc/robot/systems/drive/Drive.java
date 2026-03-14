@@ -446,6 +446,7 @@ public class Drive extends SubsystemBase {
         );
     }
 
+    @AutoLogOutput(key = "Drive/Odometry/AccountForCollision")
     public boolean shouldAccountForCollision() {
         return mGyro.getAccMagG() > kCollisionCapG;
     }
