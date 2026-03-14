@@ -2,7 +2,7 @@
 
 package frc.lib.tuning;
 
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class LoggedTunableNumber implements DoubleSupplier {
         if (!hasDefault) {
             hasDefault = true;
             this.defaultValue = defaultValue;
-            if (Constants.kTuningMode) {
+            if (RobotConstants.kTuningMode) {
                 dashboardNumber = new LoggedNetworkNumber(key, defaultValue);
             }
         }
@@ -67,7 +67,7 @@ public class LoggedTunableNumber implements DoubleSupplier {
         if (!hasDefault) {
             return 0.0;
         } else {
-            return Constants.kTuningMode ? dashboardNumber.get() : defaultValue;
+            return RobotConstants.kTuningMode ? dashboardNumber.get() : defaultValue;
         }
     }
 

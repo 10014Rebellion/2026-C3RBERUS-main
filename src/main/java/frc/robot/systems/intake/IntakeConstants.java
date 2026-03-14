@@ -6,7 +6,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
@@ -22,7 +22,7 @@ public class IntakeConstants {
 
         public static final BasicMotorHardware kPivotMotorConfig = new BasicMotorHardware(
             41, // TODO: TUNE ME;
-            Constants.kSubsystemsCANBus,
+            RobotConstants.kSubsystemsCANBus,
             13.5,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Brake,
@@ -61,7 +61,7 @@ public class IntakeConstants {
     public static class RollerConstants {
         public final static BasicMotorHardware kRollerMotorConfig = new BasicMotorHardware(
             42,
-            Constants.kSubsystemsCANBus,
+            RobotConstants.kSubsystemsCANBus,
             1,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Coast,

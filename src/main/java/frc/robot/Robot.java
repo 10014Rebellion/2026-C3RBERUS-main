@@ -6,7 +6,7 @@ import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.Constants.DashboardConstants;
+import frc.robot.RobotConstants.DashboardConstants;
 import frc.robot.game.TransitionTracker;
 // import frc.robot.systems.shooter.ShotCalculator;
 
@@ -101,7 +101,7 @@ public class Robot extends LoggedRobot {
                 break;
         }
 
-        switch (Constants.kCurrentMode) {
+        switch (RobotConstants.kCurrentMode) {
             case REAL:
                 // Running on a real robot, log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(new WPILOGWriter());

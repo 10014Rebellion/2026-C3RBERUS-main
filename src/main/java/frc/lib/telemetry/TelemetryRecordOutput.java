@@ -12,13 +12,12 @@ import edu.wpi.first.util.WPISerializable;
 import edu.wpi.first.util.protobuf.Protobuf;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
-import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 import us.hebi.quickbuf.ProtoMessage;
 
 public class TelemetryRecordOutput {
   private static boolean shouldLogDebugValue() {
-    return Constants.kTuningMode;
+    return RobotConstants.kTuningMode;
   }
   /**
    * Records a single output field for easy access when viewing the log. On the

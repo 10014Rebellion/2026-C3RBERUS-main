@@ -13,7 +13,7 @@ import edu.wpi.first.math.geometry.Transform3d;
  * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
-public final class Constants {
+public final class RobotConstants {
     public static final Mode kCurrentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
     public static final boolean kTuningMode = !DriverStation.isFMSAttached();
     public static final CANBus kSubsystemsCANBus = new CANBus("overworld"); // Tuned for C3RBERUS!
@@ -34,7 +34,7 @@ public final class Constants {
         REPLAY
     }
 
-    public static class RobotConstants {
+    public static class ShooterPositionConstants {
         public static final Transform3d kLeftShooterOffset = new Transform3d(-0.0875919, 0.15875, 0.5551932, Rotation3d.kZero); // Z is height from ground
         public static final Transform3d kMiddleShooterOffset = new Transform3d(-0.0875919, 0, 0.5551932, Rotation3d.kZero); // Z is height from ground
         public static final Transform3d kRightShooterOffset = new Transform3d(-0.0875919, -0.15875, 0.5551932, Rotation3d.kZero); // Z is height from ground

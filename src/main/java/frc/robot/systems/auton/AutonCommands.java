@@ -29,7 +29,7 @@ import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
-import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
+import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
@@ -121,15 +121,15 @@ public class AutonCommands extends SubsystemBase {
         Trigger hasPath3Ended = auto.loggedCondition(path3Name+"/hasEnded", () -> autoPath3.hasEnded(), true);
 
         shootingRange
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         autoActivted
             .onTrue(autoPath1)
             .onTrue(mIntake.setPivotStateCmd(IntakePivotState.STOWED))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         hasPath1Ended
@@ -140,8 +140,8 @@ public class AutonCommands extends SubsystemBase {
 
         SequentialEndingCommandGroup path1FPShooting = 
             new SequentialEndingCommandGroup(
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(2.5),
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.01));
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(2.5),
+                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.01));
 
         SequentialEndingCommandGroup path1IShooting = 
             new SequentialEndingCommandGroup(
@@ -164,7 +164,7 @@ public class AutonCommands extends SubsystemBase {
                 && path1FPShooting.hasEnded()
                 && path1IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
             .onTrue(autoPath2);
 
         hasPath2Ended
@@ -199,7 +199,7 @@ public class AutonCommands extends SubsystemBase {
         autoActivted
             .onTrue(autoPath1)
             // .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         intakingRange
@@ -210,9 +210,9 @@ public class AutonCommands extends SubsystemBase {
             .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
         shootingRange
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         hasPath1Ended
@@ -227,8 +227,8 @@ public class AutonCommands extends SubsystemBase {
 
         SequentialEndingCommandGroup path2FPShooting = 
             new SequentialEndingCommandGroup(
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(5.0),
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
+                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
 
         SequentialEndingCommandGroup path2IShooting = 
             new SequentialEndingCommandGroup(
@@ -253,7 +253,7 @@ public class AutonCommands extends SubsystemBase {
                 && path2IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
             .onTrue(mRobotDrive.getDriveManager().setToTeleop())
             .onTrue(endAuto(auto));
             
@@ -282,7 +282,7 @@ public class AutonCommands extends SubsystemBase {
         autoActivted
             .onTrue(autoPath1)
             // .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         intakingRange
@@ -293,9 +293,9 @@ public class AutonCommands extends SubsystemBase {
             .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
         shootingRange
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         hasPath1Ended
@@ -310,8 +310,8 @@ public class AutonCommands extends SubsystemBase {
 
         SequentialEndingCommandGroup path2FPShooting = 
             new SequentialEndingCommandGroup(
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).withTimeout(5.0),
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
+                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
 
         SequentialEndingCommandGroup path2IShooting = 
             new SequentialEndingCommandGroup(
@@ -336,7 +336,7 @@ public class AutonCommands extends SubsystemBase {
                 && path2IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
             .onTrue(mRobotDrive.getDriveManager().setToTeleop())
             .onTrue(endAuto(auto));
             
@@ -409,11 +409,11 @@ public class AutonCommands extends SubsystemBase {
     }
 
     // public Command shotIndexCommand() {
-    //     return mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE));
+    //     return mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE));
     // }
     
     // public Command spinFlywheelsCommand() {
-    //     return mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE);
+    //     return mFlywheelsSS.setStateCmd(FlywheelStates.SHOOT_CLOSE);
     // }
 
     public Command turnToHubCommand() {

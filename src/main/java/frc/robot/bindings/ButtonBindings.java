@@ -21,7 +21,7 @@ import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
-import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelState;
+import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
@@ -65,8 +65,8 @@ public class ButtonBindings {
             .onTrue(mDriveSS.getDriveManager().setToTeleop()
                 .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
                 .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-                .alongWith(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
-                .alongWith(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
+                .alongWith(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
+                .alongWith(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             );
         
         new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
@@ -76,19 +76,19 @@ public class ButtonBindings {
 
     public void initButtonBoard() {
         mHID.button(3)
-            .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.TUNING))
-            .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
+            .whileTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
+            .whileFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
 
         mHID.button(4)
             .whileTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT))
             .whileFalse(mHoodSS.setStateCmd(HoodStates.HOLD_POSITION));
 
         mHID.button(9)
-            .onTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE)
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT)
                 .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.CONVEY_TO_INDEX))
                 .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
                 .alongWith(mIntakeSS.trashCompact()))
-            .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED)
+            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED)
                 .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE)
                 .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
                 .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))));
@@ -153,19 +153,19 @@ public class ButtonBindings {
 
         mPilotController.povUp()
             .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY));
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY));
         
         mPilotController.povDown()
             .onTrue(mHoodSS.setStateCmd(HoodStates.TOWER_SHOT))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_MID_VELOCITY));
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TOWER_VELOCITY));
 
         mPilotController.povRight()
             .onTrue(mHoodSS.setStateCmd(HoodStates.MAX))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SNOW_BLOW));
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY));
         
         mPilotController.povLeft()
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
-            .onTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
 
         mPilotController.leftBumper()
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
@@ -176,31 +176,24 @@ public class ButtonBindings {
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE).alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE)));
           
         mPilotController.leftTrigger()
-            .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SNOW_BLOW))
-            .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE));
+            .whileTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
+            .whileFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
 
         /* TODO: TUNE */
         mPilotController.y()
-            .whileTrue(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.SHOOT_CLOSE_VELOCITY))
-            // .whileTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .whileFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY));
-            // .whileFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+            .whileTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
+            .whileFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE));
 
         mPilotController.rightTrigger().whileTrue(
             new SequentialCommandGroup(
-                // mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.UNJAM).withTimeout(0.4),
-                // mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.UNJAM)).until(()->mFuelPumpSS.isReadyToShoot()),
-                mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE).alongWith(
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).alongWith(
                 mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE)).alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             )
         )
         .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE))
-                .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
-                // .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotState.INTAKE))
+                .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
                 .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-                // .alongWith(mHoodSS.setStateCmd(HoodStates.MIN))
-                // .alongWith(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.IDLE))
-                .onFalse(mFlywheelsSS.setFlywheelStateCmd(FlywheelState.STANDBY))
+                .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
                 .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
     }
 
@@ -257,11 +250,11 @@ public class ButtonBindings {
         new Trigger(
             () -> mGunnerController.getRightY() > 0.25)
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
-                .onTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.OUTTAKE))
+                .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.OUTTAKE_VOLT))
                 .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.OUTTAKE))
 
                 .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-                .onFalse(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.STOPPED))
+                .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
                 .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
 
     }

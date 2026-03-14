@@ -1,7 +1,5 @@
 package frc.robot.systems.shooter.hood;
 
-import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -13,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.logging.InvalidValueErrors.UnaccountedEnum;
 
 public class HoodSS extends SubsystemBase {
     public static enum HoodStates {
@@ -86,8 +85,6 @@ public class HoodSS extends SubsystemBase {
                 HoodConstants.setHoodAngleSetpoint(mHoodInputs.iHoodAngle.plus(HoodConstants.kAdjustStepAmount));
             } case STEP_DECREMENT -> {
                 HoodConstants.setHoodAngleSetpoint(mHoodInputs.iHoodAngle.minus(HoodConstants.kAdjustStepAmount));
-            } default -> {
-                Telemetry.reportIssue(null);
             }
         }
     }
@@ -116,17 +113,9 @@ public class HoodSS extends SubsystemBase {
                         Rotation2d.fromDegrees(HoodConstants.tIncrementSpeedDPS.get() * 0.02)));
                 setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
             } default -> {
-                Telemetry.reportIssue(null);
+                Telemetry.reportIssue(new UnaccountedEnum(mCurrentHoodState.toString()));
             }
         }
-    }
-
-    /*
-     * Performs variable updates or parameter resets when a state ends, SHOULD NOT CHANGE THE STATE THROUGH HERE.
-     */
-    @SuppressWarnings("incomplete-switch")
-    private void endState(HoodStates pStateToEnd) {
-        switch (pStateToEnd) {}
     }
 
     public Command setStateCmd(HoodStates pNewState) {
@@ -143,7 +132,6 @@ public class HoodSS extends SubsystemBase {
     }
 
     private void setState(HoodStates pNewState) {
-        endState(mCurrentHoodState);
         mCurrentHoodState = pNewState;
         initializeState(pNewState);
     }
@@ -169,7 +157,7 @@ public class HoodSS extends SubsystemBase {
 
         mHoodIO.setMotorPosition(pRot, ffOutput);
 
-        mDesiredDirection = toDirection(getErrorPositionRotations());
+        mDesiredDirection = toDirection(getErrorRot());
         enforceSoftLimits();
     }
 
@@ -217,7 +205,7 @@ public class HoodSS extends SubsystemBase {
     }
   
     @AutoLogOutput(key = "Shooter/Hood/Feedback/ErrorRotation")
-    public double getErrorPositionRotations() {
+    public double getErrorRot() {
         return getCurrentGoal().getRotations() - mHoodInputs.iHoodAngle.getRotations();
     }
 
@@ -228,7 +216,7 @@ public class HoodSS extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/Hood/Feedback/AtGoal")
     public boolean atGoal() {
-        return Math.abs(getErrorPositionRotations()) < tHoodTolerance.get();
+        return Math.abs(getErrorRot()) <= tHoodTolerance.get();
     }
 
     private Rotation2d clampRotToSoftLimits(Rotation2d pRotToClamp) {

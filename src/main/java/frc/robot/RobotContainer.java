@@ -24,14 +24,14 @@ import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.roller.IntakeRollerIO;
 import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
-import frc.robot.systems.shooter.ShooterConstants;
-import frc.robot.systems.shooter.ShooterConstants.FuelPumpConstants;
+import frc.robot.systems.shooter.flywheels.FlywheelConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelIO;
 import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
 import frc.robot.systems.shooter.flywheels.FlywheelIOSim;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIOCANCoder;
+import frc.robot.systems.shooter.fuelpump.FuelPumpConstants;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIO;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIOKrakenX44;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIOSim;
@@ -47,7 +47,6 @@ import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.climb.ClimbConstants;
-import frc.robot.systems.climb.ClimbIO;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.conveyor.ConveyorSS;
@@ -73,7 +72,7 @@ public class RobotContainer {
     private final AutonCommands autos;
 
     public RobotContainer() {
-        switch (Constants.kCurrentMode) {
+        switch (RobotConstants.kCurrentMode) {
             case REAL: {
                 mDrive = new Drive(
                     new Module[] {
@@ -99,9 +98,9 @@ public class RobotContainer {
                 mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig));
 
                 mFlywheelsSS = new FlywheelsSS(
-                        new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig),
-                        new FlywheelIOKrakenX44(ShooterConstants.FlywheelConstants.kFlywheelFollowerConfig),
-                        new EncoderIOCANCoder(ShooterConstants.FlywheelConstants.kCANCoderConfig)
+                        new FlywheelIOKrakenX44(FlywheelConstants.kFlywheelLeaderConfig),
+                        new FlywheelIOKrakenX44(FlywheelConstants.kFlywheelFollowerConfig),
+                        new EncoderIOCANCoder(FlywheelConstants.kCANCoderConfig)
                 );
 
                 mIntake = new Intake(
@@ -136,8 +135,8 @@ public class RobotContainer {
 
                     }));
                 
-                FlywheelIOSim leaderSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);
-                FlywheelIOSim followerSim = new FlywheelIOSim(ShooterConstants.FlywheelConstants.kFlywheelLeaderConfig);;
+                FlywheelIOSim leaderSim = new FlywheelIOSim(FlywheelConstants.kFlywheelLeaderConfig);
+                FlywheelIOSim followerSim = new FlywheelIOSim(FlywheelConstants.kFlywheelLeaderConfig);;
 
                 
                 mFuelPumpSS = new FuelPumpSS(

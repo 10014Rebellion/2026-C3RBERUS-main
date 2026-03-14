@@ -24,7 +24,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
 import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 
 public class IntakePivotIOKrakenX44 implements IntakePivotIO{
@@ -53,7 +53,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private Rotation2d mPivotPos = Rotation2d.kZero;
     
     public IntakePivotIOKrakenX44(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig, RotationSoftLimits pLimits) {
-        mEncoder = new CANdi(pEncoderConfig.canID(), Constants.kSubsystemsCANBus);
+        mEncoder = new CANdi(pEncoderConfig.canID(), RobotConstants.kSubsystemsCANBus);
         CANdiConfiguration mEncoderConfiguration = new CANdiConfiguration();
         mEncoderConfiguration.PWM1.AbsoluteSensorOffset = -pEncoderConfig.offset().getRotations();
         mEncoder.getConfigurator().apply(mEncoderConfiguration);

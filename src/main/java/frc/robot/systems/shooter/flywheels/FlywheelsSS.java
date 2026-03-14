@@ -2,58 +2,32 @@ package frc.robot.systems.shooter.flywheels;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.systems.shooter.ShooterConstants;
+import frc.robot.logging.InvalidValueErrors.UnaccountedEnum;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderInputsAutoLogged;
-import static frc.robot.systems.shooter.ShooterConstants.FlywheelConstants.kFlywheelControlConfig;
 
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
+import static frc.robot.systems.shooter.flywheels.FlywheelConstants.kFlywheelControlConfig;
+
 
 public class FlywheelsSS extends SubsystemBase {
-
-  public static final LoggedTunableNumber tFlywheelCustomVolts = 
-    new LoggedTunableNumber("Flywheel/Control/CustomVolts", 0);
-
-  public static final LoggedTunableNumber tFlywheelCustomVelocity = 
-    new LoggedTunableNumber("Flywheel/Control/CustomVelocity", 0);
-
-  public static enum ControlType {
-    VOLTAGE,
-    VELOCITY
-  }
-
-  public static enum FlywheelState {
-    SHOOT_FAR(() -> 10.0, ControlType.VOLTAGE),
-    STANDBY(() -> 2.0, ControlType.VOLTAGE),
-    SHOOT_CLOSE(() -> 10.0, ControlType.VOLTAGE),
-    SHOOT_BUMP(() -> 12.0, ControlType.VOLTAGE),
-    IDLE(() -> 0.0, ControlType.VOLTAGE),
-    SNOW_BLOW(() -> 12.0, ControlType.VOLTAGE),
-    TUNING(tFlywheelCustomVolts, ControlType.VOLTAGE),
-    TUNING_VELOCITY(tFlywheelCustomVelocity, ControlType.VELOCITY),
-    SHOOT_CLOSE_VELOCITY(() -> 105.0, ControlType.VELOCITY),
-    SHOOT_MID_VELOCITY(() -> 105.0, ControlType.VELOCITY),
-    SHOOT_FAR_VELOCITY(() -> 0.0, ControlType.VELOCITY);
-
-    private DoubleSupplier mControlSupplier;
-    private ControlType pControlType;
-
-    private FlywheelState(DoubleSupplier pControlSupplier, ControlType type) {
-      mControlSupplier = pControlSupplier;
-      pControlType = type;
-    }
-
-    public double getDesiredControl() {
-      return mControlSupplier.getAsDouble();
-    } 
+  public static enum FlywheelStates {
+    STOPPED,
+    STANDBY_VOLTAGE,
+    TUNING_VOLTAGE,
+    MAX_VOLTAGE,
+    TUNING_VELOCITY,
+    FEED_VELOCITY,
+    CLOSE_VELOCITY,
+    TOWER_VELOCITY,
+    BUMP_VELOCITY,
+    MAX_VELOCITY,
+    SHOTMAP_VELOCITY,
   }
 
   private final FlywheelIO mLeaderFlywheelIO;
@@ -64,21 +38,18 @@ public class FlywheelsSS extends SubsystemBase {
   private final FlywheelInputsAutoLogged mFollowerFlywheelInputs = new FlywheelInputsAutoLogged();
   private final EncoderInputsAutoLogged mEncoderInputs = new EncoderInputsAutoLogged();
 
-  private final LoggedTunableNumber tFlywheelKP = new LoggedTunableNumber("Flywheel/Control/kP", kFlywheelControlConfig.pdController().kP());
-  private final LoggedTunableNumber tFlywheelKD = new LoggedTunableNumber("Flywheel/Control/kD", kFlywheelControlConfig.pdController().kD());
-
-  private final LoggedTunableNumber tFlywheelKS = new LoggedTunableNumber("Flywheel/Control/kS", kFlywheelControlConfig.feedforward().getKs());
-  private final LoggedTunableNumber tFlywheelKV = new LoggedTunableNumber("Flywheel/Control/kV", kFlywheelControlConfig.feedforward().getKv());
-  private final LoggedTunableNumber tFlywheelKA = new LoggedTunableNumber("Flywheel/Control/kA", kFlywheelControlConfig.feedforward().getKa());
-
-  private final LoggedTunableNumber tFlywheelKMaxVel = new LoggedTunableNumber("Flywheel/Control/MaxVel", kFlywheelControlConfig.motionMagicConstants().maxVelocity());
-  private final LoggedTunableNumber tFlywheelKMaxAccel = new LoggedTunableNumber("Flywheel/Control/MaxAccel", kFlywheelControlConfig.motionMagicConstants().maxAcceleration());
-  private final LoggedTunableNumber tFlywheelKMaxJerk = new LoggedTunableNumber("Flywheel/Control/MaxJerk", kFlywheelControlConfig.motionMagicConstants().maxJerk());
-
-  private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Flywheel/Control/Tolerance", ShooterConstants.FlywheelConstants.kToleranceRPS);
+  private final LoggedTunableNumber tFlywheelKP = new LoggedTunableNumber("Shooter/Flywheel/Control/PID/kP", kFlywheelControlConfig.pdController().kP());
+  private final LoggedTunableNumber tFlywheelKD = new LoggedTunableNumber("Shooter/Flywheel/Control/PID/kD", kFlywheelControlConfig.pdController().kD());
+  private final LoggedTunableNumber tFlywheelKS = new LoggedTunableNumber("Shooter/Flywheel/Control/FF/kS", kFlywheelControlConfig.feedforward().getKs());
+  private final LoggedTunableNumber tFlywheelKV = new LoggedTunableNumber("Shooter/Flywheel/Control/FF/kV", kFlywheelControlConfig.feedforward().getKv());
+  private final LoggedTunableNumber tFlywheelKA = new LoggedTunableNumber("Shooter/Flywheel/Control/FF/kA", kFlywheelControlConfig.feedforward().getKa());
+  private final LoggedTunableNumber tFlywheelMaxVel = new LoggedTunableNumber("Shooter/Flywheel/Control/Profile/MaxVel", kFlywheelControlConfig.motionMagicConstants().maxVelocity());
+  private final LoggedTunableNumber tFlywheelMaxAccel = new LoggedTunableNumber("Shooter/Flywheel/Control/Profile/MaxAccel", kFlywheelControlConfig.motionMagicConstants().maxAcceleration());
+  private final LoggedTunableNumber tFlywheelMaxJerk = new LoggedTunableNumber("Shooter/Flywheel/Control/Profile/MaxJerk", kFlywheelControlConfig.motionMagicConstants().maxJerk());
+  private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Shooter/Flywheel/Control/Tolerance", FlywheelConstants.kToleranceRPS);
 
   private Rotation2d mCurrentRPSGoal = Rotation2d.kZero;
-  private FlywheelState mFlywheelState = FlywheelState.IDLE;
+  private FlywheelStates mCurrentFlywheelState = FlywheelStates.STOPPED;
 
   public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
     this.mLeaderFlywheelIO = pLeaderFlywheelIO;
@@ -93,86 +64,44 @@ public class FlywheelsSS extends SubsystemBase {
     mFlywheelEncoder.updateInputs(mEncoderInputs);
     
     refreshTuneables();
+    executeState();
     
     Logger.processInputs("Flywheel/Leader", mLeaderFlywheelInputs);
     Logger.processInputs("Flywheel/Follower", mFollowerFlywheelInputs);
     Logger.processInputs("Flywheel/Encoder", mEncoderInputs);
-
-    Logger.recordOutput("Flywheel/State", mFlywheelState);
-
-    // if(mFlywheelState != null) {
-    //   if(mFlywheelState.equals(FlywheelState.IDLE)) setFlywheelVolts(0.0);
-    //    else {Logger.recordOutput("Flywheel/State", mFlywheelState);
-    //   setFlywheelClosedLoop(mFlywheelState.getDesiredRotation()); }
-    // }
   }
 
-  public Command setFlywheelStateCmd(FlywheelState pFlywheelState){
-    return Commands.run(() -> {
-      if(pFlywheelState.pControlType.equals(ControlType.VOLTAGE)) { 
-        setFlywheelStateVolts(pFlywheelState);
-      } else {
-        setFlywheelStateVelocity(pFlywheelState);
+  private void executeState() {
+    if(FlywheelConstants.kFlywheelSetpointToVelocity.containsKey(mCurrentFlywheelState)) {
+      setFlywheelVelocity(FlywheelConstants.kFlywheelSetpointToVelocity.get(mCurrentFlywheelState).get());
+    } else if(FlywheelConstants.kFlywheelSetpointToVoltageTuneable.containsKey(mCurrentFlywheelState)) {
+      setFlywheelVoltage(FlywheelConstants.kFlywheelSetpointToVoltageTuneable.get(mCurrentFlywheelState).get());
+    } else{
+      switch (mCurrentFlywheelState) {
+        case STOPPED -> {
+          stopFlywheels();
+        }
+        case SHOTMAP_VELOCITY -> {
+          // TODO: IMPLEMENT A SHOTMAP!
+        }
+        default -> {
+          Telemetry.reportIssue(new UnaccountedEnum(mCurrentFlywheelState.toString()));
+        }
       }
-    }, this);
+    }
   }
 
-  public Command setFlywheelVoltsCmd(double pVolts){
-    return Commands.run(() -> {
-      setFlywheelVolts(pVolts);
-    }, this);
-  }
-
-  // public Command setFlywheelAmpsCmd(double pAmps){
-  //   return Commands.run(() -> {
-  //     setFlywheelAmps(pAmps);
-  //   }, this);
-  // }
-
-  public Command setFlywheelsVelocityManualCmd(Rotation2d pRotpS){
-    return Commands.run(() -> {
-      setFlywheelVelocityManual(pRotpS);
-    }, this);
-  }
-
-  public Command stopFlywheelCmd(){
-    return Commands.run(() -> {
-      stopFlywheels();
-    }, this);
-  }
-
-  public void setFlywheelStateVolts(FlywheelState mState) {
-    mFlywheelState = mState;
-    mLeaderFlywheelIO.setMotorVolts(mState.getDesiredControl());
-    mFollowerFlywheelIO.enforceFollower();
-  }
-
-  public void setFlywheelStateVelocity(FlywheelState mState) {
-    mFlywheelState = mState;
-    setFlywheelClosedLoop(Rotation2d.fromRotations(mState.getDesiredControl()));
-    mFollowerFlywheelIO.enforceFollower();
-  }
-
-  public void setFlywheelVolts(double pVolts) {
-    mLeaderFlywheelIO.setMotorVolts(pVolts);
-    mFollowerFlywheelIO.enforceFollower();
-  }
-
-  // public void setFlywheelAmps(double pVolts) {
-  //   mLeaderFlywheelIO.setMotorAmps(pVolts);
-  //   mFollowerFlywheelIO.enforceFollower();
-  // }
-
-  public void setFlywheelVelocityManual(Rotation2d pRotsPerS){
-    setFlywheelClosedLoop(pRotsPerS);
-  }
-
-  public void stopFlywheels(){
+  private void stopFlywheels() {
     mLeaderFlywheelIO.stopMotor();
     mFollowerFlywheelIO.enforceFollower();
   }
 
-  public void setFlywheelClosedLoop(Rotation2d pRotsPerS){
+  private void setFlywheelVoltage(double pVoltage) {
+    mLeaderFlywheelIO.setMotorVolts(pVoltage);
+    mFollowerFlywheelIO.enforceFollower();
+  }
+
+  private void setFlywheelVelocity(Rotation2d pRotsPerS){
     mCurrentRPSGoal = pRotsPerS;
     Logger.recordOutput("Flywheel/Control/FunctionSetpoint", mCurrentRPSGoal);
     mLeaderFlywheelIO.setMotorVelAndAccel(
@@ -180,6 +109,23 @@ public class FlywheelsSS extends SubsystemBase {
       0.0,
       kFlywheelControlConfig.feedforward().calculate(getFlywheelRPS().getRotations()));
     mFollowerFlywheelIO.enforceFollower();
+  }
+
+  public Command setStateCmd(FlywheelStates pNewState) {
+    return setStateCmd(pNewState, true);
+  }
+
+  public Command setStateCmd(FlywheelStates pNewState, boolean holdRequirementContinuously) {
+    return new FunctionalCommand(
+      () -> setState(pNewState), 
+      () -> {}, (interrupted) ->  {}, 
+      () -> !holdRequirementContinuously, 
+      this
+    );
+  }
+
+  private void setState(FlywheelStates pNewState) {
+    mCurrentFlywheelState = pNewState;
   }
 
   public Rotation2d getFlywheelRPS() {
@@ -191,31 +137,18 @@ public class FlywheelsSS extends SubsystemBase {
     mFollowerFlywheelIO.setPDConstants(pKP, pKD);
   }
 
-  private void refreshTuneables() {
-    LoggedTunableNumber.ifChanged( hashCode(), 
-      () -> setBothPDConstants(tFlywheelKP.get(), tFlywheelKD.get()), 
-      tFlywheelKP, tFlywheelKD
-    );
-
-    LoggedTunableNumber.ifChanged( hashCode(), 
-      () -> mLeaderFlywheelIO.setMotionMagicConstants(tFlywheelKMaxVel.get(), tFlywheelKMaxAccel.get(), tFlywheelKMaxJerk.get()),
-      tFlywheelKMaxVel, tFlywheelKMaxAccel, tFlywheelKMaxJerk
-    );
-
-    LoggedTunableNumber.ifChanged( hashCode(), 
-      () -> setFF(tFlywheelKS.get(), tFlywheelKV.get(), tFlywheelKA.get()),
-      tFlywheelKS, tFlywheelKV, tFlywheelKA
-    );
-  }
-
   private void setFF(double pKS, double pKV, double pKA){
     kFlywheelControlConfig.feedforward().setKv(pKV);
     kFlywheelControlConfig.feedforward().setKs(pKS);
     kFlywheelControlConfig.feedforward().setKa(pKA);
   }
 
+  public FlywheelStates getFlywheelState() {
+    return mCurrentFlywheelState;
+  }
+
   @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRotationsPerSec")
-  public double getErrorRotationsPerSec() {
+  public double getErrorRPS() {
     return mCurrentRPSGoal.minus(getFlywheelRPS()).getRotations();
   }
 
@@ -226,6 +159,23 @@ public class FlywheelsSS extends SubsystemBase {
 
   @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtGoal")
   public boolean atGoal() {
-    return Math.abs(getErrorRotationsPerSec()) < tFlywheelTolerance.get();
+    return Math.abs(getErrorRPS()) <= tFlywheelTolerance.get();
+  }
+
+  private void refreshTuneables() {
+    LoggedTunableNumber.ifChanged( hashCode(), 
+      () -> setBothPDConstants(tFlywheelKP.get(), tFlywheelKD.get()), 
+      tFlywheelKP, tFlywheelKD
+    );
+
+    LoggedTunableNumber.ifChanged( hashCode(), 
+      () -> mLeaderFlywheelIO.setMotionMagicConstants(tFlywheelMaxVel.get(), tFlywheelMaxAccel.get(), tFlywheelMaxJerk.get()),
+      tFlywheelMaxVel, tFlywheelMaxAccel, tFlywheelMaxJerk
+    );
+
+    LoggedTunableNumber.ifChanged( hashCode(), 
+      () -> setFF(tFlywheelKS.get(), tFlywheelKV.get(), tFlywheelKA.get()),
+      tFlywheelKS, tFlywheelKV, tFlywheelKA
+    );
   }
 }
