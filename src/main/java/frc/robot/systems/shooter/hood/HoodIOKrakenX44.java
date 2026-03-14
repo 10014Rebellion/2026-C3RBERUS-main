@@ -102,7 +102,7 @@ public class HoodIOKrakenX44 implements HoodIO{
             mHoodClosedLoopReferenceSlope
         );
 
-        mHoodMotor.optimizeBusUtilization();
+        mHoodMotor.optimizeBusUtilization(0.0);
     }
 
 
