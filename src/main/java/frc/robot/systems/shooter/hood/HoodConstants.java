@@ -8,6 +8,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
@@ -44,48 +45,22 @@ public class HoodConstants {
     );
 
     public static final Rotation2d kAdjustStepAmount = Rotation2d.fromDegrees(2);
-    public static final double kToleranceRotations = 0.5;
-    private static Rotation2d kRotationIncrementSetpoint = Rotation2d.fromDegrees(0.0);
-    
-    public static Rotation2d getRotationalIncrementSetpoint() {
-        return kRotationIncrementSetpoint;
-    }
+    public static final Rotation2d kTolerance = Rotation2d.fromDegrees(.5);
+    public static final double kHoodLength = Units.feetToMeters(8.061);
+    public static final double kHoodMass = Units.inchesToMeters(1.258);
 
-    public static void setRotationalIncrementSetpoint(Rotation2d pRotationIncrementSetpoint) {
-        kRotationIncrementSetpoint = pRotationIncrementSetpoint;
-    }
-
-    private static Rotation2d kHoldAngleSetpoint = Rotation2d.fromDegrees(0.0);
-
-    public static Rotation2d getHoldAngleSetpoint() {
-        return kHoldAngleSetpoint;
-    }
-
-    public static void setHoodAngleSetpoint(Rotation2d pHoldAngleSetpoint) {
-        kHoldAngleSetpoint = pHoldAngleSetpoint;
-    }
-
-    private static Rotation2d kAutoShootSetpoint = Rotation2d.fromDegrees(0.0);
-
-    public static Rotation2d getAutoShootSetpoint() {
-        return kAutoShootSetpoint;
-    }
-
-    public static void setAutoShootSetpoint(Rotation2d pAutoShootSetpoint) {
-        kAutoShootSetpoint = pAutoShootSetpoint;
-    }
-
+    // Only add states that have constant setpoint throughout a real match.
     public static final HashMap<HoodStates, Supplier<Rotation2d>> kStateToSetpointMapHood = new HashMap<HoodStates, Supplier<Rotation2d>>();
 
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Hood/TuneVoltage", 0.0);
     public static final LoggedTunableNumber tTuningAmp = new LoggedTunableNumber("Hood/TuneAmperage", 0.0);
-    public static final LoggedTunableNumber tMaxSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MaxSetpointDegrees", 0.0);
-    public static final LoggedTunableNumber tMidSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MidSetpointDegrees", 0.0);
-    public static final LoggedTunableNumber tMinSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MinSetpointDegrees", 0.0);
+    public static final LoggedTunableNumber tTuningShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/TuningShotSetpointDegrees", 0.0);
+    public static final LoggedTunableNumber tMaxSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MaxSetpointDegrees", kHoodLimits.forwardLimit().getDegrees());
+    public static final LoggedTunableNumber tMidSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MidSetpointDegrees", kHoodLimits.forwardLimit().getDegrees() / 2.0);
+    public static final LoggedTunableNumber tMinSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MinSetpointDegrees", kHoodLimits.backwardLimit().getDegrees());
     public static final LoggedTunableNumber tCloseShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/CloseShotSetpointDegrees", 0.0);
     public static final LoggedTunableNumber tTowerShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/TowerShotSetpointDegrees", 0.0);
     public static final LoggedTunableNumber tBumpShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/BumpShotSetpointDegrees", 0.0);
-    public static final LoggedTunableNumber tTuningShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/TuningShotSetpointDegrees", 0.0);
     public static final LoggedTunableNumber tIncrementSpeedDPS = new LoggedTunableNumber("Hood/IncrementSpeedDPS", 1.0);
 
     static {
@@ -95,12 +70,7 @@ public class HoodConstants {
         kStateToSetpointMapHood.put(HoodStates.CLOSE_SHOT, () -> Rotation2d.fromDegrees(tCloseShotSetpointDeg.get()));
         kStateToSetpointMapHood.put(HoodStates.TOWER_SHOT, () -> Rotation2d.fromDegrees(tTowerShotSetpointDeg.get()));
         kStateToSetpointMapHood.put(HoodStates.BUMP_SHOT, () -> Rotation2d.fromDegrees(tBumpShotSetpointDeg.get()));
-        kStateToSetpointMapHood.put(HoodStates.INCREMENTING, () -> kRotationIncrementSetpoint);
-        kStateToSetpointMapHood.put(HoodStates.DECREMENTING, () -> kRotationIncrementSetpoint);
-        kStateToSetpointMapHood.put(HoodStates.STEP_INCREMENT, () -> kRotationIncrementSetpoint);
-        kStateToSetpointMapHood.put(HoodStates.STEP_DECREMENT, () -> kRotationIncrementSetpoint);
-        kStateToSetpointMapHood.put(HoodStates.HOLD_POSITION, () -> kHoldAngleSetpoint);
-        kStateToSetpointMapHood.put(HoodStates.AUTO_SHOOT, () -> kAutoShootSetpoint);
+        kStateToSetpointMapHood.put(HoodStates.TUNING_SETPOINT, () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get()));
     }
 
 }

@@ -21,7 +21,6 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.PDConstants;
 
 public class HoodIOKrakenX44 implements HoodIO{
     private final TalonFX mHoodMotor;
@@ -122,8 +121,8 @@ public class HoodIOKrakenX44 implements HoodIO{
         ).isOK();
         pInputs.iHoodControlMode = mHoodControlMode.getValue().toString();
         pInputs.iHoodAngle = getPos();
-        pInputs.iHoodVelocityRotPS = mHoodVelocityRPS.getValueAsDouble();
-        pInputs.iHoodAccelerationRPSS = mHoodAccelerationRPSS.getValueAsDouble();
+        pInputs.iHoodVelocityRotPS = Rotation2d.fromRotations(mHoodVelocityRPS.getValueAsDouble());
+        pInputs.iHoodAccelerationRPSS = Rotation2d.fromRotations(mHoodAccelerationRPSS.getValueAsDouble());
         pInputs.iHoodMotorVolts = mHoodVoltage.getValueAsDouble();
         pInputs.iHoodSupplyCurrentAmps = mHoodSupplyCurrent.getValueAsDouble();
         pInputs.iHoodStatorCurrentAmps = mHoodStatorCurrent.getValueAsDouble();
@@ -145,11 +144,11 @@ public class HoodIOKrakenX44 implements HoodIO{
     }
 
     @Override 
-    public void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {
+    public void setMotionMagicConstants(double pCruiseVelRPS, double pMaxAccelRPS2, double pMaxJerkRPS3) {
         MotionMagicConfigs motionMagicConfig = new MotionMagicConfigs();
-        motionMagicConfig.MotionMagicCruiseVelocity = pCruiseVel;
-        motionMagicConfig.MotionMagicAcceleration = pMaxAccel;
-        motionMagicConfig.MotionMagicJerk = pMaxJerk;
+        motionMagicConfig.MotionMagicCruiseVelocity = pCruiseVelRPS;
+        motionMagicConfig.MotionMagicAcceleration = pMaxAccelRPS2;
+        motionMagicConfig.MotionMagicJerk = pMaxJerkRPS3;
         mHoodMotor.getConfigurator().apply(motionMagicConfig);
     }
 

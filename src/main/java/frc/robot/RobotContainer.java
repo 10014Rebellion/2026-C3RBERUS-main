@@ -144,7 +144,7 @@ public class RobotContainer {
                     new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig)
                 );
 
-                mHoodSS = new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodLimits));
+                mHoodSS = new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig));
 
                 mFlywheelsSS = new FlywheelsSS(
                     leaderSim,

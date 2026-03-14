@@ -11,26 +11,27 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.logging.InvalidValueErrors.UnaccountedEnum;
 
 public class HoodSS extends SubsystemBase {
     public static enum HoodStates {
         STOPPED,
         TUNING_VOLTAGE,
         TUNING_AMPS,
+        INCREMENTING,
+        DECREMENTING,
+        HOLD_POSITION,
+        SHOTMAP_POSITION,
+        STEP_INCREMENT,
+        STEP_DECREMENT,
+
+        // CONSTANT SETPOINTS
+        TUNING_SETPOINT,
         MAX,
         MID,
         MIN,
         CLOSE_SHOT,
         TOWER_SHOT,
         BUMP_SHOT,
-        INCREMENTING,
-        DECREMENTING,
-        STEP_INCREMENT,
-        STEP_DECREMENT,
-        HOLD_POSITION,
-        AUTO_SHOOT,
-        TUNING_SETPOINT
     }
 
     private final HoodIO mHoodIO;
@@ -43,10 +44,14 @@ public class HoodSS extends SubsystemBase {
     private final LoggedTunableNumber tHoodKG = new LoggedTunableNumber("Shooter/Hood/Control/FF/kG", HoodConstants.kHoodControlConfig.feedforward().getKg());
     private final LoggedTunableNumber tHoodKV = new LoggedTunableNumber("Shooter/Hood/Control/FF/kV", HoodConstants.kHoodControlConfig.feedforward().getKv());
     private final LoggedTunableNumber tHoodKA = new LoggedTunableNumber("Shooter/Hood/Control/FF/kA", HoodConstants.kHoodControlConfig.feedforward().getKa());
-    private final LoggedTunableNumber tHoodCruiseVel = new LoggedTunableNumber("Shooter/Hood/Control/Profile/CruiseVel", HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity());
-    private final LoggedTunableNumber tHoodMaxAccel = new LoggedTunableNumber("Shooter/Hood/Control/Profile/MaxAcceleration", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration());
-    private final LoggedTunableNumber tHoodMaxJerk = new LoggedTunableNumber("Shooter/Hood/Control/Profile/MaxJerk", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk());
-    private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Shooter/Hood/Control/Tolerance", HoodConstants.kToleranceRotations);
+    private final LoggedTunableNumber tHoodCruiseVelDegS = 
+        new LoggedTunableNumber("Shooter/Hood/Control/Profile/CruiseVelDegS", HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity() * 360);
+    private final LoggedTunableNumber tHoodMaxAccelDegS2 = 
+        new LoggedTunableNumber("Shooter/Hood/Control/Profile/MaxAccelerationDegs2", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration() * 360);
+    private final LoggedTunableNumber tHoodMaxJerkDegS3 = 
+        new LoggedTunableNumber("Shooter/Hood/Control/Profile/MaxJerks3", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk() * 360);
+    private final LoggedTunableNumber tHoodTolerance = 
+        new LoggedTunableNumber("Shooter/Hood/Control/Tolerance", HoodConstants.kTolerance.getDegrees());
   
     @AutoLogOutput(key = "Shooter/Hood/States/CurrentState")
     private HoodStates mCurrentHoodState = HoodStates.STOPPED;
@@ -80,11 +85,11 @@ public class HoodSS extends SubsystemBase {
     private void initializeState(HoodStates pStateToInit) {
         switch (pStateToInit) {
             case HOLD_POSITION -> {
-                HoodConstants.setHoodAngleSetpoint(mHoodInputs.iHoodAngle);
+                setHoodPosition(mHoodInputs.iHoodAngle);
             } case STEP_INCREMENT -> {
-                HoodConstants.setHoodAngleSetpoint(mHoodInputs.iHoodAngle.plus(HoodConstants.kAdjustStepAmount));
+                setHoodPosition(mHoodInputs.iHoodAngle.plus(HoodConstants.kAdjustStepAmount));
             } case STEP_DECREMENT -> {
-                HoodConstants.setHoodAngleSetpoint(mHoodInputs.iHoodAngle.minus(HoodConstants.kAdjustStepAmount));
+                setHoodPosition(mHoodInputs.iHoodAngle.minus(HoodConstants.kAdjustStepAmount));
             }
         }
     }
@@ -92,28 +97,27 @@ public class HoodSS extends SubsystemBase {
     /*
      * Runs actions periodically to execute state, SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
+    @SuppressWarnings("incomplete-switch")
     private void executeState() {
-        switch (mCurrentHoodState) {
-            case STOPPED -> {
-                mHoodIO.stopMotor();
-            } case TUNING_VOLTAGE -> {
-                setHoodVoltage(HoodConstants.tTuningVoltage.get());
-            } case TUNING_AMPS -> {
-                setHoodAmps(HoodConstants.tTuningAmp.get());
-            } case MAX, MID, CLOSE_SHOT, BUMP_SHOT, TOWER_SHOT, TUNING_SETPOINT, HOLD_POSITION, STEP_INCREMENT, STEP_DECREMENT, AUTO_SHOOT -> {
-                setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
-            } case INCREMENTING -> {
-                HoodConstants.setRotationalIncrementSetpoint(
-                    mHoodInputs.iHoodAngle.plus(
-                        Rotation2d.fromDegrees(HoodConstants.tIncrementSpeedDPS.get() * 0.02)));
-                setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
-            } case DECREMENTING -> {
-                HoodConstants.setRotationalIncrementSetpoint(
-                    mHoodInputs.iHoodAngle.minus(
-                        Rotation2d.fromDegrees(HoodConstants.tIncrementSpeedDPS.get() * 0.02)));
-                setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
-            } default -> {
-                Telemetry.reportIssue(new UnaccountedEnum(mCurrentHoodState.toString()));
+        if(HoodConstants.kStateToSetpointMapHood.containsKey(mCurrentHoodState)) {
+            setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
+        } else {
+            switch (mCurrentHoodState) {
+                case STOPPED -> {
+                    mHoodIO.stopMotor();
+                } case TUNING_VOLTAGE -> {
+                    setHoodVoltage(HoodConstants.tTuningVoltage.get());
+                } case TUNING_AMPS -> {
+                    setHoodAmps(HoodConstants.tTuningAmp.get());
+                } case INCREMENTING -> {
+                    setHoodPosition(mHoodInputs.iHoodAngle.plus(Rotation2d.fromDegrees(1)));
+                } case DECREMENTING -> {
+                    setHoodPosition(mHoodInputs.iHoodAngle.minus(Rotation2d.fromDegrees(1)));
+                } case HOLD_POSITION -> {
+                    setHoodPosition(mLatestClosedLoopGoalRot);
+                } case SHOTMAP_POSITION -> {
+                    // TODO: IMPLEMENT ME!
+                }
             }
         }
     }
@@ -152,8 +156,8 @@ public class HoodSS extends SubsystemBase {
 
         double cos = mHoodInputs.iHoodReferenceValue.getCos();
 
-        Telemetry.log("Shooter/Hood/Pivot/ffOutput", ffOutput);
-        Telemetry.log("Shooter/Hood/Pivot/ffCos", cos);
+        Telemetry.log("Shooter/Hood/ffOutput", ffOutput);
+        Telemetry.log("Shooter/Hood/ffCos", cos);
 
         mHoodIO.setMotorPosition(pRot, ffOutput);
 
@@ -240,9 +244,14 @@ public class HoodSS extends SubsystemBase {
             tHoodKS, tHoodKG, tHoodKV, tHoodKA
         );
   
+
+        // Default unit is rotations but the actual values are in degrees. This is to preserve units //
         LoggedTunableNumber.ifChanged( hashCode(), 
-            () -> mHoodIO.setMotionMagicConstants(tHoodCruiseVel.get(), tHoodMaxAccel.get(), tHoodMaxJerk.get()), 
-            tHoodCruiseVel, tHoodMaxAccel, tHoodMaxJerk
+            () -> mHoodIO.setMotionMagicConstants(
+                tHoodCruiseVelDegS.get() / 360.0, 
+                tHoodMaxAccelDegS2.get() / 360.0, 
+                tHoodMaxJerkDegS3.get() / 360.0), 
+            tHoodCruiseVelDegS, tHoodMaxAccelDegS2, tHoodMaxJerkDegS3
         );
     }
 }
