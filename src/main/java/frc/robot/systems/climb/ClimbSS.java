@@ -39,6 +39,7 @@ public class ClimbSS extends SubsystemBase {
         mClimbIO.updateInputs(mClimbInputs);
         Logger.processInputs("Climb", mClimbInputs);
         Logger.recordOutput("Climb/LimitsEnforced", mLimitEnforced);
+        Logger.recordOutput("Climb/State", mClimbState);
         executeState();
     }
 
