@@ -204,7 +204,7 @@ public class Drive extends SubsystemBase {
             : 1.0;
 
         mTiltFactor = mTiltDebouncer.calculate(shouldAccountForFlip()) 
-            ?  mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iPitchPosition.getCos()
+            ? mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iPitchPosition.getCos()
             : 1.0;
         
         mVisionFactor = (mSkidFactor + mGyroFactor) * mTiltFactor;
