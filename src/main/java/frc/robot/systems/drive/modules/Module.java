@@ -76,8 +76,7 @@ public class Module {
             () -> {
                 mDriveFF = new SimpleMotorFeedforward(
                     tDriveS.get(), tDriveV.get(), tDriveA.get());
-            },
-            tDriveS, tDriveV, tDriveA);
+            }, tDriveS, tDriveV, tDriveA);
 
         LoggedTunableNumber.ifChanged(
             hashCode(),
