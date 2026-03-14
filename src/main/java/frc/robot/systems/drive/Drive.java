@@ -56,10 +56,12 @@ public class Drive extends SubsystemBase {
     private final Debouncer mCollisionDebouncer = new Debouncer(kTrustTime, DebounceType.kFalling);
     private final Debouncer mTiltDebouncer = new Debouncer(kTrustTime, DebounceType.kFalling);
 
+    @AutoLogOutput(key = "Drive/Odometry/AccountForSkidding")
     private boolean mHasSkidded = false;
     private double mSkidFactor = 0.0;
     private double mGyroFactor = 1.0;
     private double mTiltFactor = 1.0;
+    private double mVisionFactor = 1.0;
 
     public static RobotConfig mRobotConfig;
     private final SwerveSetpointGenerator mSetpointGenerator;
@@ -161,9 +163,6 @@ public class Drive extends SubsystemBase {
 
         for (int i = 0; i < mModules[0].getOdometryTimeStamps().length; i++) {
             // Read wheel positions and deltas from each module
-            // modulePositionsHighF = SwerveHelper.zeroPositions();
-            // moduleDeltasHighF = SwerveHelper.zeroPositions();
-
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
                 modulePositionsHighF[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
 
@@ -196,7 +195,7 @@ public class Drive extends SubsystemBase {
             getRobotChassisSpeeds(), 
             mRotationSpeed) > kSkidRatioCap;
 
-        mSkidFactor = ( mSkidFactorDebouncer.calculate(mHasSkidded) ) 
+        mSkidFactor = (mSkidFactorDebouncer.calculate(mHasSkidded)) 
             ? kSkidScalar 
             : 0;
 
@@ -208,7 +207,7 @@ public class Drive extends SubsystemBase {
             ?  mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iPitchPosition.getCos()
             : 1.0;
         
-        double visionFactor = (mSkidFactor + mGyroFactor) * mTiltFactor;
+        mVisionFactor = (mSkidFactor + mGyroFactor) * mTiltFactor;
         
         /* VISION */
         mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
@@ -218,7 +217,7 @@ public class Drive extends SubsystemBase {
                 mPoseEstimator.addVisionMeasurement(
                     observation.pose(), 
                     observation.timeStamp(), 
-                    observation.stdDevs().times(1.0 / visionFactor));
+                    observation.stdDevs().times(1.0 / mVisionFactor));
             }
 
             Telemetry.logVisionObservationStdDevs(observation);
@@ -230,7 +229,7 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput("Drive/Odometry/SkidFactor", mSkidFactor);
         Logger.recordOutput("Drive/Odometry/SkidCount", mHasSkidded);
         Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
-        Logger.recordOutput("Drive/Odometry/VisionFactor", visionFactor);
+        Logger.recordOutput("Drive/Odometry/VisionFactor", mVisionFactor);
     }
 
     ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
