@@ -21,6 +21,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
+import frc.lib.hardware.HardwareRecords.PDConstants;
 
 public class HoodIOKrakenX44 implements HoodIO{
     private final TalonFX mHoodMotor;
@@ -60,9 +61,13 @@ public class HoodIOKrakenX44 implements HoodIO{
         // HoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
         // HoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mRotationSoftLimits.backwardLimit().getRotations();
 
-        HoodConfig.MotionMagic.MotionMagicAcceleration = 0.0;
-        HoodConfig.MotionMagic.MotionMagicCruiseVelocity = 0.0;
-        HoodConfig.MotionMagic.MotionMagicJerk = 0.0;
+
+        // TODO: CHECK WITH TAHA 
+        // Originally was 0.0 for all of these constraints
+        // Swithced over to use the controller
+        HoodConfig.MotionMagic.MotionMagicAcceleration = pController.motionMagicConstants().maxAcceleration();
+        HoodConfig.MotionMagic.MotionMagicCruiseVelocity = pController.motionMagicConstants().maxVelocity();
+        HoodConfig.MotionMagic.MotionMagicJerk = pController.motionMagicConstants().maxAcceleration();
 
         HoodConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         HoodConfig.Slot0.kP = pController.pdController().kP();
@@ -97,7 +102,7 @@ public class HoodIOKrakenX44 implements HoodIO{
             mHoodClosedLoopReferenceSlope
         );
 
-        mHoodMotor.optimizeBusUtilization();
+        mHoodMotor.optimizeBusUtilization(0.0);
     }
 
 
