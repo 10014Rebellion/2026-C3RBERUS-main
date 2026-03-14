@@ -57,15 +57,15 @@ public class FlywheelConstants {
     public static final HashMap<FlywheelStates, LoggedTunableNumber> kFlywheelSetpointToVoltageTuneable = new HashMap<FlywheelStates, LoggedTunableNumber>();
     public static final HashMap<FlywheelStates, Supplier<Rotation2d>> kFlywheelSetpointToVelocity = new HashMap<FlywheelStates, Supplier<Rotation2d>>();
 
-    public static final LoggedTunableNumber tStandbyVoltage = new LoggedTunableNumber("Flywheels/SetpointsVoltage/StandbyVoltage", 0.0);
-    public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Flywheels/SetpointsVoltage/TuneVoltage", 0.0);
-    public static final LoggedTunableNumber tMaxVoltage = new LoggedTunableNumber("Flywheels/SetpointsVoltage/MaxVoltage", 0.0);
-    public static final LoggedTunableNumber tTuningVelocity = new LoggedTunableNumber("Flywheels/TuneVelocityRPS", 0.0);
-    public static final LoggedTunableNumber tFeedVelocity = new LoggedTunableNumber("Flywheels/FeedVelocity", 0.0);
-    public static final LoggedTunableNumber tCloseVelocity = new LoggedTunableNumber("Flywheels/SetpointsRPS/CloseVelocity", 0.0);
-    public static final LoggedTunableNumber tTowerVelocity = new LoggedTunableNumber("Flywheels/SetpointsRPS/CloseVelocity", 0.0);
-    public static final LoggedTunableNumber tBumpVelocity = new LoggedTunableNumber("Flywheels/SetpointsRPS/CloseVelocity", 0.0);
-    public static final LoggedTunableNumber tMaxVelocity = new LoggedTunableNumber("Flywheels/SetpointsRPS/MaxVelocity", 0.0);
+    public static final LoggedTunableNumber tStandbyVoltage = new LoggedTunableNumber("Shooter/Flywheels/SetpointsVoltage/StandbyVoltage", 0.0);
+    public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/Flywheels/SetpointsVoltage/TuneVoltage", 0.0);
+    public static final LoggedTunableNumber tMaxVoltage = new LoggedTunableNumber("Shooter/Flywheels/SetpointsVoltage/MaxVoltage", 0.0);
+    public static final LoggedTunableNumber tTuningVelocity = new LoggedTunableNumber("Shooter/Flywheels/TuneVelocityRPS", 0.0);
+    public static final LoggedTunableNumber tFeedVelocity = new LoggedTunableNumber("Shooter/Flywheels/FeedVelocity", 0.0);
+    public static final LoggedTunableNumber tCloseVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/CloseVelocity", 0.0);
+    public static final LoggedTunableNumber tTowerVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/CloseVelocity", 0.0);
+    public static final LoggedTunableNumber tBumpVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/CloseVelocity", 0.0);
+    public static final LoggedTunableNumber tMaxVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/MaxVelocity", 0.0);
 
     static {
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.STANDBY_VOLTAGE, tStandbyVoltage);

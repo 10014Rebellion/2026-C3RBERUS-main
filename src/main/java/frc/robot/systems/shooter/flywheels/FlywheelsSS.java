@@ -48,7 +48,7 @@ public class FlywheelsSS extends SubsystemBase {
   private final LoggedTunableNumber tFlywheelMaxJerk = new LoggedTunableNumber("Shooter/Flywheel/Control/Profile/MaxJerk", kFlywheelControlConfig.motionMagicConstants().maxJerk());
   private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Shooter/Flywheel/Control/Tolerance", FlywheelConstants.kToleranceRPS);
 
-  private Rotation2d mCurrentRPSGoal = Rotation2d.kZero;
+  private Rotation2d mLastestClosedLoopGoalRPS = Rotation2d.kZero;
   private FlywheelStates mCurrentFlywheelState = FlywheelStates.STOPPED;
 
   public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
@@ -66,9 +66,9 @@ public class FlywheelsSS extends SubsystemBase {
     refreshTuneables();
     executeState();
     
-    Logger.processInputs("Flywheel/Leader", mLeaderFlywheelInputs);
-    Logger.processInputs("Flywheel/Follower", mFollowerFlywheelInputs);
-    Logger.processInputs("Flywheel/Encoder", mEncoderInputs);
+    Logger.processInputs("Shooter/Flywheel/Leader", mLeaderFlywheelInputs);
+    Logger.processInputs("Shooter/Flywheel/Follower", mFollowerFlywheelInputs);
+    Logger.processInputs("Shooter/Flywheel/Encoder", mEncoderInputs);
   }
 
   private void executeState() {
@@ -102,8 +102,8 @@ public class FlywheelsSS extends SubsystemBase {
   }
 
   private void setFlywheelVelocity(Rotation2d pRotsPerS){
-    mCurrentRPSGoal = pRotsPerS;
-    Logger.recordOutput("Flywheel/Control/FunctionSetpoint", mCurrentRPSGoal);
+    mLastestClosedLoopGoalRPS = pRotsPerS;
+    Logger.recordOutput("Shooter/Flywheel/Control/FunctionSetpoint", mLastestClosedLoopGoalRPS);
     mLeaderFlywheelIO.setMotorVelAndAccel(
       pRotsPerS.getRotations(),
       0.0,
@@ -147,18 +147,18 @@ public class FlywheelsSS extends SubsystemBase {
     return mCurrentFlywheelState;
   }
 
-  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRotationsPerSec")
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRPS")
   public double getErrorRPS() {
-    return mCurrentRPSGoal.minus(getFlywheelRPS()).getRotations();
+    return mLastestClosedLoopGoalRPS.minus(getFlywheelRPS()).getRotations();
   }
 
-  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/CurrentGoal")
-  public Rotation2d getCurrentGoal() {
-    return mCurrentRPSGoal;
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/LatestClosedLoopGoalRPS")
+  public Rotation2d getLatestClosedLoopGoal() {
+    return mLastestClosedLoopGoalRPS;
   }
 
-  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtGoal")
-  public boolean atGoal() {
+  @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtLatestClosedLoopGoal")
+  public boolean atLatestClosedLoopGoal() {
     return Math.abs(getErrorRPS()) <= tFlywheelTolerance.get();
   }
 

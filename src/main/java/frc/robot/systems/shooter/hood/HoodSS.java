@@ -15,7 +15,7 @@ import frc.robot.logging.InvalidValueErrors.UnaccountedEnum;
 
 public class HoodSS extends SubsystemBase {
     public static enum HoodStates {
-        STOPPED, // At rest
+        STOPPED,
         TUNING_VOLTAGE,
         TUNING_AMPS,
         MAX,
@@ -51,8 +51,8 @@ public class HoodSS extends SubsystemBase {
     @AutoLogOutput(key = "Shooter/Hood/States/CurrentState")
     private HoodStates mCurrentHoodState = HoodStates.STOPPED;
 
-    @AutoLogOutput(key = "Shooter/Hood/RotationGoal/CurrentGoal")
-    private Rotation2d mGoalAngle = Rotation2d.kZero;
+    @AutoLogOutput(key = "Shooter/Hood/LatestClosedLoopGoalRot")
+    private Rotation2d mLatestClosedLoopGoalRot = Rotation2d.kZero;
     private int mDesiredDirection = 0;
 
     @AutoLogOutput(key = "Shooter/Hood/LimitsEnforced")
@@ -136,24 +136,24 @@ public class HoodSS extends SubsystemBase {
         initializeState(pNewState);
     }
 
-    public void setHoodPosition(Rotation2d pRot) {
-        Telemetry.log("IntakePivot/Setpoint/Non-limited", pRot);
+    private void setHoodPosition(Rotation2d pRot) {
+        Telemetry.log("Shooter/Hood/Setpoint/NonLimited", pRot);
 
         pRot = clampRotToSoftLimits(pRot);
 
-        Telemetry.log("IntakePivot/Setpoint/Limited", pRot);
+        Telemetry.log("Shooter/Hood/Setpoint/Limited", pRot);
 
-        mGoalAngle = pRot;
+        mLatestClosedLoopGoalRot = pRot;
 
         double ffOutput = mHoodFF.calculate(
             mHoodInputs.iHoodAngle.getRadians(), 
-            mHoodInputs.iHoodReferenceValue.getRadians()
+            mHoodInputs.iHoodReferenceValueSlope.getRadians()
         );
 
         double cos = mHoodInputs.iHoodReferenceValue.getCos();
 
-        Telemetry.log("Intake/Pivot/ffOutput", ffOutput);
-        Telemetry.log("Intake/Pivot/cos", cos);
+        Telemetry.log("Shooter/Hood/Pivot/ffOutput", ffOutput);
+        Telemetry.log("Shooter/Hood/Pivot/ffCos", cos);
 
         mHoodIO.setMotorPosition(pRot, ffOutput);
 
@@ -161,19 +161,19 @@ public class HoodSS extends SubsystemBase {
         enforceSoftLimits();
     }
 
-    public void setHoodVoltage(double pVolts) {
+    private void setHoodVoltage(double pVolts) {
         mDesiredDirection = toDirection(pVolts);
         mHoodIO.setMotorVolts(pVolts);
         enforceSoftLimits();
     }
 
-    public void setHoodAmps(double pAmps) {
+    private void setHoodAmps(double pAmps) {
         mDesiredDirection = toDirection(pAmps);
         mHoodIO.setMotorAmps(pAmps);
         enforceSoftLimits();
     }
 
-    public void enforceSoftLimits() {
+    private void enforceSoftLimits() {
         if(
         (mHoodInputs.iHoodAngle.getRotations() > HoodConstants.kHoodLimits.forwardLimit().getRotations()
             && mDesiredDirection == 1 ) 
@@ -211,7 +211,7 @@ public class HoodSS extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/Hood/Feedback/CurrentGoal")
     public Rotation2d getCurrentGoal() {
-        return mGoalAngle;    
+        return mLatestClosedLoopGoalRot;    
     }
 
     @AutoLogOutput(key = "Shooter/Hood/Feedback/AtGoal")

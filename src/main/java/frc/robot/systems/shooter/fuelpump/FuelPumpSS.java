@@ -39,8 +39,8 @@ public class FuelPumpSS extends SubsystemBase {
     executeState();
     mFollowerFuelPumpIO.enforceFollower();
 
-    Logger.processInputs("FuelPump/Leader", mLeaderFuelPumpInputs);
-    Logger.processInputs("FuelPump/Follower", mFollowerFuelPumpInputs);
+    Logger.processInputs("Shooter/FuelPump/Leader", mLeaderFuelPumpInputs);
+    Logger.processInputs("Shooter/FuelPump/Follower", mFollowerFuelPumpInputs);
   }
 
   private void executeState() {

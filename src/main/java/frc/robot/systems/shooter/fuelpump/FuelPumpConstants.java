@@ -33,10 +33,9 @@ public class FuelPumpConstants {
 
     public static final HashMap<FuelPumpState, LoggedTunableNumber> kStateToTuneableFuelPump = new HashMap<FuelPumpState, LoggedTunableNumber>();
 
-    public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("FuelPump/TuneVoltage", 0.0);
-
-    public static final LoggedTunableNumber tIntakeVolts  = new LoggedTunableNumber("FuelPump/DesiredVolts/IntakeVolts", 0.0);
-    public static final LoggedTunableNumber tOuttakeVolts  = new LoggedTunableNumber("FuelPump/DesiredVolts/OuttakeVolts", 0.0);
+    public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/FuelPump/TuneVoltage", 0.0);
+    public static final LoggedTunableNumber tIntakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/IntakeVolts", 0.0);
+    public static final LoggedTunableNumber tOuttakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/OuttakeVolts", 0.0);
 
     static {
         kStateToTuneableFuelPump.put(FuelPumpState.INTAKE_VOLT, tIntakeVolts);
