@@ -52,8 +52,14 @@ public class Drive extends SubsystemBase {
     private final SwerveDriveOdometry mOdometry;
     private final SwerveDrivePoseEstimator mPoseEstimator;
     private final Field2d mField = new Field2d();
-    private final Debouncer mSkidFactorDebouncer = new Debouncer(0.25, DebounceType.kFalling);
-    private final Debouncer mCollisionDebouncer = new Debouncer(0.25, DebounceType.kFalling);
+    private final Debouncer mSkidFactorDebouncer = new Debouncer(kTrustTime, DebounceType.kFalling);
+    private final Debouncer mCollisionDebouncer = new Debouncer(kTrustTime, DebounceType.kFalling);
+    private final Debouncer mTiltDebouncer = new Debouncer(kTrustTime, DebounceType.kFalling);
+
+    private boolean mHasSkidded = false;
+    private double mSkidFactor = 0.0;
+    private double mGyroFactor = 1.0;
+    private double mTiltFactor = 1.0;
 
     public static RobotConfig mRobotConfig;
     private final SwerveSetpointGenerator mSetpointGenerator;
@@ -81,9 +87,6 @@ public class Drive extends SubsystemBase {
     SwerveModulePosition[] modulePositionsHighF = SwerveHelper.zeroPositions();
     SwerveModulePosition[] moduleDeltasHighF = SwerveHelper.zeroPositions();
     ChassisSpeeds mRotationSpeed = new ChassisSpeeds(0.0, 0.0, 0.0);
-    boolean mHasSkidded = false;
-    double mSkidFactor = 0.0;
-    double mGyroFactor = 1.0;
 
     private final boolean kUseGenerator = true;
     private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
@@ -197,11 +200,15 @@ public class Drive extends SubsystemBase {
             ? kSkidScalar 
             : 0;
 
-        mGyroFactor = ( mCollisionDebouncer.calculate( mGyro.getAccMagG() > kCollisionCapG ) ) 
+        mGyroFactor = ( mCollisionDebouncer.calculate(shouldAccountForCollision()) ) 
             ? kCollisionScalar 
             : 1.0;
+
+        mTiltFactor = mTiltDebouncer.calculate(shouldAccountForFlip()) 
+            ?  mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iPitchPosition.getCos()
+            : 1.0;
         
-        double visionFactor = mSkidFactor + mGyroFactor;
+        double visionFactor = (mSkidFactor + mGyroFactor) * mTiltFactor;
         
         /* VISION */
         mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
@@ -429,6 +436,19 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key = "Drive/Odometry/DesiredChassisSpeeds")
     public ChassisSpeeds getDesiredChassisSpeeds() {
         return mDesiredSpeeds;
+    }
+
+    @AutoLogOutput( key = "Drive/Odometry/AccountForFlip")
+    public boolean shouldAccountForFlip() {
+        return kAccountForTilt && (
+            (DriveConstants.kTiltCutOffPitch.getDegrees() < mGyroInputs.iPitchPosition.getDegrees())
+                ||
+            (DriveConstants.kTiltCutOffRoll.getDegrees() < mGyroInputs.iRollPosition.getDegrees())
+        );
+    }
+
+    public boolean shouldAccountForCollision() {
+        return mGyro.getAccMagG() > kCollisionCapG;
     }
 
     public RobotConfig getPPRobotConfig() {

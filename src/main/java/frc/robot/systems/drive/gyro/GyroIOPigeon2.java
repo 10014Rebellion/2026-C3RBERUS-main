@@ -2,6 +2,7 @@
 
 package frc.robot.systems.drive.gyro;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import java.util.Queue;
@@ -22,6 +23,8 @@ import frc.robot.systems.drive.PhoenixOdometryThread;
 public class GyroIOPigeon2 implements GyroIO {
     private final Pigeon2 mGyro = new Pigeon2(DriveConstants.kPigeonCANID, DriveConstants.kCANBus);
     private final StatusSignal<Angle> mYaw = mGyro.getYaw();
+    private final StatusSignal<Angle> mPitchPosition = mGyro.getPitch();
+    private final StatusSignal<Angle> mRollPosition = mGyro.getRoll();
     private final StatusSignal<AngularVelocity> mYawVelocity = mGyro.getAngularVelocityXWorld();
     private final StatusSignal<LinearAcceleration> mYawAccelerationX = mGyro.getAccelerationX();
     private final StatusSignal<LinearAcceleration> mYawAccelerationY = mGyro.getAccelerationY();
@@ -39,7 +42,13 @@ public class GyroIOPigeon2 implements GyroIO {
         mGyro.getConfigurator().setYaw(0.0);
 
         BaseStatusSignal.setUpdateFrequencyForAll(DriveConstants.kOdometryFrequency, mYaw);
-        BaseStatusSignal.setUpdateFrequencyForAll(50, mYawVelocity, mYawAccelerationX, mYawAccelerationY, mYawAccelerationZ);
+        BaseStatusSignal.setUpdateFrequencyForAll(50, 
+            mPitchPosition, 
+            mRollPosition, 
+            mYawVelocity, 
+            mYawAccelerationX, 
+            mYawAccelerationY, 
+            mYawAccelerationZ);
 
         yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(mYaw.clone());
@@ -56,6 +65,8 @@ public class GyroIOPigeon2 implements GyroIO {
             mYawAccelerationY,
             mYawAccelerationZ).equals(StatusCode.OK);
         pInputs.iYawPosition = Rotation2d.fromDegrees(mYaw.getValueAsDouble());
+        pInputs.iPitchPosition = Rotation2d.fromDegrees(mPitchPosition.getValue().in(Degrees));
+        pInputs.iRollPosition = Rotation2d.fromDegrees(mRollPosition.getValue().in(Degrees));
         pInputs.iYawVelocityPS = Rotation2d.fromDegrees(mYawVelocity.getValue().in(DegreesPerSecond));
         pInputs.iAccXG = mYawAccelerationX.getValueAsDouble();
         pInputs.iAccYG = mYawAccelerationY.getValueAsDouble();

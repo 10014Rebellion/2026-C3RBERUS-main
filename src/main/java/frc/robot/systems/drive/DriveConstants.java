@@ -10,6 +10,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -62,6 +63,10 @@ public class DriveConstants {
     public static final double kSkidScalar = 1.0; // TODO: TUNE ME
     public static final double kCollisionCapG = 1.75; // TODO: TUNE ME
     public static final double kCollisionScalar = 1.0; // TODO: TUNE ME
+    public static final boolean kAccountForTilt = true; 
+    public static final Rotation2d kTiltCutOffPitch = Rotation2d.fromDegrees(5.0);
+    public static final Rotation2d kTiltCutOffRoll = Rotation2d.fromDegrees(5.0);
+    public static final double kTrustTime = 0.5; 
 
     public static final boolean kDoExtraLogging = false;
 
