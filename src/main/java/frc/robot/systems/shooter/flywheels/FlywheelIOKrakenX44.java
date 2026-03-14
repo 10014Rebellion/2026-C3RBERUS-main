@@ -98,7 +98,7 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
             mFlywheelClosedLoopReference
         );
 
-        mFlywheelMotor.optimizeBusUtilization();
+        mFlywheelMotor.optimizeBusUtilization(0);
     }
 
     @Override

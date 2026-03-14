@@ -81,7 +81,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
         mFuelPumpSupplyCurrent = mFuelPumpMotor.getSupplyCurrent();
         mFuelPumpStatorCurrent = mFuelPumpMotor.getStatorCurrent();
         mFuelPumpTempCelsius = mFuelPumpMotor.getDeviceTemp();
-
+        
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0, 
             mFuelPumpControlMode,
@@ -93,7 +93,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
             mFuelPumpTempCelsius
         );
 
-        mFuelPumpMotor.optimizeBusUtilization();
+        mFuelPumpMotor.optimizeBusUtilization(0);
     }
 
     @Override
@@ -115,7 +115,6 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
         pInputs.iFuelPumpStatorCurrentAmps = mFuelPumpStatorCurrent.getValueAsDouble();
         pInputs.iFuelPumpTempCelsius = mFuelPumpTempCelsius.getValueAsDouble();
         pInputs.iFuelPumpVelocityGoal = getVelocityGoal();
-
     }
 
     private boolean isLeader() {
