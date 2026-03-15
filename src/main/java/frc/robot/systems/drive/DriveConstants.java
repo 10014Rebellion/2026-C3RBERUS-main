@@ -91,8 +91,8 @@ public class DriveConstants {
     // public static final double kDriveSupplyAmpLowerLimitTime = 0.25;
 
     public static final double kAzimuthStatorAmpLimit = 40.0;
-    public static final double kAzimuthSupplyAmpLimit = 40.0;
-    public static final double kAzimuthFOCAmpLimit = 30.0;
+    public static final double kAzimuthSupplyAmpLimit = 20.0;
+    public static final double kAzimuthFOCAmpLimit = 40.0;
 
     public static final ModuleControlConfig kModuleControllerConfigs = !RobotConstants.isSim()
         // kV is generally 0 for FOC control, so double check in ModuleIOKraken to see whether kV should be applied

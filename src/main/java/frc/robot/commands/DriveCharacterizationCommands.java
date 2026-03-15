@@ -30,6 +30,11 @@ public class DriveCharacterizationCommands {
             .alongWith(pDrive.getDriveManager().setToSysIDCharacterization());
     }
 
+    public static Command testDriveAmpCharacterization(Drive pDrive) {
+        return Commands.runOnce(() -> setDriveAmperagesForAllModules(Drive.tDriveCharacterizationAmperage.get(), pDrive))
+            .alongWith(pDrive.getDriveManager().setToSysIDCharacterization());
+    }
+
     public static void setDriveAmperagesForAllModules(double amps, Drive pDrive) {
         for (int i = 0; i < 4; i++) {
             pDrive.getModules()[i].setDriveAmperage(amps);

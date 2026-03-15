@@ -100,6 +100,8 @@ public class Drive extends SubsystemBase {
 
     public static final LoggedTunableNumber tRotationDriftTestSpeedDeg = new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
     public static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 3.5);
+    public static final LoggedTunableNumber tDriveCharacterizationVoltage = new LoggedTunableNumber("Drive/DriveCharacterizationVoltage", 0);
+    public static final LoggedTunableNumber tDriveCharacterizationAmperage = new LoggedTunableNumber("Drive/DriveCharacterizationAmperage", 0);
     public static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
     public static final LoggedTunableNumber tAzimuthCharacterizationAmps = new LoggedTunableNumber("Drive/AzimuthCharacterizationAmps", 0);
     
