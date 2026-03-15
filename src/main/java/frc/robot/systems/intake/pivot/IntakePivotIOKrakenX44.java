@@ -8,7 +8,7 @@ import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -23,7 +23,6 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
-import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 import frc.robot.Constants;
 import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 
@@ -33,10 +32,9 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private final CANdi mEncoder;
     private final StatusSignal<Angle> mIntakeEncoderAbsolutePosition;
 
-    // private final DetachedEncoder mIntakePivotEncoder;
     private final VoltageOut mIntakePivotVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mIntakePivotAmpsControl = new TorqueCurrentFOC(0.0);
-    private final PositionVoltage mIntakePivotRotationControl = new PositionVoltage(0.0);
+    private final MotionMagicVoltage mIntakePivotRotationControl = new MotionMagicVoltage(0.0);
     
     private final StatusSignal<Angle> mIntakePivotRotation;
     private final StatusSignal<AngularVelocity> mIntakePivotVelocityRPS;
@@ -48,19 +46,14 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private final StatusSignal<Temperature> mIntakePivotTempCelsius;
     private final StatusSignal<Double> mIntakePivotReferencePosition;
     private final StatusSignal<Double> mIntakePivotReferencePositionSlope;
-
-    private final RotationSoftLimits mLimits;
-    private Rotation2d mPivotPos = Rotation2d.kZero;
     
-    public IntakePivotIOKrakenX44(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig, RotationSoftLimits pLimits) {
+    public IntakePivotIOKrakenX44(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig) {
         mEncoder = new CANdi(pEncoderConfig.canID(), Constants.kSubsystemsCANBus);
         CANdiConfiguration mEncoderConfiguration = new CANdiConfiguration();
         mEncoderConfiguration.PWM1.AbsoluteSensorOffset = -pEncoderConfig.offset().getRotations();
         mEncoder.getConfigurator().apply(mEncoderConfiguration);
 
         mIntakeEncoderAbsolutePosition = mEncoder.getPWM1Position();
-
-        this.mLimits = pLimits;
 
         // Motor
         mIntakePivotMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
@@ -104,12 +97,15 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0, 
+            mIntakePivotRotation,
             mIntakePivotVelocityRPS,
             mIntakePivotAccelerationRPSS, 
             mIntakePivotVoltage,
             mIntakePivotSupplyCurrent,
             mIntakePivotStatorCurrent,
-            mIntakePivotTempCelsius
+            mIntakePivotTempCelsius,
+            mIntakePivotReferencePosition,
+            mIntakePivotReferencePositionSlope
         );
 
         mIntakePivotMotor.optimizeBusUtilization();
@@ -133,8 +129,6 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         ).isOK();
         pInputs.iIntakePivotRotation = 
             Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
-            // .minus(mOffset);
-        mPivotPos = Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
         pInputs.iIntakePivotVelocityRPS = Rotation2d.fromRotations(mIntakePivotVelocityRPS.getValueAsDouble());
         pInputs.iIntakePivotAccelerationRPSS = Rotation2d.fromRotations(mIntakePivotAccelerationRPSS.getValueAsDouble());
         pInputs.iIntakePivotMotorVolts = mIntakePivotVoltage.getValueAsDouble();
@@ -143,12 +137,9 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         pInputs.iIntakePivotTempCelsius = mIntakePivotTempCelsius.getValueAsDouble();
         pInputs.iIntakeClosedLoopReference = 
             Rotation2d.fromRotations(mIntakePivotReferencePosition.getValueAsDouble());
-            // .minus(mOffset);
         pInputs.iIntakeClosedLoopReferenceSlope = 
             Rotation2d.fromRotations(mIntakePivotReferencePositionSlope.getValueAsDouble());
-            // .minus(mOffset);
     }
-
 
     @Override 
     public void setPDConstants(double pKP, double pKD) {
@@ -170,7 +161,6 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     @Override
     public void setMotorVolts(double pVolts) {
         mIntakePivotMotor.setControl(mIntakePivotVoltageControl.withOutput(pVolts));
-        enforceSoftLimits();
     }
 
     @Override
@@ -179,17 +169,13 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     }
 
     @Override
-    public void setMotorRot(Rotation2d pRot, double feedforward) {
-        mIntakePivotMotor.setControl(mIntakePivotRotationControl.withPosition(pRot.getRotations()).withFeedForward(feedforward));
-        enforceSoftLimits();
+    public void resetPPID() {
+        /* Does nothing at this point in time */
     }
-    
 
     @Override
-    public void enforceSoftLimits() {
-        double currentRotation = mPivotPos.getRotations();
-        if((currentRotation > mLimits.forwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() > 0) || 
-           (currentRotation < mLimits.backwardLimit().getRotations() && mIntakePivotVoltage.getValueAsDouble() < 0)) stopMotor();
+    public void setMotorPosition(Rotation2d pRot, double feedforward) {
+        mIntakePivotMotor.setControl(mIntakePivotRotationControl.withPosition(pRot.getRotations()).withFeedForward(feedforward));
     }
 
     @Override

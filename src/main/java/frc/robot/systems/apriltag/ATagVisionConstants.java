@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 public class ATagVisionConstants {
     // Best to get these from CAD, or in person.
     public static final String kFrontLeftCamName = "SideLeft-OV9281"; // >>> TODO: TUNE ME
-    public static final Orientation kFrontLeftCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
+    public static final Orientation kFrontLeftCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kFrontLeftCamTransform = new Transform3d(
         new Translation3d(
             Units.inchesToMeters(-4.375), // Y: inches left // >>> TODO: TUNE ME
@@ -39,7 +39,7 @@ public class ATagVisionConstants {
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(5), // Pitch: upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(36 + 180) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(36.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kFLATagCamHardware = 
         new ATagCameraHardware(kFrontLeftCamName, kFrontLeftCamOrientation, kFrontLeftCamTransform);
@@ -55,7 +55,7 @@ public class ATagVisionConstants {
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(5.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(-36) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(-36.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kFRATagCamHardware = 
         new ATagCameraHardware(kFrontRightCamName, kFrontRightCamOrientation, kFrontRightCamTransform);
@@ -71,7 +71,7 @@ public class ATagVisionConstants {
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(5.0), // Pitch: upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(138) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(138.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kBLATagCamHardware = 
         new ATagCameraHardware(kBackLeftCamName, kBackLeftCamOrientation, kBackLeftCamTransform);
@@ -87,7 +87,7 @@ public class ATagVisionConstants {
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(5.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(-138) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(-138.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kBRATagCamHardware = 
         new ATagCameraHardware(kBackRightCamName, kBackRightCamOrientation, kBackRightCamTransform);
@@ -103,7 +103,7 @@ public class ATagVisionConstants {
      * This turns on a implementation of single tag vision algorithm that may be more accurate
      * https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2025-build-thread/477314/85
      */
-    public static final boolean KUseSingleTagTransform = false;
+    // public static final boolean KUseSingleTagTransform = false;
 
     public static final double kAmbiguityThreshold = (RobotBase.isReal()) ? 0.2 : 1.0;
 

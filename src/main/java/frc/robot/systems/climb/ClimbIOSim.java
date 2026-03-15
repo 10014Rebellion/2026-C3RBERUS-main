@@ -10,7 +10,6 @@ public class ClimbIOSim implements ClimbIO{
 
     private double mAppliedVolts;
     private final ElevatorSim mElevatorSim;
-    private final PositionSoftLimits mSoftLimits;
 
     public ClimbIOSim(SimulatedElevator pConfig, BasicMotorHardware pHardware, PositionSoftLimits pSoftLimits) {
 
@@ -23,10 +22,10 @@ public class ClimbIOSim implements ClimbIO{
             pSoftLimits.forwardLimitM(),
             pConfig.kSimulateGravity(), 
             pConfig.kStartingHeightMeters(), 
+            pConfig.kMeasurementStdDevs(),
             pConfig.kMeasurementStdDevs());
 
         mAppliedVolts = 0.0;
-        mSoftLimits = pSoftLimits;
     }
 
     @Override
@@ -42,20 +41,9 @@ public class ClimbIOSim implements ClimbIO{
         pInputs.iClimbPositionMeters = mElevatorSim.getPositionMeters();
     }
 
-    private double getPosition(){
-        return mElevatorSim.getPositionMeters();
-    }
-
-    @Override
-    public void enforceSoftLimits(){
-        double currentPosition = getPosition();
-        if((currentPosition > mSoftLimits.forwardLimitM() && mAppliedVolts > 0) || 
-           (currentPosition < mSoftLimits.backwardLimitM() && mAppliedVolts < 0)) stopMotor();
-    }
-
     @Override
     public void setMotorVolts(double pVolts){
-        mAppliedVolts = MathUtil.clamp(12.0, -12.0, pVolts);
+        mAppliedVolts = MathUtil.clamp(pVolts, -12.0, 12.0);
         mElevatorSim.setInputVoltage(mAppliedVolts);
     }
 

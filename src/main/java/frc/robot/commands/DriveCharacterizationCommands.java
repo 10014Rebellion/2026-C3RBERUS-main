@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -34,9 +32,8 @@ public class DriveCharacterizationCommands {
 
     public static void setDriveAmperagesForAllModules(double amps, Drive pDrive) {
         for (int i = 0; i < 4; i++) {
-            pDrive.getModules()[i].setDesiredVelocity(OptionalDouble.empty());
             pDrive.getModules()[i].setDriveAmperage(amps);
-            pDrive.getModules()[i].setDesiredRotation(Optional.of(Rotation2d.fromDegrees(0.0)));
+            pDrive.getModules()[i].setAzimuthRotation(Rotation2d.kZero, Rotation2d.kZero);
         }
     }
 
@@ -63,9 +60,8 @@ public class DriveCharacterizationCommands {
         return pDrive.getDriveManager().setToSysIDCharacterization()
             .andThen(SysIDCharacterization.runDriveSysIDTests(
                 (voltage) -> {
-                pDrive.getModules()[pModNumber].setDesiredRotation(Optional.empty());
-                pDrive.getModules()[pModNumber].setDesiredVelocity(OptionalDouble.of(0.0));
                 pDrive.getModules()[pModNumber].setAzimuthVoltage(voltage);
+                pDrive.getModules()[pModNumber].setDriveVoltage(0.0);
             }, pDrive));
     }
 
@@ -78,8 +74,7 @@ public class DriveCharacterizationCommands {
             () -> pDrive.getDriveManager().setToSysIDCharacterization().initialize(), 
             () -> {
                 for(int moduleNumber : pModNumbers) {
-                    pDrive.getModules()[moduleNumber].setDesiredRotation(Optional.empty());
-                    pDrive.getModules()[moduleNumber].setDesiredVelocity(OptionalDouble.empty());
+                    pDrive.getModules()[moduleNumber].setDriveVoltage(0.0);
                     pDrive.getModules()[moduleNumber].setAzimuthVoltage(voltage.getAsDouble());
                 }
             }, 
@@ -97,8 +92,7 @@ public class DriveCharacterizationCommands {
             () -> pDrive.getDriveManager().setToSysIDCharacterization().initialize(), 
             () -> {
                 for(int moduleNumber : pModNumbers) {
-                    pDrive.getModules()[moduleNumber].setDesiredRotation(Optional.empty());
-                    pDrive.getModules()[moduleNumber].setDesiredVelocity(OptionalDouble.of(0.0));
+                    pDrive.getModules()[moduleNumber].setDriveVoltage(0.0);
                     pDrive.getModules()[moduleNumber].setAzimuthAmps(amps.getAsDouble());
                 }
             }, 

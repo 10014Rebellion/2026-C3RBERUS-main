@@ -10,8 +10,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -19,15 +17,11 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
-import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 
 public class ClimbIOKrakenx44 implements ClimbIO {
     private final TalonFX mClimbMotor;
     private final VoltageOut mClimbVoltageControl = new VoltageOut(0.0);
     private final PositionDutyCycle mClimbPositionControl = new PositionDutyCycle(0.0);
-
-    private final PositionSoftLimits mSoftLimits;
 
     private final StatusSignal<AngularVelocity> mClimbVelocityMPS;
     private final StatusSignal<Voltage> mClimbVoltage;
@@ -38,7 +32,7 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     private final StatusSignal<Angle> mClimbPosition;
     private final StatusSignal<Double> mClosedLoopReference;
 
-    public ClimbIOKrakenx44(BasicMotorHardware pConfig, PositionSoftLimits pSoftLimits) {
+    public ClimbIOKrakenx44(BasicMotorHardware pConfig) {
         mClimbMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
         var ClimbConfig = new TalonFXConfiguration();
 
@@ -83,7 +77,6 @@ public class ClimbIOKrakenx44 implements ClimbIO {
 
         // mClimbMotor.setPosition(0.0);
         mClimbMotor.optimizeBusUtilization();
-        mSoftLimits = pSoftLimits;
     }
 
     @Override
@@ -111,10 +104,6 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     @Override
     public void setMotorPosition(double pPositionM, double pFeedforward) {
         mClimbMotor.setControl(mClimbPositionControl.withPosition(pPositionM).withFeedForward(pFeedforward));
-    }
-
-    @Override
-    public void enforceSoftLimits(){
     }
 
     @Override
