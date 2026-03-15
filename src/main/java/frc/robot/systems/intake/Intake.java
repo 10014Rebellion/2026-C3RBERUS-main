@@ -13,7 +13,7 @@ import frc.robot.systems.intake.roller.IntakeRollerSS;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 
 public class Intake {
-    public static final double tIntakeCompactTime = 0.3;
+    public static final double tIntakeCompactTime = 0.75;
 
     private final IntakePivotSS mIntakePivotSS;
     private final IntakeRollerSS mIntakeRollerSS;
@@ -40,8 +40,8 @@ public class Intake {
     public Command trashCompactPivotContinuous() {
         return new RepeatCommand(
             new SequentialCommandGroup(
-                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT).withTimeout(tIntakeCompactTime),
-                mIntakePivotSS.setStateCmd(IntakePivotStates.INTAKE).withTimeout(tIntakeCompactTime)
+                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_HIGH).withTimeout(tIntakeCompactTime),
+                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_LOW).withTimeout(tIntakeCompactTime)
             )
         );
     }
