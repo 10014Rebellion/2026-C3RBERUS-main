@@ -13,7 +13,7 @@ import frc.robot.systems.intake.roller.IntakeRollerSS;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 
 public class Intake {
-    public static final double tIntakeCompactTime = 0.3;
+    public static final double tIntakeCompactTime = 0.75;
 
     private final IntakePivotSS mIntakePivotSS;
     private final IntakeRollerSS mIntakeRollerSS;

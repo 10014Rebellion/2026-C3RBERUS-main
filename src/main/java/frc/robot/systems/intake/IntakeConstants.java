@@ -38,16 +38,16 @@ public class IntakeConstants {
             40, 
             FeedbackSensorSourceValue.FusedCANdiPWM1,
             1.0,
-            Rotation2d.fromRotations(-0.241699 + 0.055555) // 0.055555 is to account for the fact that our CG is 20deg off the ground
+            Rotation2d.fromRotations(-0.241699 - 0.29 + 0.055555) // 0.055555 is to account for the fact that our CG is 20deg off the ground
         );
 
         // WITH POSITION VOLTAGE
         public static final ArmControllerMotionMagic kPivotController = (!RobotConstants.isSim()) ?
             new ArmControllerMotionMagic(
                 0, 
-                new PDConstants(19.0, 0.0), 
-                new MotionMagicConstants(0, 0, 0), // NOT USED
-                new ArmFeedforward(0.5, 0.6, 0, 0)
+                new PDConstants(35.0, 4.5), 
+                new MotionMagicConstants(1200, 2400, 0), // NOT USED
+                new ArmFeedforward(0.5, 0.4, 0, 0)
             )
                 :
             new ArmControllerMotionMagic(
@@ -69,15 +69,15 @@ public class IntakeConstants {
         public static final LoggedTunableNumber tPivotTuningAmp = new LoggedTunableNumber("Intake/Tuning/TuneAmperage", 0.0);
 
         public static final LoggedTunableNumber tStowSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/StowSetpointDegrees", 114.48);
+            "Intake/Setpoint/StowSetpointDegrees", 73.5);
         public static final Supplier<Rotation2d> kStowSetpointSup = () -> Rotation2d.fromDegrees(tStowSetpointDeg.get());
 
         public static final LoggedTunableNumber tCompactSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/CompactSetpointDegrees", 25.0);
+            "Intake/Setpoint/CompactSetpointDegrees", 48.0);
         public static final Supplier<Rotation2d> kCompactSetpointSup = () -> Rotation2d.fromDegrees(tCompactSetpointDeg.get());
 
         public static final LoggedTunableNumber tIntakeSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/IntakeSetpointDegrees", -24.48);
+            "Intake/Setpoint/IntakeSetpointDegrees", 0.0);
         public static final Supplier<Rotation2d> kIntakeSetpointSup = () -> Rotation2d.fromDegrees(tIntakeSetpointDeg.get());
 
         public static final LoggedTunableNumber tTuningShotSetpointDeg  = new LoggedTunableNumber(
@@ -99,7 +99,7 @@ public class IntakeConstants {
             42,
             RobotConstants.kSubsystemsCANBus,
             1,
-            InvertedValue.CounterClockwise_Positive,
+            InvertedValue.Clockwise_Positive,
             NeutralModeValue.Coast,
             new CurrentLimits(30, 40)
         );
