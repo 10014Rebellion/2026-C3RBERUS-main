@@ -46,7 +46,7 @@ public class IntakeConstants {
             new ArmControllerMotionMagic(
                 0, 
                 new PDConstants(35.0, 4.5), 
-                new MotionMagicConstants(1200.0 / 360.0, 2400.0 / 360.0, 0 / 360.0),
+                new MotionMagicConstants(1800.0 / 360.0, 2400.0 / 360.0, 0 / 360.0),
                 new ArmFeedforward(0.5, 0.4, 0, 0)
             )
                 :

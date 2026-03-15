@@ -43,11 +43,11 @@ public class IntakePivotSS extends SubsystemBase {
     private final LoggedTunableNumber tIntakeKA = new LoggedTunableNumber("Intake/Control/FF/kA", 
         IntakeConstants.PivotConstants.kPivotController.feedforward().getKa());
     private final LoggedTunableNumber tIntakeCruiseVelDPS = new LoggedTunableNumber("Intake/Control/Profile/CruiseVelDPS", 
-        IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxVelocity());
+        IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxVelocity() * 360.0);
     private final LoggedTunableNumber tIntakeMaxAccelDPSS = new LoggedTunableNumber("Intake/Control/Profile/MaxAccelerationDPSS", 
-        IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxAcceleration());
+        IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxAcceleration() * 360.0);
     private final LoggedTunableNumber tIntakeMaxJerkDPSSS = new LoggedTunableNumber("Intake/Control/Profile/MaxJerkDPSSS", 
-        IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxJerk());
+        IntakeConstants.PivotConstants.kPivotController.motionMagicConstants().maxJerk() * 360.0);
     private final LoggedTunableNumber tIntakeToleranceDegrees = new LoggedTunableNumber("Intake/Control/ToleranceDegrees", 
         IntakeConstants.PivotConstants.kPivotMotorToleranceRotations.getDegrees());
   
@@ -86,7 +86,7 @@ public class IntakePivotSS extends SubsystemBase {
             case STOPPED -> {
             } case TUNING_VOLTAGE -> {
             } case TUNING_AMPS -> {
-            } case STOW, COMPACT_HIGH, INTAKE, TUNING_SETPOINT -> {
+            } case STOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
                 mIntakePivotIO.resetPPID();
             } case INVALID -> {}
             default -> {
