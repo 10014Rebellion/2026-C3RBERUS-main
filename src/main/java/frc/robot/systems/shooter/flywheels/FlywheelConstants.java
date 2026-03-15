@@ -22,7 +22,7 @@ import frc.robot.RobotConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 
 public class FlywheelConstants {
-    public static final double kMaxFlywheelTestedRPS = 112;
+    public static final double kMaxFlywheelTestedRPS = 115;
     public static final double kToleranceRPS = 3.0;
     public static final double kBangBangTimeout = 0.25;
 
@@ -38,7 +38,7 @@ public class FlywheelConstants {
         1,
         InvertedValue.CounterClockwise_Positive,
         NeutralModeValue.Coast,
-        new CurrentLimits(60, 80)
+        new CurrentLimits(80, 80)
     );
 
     public static final FollowerMotorHardware kFlywheelFollowerConfig = new FollowerMotorHardware(

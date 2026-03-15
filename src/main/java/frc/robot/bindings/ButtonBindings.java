@@ -73,17 +73,17 @@ public class ButtonBindings {
             .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT))
             .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
         
-        // mPilotController.x().and(isTesting())
-        //     .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
-        //     .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
+        mPilotController.x().and(isTesting())
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
 
-        // mPilotController.y().and(isTesting())
-        //     .onTrue(mIntakeSS.trashCompactPivotContinuous())
-        //     .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
+        mPilotController.y().and(isTesting())
+            .onTrue(mIntakeSS.trashCompactPivotContinuous())
+            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
 
-        mPilotController.x()
-            .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_VOLTAGE))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
+        // mPilotController.x()
+        //     .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_VOLTAGE))
+        //     .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
 
         mPilotController.rightTrigger().and(isTesting())
             .onTrue(DriveCharacterizationCommands.testAzimuthsVoltage(mDriveSS, 0, 1, 2, 3))
