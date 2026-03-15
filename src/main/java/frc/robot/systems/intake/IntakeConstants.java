@@ -106,7 +106,7 @@ public class IntakeConstants {
             1,
             InvertedValue.Clockwise_Positive,
             NeutralModeValue.Coast,
-            new CurrentLimits(30, 40)
+            new CurrentLimits(30, 80)
         );
 
         public static final LoggedTunableNumber tIdleTuningVoltage = new LoggedTunableNumber("Intake/Voltage/IDLE", 0.0);

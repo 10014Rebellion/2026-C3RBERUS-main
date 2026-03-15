@@ -34,9 +34,9 @@ public class HoodConstants {
 
     public static final ArmControllerMotionMagic kHoodControlConfig = new ArmControllerMotionMagic(
         0, // not currently used
-        new PDConstants(22, 0), // Tuned for C3RBERUS!
-        new MotionMagicConstants(100, 1000, 0),  // Tuned for C3RBERUS!
-        new ArmFeedforward(0, 0.06, 0, 0) // Tuned for C3RBERUS!
+        new PDConstants(300, 5), // Tuned for C3RBERUS!
+        new MotionMagicConstants(4000.0 / 360.0, 4000. / 360.0, 0),  // Tuned for C3RBERUS!
+        new ArmFeedforward(0.9, 0.06, 0, 0) // Tuned for C3RBERUS!
     );
 
     public static final RotationSoftLimits kHoodLimits = new RotationSoftLimits(

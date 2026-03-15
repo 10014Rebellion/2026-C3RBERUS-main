@@ -22,7 +22,7 @@ public class FuelPumpConstants {
         1,
         InvertedValue.CounterClockwise_Positive,
         NeutralModeValue.Coast,
-        new CurrentLimits(40, 50)
+        new CurrentLimits(40, 80)
     );
 
     public static final FollowerMotorHardware kFuelPumpFollowerConfig = new FollowerMotorHardware(
