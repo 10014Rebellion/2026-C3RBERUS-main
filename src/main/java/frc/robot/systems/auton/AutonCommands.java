@@ -22,11 +22,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.GameGoalPoseChooser;
-import frc.robot.systems.conveyor.ConveyorSS;
-import frc.robot.systems.conveyor.ConveyorSS.ConveyorState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
+import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
@@ -43,21 +41,18 @@ public class AutonCommands extends SubsystemBase {
     private final HoodSS mHoodSS;
     private final FuelPumpSS mFuelPumpSS;
     private final FlywheelsSS mFlywheelsSS;
-    private final ConveyorSS mConveyorSS;
 
     private final SendableChooser<Supplier<Command>> mAutoChooser;
     private final LoggedDashboardChooser<Supplier<Command>> mAutoChooserLogged;
 
     private boolean wantToShoot = false;
 
-    public AutonCommands(Drive pRobotDrive, Intake pIntake, ConveyorSS mConveyor, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS) {
+    public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS) {
         this.mRobotDrive = pRobotDrive;
         this.mIntake = pIntake;
         this.mHoodSS = pHoodSS;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mFuelPumpSS = pFuelPumpSS;
-        // this.mShooter = pShooter;
-        this.mConveyorSS = mConveyor;
 
         mAutoChooser = new SendableChooser<>();
 
@@ -128,7 +123,7 @@ public class AutonCommands extends SubsystemBase {
 
         autoActivted
             .onTrue(autoPath1)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.STOWED))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.STOW))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
@@ -148,20 +143,14 @@ public class AutonCommands extends SubsystemBase {
                 mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(2.5),
                 mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.01));
 
-        SequentialEndingCommandGroup path1CShooting = 
-            new SequentialEndingCommandGroup(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(2.5),
-                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.01));
 
         hasPath1Ended.and(shootingRange.debounce(1.0))
             .onTrue(path1FPShooting)
-            .onTrue(path1IShooting)
-            .onTrue(path1CShooting);
+            .onTrue(path1IShooting);
 
         auto.loggedCondition(
             "Path1/ShootingHasEnded", 
-            () -> path1CShooting.hasEnded() 
-                && path1FPShooting.hasEnded()
+                () -> path1FPShooting.hasEnded()
                 && path1IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
@@ -204,10 +193,8 @@ public class AutonCommands extends SubsystemBase {
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE))
-            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
-            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
+            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
         shootingRange
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
@@ -235,24 +222,17 @@ public class AutonCommands extends SubsystemBase {
                 mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
                 mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
 
-        SequentialEndingCommandGroup path2CShooting = 
-            new SequentialEndingCommandGroup(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(5.0),
-                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.1));
-
         hasPath2Ended.and(shootingRange.debounce(0.5))
             .onTrue(path2FPShooting)
             .onTrue(path2IShooting)
-            .onTrue(path2CShooting)
-            .onTrue(mIntake.trashCompact());
+            .onTrue(mIntake.trashCompactPivotContinuous());
 
         auto.loggedCondition(
             "Path2/ShootingHasEnded", 
-            () -> path2CShooting.hasEnded() 
-                && path2FPShooting.hasEnded()
+            () -> path2FPShooting.hasEnded()
                 && path2IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
             .onTrue(mRobotDrive.getDriveManager().setToTeleop())
             .onTrue(endAuto(auto));
@@ -287,10 +267,8 @@ public class AutonCommands extends SubsystemBase {
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE))
-            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
-            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE));
+            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
+            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
         shootingRange
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
@@ -318,24 +296,17 @@ public class AutonCommands extends SubsystemBase {
                 mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
                 mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
 
-        SequentialEndingCommandGroup path2CShooting = 
-            new SequentialEndingCommandGroup(
-                mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE).withTimeout(5.0),
-                mConveyorSS.setConveyorStateCmd(ConveyorState.IDLE).withTimeout(0.1));
-
         hasPath2Ended.and(shootingRange.debounce(0.5))
             .onTrue(path2FPShooting)
             .onTrue(path2IShooting)
-            .onTrue(path2CShooting)
-            .onTrue(mIntake.trashCompact());
+            .onTrue(mIntake.trashCompactPivotContinuous());
 
         auto.loggedCondition(
             "Path2/ShootingHasEnded", 
-            () -> path2CShooting.hasEnded() 
-                && path2FPShooting.hasEnded()
+            () -> path2FPShooting.hasEnded()
                 && path2IShooting.hasEnded(), true)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotState.INTAKE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
             .onTrue(mRobotDrive.getDriveManager().setToTeleop())
             .onTrue(endAuto(auto));
@@ -397,11 +368,11 @@ public class AutonCommands extends SubsystemBase {
 
     ///////////////// SUPERSTRUCTURE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\
     public Command intakeCommand() {
-        return mIntake.setPivotStateCmd(IntakePivotState.INTAKE).alongWith(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE));
+        return mIntake.setPivotStateCmd(IntakePivotStates.INTAKE).alongWith(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE));
     }
 
     public Command deployIntakeCommand() {
-        return mIntake.setPivotStateCmd(IntakePivotState.INTAKE);
+        return mIntake.setPivotStateCmd(IntakePivotStates.INTAKE);
     }
 
     public Command bindexCommand() {

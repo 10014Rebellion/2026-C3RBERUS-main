@@ -23,6 +23,7 @@ import frc.robot.systems.intake.pivot.IntakePivotIOSim;
 import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.roller.IntakeRollerIO;
 import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
+import frc.robot.systems.intake.roller.IntakeRollerIOSim;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
 import frc.robot.systems.shooter.flywheels.FlywheelConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelIO;
@@ -48,12 +49,10 @@ import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.climb.ClimbConstants;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
+import frc.robot.systems.climb.ClimbIOSim;
 import frc.robot.systems.climb.ClimbSS;
-import frc.robot.systems.conveyor.ConveyorSS;
-import frc.robot.systems.conveyor.ConveyorConstants;
-import frc.robot.systems.conveyor.ConveyorIO;
-import frc.robot.systems.conveyor.ConveyorIOKrakenX44;
-import frc.robot.systems.conveyor.ConveyorIOSim;
+import frc.robot.systems.climb.AngularServoIO;
+import frc.robot.systems.climb.AngularServoIOPWM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -63,7 +62,6 @@ public class RobotContainer {
     private final FuelPumpSS mFuelPumpSS;
     private final HoodSS mHoodSS;
     private final FlywheelsSS mFlywheelsSS;
-    private final ConveyorSS mConveyor;
     private final Intake mIntake;
     private final ClimbSS mClimbSS;
 
@@ -106,12 +104,14 @@ public class RobotContainer {
                 mIntake = new Intake(
                     new IntakePivotSS(new IntakePivotIOKrakenX44(
                         IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                        IntakeConstants.PivotConstants.kPivotEncoderConfig,
-                        IntakeConstants.PivotConstants.kPivotLimits)),
+                        IntakeConstants.PivotConstants.kPivotEncoderConfig)),
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
-                mConveyor = new ConveyorSS(new ConveyorIOKrakenX44(ConveyorConstants.kConveyorMotorConstants));
+                mClimbSS = new ClimbSS(
+                    new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants),
+                    new AngularServoIOPWM(ClimbConstants.kHookPort));
+
                 break;
             }
             case SIM: {
@@ -124,15 +124,10 @@ public class RobotContainer {
                     },
                     new GyroIO() {},
                     new ATagVision(new ATagCameraIO[]{
-                        // new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
-                        // new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
-                        // new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
-                        // new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}
-
+                        new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
+                        new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
                     }));
                 
                 FlywheelIOSim leaderSim = new FlywheelIOSim(FlywheelConstants.kFlywheelLeaderConfig);
@@ -155,12 +150,17 @@ public class RobotContainer {
                 mIntake = new Intake(
                     new IntakePivotSS(new IntakePivotIOSim(
                         IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                        IntakeConstants.PivotConstants.kPivotEncoderConfig,
-                        IntakeConstants.PivotConstants.kPivotLimits)),
-                    new IntakeRollerSS(new IntakeRollerIO() {})
+                        IntakeConstants.PivotConstants.kPivotEncoderConfig)),
+                    new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
-                mConveyor = new ConveyorSS(new ConveyorIOSim());
+                mClimbSS = new ClimbSS(
+                    new ClimbIOSim(
+                        ClimbConstants.kSimElevator, 
+                        ClimbConstants.kClimbMotorConstants, 
+                        ClimbConstants.kSoftLimits),
+                    new AngularServoIO() {});
+
                 break;
             }
 
@@ -199,14 +199,15 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
-                mConveyor = new ConveyorSS(new ConveyorIO() {});
+                mClimbSS = new ClimbSS(
+                    new ClimbIO() {},
+                    new AngularServoIO() {});
+
                 break;
             }
         }
-
-        mClimbSS = new ClimbSS(new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants, ClimbConstants.kSoftLimits), ClimbConstants.kSoftLimits);
         
-        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake, mConveyor, mClimbSS);
+        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake, mClimbSS);
 
         initBindings();
         initBaseTriggers();
@@ -216,7 +217,7 @@ public class RobotContainer {
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDrive.getDriveManager().setDriveProfile(profile));
 
-        autos = new AutonCommands(mDrive, mIntake, mConveyor, mFuelPumpSS, mHoodSS, mFlywheelsSS);
+        autos = new AutonCommands(mDrive, mIntake, mFuelPumpSS, mHoodSS, mFlywheelsSS);
     }
 
     public Drive getDrivetrain() {

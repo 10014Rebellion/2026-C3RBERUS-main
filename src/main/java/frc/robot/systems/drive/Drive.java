@@ -16,7 +16,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -53,17 +52,25 @@ public class Drive extends SubsystemBase {
     private final SwerveDriveOdometry mOdometry;
     private final SwerveDrivePoseEstimator mPoseEstimator;
     private final Field2d mField = new Field2d();
-    private final Debouncer mSkidFactorDebouncer = new Debouncer(0.25, DebounceType.kFalling);
-    private final Debouncer mCollisionDebouncer = new Debouncer(0.25, DebounceType.kFalling);
+    private final Debouncer mSkidFactorDebouncer = new Debouncer(kTrustTime, DebounceType.kFalling);
+    private final Debouncer mCollisionDebouncer = new Debouncer(kTrustTime, DebounceType.kFalling);
+    private final Debouncer mTiltDebouncer = new Debouncer(kTrustTime, DebounceType.kFalling);
+
+    @AutoLogOutput(key = "Drive/Odometry/AccountForSkidding")
+    private boolean mHasSkidded = false;
+    private double mSkidFactor = 0.0;
+    private double mGyroFactor = 1.0;
+    private double mTiltFactor = 1.0;
+    private double mVisionFactor = 1.0;
 
     public static RobotConfig mRobotConfig;
     private final SwerveSetpointGenerator mSetpointGenerator;
     private SwerveSetpoint mPreviousSetpoint =
-            new SwerveSetpoint(
-                new ChassisSpeeds(), 
-                SwerveHelper.zeroStates(), 
-                DriveFeedforwards.zeros(4), 
-                AzimuthFeedForward.zeros());
+        new SwerveSetpoint(
+            new ChassisSpeeds(), 
+            SwerveHelper.zeroStates(), 
+            DriveFeedforwards.zeros(4), 
+            AzimuthFeedForward.zeros());
 
     private ChassisSpeeds mDesiredSpeeds = new ChassisSpeeds();
     private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
@@ -75,11 +82,15 @@ public class Drive extends SubsystemBase {
     private final PathConstraints mDriveConstraints = DriveConstants.kAutoConstraints;
 
     private SwerveModulePosition[] mPrevPositions = SwerveHelper.zeroPositions();
-    private Rotation2d[] mAngleDeltas = new Rotation2d[4];
+    private Rotation2d[] mAngleDeltas = SwerveHelper.zeroRotations();
     @AutoLogOutput(key="Drive/Swerve/PreviousDriveAmps")
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
-    private final boolean kUseGenerator = false;
+    SwerveModulePosition[] modulePositionsHighF = SwerveHelper.zeroPositions();
+    SwerveModulePosition[] moduleDeltasHighF = SwerveHelper.zeroPositions();
+    ChassisSpeeds mRotationSpeed = new ChassisSpeeds(0.0, 0.0, 0.0);
+
+    private final boolean kUseGenerator = true;
     private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
 
     private DriveManager mDriveManager;
@@ -88,7 +99,7 @@ public class Drive extends SubsystemBase {
     public static final LoggedTunableNumber tDriveFFAggressiveness = new LoggedTunableNumber("Drive/Teleop/DriveFFAggressiveness", kDriveFFAggressiveness);
 
     public static final LoggedTunableNumber tRotationDriftTestSpeedDeg = new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
-    public static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
+    public static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 3.5);
     public static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
     public static final LoggedTunableNumber tAzimuthCharacterizationAmps = new LoggedTunableNumber("Drive/AzimuthCharacterizationAmps", 0);
     
@@ -99,8 +110,8 @@ public class Drive extends SubsystemBase {
 
         mRobotRotation = mGyroInputs.iYawPosition;
 
-        mOdometry = new SwerveDriveOdometry(kKinematics, getRobotRotation(), getModulePositions());
-        mPoseEstimator = new SwerveDrivePoseEstimator(kKinematics, getRobotRotation(), getModulePositions(), new Pose2d());
+        mOdometry = new SwerveDriveOdometry(kKinematics, getRobotRotation(), getModulePositionsHighF());
+        mPoseEstimator = new SwerveDrivePoseEstimator(kKinematics, getRobotRotation(), getModulePositionsHighF(), new Pose2d());
 
         mRobotConfig = PPRobotConfigLoader.load();
         mSetpointGenerator = new SwerveSetpointGenerator(mRobotConfig, kMaxAzimuthAngularRadiansPS);
@@ -135,7 +146,6 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         updateSensorsAndOdometry();
         runSwerve(mDriveManager.computeDesiredSpeedsFromState());
-        // getClosestShootingConfig();
     }
 
     private void updateSensorsAndOdometry() {
@@ -151,57 +161,53 @@ public class Drive extends SubsystemBase {
             kOdometryLock.unlock();
         }
 
-        double skidCount = 0;
-        double[] sampleTimestamps = mModules[0].getOdometryTimeStamps(); // All signals are sampled together
-        int sampleCount = sampleTimestamps.length;
-        mAngleDeltas = SwerveHelper.zeroRotations();
-        for (int i = 0; i < sampleCount; i++) {
+        for (int i = 0; i < mModules[0].getOdometryTimeStamps().length; i++) {
             // Read wheel positions and deltas from each module
-            SwerveModulePosition[] modulePositions = SwerveHelper.zeroPositions();
-            SwerveModulePosition[] moduleDeltas = SwerveHelper.zeroPositions();
-
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-                // System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n"+mModules[moduleIndex].getOdometryPositions().length+"\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-                modulePositions[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
+                modulePositionsHighF[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
 
                 mAngleDeltas[moduleIndex] = mAngleDeltas[moduleIndex].plus(
                     GeomUtil.getSmallestChangeInRotation(
-                        modulePositions[moduleIndex].angle, 
+                        modulePositionsHighF[moduleIndex].angle, 
                         mPrevPositions[moduleIndex].angle));
 
-                moduleDeltas[moduleIndex] = new SwerveModulePosition(
-                    modulePositions[moduleIndex].distanceMeters 
+                moduleDeltasHighF[moduleIndex] = new SwerveModulePosition(
+                    modulePositionsHighF[moduleIndex].distanceMeters 
                         - mPrevPositions[moduleIndex].distanceMeters,
-                    modulePositions[moduleIndex].angle);
+                    modulePositionsHighF[moduleIndex].angle);
 
-                mPrevPositions[moduleIndex] = modulePositions[moduleIndex];
+                mPrevPositions[moduleIndex] = modulePositionsHighF[moduleIndex];
             }
 
-            Twist2d robotTwist = kKinematics.toTwist2d(moduleDeltas);
-            double skidRatio = SwerveHelper.skidRatio(GeomUtil.toChassisSpeeds(robotTwist, 1.0 / kOdometryFrequency));
-
-            if(kSkidRatioCap < skidRatio) skidCount++;
+            mRotationSpeed = new ChassisSpeeds(
+                0.0, 0.0, kKinematics.toTwist2d(moduleDeltasHighF).dtheta);
 
             // Update gyro angle
             // Use the real gyro angle
             if (mGyroInputs.iConnected) mRobotRotation = mGyroInputs.odometryYawPositions[i];
             // Use the angle delta from the kinematics and module deltas
-            else mRobotRotation = mRobotRotation.plus(new Rotation2d(robotTwist.dtheta));
+            else mRobotRotation = mRobotRotation.plus(Rotation2d.fromRadians(mRotationSpeed.omegaRadiansPerSecond));
 
-            mPoseEstimator.updateWithTime(sampleTimestamps[i], mRobotRotation, modulePositions);
-
-            Logger.recordOutput("Drive/Odometry/SkidRatio/"+i, skidRatio);
+            mPoseEstimator.updateWithTime(mModules[0].getOdometryTimeStamps()[i], mRobotRotation, modulePositionsHighF);
         }
 
-        double skidFactor = ( mSkidFactorDebouncer.calculate(skidCount > 0) ) 
-            ? skidCount * kSkidScalar 
+        mHasSkidded = SwerveHelper.skidRatio(
+            getRobotChassisSpeeds(), 
+            mRotationSpeed) > kSkidRatioCap;
+
+        mSkidFactor = (mSkidFactorDebouncer.calculate(mHasSkidded)) 
+            ? kSkidScalar 
             : 0;
 
-        double gyroFactor = ( mCollisionDebouncer.calculate( mGyro.getAccMagG() > kCollisionCapG ) ) 
+        mGyroFactor = ( mCollisionDebouncer.calculate(shouldAccountForCollision()) ) 
             ? kCollisionScalar 
             : 1.0;
+
+        mTiltFactor = mTiltDebouncer.calculate(shouldAccountForFlip()) 
+            ? mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iPitchPosition.getCos()
+            : 1.0;
         
-        double visionFactor = skidFactor + gyroFactor;
+        mVisionFactor = (mSkidFactor + mGyroFactor) * mTiltFactor;
         
         /* VISION */
         mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
@@ -211,19 +217,19 @@ public class Drive extends SubsystemBase {
                 mPoseEstimator.addVisionMeasurement(
                     observation.pose(), 
                     observation.timeStamp(), 
-                    observation.stdDevs().times(1.0 / visionFactor));
+                    observation.stdDevs().times(1.0 / mVisionFactor));
             }
 
             Telemetry.logVisionObservationStdDevs(observation);
         }
 
         /* For logging purposes */
-        mOdometry.update(mRobotRotation, getModulePositions());
+        mOdometry.update(mRobotRotation, getModulePositionsHighF());
         mField.setRobotPose(getPoseEstimate());
-        Logger.recordOutput("Drive/Odometry/SkidFactor", skidFactor);
-        Logger.recordOutput("Drive/Odometry/SkidCount", skidCount);
-        Logger.recordOutput("Drive/Odometry/GyroFactor", gyroFactor);
-        Logger.recordOutput("Drive/Odometry/VisionFactor", visionFactor);
+        Logger.recordOutput("Drive/Odometry/SkidFactor", mSkidFactor);
+        Logger.recordOutput("Drive/Odometry/SkidCount", mHasSkidded);
+        Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
+        Logger.recordOutput("Drive/Odometry/VisionFactor", mVisionFactor);
     }
 
     ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
@@ -312,7 +318,7 @@ public class Drive extends SubsystemBase {
         }
 
         // mPrevSetpointStates = optimizedSetpointStates;
-        // Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
+        if(kUseGenerator) Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(optimizedSetpointStates));
         Telemetry.log("Drive/Odometry/FieldSetpointChassisSpeed", ChassisSpeeds.fromRobotRelativeSpeeds(
@@ -373,8 +379,8 @@ public class Drive extends SubsystemBase {
         mGyro.resetGyro(mRobotRotation);
         // Safe to pass in odometry poses because of the syncing
         // between gyro and pose estimator in reset gyro function
-        mPoseEstimator.resetPosition(getRobotRotation(), getModulePositions(), estimatorPose);
-        mOdometry.resetPosition(getRobotRotation(), getModulePositions(), odometryPose);
+        mPoseEstimator.resetPosition(getRobotRotation(), getModulePositionsHighF(), estimatorPose);
+        mOdometry.resetPosition(getRobotRotation(), getModulePositionsHighF(), odometryPose);
     }
 
     public void resetModulesEncoders() {
@@ -390,7 +396,7 @@ public class Drive extends SubsystemBase {
     }
 
     @AutoLogOutput(key = "Drive/Swerve/ModulePositions")
-    public SwerveModulePosition[] getModulePositions() {
+    public SwerveModulePosition[] getModulePositionsHighF() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) positions[i] = mModules[i].getCurrentPosition();
         return positions;
@@ -421,9 +427,28 @@ public class Drive extends SubsystemBase {
         return kKinematics.toChassisSpeeds(getModuleStates());
     }
 
+    @AutoLogOutput(key = "Drive/Odometry/RobotChassisSpeeds")
+    public ChassisSpeeds getRobotRotationSpeed() {
+        return mRotationSpeed;
+    }    
+
     @AutoLogOutput(key = "Drive/Odometry/DesiredChassisSpeeds")
     public ChassisSpeeds getDesiredChassisSpeeds() {
         return mDesiredSpeeds;
+    }
+
+    @AutoLogOutput( key = "Drive/Odometry/AccountForFlip")
+    public boolean shouldAccountForFlip() {
+        return kAccountForTilt && (
+            (DriveConstants.kTiltCutOffPitch.getDegrees() < mGyroInputs.iPitchPosition.getDegrees())
+                ||
+            (DriveConstants.kTiltCutOffRoll.getDegrees() < mGyroInputs.iRollPosition.getDegrees())
+        );
+    }
+
+    @AutoLogOutput(key = "Drive/Odometry/AccountForCollision")
+    public boolean shouldAccountForCollision() {
+        return mGyro.getAccMagG() > kCollisionCapG;
     }
 
     public RobotConfig getPPRobotConfig() {
@@ -437,27 +462,4 @@ public class Drive extends SubsystemBase {
     public Module[] getModules() {
         return this.mModules;
     }
-
-    public double getDistance(Pose2d robotPose, Pose2d otherPose){
-        return robotPose.getTranslation().getDistance(otherPose.getTranslation());
-    }
-
-    // public void setClosestShootingConfig(){
-
-    //     ShootingConfig closestPose = ShootingPoses.kShootingConfigs[0];
-
-    //     for(ShootingConfig shooterConfig : ShootingPoses.kShootingConfigs){
-            
-
-    //         if(getDistance(shooterConfig.pose(), getPoseEstimate()) < getDistance(closestPose.pose(), getPoseEstimate())){
-    //             closestPose = shooterConfig;
-    //         }
-    //     }
-
-    //     mClosestShootingPose =  closestPose;
-    // }
-
-    // public ShootingConfig getClosestShootingConfig(){
-    //     return mClosestShootingPose;
-    // }
 }

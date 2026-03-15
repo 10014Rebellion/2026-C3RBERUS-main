@@ -51,7 +51,7 @@ public class ATagCameraIOPV implements ATagCameraIO {
 
         mPoseEstimator = new PhotonPoseEstimator(FieldConstants.kApriltagLayout, pCameraTransform);
 
-        if (RobotConstants.kCurrentMode == Mode.SIM) setupSimulation();
+        if (RobotConstants.isSim()) setupSimulation();
     }
 
     private void setupSimulation() {
@@ -87,34 +87,28 @@ public class ATagCameraIOPV implements ATagCameraIO {
             if (!pInputs.iHasBeenUpdated) return;
 
             PhotonPipelineResult latestValidResult = unreadResults.get(unreadResults.size() - 1);
+
+            pInputs.iHasTarget = !(latestValidResult == null || !latestValidResult.hasTargets());
+
+            if(pInputs.iHasTarget) {
+                PhotonTrackedTarget target = latestValidResult.getBestTarget();
+                pInputs.iCameraToApriltag = target.getBestCameraToTarget();
+                pInputs.iRobotToApriltag = target.getBestCameraToTarget().plus(mCameraTransform);
+                pInputs.iSingleTagAprilTagID = target.getFiducialId();
+                pInputs.iPoseAmbiguity = target.getPoseAmbiguity();
+                pInputs.iYaw = target.getYaw();
+                pInputs.iPitch = target.getPitch();
+                pInputs.iArea = target.getArea();
+                pInputs.iLatencySeconds = latestValidResult.metadata.getLatencyMillis() / 1000.0;
+                pInputs.iLatestTimestamp = latestValidResult.getTimestampSeconds();
+            }
+
             Optional<EstimatedRobotPose> latestEstimatedRobotPose = mPoseEstimator.estimateCoprocMultiTagPose(latestValidResult);
 
             if (latestEstimatedRobotPose.isEmpty()){
-                // DriverStation.reportWarning("Multi Tag CoProcessor Failed for: " + mCamName, false);
-
                 latestEstimatedRobotPose = mPoseEstimator.estimateClosestToReferencePose(
                     latestValidResult, GeomUtil.toPose3d(pLastRobotPose));
             }
-
-            if (latestValidResult == null || !latestValidResult.hasTargets()) {
-                // DriverStation.reportWarning(
-                //         "No valid pose found in unread PhotonVision results for " + mCamName, false);
-                pInputs.iHasTarget = false;
-                return;
-            }
-
-            pInputs.iHasTarget = true;
-
-            PhotonTrackedTarget target = latestValidResult.getBestTarget();
-            pInputs.iCameraToApriltag = target.getBestCameraToTarget();
-            pInputs.iRobotToApriltag = target.getBestCameraToTarget().plus(mCameraTransform);
-            pInputs.iSingleTagAprilTagID = target.getFiducialId();
-            pInputs.iPoseAmbiguity = target.getPoseAmbiguity();
-            pInputs.iYaw = target.getYaw();
-            pInputs.iPitch = target.getPitch();
-            pInputs.iArea = target.getArea();
-            pInputs.iLatencySeconds = latestValidResult.metadata.getLatencyMillis() / 1000.0;
-            pInputs.iLatestTimestamp = latestValidResult.getTimestampSeconds();
 
             latestEstimatedRobotPose.ifPresent(est -> {
                 if (mOrientation == Orientation.BACK)

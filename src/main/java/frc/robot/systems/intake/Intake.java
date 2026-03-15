@@ -4,65 +4,45 @@
 
 package frc.robot.systems.intake;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.systems.intake.pivot.IntakePivotSS;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotState;
+import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 
 public class Intake {
-  private final IntakePivotSS mIntakePivotSS;
-  private final IntakeRollerSS mIntakeRollerSS;
+    public static final double tIntakeCompactTime = 0.3;
 
-  public Intake(IntakePivotSS pIntakePivotSS, IntakeRollerSS pIntakeRollerSS) {
-    this.mIntakePivotSS = pIntakePivotSS;
-    this.mIntakeRollerSS = pIntakeRollerSS;
-  }
+    private final IntakePivotSS mIntakePivotSS;
+    private final IntakeRollerSS mIntakeRollerSS;
 
-  // ROLLER COMMANDS //
-  public Command setRollerStateCmd(IntakeRollerState rollerState) {
-    return mIntakeRollerSS.setIntakeRollerStateCmd(rollerState);
-  }
+    public Intake(IntakePivotSS pIntakePivotSS, IntakeRollerSS pIntakeRollerSS) {
+        this.mIntakePivotSS = pIntakePivotSS;
+        this.mIntakeRollerSS = pIntakeRollerSS;
+    }
 
-  public Command trashCompact(){
-    return (mIntakePivotSS.trashCompact());
-  }
-
-  public Command setRollerVoltsManualCmd(double pVolts) {
-    return mIntakeRollerSS.setIntakeVoltsManualCmd(pVolts);
-  }
+    // ROLLER COMMANDS //
+    public Command setRollerStateCmd(IntakeRollerState rollerState) {
+        return mIntakeRollerSS.setStateCmd(rollerState);
+    }
   
-  public Command stopRollerCmd() {
-    return mIntakeRollerSS.stopIntakeVoltsManualCmd();
-  }
+    public Command stopRollerCmd() {
+        return mIntakeRollerSS.setStateCmd(IntakeRollerState.IDLE);
+    }
 
-  // PIVOT COMMANDS //
-  public Command setPivotStateCmd(IntakePivotState pIntakePivotState) {
-    return mIntakePivotSS.setIntakePivotStateCmd(pIntakePivotState);
-  }
-  
-  public Command setPivotAmps(double pAmps){
-    return mIntakePivotSS.setIntakePivotAmpsCmd(pAmps);
-  }
+    // PIVOT COMMANDS //
+    public Command setPivotStateCmd(IntakePivotStates pIntakePivotState) {
+        return mIntakePivotSS.setStateCmd(pIntakePivotState);
+    }
 
-  public Command setPivotAmps() {
-    return mIntakePivotSS.setIntakePivotAmpsCmd();
-  }
-  
-  public Command setPivotRotManualCmd(Rotation2d pRot){
-    return mIntakePivotSS.setIntakePivotManualCmd(pRot);
-  }
-  
-  public Command setPivotRotManualCmd(){
-    return mIntakePivotSS.setIntakePivotStateCmd(IntakePivotState.TUNING);
-  }
-
-  public Command setPivotVoltsCmd(double pVolts){
-    return mIntakePivotSS.setIntakePivotVoltsCmd(pVolts);
-  }
-
-  public Command stopPivotCmd() {
-    return mIntakePivotSS.stopIntakePivotCmd();
-  }
+    public Command trashCompactPivotContinuous() {
+        return new RepeatCommand(
+            new SequentialCommandGroup(
+                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT).withTimeout(tIntakeCompactTime),
+                mIntakePivotSS.setStateCmd(IntakePivotStates.INTAKE).withTimeout(tIntakeCompactTime)
+            )
+        );
+    }
 }
