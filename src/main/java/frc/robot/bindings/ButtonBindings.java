@@ -1,11 +1,15 @@
 package frc.robot.bindings;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -35,6 +39,9 @@ public class ButtonBindings {
     private final ClimbSS mClimbSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
+    private final DigitalInput  mClimbNeutralModeButton;
+
+
 
     private final CommandGenericHID mHID = new CommandGenericHID(2);
 
@@ -46,6 +53,7 @@ public class ButtonBindings {
         this.mIntakeSS = pIntake;
         this.mClimbSS = pClimbSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.getDriveManager().setToTeleop());
+        this.mClimbNeutralModeButton = new DigitalInput(0);
     }
 
 
@@ -78,6 +86,9 @@ public class ButtonBindings {
             .whileTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT))
             .whileFalse(mHoodSS.setStateCmd(HoodStates.HOLD_POSITION));
 
+        new Trigger(() -> mClimbNeutralModeButton.get() && DriverStation.isDisabled() && !DriverStation.isFMSAttached())
+            .whileTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)))
+            .whileFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)));
         // mHID.button(9)
         //     .onTrue(mFuelPumpSS.setFuelPumpStateCmd(FuelPumpState.INTAKE)
         //         .alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.CONVEY_TO_INDEX))
@@ -322,4 +333,6 @@ public class ButtonBindings {
         //             4.036095142364502, Rotation2d.kZero)))));
         // }
     }
+
+
 }

@@ -4,6 +4,8 @@ package frc.robot.systems.climb;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 public interface ClimbIO {
     @AutoLog
     public static class ClimbInputs {
@@ -27,4 +29,8 @@ public interface ClimbIO {
     public default void setPDConstants(double pKP, double pKD) {}
 
     public default void stopMotor() {}
+
+    public default void changeClimbNeutralMode(NeutralModeValue pNeutralMode) {}
+
+    
 }
