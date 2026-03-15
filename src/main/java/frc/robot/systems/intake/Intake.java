@@ -40,8 +40,8 @@ public class Intake {
     public Command trashCompactPivotContinuous() {
         return new RepeatCommand(
             new SequentialCommandGroup(
-                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT).withTimeout(tIntakeCompactTime),
-                mIntakePivotSS.setStateCmd(IntakePivotStates.INTAKE).withTimeout(tIntakeCompactTime)
+                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_HIGH).withTimeout(tIntakeCompactTime),
+                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_LOW).withTimeout(tIntakeCompactTime)
             )
         );
     }

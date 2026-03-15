@@ -28,7 +28,7 @@ public class IntakeConstants {
         public static final BasicMotorHardware kPivotMotorConfig = new BasicMotorHardware(
             41, // TODO: TUNE ME;
             RobotConstants.kSubsystemsCANBus,
-            13.5,
+            15.0,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Brake,
             new CurrentLimits(60, 80)
@@ -72,9 +72,13 @@ public class IntakeConstants {
             "Intake/Setpoint/StowSetpointDegrees", 73.5);
         public static final Supplier<Rotation2d> kStowSetpointSup = () -> Rotation2d.fromDegrees(tStowSetpointDeg.get());
 
-        public static final LoggedTunableNumber tCompactSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/CompactSetpointDegrees", 48.0);
-        public static final Supplier<Rotation2d> kCompactSetpointSup = () -> Rotation2d.fromDegrees(tCompactSetpointDeg.get());
+        public static final LoggedTunableNumber tCompactHighSetpointDeg  = new LoggedTunableNumber(
+            "Intake/Setpoint/CompactHighSetpointDegrees", 48.0);
+        public static final Supplier<Rotation2d> kCompactHighSetpointSup = () -> Rotation2d.fromDegrees(tCompactHighSetpointDeg.get());
+
+        public static final LoggedTunableNumber tCompactLowSetpointDeg  = new LoggedTunableNumber(
+            "Intake/Setpoint/CompactLowSetpointDegrees", 18.0);
+        public static final Supplier<Rotation2d> kCompactLowSetpointSup = () -> Rotation2d.fromDegrees(tCompactLowSetpointDeg.get());
 
         public static final LoggedTunableNumber tIntakeSetpointDeg  = new LoggedTunableNumber(
             "Intake/Setpoint/IntakeSetpointDegrees", 0.0);
@@ -88,7 +92,8 @@ public class IntakeConstants {
 
         static {
             kStateToSetpointMapIntake.put(IntakePivotStates.STOW, kStowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT, kCompactSetpointSup);
+            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_HIGH, kCompactHighSetpointSup);
+            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_LOW, kCompactLowSetpointSup);
             kStateToSetpointMapIntake.put(IntakePivotStates.INTAKE, kIntakeSetpointSup);
             kStateToSetpointMapIntake.put(IntakePivotStates.TUNING_SETPOINT, kTuningShotSetpointSup);
         }
