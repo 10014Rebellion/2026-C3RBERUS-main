@@ -5,7 +5,8 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
@@ -20,12 +21,12 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 
 public class HoodIOKrakenX44 implements HoodIO{
     private final TalonFX mHoodMotor;
     private final VoltageOut mHoodVoltageControl = new VoltageOut(0.0);
-    private final PositionDutyCycle mHoodPositionControl = new PositionDutyCycle(0.0);
+    private final TorqueCurrentFOC mHoodTorqueControl = new TorqueCurrentFOC(0.0);
+    private final MotionMagicVoltage mHoodPositionControl = new MotionMagicVoltage(0.0);
     private final StatusSignal<ControlModeValue> mHoodControlMode;
     private final StatusSignal<Angle> mHoodPosition;
     private final StatusSignal<AngularVelocity> mHoodVelocityRPS;
@@ -34,11 +35,11 @@ public class HoodIOKrakenX44 implements HoodIO{
     private final StatusSignal<Current> mHoodSupplyCurrent;
     private final StatusSignal<Current> mHoodStatorCurrent;
     private final StatusSignal<Temperature> mHoodTempCelsius;
-    private final RotationSoftLimits mRotationSoftLimits;
+    private final StatusSignal<Double> mHoodClosedLoopReference;
+    private final StatusSignal<Double> mHoodClosedLoopReferenceSlope;
 
-    public HoodIOKrakenX44(BasicMotorHardware pMotorHardware, ArmControllerMotionMagic pController, RotationSoftLimits pSoftLimits) {
+    public HoodIOKrakenX44(BasicMotorHardware pMotorHardware, ArmControllerMotionMagic pController) {
         this.mHoodMotor = new TalonFX(pMotorHardware.motorID(), pMotorHardware.canBus());
-        this.mRotationSoftLimits = pSoftLimits;
 
         TalonFXConfiguration HoodConfig = new TalonFXConfiguration();
 
@@ -54,14 +55,18 @@ public class HoodIOKrakenX44 implements HoodIO{
         HoodConfig.Feedback.RotorToSensorRatio = 1;
         HoodConfig.Feedback.SensorToMechanismRatio = pMotorHardware.rotorToMechanismRatio();
 
-        HoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-        HoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mRotationSoftLimits.forwardLimit().getRotations();
-        HoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-        HoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mRotationSoftLimits.backwardLimit().getRotations();
+        // HoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        // HoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = mRotationSoftLimits.forwardLimit().getRotations();
+        // HoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        // HoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = mRotationSoftLimits.backwardLimit().getRotations();
 
-        HoodConfig.MotionMagic.MotionMagicAcceleration = 0.0;
-        HoodConfig.MotionMagic.MotionMagicCruiseVelocity = 0.0;
-        HoodConfig.MotionMagic.MotionMagicJerk = 0.0;
+
+        // TODO: CHECK WITH TAHA 
+        // Originally was 0.0 for all of these constraints
+        // Swithced over to use the controller
+        HoodConfig.MotionMagic.MotionMagicAcceleration = pController.motionMagicConstants().maxAcceleration();
+        HoodConfig.MotionMagic.MotionMagicCruiseVelocity = pController.motionMagicConstants().maxVelocity();
+        HoodConfig.MotionMagic.MotionMagicJerk = pController.motionMagicConstants().maxAcceleration();
 
         HoodConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         HoodConfig.Slot0.kP = pController.pdController().kP();
@@ -77,6 +82,8 @@ public class HoodIOKrakenX44 implements HoodIO{
         mHoodSupplyCurrent = mHoodMotor.getSupplyCurrent();
         mHoodStatorCurrent = mHoodMotor.getStatorCurrent();
         mHoodTempCelsius = mHoodMotor.getDeviceTemp();
+        mHoodClosedLoopReference = mHoodMotor.getClosedLoopReference();
+        mHoodClosedLoopReferenceSlope = mHoodMotor.getClosedLoopReferenceSlope();
 
         mHoodMotor.setPosition(0.0);
 
@@ -89,10 +96,12 @@ public class HoodIOKrakenX44 implements HoodIO{
             mHoodVoltage,
             mHoodSupplyCurrent,
             mHoodStatorCurrent,
-            mHoodTempCelsius
+            mHoodTempCelsius,
+            mHoodClosedLoopReference,
+            mHoodClosedLoopReferenceSlope
         );
 
-        mHoodMotor.optimizeBusUtilization();
+        mHoodMotor.optimizeBusUtilization(0.0);
     }
 
 
@@ -106,17 +115,20 @@ public class HoodIOKrakenX44 implements HoodIO{
             mHoodVoltage,
             mHoodSupplyCurrent,
             mHoodStatorCurrent,
-            mHoodTempCelsius
+            mHoodTempCelsius,
+            mHoodClosedLoopReference,
+            mHoodClosedLoopReferenceSlope
         ).isOK();
         pInputs.iHoodControlMode = mHoodControlMode.getValue().toString();
         pInputs.iHoodAngle = getPos();
-        pInputs.iHoodVelocityRotPS = mHoodVelocityRPS.getValueAsDouble();
-        pInputs.iHoodAccelerationRPSS = mHoodAccelerationRPSS.getValueAsDouble();
+        pInputs.iHoodVelocityRotPS = Rotation2d.fromRotations(mHoodVelocityRPS.getValueAsDouble());
+        pInputs.iHoodAccelerationRPSS = Rotation2d.fromRotations(mHoodAccelerationRPSS.getValueAsDouble());
         pInputs.iHoodMotorVolts = mHoodVoltage.getValueAsDouble();
         pInputs.iHoodSupplyCurrentAmps = mHoodSupplyCurrent.getValueAsDouble();
         pInputs.iHoodStatorCurrentAmps = mHoodStatorCurrent.getValueAsDouble();
         pInputs.iHoodTempCelsius = mHoodTempCelsius.getValueAsDouble();
-        pInputs.iHoodReferenceValue = Rotation2d.fromRotations(mHoodMotor.getClosedLoopReference().getValueAsDouble());
+        pInputs.iHoodReferenceValue = Rotation2d.fromRotations(mHoodClosedLoopReference.getValueAsDouble());
+        pInputs.iHoodReferenceValueSlope = Rotation2d.fromRotations(mHoodClosedLoopReferenceSlope.getValueAsDouble());
     }
 
     private Rotation2d getPos() {
@@ -132,11 +144,11 @@ public class HoodIOKrakenX44 implements HoodIO{
     }
 
     @Override 
-    public void setMotionMagicConstants(double pCruiseVel, double pMaxAccel, double pMaxJerk) {
+    public void setMotionMagicConstants(double pCruiseVelRPS, double pMaxAccelRPS2, double pMaxJerkRPS3) {
         MotionMagicConfigs motionMagicConfig = new MotionMagicConfigs();
-        motionMagicConfig.MotionMagicCruiseVelocity = pCruiseVel;
-        motionMagicConfig.MotionMagicAcceleration = pMaxAccel;
-        motionMagicConfig.MotionMagicJerk = pMaxJerk;
+        motionMagicConfig.MotionMagicCruiseVelocity = pCruiseVelRPS;
+        motionMagicConfig.MotionMagicAcceleration = pMaxAccelRPS2;
+        motionMagicConfig.MotionMagicJerk = pMaxJerkRPS3;
         mHoodMotor.getConfigurator().apply(motionMagicConfig);
     }
 
@@ -151,6 +163,11 @@ public class HoodIOKrakenX44 implements HoodIO{
     @Override
     public void setMotorVolts(double pVolts) {
         mHoodMotor.setControl(mHoodVoltageControl.withOutput(pVolts));
+    }
+
+    @Override
+    public void setMotorAmps(double pAmps) {
+        mHoodMotor.setControl(mHoodTorqueControl.withOutput(pAmps));
     }
 
     @Override

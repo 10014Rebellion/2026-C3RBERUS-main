@@ -22,7 +22,6 @@ import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.telemetry.Telemetry;
 import frc.robot.logging.MotorErrors;
-import frc.robot.systems.shooter.ShooterConstants.FlywheelConstants;
 
 public class FlywheelIOKrakenX44 implements FlywheelIO{
     private final TalonFX mFlywheelMotor;
@@ -36,6 +35,7 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
     private final StatusSignal<Temperature> mFlywheelTempCelsius;
     private final StatusSignal<AngularAcceleration> mFlywheelAccelerationRPSS;
     private final StatusSignal<Double> mFlywheelClosedLoopReference;
+    private final StatusSignal<Double> mFlywheelClosedLoopReferenceSlope;
     private Follower mFollowerController = null;
 
 
@@ -86,6 +86,7 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
         mFlywheelStatorCurrent = mFlywheelMotor.getStatorCurrent();
         mFlywheelTempCelsius = mFlywheelMotor.getDeviceTemp();
         mFlywheelClosedLoopReference = mFlywheelMotor.getClosedLoopReference();
+        mFlywheelClosedLoopReferenceSlope = mFlywheelMotor.getClosedLoopReferenceSlope();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0, 
@@ -96,10 +97,11 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
             mFlywheelSupplyCurrent,
             mFlywheelStatorCurrent,
             mFlywheelTempCelsius,
-            mFlywheelClosedLoopReference
+            mFlywheelClosedLoopReference,
+            mFlywheelClosedLoopReferenceSlope
         );
 
-        mFlywheelMotor.optimizeBusUtilization();
+        mFlywheelMotor.optimizeBusUtilization(0);
     }
 
     @Override
@@ -117,7 +119,7 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
         pInputs.iIsLeader = isLeader();
         pInputs.iFlywheelControlMode = mFlywheelControlMode.getValue().toString();
         pInputs.iFlywheelRotorVelocityRPS = Rotation2d.fromRotations(mFlywheelVelocityRPS.getValueAsDouble());
-        pInputs.iFlywheelRotorAccelerationRPSS = mFlywheelAccelerationRPSS.getValueAsDouble();
+        pInputs.iFlywheelRotorAccelerationRPSS = Rotation2d.fromRotations(mFlywheelAccelerationRPSS.getValueAsDouble());
         pInputs.iFlywheelMotorVolts = mFlywheelVoltage.getValueAsDouble();
         pInputs.iFlywheelSupplyCurrentAmps = mFlywheelSupplyCurrent.getValueAsDouble();
         pInputs.iFlywheelStatorCurrentAmps = mFlywheelStatorCurrent.getValueAsDouble();

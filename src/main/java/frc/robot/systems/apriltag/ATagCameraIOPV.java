@@ -8,7 +8,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.RobotConstants;
+import frc.robot.RobotConstants.Mode;
 import frc.robot.game.FieldConstants;
 import frc.robot.systems.apriltag.ATagVisionConstants.ATagCameraHardware;
 import frc.robot.systems.apriltag.ATagVisionConstants.CameraSimConfigs;
@@ -49,7 +51,7 @@ public class ATagCameraIOPV implements ATagCameraIO {
 
         mPoseEstimator = new PhotonPoseEstimator(FieldConstants.kApriltagLayout, pCameraTransform);
 
-        if (Constants.isSim()) setupSimulation();
+        if (RobotConstants.isSim()) setupSimulation();
     }
 
     private void setupSimulation() {
@@ -76,7 +78,7 @@ public class ATagCameraIOPV implements ATagCameraIO {
         pInputs.iCameraToRobot = mCameraTransform;
 
         try {
-            if (Constants.isSim()) mVisionSim.update(pSimOdomPose);
+            if (RobotConstants.isSim()) mVisionSim.update(pSimOdomPose);
             
             pInputs.iIsConnected = mPhotonCam.isConnected();
             List<PhotonPipelineResult> unreadResults = mPhotonCam.getAllUnreadResults();

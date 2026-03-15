@@ -2,12 +2,12 @@ package frc.robot.bindings;
 
 import java.util.function.DoubleSupplier;
 
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 
 public class DriverTransition {
     private final double kSwitchTimeSec = 3;
 
-    private final double kStepAmount = 1.0 / ((int) Math.ceil(kSwitchTimeSec / Constants.kPeriodicSec));
+    private final double kStepAmount = 1.0 / ((int) Math.ceil(kSwitchTimeSec / RobotConstants.kPeriodicSec));
     private double kDefenderFactor = 0.0;
     private DriverType mActiveDriver = DriverType.SCORER;
     private DriverType mDesiredDriver = DriverType.SCORER;

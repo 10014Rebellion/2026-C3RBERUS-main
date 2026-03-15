@@ -15,7 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 
 public class DriveConstants {
 
@@ -80,7 +80,7 @@ public class DriveConstants {
     public static final double kWheelCircumferenceMeters = 2 * Math.PI * kWheelRadiusMeters;
     public static final double kWheelInertia = 125.0 / 4.0;
 
-    public static final boolean kUseVoltageFeedforward = Constants.isSim();
+    public static final boolean kUseVoltageFeedforward = RobotConstants.isSim();
 
     public static final double kPeakVoltage = 12.0;
 
@@ -94,7 +94,7 @@ public class DriveConstants {
     public static final double kAzimuthSupplyAmpLimit = 40.0;
     public static final double kAzimuthFOCAmpLimit = 30.0;
 
-    public static final ModuleControlConfig kModuleControllerConfigs = !Constants.isSim()
+    public static final ModuleControlConfig kModuleControllerConfigs = !RobotConstants.isSim()
         // kV is generally 0 for FOC control, so double check in ModuleIOKraken to see whether kV should be applied
         ? new ModuleControlConfig(
             new PIDController(150.0, 0.0, 0.0), new SimpleMotorFeedforward(5.5, 0.0, 1.0), // DRIVE // TODO: TUNE ME

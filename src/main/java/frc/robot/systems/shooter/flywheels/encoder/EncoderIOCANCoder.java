@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.lib.hardware.HardwareRecords.RelativeCANCoderHardware;
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 
 public class EncoderIOCANCoder implements EncoderIO{
     private final CANcoder mCANCoder;
@@ -18,7 +18,7 @@ public class EncoderIOCANCoder implements EncoderIO{
     private final StatusSignal<MagnetHealthValue> mMagnetHealth;
 
     public EncoderIOCANCoder(RelativeCANCoderHardware pCANCoderConfig) {
-        this.mCANCoder = new CANcoder(pCANCoderConfig.cancoderID(), Constants.kSubsystemsCANBus);
+        this.mCANCoder = new CANcoder(pCANCoderConfig.cancoderID(), RobotConstants.kSubsystemsCANBus);
 
         CANcoderConfiguration mCTRConfigCANCoder = new CANcoderConfiguration();
         mCTRConfigCANCoder.MagnetSensor.SensorDirection = pCANCoderConfig.direction();

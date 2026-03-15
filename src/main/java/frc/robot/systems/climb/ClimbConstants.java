@@ -7,7 +7,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
@@ -41,7 +41,7 @@ public class ClimbConstants {
     
     public static final BasicMotorHardware kClimbMotorConstants = new BasicMotorHardware(
         60, // Motor ID // TODO: TUNE ME!
-        Constants.kSubsystemsCANBus, 
+        RobotConstants.kSubsystemsCANBus, 
         16.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
         InvertedValue.Clockwise_Positive,
         NeutralModeValue.Brake,

@@ -9,7 +9,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
@@ -27,7 +27,7 @@ public class IntakeConstants {
 
         public static final BasicMotorHardware kPivotMotorConfig = new BasicMotorHardware(
             41, // TODO: TUNE ME;
-            Constants.kSubsystemsCANBus,
+            RobotConstants.kSubsystemsCANBus,
             13.5,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Brake,
@@ -42,7 +42,7 @@ public class IntakeConstants {
         );
 
         // WITH POSITION VOLTAGE
-        public static final ArmControllerMotionMagic kPivotController = (!Constants.isSim()) ?
+        public static final ArmControllerMotionMagic kPivotController = (!RobotConstants.isSim()) ?
             new ArmControllerMotionMagic(
                 0, 
                 new PDConstants(19.0, 0.0), 
@@ -97,7 +97,7 @@ public class IntakeConstants {
     public static class RollerConstants {
         public final static BasicMotorHardware kRollerMotorConfig = new BasicMotorHardware(
             42,
-            Constants.kSubsystemsCANBus,
+            RobotConstants.kSubsystemsCANBus,
             1,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Coast,
