@@ -58,6 +58,7 @@ public class ButtonBindings {
 
 
     public void initBindings() {
+        testBindings();
         initPilotBindings();
         initGunnerBindings();
         initTriggers();
@@ -92,7 +93,7 @@ public class ButtonBindings {
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
-        mPilotController.rightBumper().and(isTesting())
+        mPilotController.leftBumper().and(isTesting())
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
     }
@@ -367,6 +368,6 @@ public class ButtonBindings {
     // }
 
     public BooleanSupplier isTesting() {
-        return () -> kUsingPilotGunner.get();
+        return () -> !kUsingPilotGunner.get();
     }
 }
