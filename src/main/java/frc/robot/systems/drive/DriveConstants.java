@@ -108,13 +108,13 @@ public class DriveConstants {
 
     /* If 180 was added, the person who got the offset had the bevel gears on the wrong side when they did it */
     // BEVEL FACING LEFT (it shoulda been facing right tho)
-    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, 0.160156);
+    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, 0.155273);
 
-    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, 0.419434);
+    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, -0.077393);
 
-    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(33, 23, 13, 0.094482);
+    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(33, 23, 13, 0.244873);
 
-    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(34, 24, 14, -0.027832);
+    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(34, 24, 14, -0.184814);
 
     ////////////////////////// RECORDS \\\\\\\\\\\\\\\\\\\\\\\\
     public static record ModuleHardwareConfig(int driveID, int azimuthID, int encoderID, double offset) {}
