@@ -13,12 +13,13 @@ public interface FlywheelIO {
       public boolean iIsLeader = true;
       public String iFlywheelControlMode = "";
       public Rotation2d iFlywheelRotorVelocityRPS = Rotation2d.kZero;
-      public double iFlywheelRotorAccelerationRPSS = 0.0;
+      public Rotation2d iFlywheelRotorAccelerationRPSS = Rotation2d.kZero;
       public double iFlywheelMotorVolts = 0.0;
       public double iFlywheelSupplyCurrentAmps = 0.0;
       public double iFlywheelStatorCurrentAmps = 0.0;
       public double iFlywheelTempCelsius = 0.0;
       public Rotation2d iFlywheelClosedLoopReference = Rotation2d.kZero;
+      public Rotation2d iFlywheelClosedLoopReferenceSlope = Rotation2d.kZero;
     }
 
     public default void updateInputs(FlywheelInputs pInputs) {}

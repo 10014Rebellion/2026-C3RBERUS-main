@@ -63,8 +63,8 @@ public class FlywheelConstants {
     public static final LoggedTunableNumber tTuningVelocity = new LoggedTunableNumber("Shooter/Flywheels/TuneVelocityRPS", 0.0);
     public static final LoggedTunableNumber tFeedVelocity = new LoggedTunableNumber("Shooter/Flywheels/FeedVelocity", 0.0);
     public static final LoggedTunableNumber tCloseVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/CloseVelocity", 0.0);
-    public static final LoggedTunableNumber tTowerVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/CloseVelocity", 0.0);
-    public static final LoggedTunableNumber tBumpVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/CloseVelocity", 0.0);
+    public static final LoggedTunableNumber tTowerVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/TowerVelocity", 0.0);
+    public static final LoggedTunableNumber tBumpVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/BumpVelocity", 0.0);
     public static final LoggedTunableNumber tMaxVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/MaxVelocity", 0.0);
 
     static {

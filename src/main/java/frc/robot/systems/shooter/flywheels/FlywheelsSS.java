@@ -49,6 +49,8 @@ public class FlywheelsSS extends SubsystemBase {
   private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Shooter/Flywheel/Control/Tolerance", FlywheelConstants.kToleranceRPS);
 
   private Rotation2d mLastestClosedLoopGoalRPS = Rotation2d.kZero;
+
+  @AutoLogOutput(key = "Shooter/Flywheel/States/CurrentState")
   private FlywheelStates mCurrentFlywheelState = FlywheelStates.STOPPED;
 
   public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
