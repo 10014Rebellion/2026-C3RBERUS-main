@@ -37,12 +37,12 @@ public class ATagVisionConstants {
         new Translation3d(
             Units.inchesToMeters(-3.936), // X: inches back // >>> TODO: TUNE ME
             Units.inchesToMeters(12.747), // Y: inches left // >>> TODO: TUNE ME
-            Units.inchesToMeters(18.916) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(10), // Pitch: upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(-18.7) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(-20.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kFLATagCamHardware = 
         new ATagCameraHardware(kFrontLeftCamName, kFrontLeftCamOrientation, kFrontLeftCamTransform);
@@ -53,12 +53,12 @@ public class ATagVisionConstants {
         new Translation3d(
             Units.inchesToMeters(-3.936), // X: inches back // >>> TODO: TUNE ME
             Units.inchesToMeters(-12.747), // Y: inches right // >>> TODO: TUNE ME
-            Units.inchesToMeters(18.916) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(10), // Pitch: upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(18.7) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(20.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kFRATagCamHardware = 
         new ATagCameraHardware(kFrontRightCamName, kFrontRightCamOrientation, kFrontRightCamTransform);
@@ -69,12 +69,12 @@ public class ATagVisionConstants {
         new Translation3d(
             Units.inchesToMeters(-9.00), // X: inches back // >>> TODO: TUNE ME
             Units.inchesToMeters(14.0), // Y: inches left // >>> TODO: TUNE ME
-            Units.inchesToMeters(18.926) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(10.0), // Pitch: upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(127.2) // Yaw: angled outward // >>> TODO: TUNE ME
+            Units.degreesToRadians(108.0) // Yaw: angled outward // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kBLATagCamHardware = 
         new ATagCameraHardware(kBackLeftCamName, kBackLeftCamOrientation, kBackLeftCamTransform);
@@ -85,12 +85,12 @@ public class ATagVisionConstants {
         new Translation3d(
             Units.inchesToMeters(-9.00), // Y: inches right // >>> TODO: TUNE ME
             Units.inchesToMeters(-14.0), // Y: inches right // >>> TODO: TUNE ME
-            Units.inchesToMeters(18.926) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME
             Units.degreesToRadians(10.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
-            Units.degreesToRadians(-127.2) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+            Units.degreesToRadians(-108.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
         ));
     public static final ATagCameraHardware kBRATagCamHardware = 
         new ATagCameraHardware(kBackRightCamName, kBackRightCamOrientation, kBackRightCamTransform);
