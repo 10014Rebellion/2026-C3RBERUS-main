@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.logging.InvalidValueErrors.UnaccountedEnum;
+import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderInputsAutoLogged;
 
@@ -84,7 +85,7 @@ public class FlywheelsSS extends SubsystemBase {
           stopFlywheels();
         }
         case SHOTMAP_VELOCITY -> {
-          // TODO: IMPLEMENT A SHOTMAP!
+          setFlywheelVelocity(ShooterConstants.getFlywheelVel());
         }
         default -> {
           Telemetry.reportIssue(new UnaccountedEnum(mCurrentFlywheelState.toString()));

@@ -86,12 +86,25 @@ public class ButtonBindings {
             .onTrue(mIntakeSS.trashCompactPivotContinuous())
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
 
+        // mPilotController.y().and(isTesting())
+        //     .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
+        //     .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT));
+
+        // mPilotController.y().and(isTesting()).and(new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal() && mHoodSS.atGoal()))
+        //     .onTrue(mIntakeSS.trashCompactPivotContinuous())
+        //     .onTrue(null);
+
             // TO DO: Tune this
         mPilotController.leftTrigger().and(isTesting())
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                 () -> AllianceFlipUtil.apply(Rotation2d.kZero), 
                 () -> GameGoalPoseChooser.getHub()))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        mPilotController.leftTrigger().and(isTesting())
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         mPilotController.rightTrigger().and(isTesting())
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
@@ -125,11 +138,10 @@ public class ButtonBindings {
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         mGunnerController.rightTrigger().and(isTesting())
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TOWER_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.TOWER_SHOT));
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
         
-
-        mGunnerController.rightTrigger().and(new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal()).debounce(0.05)).and(isTesting())
+        mGunnerController.rightTrigger().and(new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal() && mHoodSS.atGoal()).debounce(0.08)).and(isTesting())
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mIntakeSS.trashCompactPivotContinuous());

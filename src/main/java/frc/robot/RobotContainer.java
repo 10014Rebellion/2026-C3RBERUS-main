@@ -25,6 +25,7 @@ import frc.robot.systems.intake.roller.IntakeRollerIO;
 import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
 import frc.robot.systems.intake.roller.IntakeRollerIOSim;
 import frc.robot.systems.intake.roller.IntakeRollerSS;
+import frc.robot.systems.shooter.ShooterConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelConstants;
 import frc.robot.systems.shooter.flywheels.FlywheelIO;
 import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
@@ -207,6 +208,8 @@ public class RobotContainer {
                 break;
             }
         }
+
+        ShooterConstants.setPoseSupplier(() -> mDrive.getPoseEstimate());
         
         mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake, mClimbSS);
 

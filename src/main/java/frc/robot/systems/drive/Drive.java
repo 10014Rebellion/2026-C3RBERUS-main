@@ -33,6 +33,7 @@ import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVision.VisionObservation;
 import frc.robot.systems.drive.controllers.SpeedErrorController;
@@ -326,6 +327,11 @@ public class Drive extends SubsystemBase {
         Telemetry.log("Drive/Odometry/FieldSetpointChassisSpeed", ChassisSpeeds.fromRobotRelativeSpeeds(
             kKinematics.toChassisSpeeds(optimizedSetpointStates), mRobotRotation));
         Telemetry.log("Drive/Swerve/ModuleTorqueFF", moduleTorques);
+
+        Logger.recordOutput("Drive/DistanceToHub", 
+            Math.hypot(
+                getPoseEstimate().getX() - GameGoalPoseChooser.getHub().getX(), 
+                getPoseEstimate().getY() - GameGoalPoseChooser.getHub().getY()));
     }
 
     /* Calculates DriveFeedforward based off state */
