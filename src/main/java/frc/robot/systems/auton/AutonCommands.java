@@ -72,6 +72,102 @@ public class AutonCommands extends SubsystemBase {
         return new InstantCommand();
     }
 
+    public Command doubleCenterScoreAuto(String pAutoName, String pACAPath1Name, String pACAPath2Name) {
+        AutoEvent auto = new AutoEvent("RightScore", this);
+
+        Trigger autoActivted = auto.getIsRunningTrigger();
+
+        Trigger intakingRange = inIntakeRange(auto);
+        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
+        Trigger scoreReady = auto.condition(shootingRange);
+
+        SequentialEndingCommandGroup autoPath1 = followChoreoPath(pACAPath1Name, true);
+        Trigger isPath1Running = auto.loggedCondition(pACAPath1Name+"/isRunning", () -> autoPath1.isRunning(), true);
+        Trigger hasPath1Ended = auto.loggedCondition(pACAPath1Name+"/hasEnded", () -> autoPath1.hasEnded(), true);
+
+        SequentialEndingCommandGroup autoPath2 = followChoreoPath(pACAPath2Name, false);
+        Trigger isPath2Running = auto.loggedCondition(pACAPath2Name+"/isRunning", () -> autoPath2.isRunning(), true);
+        Trigger hasPath2Ended = auto.loggedCondition(pACAPath2Name+"/hasEnded", () -> autoPath2.hasEnded(), true);
+
+        autoActivted
+            .onTrue(autoPath1)
+            // .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
+            .onTrue(Commands.runOnce(() -> wantToShoot = false));
+
+        intakingRange
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
+            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        shootingRange
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+
+        hasPath1Ended
+            .onTrue(autoPath2);
+
+        /* Shooting Logic*/
+        hasPath2Ended
+            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+                () -> GameGoalPoseChooser.getHub()))
+            .onTrue(Commands.runOnce(() -> wantToShoot = true));
+
+        SequentialEndingCommandGroup path2FPShooting = 
+            new SequentialEndingCommandGroup(
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
+                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+
+        SequentialEndingCommandGroup path2IShooting = 
+            new SequentialEndingCommandGroup(
+                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
+                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
+
+        hasPath2Ended.and(shootingRange.debounce(0.5))
+            .onTrue(path2FPShooting)
+            .onTrue(path2IShooting)
+            .onTrue(mIntake.trashCompactPivotContinuous());
+
+        auto.loggedCondition(
+            "Path2/ShootingHasEnded", 
+            () -> path2FPShooting.hasEnded()
+                && path2IShooting.hasEnded(), true)
+            .onTrue(Commands.runOnce(() -> wantToShoot = false))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
+            .onTrue(mRobotDrive.getDriveManager().setToTeleop())
+            .onTrue(endAuto(auto));
+            
+        return auto;
+    }
+
+    public Command doubleCenterScoreBumpAuto() {
+        return new InstantCommand();
+    }
+
+    public Command singleCenterScoreClimbCommand() {
+        return new InstantCommand();
+    }
+
+    public Command allianceSingleScoreAuto() {
+        return new InstantCommand();
+    }
+
+    public Command allianceSingleScoreClimbAuto() {
+        return new InstantCommand();
+    }
+
+    public Command allianceDoubleScoreAuto() {
+        return new InstantCommand();
+    }
+
+    public Command allianceDoubleScoreClimbAuto() {
+        return new InstantCommand();
+    }
+
     public Command disruptLeft() {
         AutoEvent auto = new AutoEvent("Disruptleft", this);
 
