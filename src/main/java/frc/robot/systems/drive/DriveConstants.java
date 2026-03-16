@@ -35,11 +35,11 @@ public class DriveConstants {
     public static final double kDrivebaseRadiusMeters = Math.hypot(kTrackWidthXMeters / 2.0, kTrackWidthYMeters / 2.0);
 
     /* DRIVEBASE CONSTRAINTS */
-    public static final double kMaxLinearSpeedMPS = 3.5; // TODO: TUNE ME
+    public static final double kMaxLinearSpeedMPS = 4.1; // TODO: TUNE ME
     public static final double kMaxLinearAccelerationMPSS = 10.0; // TODO: TUNE ME
 
     public static final double kMaxRotationSpeedRadiansPS = kMaxLinearSpeedMPS / kDrivebaseRadiusMeters; // TODO: TUNE ME
-    public static final double kMaxRotationAccelRadiansPS = Math.toRadians(360) * 10; // TODO: TUNE ME
+    public static final double kMaxRotationAccelRadiansPS = Math.toRadians(360) * 3.6; // TODO: TUNE ME
  
     public static final double kMaxAzimuthAngularRadiansPS = 8.5 * 2 * Math.PI; // TODO: TUNE ME
 
@@ -84,11 +84,11 @@ public class DriveConstants {
 
     public static final double kPeakVoltage = 12.0;
 
-    public static final double kDriveStatorAmpLimit = 80.0; 
-    public static final double kDriveFOCAmpLimit = 80.0;
-    public static final double kDriveSupplyAmpLimit = 60.0;
-    // public static final double kDriveSupplyAmpLowerLimit = 45.0;
-    // public static final double kDriveSupplyAmpLowerLimitTime = 0.25;
+    public static final double kDriveStatorAmpLimit = 110.0; 
+    public static final double kDriveFOCAmpLimit = 110.0;
+    public static final double kDriveSupplyAmpLimit = 80.0;
+    public static final double kDriveSupplyAmpLowerLimit = 60.0;
+    public static final double kDriveSupplyAmpLowerLimitTime = 0.5;
 
     public static final double kAzimuthStatorAmpLimit = 40.0;
     public static final double kAzimuthSupplyAmpLimit = 20.0;
@@ -97,7 +97,7 @@ public class DriveConstants {
     public static final ModuleControlConfig kModuleControllerConfigs = !RobotConstants.isSim()
         // kV is generally 0 for FOC control, so double check in ModuleIOKraken to see whether kV should be applied
         ? new ModuleControlConfig(
-            new PIDController(150.0, 0.0, 0.0), new SimpleMotorFeedforward(5.5, 0.0, 1.0), // DRIVE // TODO: TUNE ME
+            new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(4.0, 0.0, 1.0), // DRIVE // TODO: TUNE ME
             new PIDController(7.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
         : new ModuleControlConfig(
             new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 3.0, 0.005),

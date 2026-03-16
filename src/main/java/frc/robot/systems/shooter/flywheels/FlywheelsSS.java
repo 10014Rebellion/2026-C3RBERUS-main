@@ -151,7 +151,7 @@ public class FlywheelsSS extends SubsystemBase {
 
   @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRPS")
   public double getErrorRPS() {
-    return mLastestClosedLoopGoalRPS.minus(getFlywheelRPS()).getRotations();
+    return mLastestClosedLoopGoalRPS.minus(mLeaderFlywheelInputs.iFlywheelRotorVelocityRPS).getRotations();
   }
 
   @AutoLogOutput(key = "Shooter/Flywheel/Feedback/LatestClosedLoopGoalRPS")
@@ -161,7 +161,7 @@ public class FlywheelsSS extends SubsystemBase {
 
   @AutoLogOutput(key = "Shooter/Flywheel/Feedback/AtLatestClosedLoopGoal")
   public boolean atLatestClosedLoopGoal() {
-    return Math.abs(getErrorRPS()) <= tFlywheelTolerance.get();
+    return Math.abs(mLeaderFlywheelInputs.iFlywheelRotorVelocityRPS.getRotations() - mLastestClosedLoopGoalRPS.getRotations()) <= tFlywheelTolerance.get();
   }
 
   private void refreshTuneables() {

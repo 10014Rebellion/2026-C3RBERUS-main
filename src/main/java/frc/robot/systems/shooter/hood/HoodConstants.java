@@ -59,7 +59,7 @@ public class HoodConstants {
     public static final LoggedTunableNumber tMidSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MidSetpointDegrees", kHoodLimits.forwardLimit().getDegrees() / 2.0);
     public static final LoggedTunableNumber tMinSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/MinSetpointDegrees", kHoodLimits.backwardLimit().getDegrees());
     public static final LoggedTunableNumber tCloseShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/CloseShotSetpointDegrees", 0.0);
-    public static final LoggedTunableNumber tTowerShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/TowerShotSetpointDegrees", 0.0);
+    public static final LoggedTunableNumber tTowerShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/TowerShotSetpointDegrees", 15.0);
     public static final LoggedTunableNumber tBumpShotSetpointDeg  = new LoggedTunableNumber("Hood/Setpoint/BumpShotSetpointDegrees", 0.0);
     public static final LoggedTunableNumber tIncrementSpeedDPS = new LoggedTunableNumber("Hood/IncrementSpeedDPS", 1.0);
 

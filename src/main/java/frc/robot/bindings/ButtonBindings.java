@@ -23,6 +23,7 @@ import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.Intake;
+import frc.robot.systems.intake.pivot.IntakePivotSS;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
@@ -65,6 +66,9 @@ public class ButtonBindings {
     }
 
     public void testBindings() {
+        mPilotController.startButton().and(isTesting())
+            .onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
+
         mPilotController.a().and(isTesting())
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
@@ -100,6 +104,28 @@ public class ButtonBindings {
         mPilotController.leftBumper().and(isTesting())
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
+
+        mGunnerController.leftTrigger().and(isTesting())
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        mGunnerController.rightTrigger().and(isTesting())
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TOWER_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.TOWER_SHOT));
+        
+
+        mGunnerController.rightTrigger().and(new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal()).debounce(0.05)).and(isTesting())
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onTrue(mIntakeSS.trashCompactPivotContinuous());
+
+        mGunnerController.rightTrigger().and(isTesting())
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
+            .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED))
+            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
     }
 
     public void initTriggers() {
