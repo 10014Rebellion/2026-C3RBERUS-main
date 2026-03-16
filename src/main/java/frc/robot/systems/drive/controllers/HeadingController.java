@@ -13,13 +13,15 @@ import frc.lib.tuning.LoggedTunableNumber;
 import java.util.function.Supplier;
 
 public class HeadingController {
-    public static final LoggedTunableNumber mSnapP = new LoggedTunableNumber("SwerveHeadingController/Snap/kP", 4.0);
+    public static final LoggedTunableNumber mSnapP = new LoggedTunableNumber("SwerveHeadingController/Snap/kP", 3.0);
     public static final LoggedTunableNumber mSnapI = new LoggedTunableNumber("SwerveHeadingController/Snap/kI", 0.0);
     public static final LoggedTunableNumber mSnapD = new LoggedTunableNumber("SwerveHeadingController/Snap/kD", 0.0);
     public static final LoggedTunableNumber mSnapMaxVDPS =
-            new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxV", 1000.0);
+            new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxV", 600.0);
     public static final LoggedTunableNumber mSnapMaxADPSS =
-            new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxA", 1000.0);
+            new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxA", 2000.0);
+
+    public static final LoggedTunableNumber tKv = new LoggedTunableNumber("SwerveHeadingController/Snap/kV", 0.25);
 
     // public static final LoggedTunableNumber stablizingP =
     //     new LoggedTunableNumber("SwerveHeadingController/Stabilizing/kP", 2.5);
@@ -74,7 +76,7 @@ public class HeadingController {
         Rotation2d profileFFOutput = Rotation2d.fromDegrees(mSnapController.getSetpoint().velocity);
         Rotation2d turnPointFFOutput = mTurnPointFF.computeOmegaFeedforward();
 
-        double outputRadians = pidOutput.getRadians() + profileFFOutput.getRadians() + turnPointFFOutput.getRadians();
+        double outputRadians = pidOutput.getRadians() + tKv.get() * profileFFOutput.getRadians() + turnPointFFOutput.getRadians();
 
         Rotation2d setpointError = Rotation2d.fromDegrees( mSnapController.getSetpoint().position - pRobotRotation.getDegrees() );
         Rotation2d goalError = Rotation2d.fromDegrees( mSnapController.getGoal().position - pRobotRotation.getDegrees() );

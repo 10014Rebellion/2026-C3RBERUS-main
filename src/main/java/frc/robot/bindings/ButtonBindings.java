@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
+import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
@@ -86,17 +87,15 @@ public class ButtonBindings {
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
 
             // TO DO: Tune this
+        mPilotController.leftTrigger().and(isTesting())
+            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
+                () -> AllianceFlipUtil.apply(Rotation2d.kZero), 
+                () -> GameGoalPoseChooser.getHub()))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
         mPilotController.rightTrigger().and(isTesting())
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                 () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
-        
-        mPilotController.leftTrigger().and(isTesting())
-            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> AllianceFlipUtil.shouldFlip() 
-                    ? Rotation2d.fromDegrees(0.0) 
-                    : Rotation2d.fromDegrees(180.0), 
                 () -> GameGoalPoseChooser.getHub()))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
@@ -144,19 +143,15 @@ public class ButtonBindings {
 
         mGunnerController.povUp().and(isTesting())
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> AllianceFlipUtil.shouldFlip() 
-                    ? Rotation2d.fromDegrees(180.0) 
-                    : Rotation2d.fromDegrees(0.0), 
+                () -> AllianceFlipUtil.apply(Rotation2d.kZero), 
                 () -> GameGoalPoseChooser.getHub()))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         mGunnerController.povDown().and(isTesting())
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> AllianceFlipUtil.shouldFlip() 
-                    ? Rotation2d.fromDegrees(0.0) 
-                    : Rotation2d.fromDegrees(180.0), 
-                () -> null))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());;
+                () -> AllianceFlipUtil.apply(Rotation2d.k180deg), 
+                TurnPointFeedforward.zeroTurnPointFF()))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
          
     }
