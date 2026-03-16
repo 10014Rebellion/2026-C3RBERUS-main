@@ -43,7 +43,7 @@ public class ButtonBindings {
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
 
-    private final LoggedNetworkBoolean kUsingPilotGunner = new LoggedNetworkBoolean("DriverOperator/UsePilotGunner", true);
+    private final LoggedNetworkBoolean kUsingPilotGunner = new LoggedNetworkBoolean("DriverOperator/UsePilotGunner", false);
 
     private final CommandGenericHID mHID = new CommandGenericHID(2);
 
@@ -85,17 +85,32 @@ public class ButtonBindings {
             .onTrue(mIntakeSS.trashCompactPivotContinuous())
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
 
+            // TO DO: Tune this
+        mPilotController.rightTrigger().and(isTesting())
+            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
+                () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
+                () -> GameGoalPoseChooser.getHub()))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        
+        mPilotController.leftTrigger().and(isTesting())
+            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
+                () -> AllianceFlipUtil.shouldFlip() 
+                    ? Rotation2d.fromDegrees(0.0) 
+                    : Rotation2d.fromDegrees(180.0), 
+                () -> GameGoalPoseChooser.getHub()))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
         // mPilotController.x()
         //     .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_VOLTAGE))
         //     .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
 
-        mPilotController.rightTrigger().and(isTesting())
-            .onTrue(DriveCharacterizationCommands.testAzimuthsVoltage(mDriveSS, 0, 1, 2, 3))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.rightTrigger().and(isTesting())
+        //     .onTrue(DriveCharacterizationCommands.testAzimuthsVoltage(mDriveSS, 0, 1, 2, 3))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        mPilotController.leftTrigger().and(isTesting())
-            .onTrue(DriveCharacterizationCommands.testDriveAmpCharacterization(mDriveSS))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mPilotController.leftTrigger().and(isTesting())
+        //     .onTrue(DriveCharacterizationCommands.testDriveAmpCharacterization(mDriveSS))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         mPilotController.rightBumper().and(isTesting())
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
@@ -126,6 +141,24 @@ public class ButtonBindings {
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
+
+        mGunnerController.povUp().and(isTesting())
+            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
+                () -> AllianceFlipUtil.shouldFlip() 
+                    ? Rotation2d.fromDegrees(180.0) 
+                    : Rotation2d.fromDegrees(0.0), 
+                () -> GameGoalPoseChooser.getHub()))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        mGunnerController.povDown().and(isTesting())
+            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
+                () -> AllianceFlipUtil.shouldFlip() 
+                    ? Rotation2d.fromDegrees(0.0) 
+                    : Rotation2d.fromDegrees(180.0), 
+                () -> null))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());;
+
+         
     }
 
     public void initTriggers() {
@@ -142,6 +175,7 @@ public class ButtonBindings {
     }
 
     public void initButtonBoard() {
+       
         // mHID.button(3)
         //     .whileTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
         //     .whileFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
@@ -220,11 +254,6 @@ public class ButtonBindings {
         //         () -> 1.0, 
         //         () -> false))
         //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
-
-        // mPilotController.y()
-        //     .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-        //         () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
-        //         () -> GameGoalPoseChooser.getHub()));
     }
 
     public Command rumbleDriverController(){
