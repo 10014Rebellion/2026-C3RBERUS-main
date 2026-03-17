@@ -156,7 +156,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
 
     @Override
     public void setMotorVolts(double pVolts) {
-        if(isLeader()) mFuelPumpMotor.setControl(mFuelPumpVoltageControl.withOutput(pVolts));
+        if(isLeader()) mFuelPumpMotor.setControl(mFuelPumpVoltageControl.withOutput(pVolts).withEnableFOC(true));
         else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
     }
 
