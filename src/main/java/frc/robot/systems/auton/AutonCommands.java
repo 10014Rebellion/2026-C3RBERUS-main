@@ -57,12 +57,25 @@ public class AutonCommands extends SubsystemBase {
         mAutoChooser = new SendableChooser<>();
 
         mAutoChooser.setDefaultOption("Stationary", () -> backUpAuton());
-        tryToAddPathToChooser("FirstTestPath", () -> firstPathTest("FirstPathTest", "FirstPath"));
-        tryToAddPathToChooser("FirstAuto", () -> autoTest("FirstAuto","FirstPath", "SecondPath"));
-        tryToAddPathToChooser("LeftFullPath", () -> leftFullPath());
-        tryToAddPathToChooser("RightFullPath", () -> rightFullPath());
-        tryToAddPathToChooser("Troll", () -> troll());
-        tryToAddPathToChooser("DisruptLeft", () -> disruptLeft());
+        // tryToAddPathToChooser("FirstTestPath", () -> firstPathTest("FirstPathTest", "FirstPath"));
+        // tryToAddPathToChooser("FirstAuto", () -> autoTest("FirstAuto","FirstPath", "SecondPath"));
+        // tryToAddPathToChooser("LeftFullPath", () -> leftFullPath());
+        // tryToAddPathToChooser("RightFullPath", () -> rightFullPath());
+        // tryToAddPathToChooser("Troll", () -> troll());
+        // tryToAddPathToChooser("DisruptLeft", () -> disruptLeft());
+        tryToAddPathToChooser("LeftDoubleSwipe", 
+            () -> doubleSwipe(
+                "LeftDoubleSwipe",
+                "L_IT_IC_ST",
+                "L_ST_IB_ST")
+        );
+
+        tryToAddPathToChooser("RightDoubleSwipe", 
+            () -> doubleSwipe(
+                "RightDoubleSwipe",
+                "R_IT_IC_ST",
+                "R_ST_IB_ST")
+        );
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     }
@@ -70,6 +83,104 @@ public class AutonCommands extends SubsystemBase {
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
     public Command backUpAuton() {
         return new InstantCommand();
+    }
+
+    public Command doubleSwipe(String autoName, String firstSwipe, String secondSwipe) {
+        AutoEvent auto = new AutoEvent(autoName, this);
+
+        Trigger autoActivted = auto.getIsRunningTrigger();
+
+        Trigger intakingRange = inIntakeRange(auto);
+        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
+
+        SequentialEndingCommandGroup firstSwipePath = followChoreoPath(firstSwipe, true);
+        Trigger isFirstSwipeRunning = auto.loggedCondition(firstSwipe+"/isRunning", () -> firstSwipePath.isRunning(), true);
+        Trigger hasFirstSwipeEnded = auto.loggedCondition(firstSwipe+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
+
+        SequentialEndingCommandGroup secondSwipePath = followChoreoPath(secondSwipe, false);
+        Trigger isSecondSwipeRunning = auto.loggedCondition(secondSwipe+"/isRunning", () -> secondSwipePath.isRunning(), true);
+        Trigger hasSecondSwipeEnded = auto.loggedCondition(secondSwipe+"/hasEnded", () -> secondSwipePath.hasEnded(), true);
+
+        intakingRange
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onTrue(Commands.waitSeconds(0.1).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
+            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        shootingRange
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+
+        autoActivted
+            .onTrue(firstSwipePath)
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(Commands.runOnce(() -> wantToShoot = false));
+
+        hasFirstSwipeEnded
+            .onTrue(Commands.runOnce(() -> wantToShoot = true))
+            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+                () -> GameGoalPoseChooser.getHub()));
+
+        SequentialEndingCommandGroup firstSwipeIntakeShot = 
+            new SequentialEndingCommandGroup(
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
+                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+
+        SequentialEndingCommandGroup firstSwipeIndexShot = 
+            new SequentialEndingCommandGroup(
+                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
+                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
+
+        hasFirstSwipeEnded.and(() -> wantToShoot).and(() -> 
+            mFlywheelsSS.atLatestClosedLoopGoal() && 
+            mHoodSS.atGoal() &&
+            mRobotDrive.getDriveManager().inHeadingTolerance())
+            .onTrue(firstSwipeIntakeShot)
+            .onTrue(firstSwipeIndexShot)
+            .onTrue(mIntake.trashCompactPivotContinuous());
+
+        hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
+            .onTrue(Commands.runOnce(() -> wantToShoot = false))
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(secondSwipePath);
+
+        hasSecondSwipeEnded
+            .onTrue(Commands.runOnce(() -> wantToShoot = true))
+            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
+                () -> GameGoalPoseChooser.getHub()));
+
+        SequentialEndingCommandGroup secondSwipeIntakeShot = 
+            new SequentialEndingCommandGroup(
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
+                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
+
+        SequentialEndingCommandGroup secondSwipeIndexShot = 
+            new SequentialEndingCommandGroup(
+                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
+                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
+
+        hasSecondSwipeEnded.and(() -> wantToShoot).and(() -> 
+            mFlywheelsSS.atLatestClosedLoopGoal() && 
+            mHoodSS.atGoal() &&
+            mRobotDrive.getDriveManager().inHeadingTolerance())
+            .onTrue(secondSwipeIntakeShot)
+            .onTrue(secondSwipeIndexShot)
+            .onTrue(mIntake.trashCompactPivotContinuous());
+
+        hasSecondSwipeEnded.and(() -> secondSwipeIndexShot.hasEnded() && secondSwipeIntakeShot.hasEnded())
+            .onTrue(Commands.runOnce(() -> wantToShoot = false))
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(secondSwipePath);
+            
+        return auto;
     }
 
     public Command disruptLeft() {
