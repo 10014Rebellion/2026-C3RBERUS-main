@@ -84,6 +84,30 @@ public class GameGoalPoseChooser {
             !DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue));
     }
 
+    public static boolean inCenter(Pose2d robotPose) {
+        return GameGoalPoseChooser.inBetween(robotPose.getX(), 5.2, 11.312);
+    }
+
+    public static boolean inEitherTrenchXRange(Pose2d robotPose) {
+        return (inBetween(robotPose.getX(), 3.747, 5.477)
+                    &&
+                inBetween(robotPose.getX(), FieldConstants.kFieldXM - 5.477, FieldConstants.kFieldXM - 3.747));
+    }
+
+    public static boolean inEitherSuperTrenchXRange(Pose2d robotPose) {
+        return (inBetween(robotPose.getX(), 4.093, 5.172)
+                    &&
+                inBetween(robotPose.getX(), FieldConstants.kFieldXM - 5.172, FieldConstants.kFieldXM - 4.093));
+    }
+
+    public static boolean inLeftTrenchYRange(Pose2d robotPose) {
+        return inBetween(robotPose.getY(), FieldConstants.kFieldYM - 1.262, FieldConstants.kFieldYM);
+    }
+
+    public static boolean inRightTrenchYRange(Pose2d robotPose) {
+        return inBetween(robotPose.getY(), 0, 1.262);
+    }
+
     public static Pose2d getHubPresetPose(Pose2d robotPose, double distance) {
         Rotation2d hubRotation = turnFromHub(robotPose);
         Pose2d hubPose = getHub();
@@ -100,5 +124,9 @@ public class GameGoalPoseChooser {
             3.351194381713867 - 0.1, 
             4.036095142364502, 
             Rotation2d.kZero));
+    }
+
+    public static boolean inBetween(double value, double min, double max) {
+        return (value > min) && (value < max);
     }
 }

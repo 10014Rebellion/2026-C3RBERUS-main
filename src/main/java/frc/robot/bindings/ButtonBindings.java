@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
+import frc.robot.game.FieldConstants;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbSS.ClimbState;
@@ -81,14 +82,26 @@ public class ButtonBindings {
         Trigger wantToEndClimb = new Trigger(() -> false);
 
         Trigger autonomousWorking = new Trigger(() -> true);
-        Trigger inCenter = new Trigger(() -> false);
+        Trigger inCenter = new Trigger(() -> GameGoalPoseChooser.inCenter(mDriveSS.getPoseEstimate()));
         Trigger inCenterTraversalHeading = new Trigger(() -> mHeadingTraversalState.equals(HeadingTraversalState.ALLIANCE));
         Trigger inAllianceTraversalHeading = new Trigger(() -> mHeadingTraversalState.equals(HeadingTraversalState.CENTER));
         Trigger isRobotMoving = new Trigger(() -> mDriveSS.isRobotMoving());
         Trigger driveIsHeadingXLocked = new Trigger(() -> mDriveSS.getDriveManager().getDriveState().equals(DriveState.HEADING_X_LOCK));
         
-        Trigger inNoHoodZone = new Trigger(() -> false);
-        Trigger inSuperNoHoodZone = new Trigger(() -> false);
+        Trigger inNoHoodZone = new Trigger(() -> 
+            (GameGoalPoseChooser.inLeftTrenchYRange(mDriveSS.getPoseEstimate()) ||
+                GameGoalPoseChooser.inEitherTrenchXRange(mDriveSS.getPoseEstimate()))
+            ||
+            (GameGoalPoseChooser.inRightTrenchYRange(mDriveSS.getPoseEstimate()) ||
+                GameGoalPoseChooser.inEitherTrenchXRange(mDriveSS.getPoseEstimate()))
+        );
+        Trigger inSuperNoHoodZone = new Trigger(() -> 
+            (GameGoalPoseChooser.inLeftTrenchYRange(mDriveSS.getPoseEstimate()) ||
+                GameGoalPoseChooser.inEitherSuperTrenchXRange(mDriveSS.getPoseEstimate()))
+            ||
+            (GameGoalPoseChooser.inRightTrenchYRange(mDriveSS.getPoseEstimate()) ||
+                GameGoalPoseChooser.inEitherSuperTrenchXRange(mDriveSS.getPoseEstimate()))
+        );
         prevHoodState = mHoodSS.getHoodState();
         Trigger flywheelAtGoal = new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal());
         Trigger hoodAtGoal = new Trigger(() -> mHoodSS.atGoal());
