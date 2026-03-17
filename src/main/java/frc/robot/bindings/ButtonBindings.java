@@ -140,7 +140,7 @@ public class ButtonBindings {
                 wantToCloseShoot.getAsBoolean();
         });
 
-        final double kShootingReadyDebounceSeconds = 0.1;
+        final double kShootingReadyDebounceSeconds = 0.2;
 
         mPilotController.startButton()
             .onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
@@ -200,6 +200,7 @@ public class ButtonBindings {
                 () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
                 () -> GameGoalPoseChooser.getHub()));
 
+        // If at goal, shoot it in
         wantToDynamicShoot.and(shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
@@ -265,7 +266,7 @@ public class ButtonBindings {
         wantToTraverse.and(() -> inCenterFlag)
             .onTrue(centerTraversalHeadingState().andThen(
                 mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                    () -> AllianceFlipUtil.apply(Rotation2d.k180deg), 
+                    () -> AllianceFlipUtil.apply(Rotation2d.kZero), 
                     TurnPointFeedforward.zeroTurnPointFF())));
 
         wantToTraverse.and(() -> !inCenterFlag)
