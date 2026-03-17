@@ -94,4 +94,11 @@ public class GameGoalPoseChooser {
             turnFromHub(robotPose)
         );
     }
+
+    public static Pose2d getCloseShotPose() {
+        return AllianceFlipUtil.apply(new Pose2d(
+            3.351194381713867 - 0.1, 
+            4.036095142364502, 
+            Rotation2d.kZero));
+    }
 }

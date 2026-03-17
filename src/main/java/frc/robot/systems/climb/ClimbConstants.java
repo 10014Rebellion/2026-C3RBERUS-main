@@ -37,7 +37,7 @@ public class ClimbConstants {
     }
 
     public static final double kClimbHeight = 1.0;
-    public static final double kClimbedHeight = 0.5;
+    public static final double kClimbedHeight = 0.1;
     
     public static final BasicMotorHardware kClimbMotorConstants = new BasicMotorHardware(
         60, // Motor ID // TODO: TUNE ME!

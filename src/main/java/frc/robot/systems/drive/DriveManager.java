@@ -19,6 +19,7 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -44,6 +45,7 @@ public class DriveManager {
         TELEOP_SNIPER,
         POV_SNIPER,
         HEADING_ALIGN,
+        HEADING_X_LOCK,
         AUTO_ALIGN,
         LINE_ALIGN,
         AUTON,
@@ -117,6 +119,13 @@ public class DriveManager {
                     teleopSpeeds.vxMetersPerSecond, 
                     teleopSpeeds.vyMetersPerSecond,
                     mHeadingController.getSnapOutputRadians(mDrive.getPoseEstimate().getRotation())));
+                break;
+            case HEADING_X_LOCK:
+                desiredSpeeds = Optional.empty();
+                mDrive.getModules()[0].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(45.0)));
+                mDrive.getModules()[1].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45.0)));
+                mDrive.getModules()[2].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45.0)));
+                mDrive.getModules()[3].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(45.0)));
                 break;
             case AUTO_ALIGN:
                 desiredSpeeds = of(mAutoAlignController.calculate(
@@ -229,6 +238,10 @@ public class DriveManager {
      */
     public Command setToStop() {
         return setDriveStateCommand(DriveState.STOP);
+    }
+
+    public Command setToHeadingXLock() {
+        return setDriveStateCommandContinued(DriveState.HEADING_X_LOCK);
     }
 
     /*
@@ -431,5 +444,9 @@ public class DriveManager {
 
     public LineController getLineAlignController() {
         return mLineAlignController;
+    }
+
+    public DriveState getDriveState() {
+        return mDriveState;
     }
 }

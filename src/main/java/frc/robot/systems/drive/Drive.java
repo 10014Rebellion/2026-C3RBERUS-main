@@ -6,6 +6,7 @@ import static frc.robot.systems.drive.DriveConstants.*;
 
 import java.util.Optional;
 
+import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -469,5 +470,11 @@ public class Drive extends SubsystemBase {
 
     public Module[] getModules() {
         return this.mModules;
+    }
+
+    public boolean isRobotMoving() {
+        return (getRobotChassisSpeeds().vxMetersPerSecond < 0.05) &&
+                (getRobotChassisSpeeds().vyMetersPerSecond < 0.05) &&
+                (Math.toDegrees(getRobotChassisSpeeds().omegaRadiansPerSecond) < 1.0);
     }
 }
