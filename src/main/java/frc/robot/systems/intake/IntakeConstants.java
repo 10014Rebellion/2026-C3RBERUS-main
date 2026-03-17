@@ -69,7 +69,7 @@ public class IntakeConstants {
         public static final LoggedTunableNumber tPivotTuningAmp = new LoggedTunableNumber("Intake/Tuning/TuneAmperage", 0.0);
 
         public static final LoggedTunableNumber tStowSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/StowSetpointDegrees", 73.5);
+            "Intake/Setpoint/StowSetpointDegrees", 90.0);
         public static final Supplier<Rotation2d> kStowSetpointSup = () -> Rotation2d.fromDegrees(tStowSetpointDeg.get());
 
         public static final LoggedTunableNumber tCompactHighSetpointDeg  = new LoggedTunableNumber(
@@ -81,7 +81,7 @@ public class IntakeConstants {
         public static final Supplier<Rotation2d> kCompactLowSetpointSup = () -> Rotation2d.fromDegrees(tCompactLowSetpointDeg.get());
 
         public static final LoggedTunableNumber tIntakeSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/IntakeSetpointDegrees", 0.0);
+            "Intake/Setpoint/IntakeSetpointDegrees", -6.5);
         public static final Supplier<Rotation2d> kIntakeSetpointSup = () -> Rotation2d.fromDegrees(tIntakeSetpointDeg.get());
 
         public static final LoggedTunableNumber tTuningShotSetpointDeg  = new LoggedTunableNumber(

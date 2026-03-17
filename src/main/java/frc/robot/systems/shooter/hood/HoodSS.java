@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.systems.shooter.ShooterConstants;
+import frc.robot.systems.shooter.ShotMap;
 
 public class HoodSS extends SubsystemBase {
     public static enum HoodStates {
@@ -117,7 +117,7 @@ public class HoodSS extends SubsystemBase {
                 } case HOLD_POSITION -> {
                     setHoodPosition(mLatestClosedLoopGoalRot);
                 } case SHOTMAP_POSITION -> {
-                    setHoodPosition(ShooterConstants.getHoodAngle());
+                    setHoodPosition(ShotMap.getInstance().getHoodAngle());
                 }
             }
         }

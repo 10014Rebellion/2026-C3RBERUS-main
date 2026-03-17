@@ -1,18 +1,32 @@
 package frc.robot.systems.shooter;
 
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.game.GameGoalPoseChooser;
 
-public class ShooterConstants {
-    private static Supplier<Pose2d> robotPose = () -> new Pose2d();
+public class ShotMap {
+    private static ShotMap mInstance;
+    
+    public static ShotMap getInstance() {
+        if(mInstance == null) {
+            mInstance = new ShotMap();
+        }
+        return mInstance;
+    }
+
+    private Supplier<Pose2d> robotPose = () -> new Pose2d();
     public double offsetM = 0.0;
 
     public record ShotMapSetpoint(double distance, Rotation2d pHoodSetpoint, Rotation2d flywheelSpeedPS) {}
 
-    public static ShotMapSetpoint[] setpoints = new ShotMapSetpoint[] {
+    public ShotMapSetpoint[] setpoints = new ShotMapSetpoint[] {
         new ShotMapSetpoint(1.25, Rotation2d.fromDegrees(7.0), Rotation2d.fromRotations(47.5)),
         new ShotMapSetpoint(1.75, Rotation2d.fromDegrees(8.5), Rotation2d.fromRotations(49.0)),
         new ShotMapSetpoint(2.25, Rotation2d.fromDegrees(10.5), Rotation2d.fromRotations(50.5)),
@@ -22,10 +36,10 @@ public class ShooterConstants {
         new ShotMapSetpoint(4.17, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(63.0)),
     };
 
-    public static InterpolatingDoubleTreeMap distanceVelRPSMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap distanceAngleDegMap = new InterpolatingDoubleTreeMap();
+    public InterpolatingDoubleTreeMap distanceVelRPSMap = new InterpolatingDoubleTreeMap();
+    public InterpolatingDoubleTreeMap distanceAngleDegMap = new InterpolatingDoubleTreeMap();
 
-    static {
+    private ShotMap() {
         for(int i = 0; i < setpoints.length; i++) {
             distanceVelRPSMap.put(setpoints[i].distance(), setpoints[i].flywheelSpeedPS.getRotations());
         }
@@ -33,9 +47,16 @@ public class ShooterConstants {
         for(int i = 0; i < setpoints.length; i++) {
             distanceAngleDegMap.put(setpoints[i].distance(), setpoints[i].pHoodSetpoint().getDegrees());
         }
+
+        CommandScheduler.getInstance().getActiveButtonLoop()
+            .bind(() -> {
+                Logger.recordOutput("ShotMap/DistanceToHub", distanceToHub());
+                Logger.recordOutput("ShotMap/AngleOfHood", getHoodAngle());
+                Logger.recordOutput("ShotMap/FlywheelRPS", getFlywheelVel());
+            });
     }
 
-    public static double distanceToHub() {
+    public double distanceToHub() {
         return 
         Math.max(setpoints[0].distance() + 0.01,
             Math.min(
@@ -47,15 +68,15 @@ public class ShooterConstants {
         );
     }
 
-    public static Rotation2d getHoodAngle() {
-        return Rotation2d.fromDegrees(distanceAngleDegMap.get(3.0));
+    public Rotation2d getHoodAngle() {
+        return Rotation2d.fromDegrees(distanceAngleDegMap.get(distanceToHub()));
     }
 
-    public static Rotation2d getFlywheelVel() {
-        return Rotation2d.fromRotations(distanceVelRPSMap.get(3.0));
+    public Rotation2d getFlywheelVel() {
+        return Rotation2d.fromRotations(distanceVelRPSMap.get(distanceToHub()));
     }
 
-    public static void setPoseSupplier(Supplier<Pose2d> pPoseSup) {
+    public void setPoseSupplier(Supplier<Pose2d> pPoseSup) {
         robotPose = pPoseSup;
     }
 

@@ -46,7 +46,7 @@ public class FuelPumpConstants {
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/FuelPump/TuneVoltage", 0.0);
     public static final LoggedTunableNumber tIntakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/IntakeVolts", 8.014);
     public static final LoggedTunableNumber tOuttakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/OuttakeVolts", -10.014);
-+
+
     static {
         kStateToTuneableFuelPump.put(FuelPumpState.INTAKE_VOLT, tIntakeVolts);
         kStateToTuneableFuelPump.put(FuelPumpState.OUTTAKE_VOLT, tOuttakeVolts);

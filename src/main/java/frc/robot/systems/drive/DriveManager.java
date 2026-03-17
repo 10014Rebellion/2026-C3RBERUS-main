@@ -405,7 +405,7 @@ public class DriveManager {
 
     ///////////// GETTERS \\\\\\\\\\\\\
     public BooleanSupplier waitUntilHeadingAlignFinishes() {
-        return () -> mHeadingAlignTimeout.calculate(inHeadingTolerance());
+        return () -> inHeadingTolerance();
     }
 
     @AutoLogOutput(key = "Drive/Tolerance/HeadingController")
