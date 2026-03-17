@@ -23,7 +23,6 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
-import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 import frc.robot.RobotConstants;
 import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 

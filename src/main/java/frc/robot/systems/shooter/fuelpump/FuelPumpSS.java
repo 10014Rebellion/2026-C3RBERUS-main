@@ -7,7 +7,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
+import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.logging.InvalidValueErrors.UnaccountedEnum;
+
+import static frc.robot.systems.shooter.fuelpump.FuelPumpConstants.kFuelPumpControlConfig;
 
 public class FuelPumpSS extends SubsystemBase {
   public static enum FuelPumpState {
@@ -26,6 +29,13 @@ public class FuelPumpSS extends SubsystemBase {
   private final FuelPumpInputsAutoLogged mLeaderFuelPumpInputs = new FuelPumpInputsAutoLogged();
   private final FuelPumpInputsAutoLogged mFollowerFuelPumpInputs = new FuelPumpInputsAutoLogged();
 
+  private final LoggedTunableNumber tFuelPumpKP = new LoggedTunableNumber("Shooter/FuelPump/Control/PID/kP", kFuelPumpControlConfig.pdController().kP());
+  private final LoggedTunableNumber tFuelPumpKD = new LoggedTunableNumber("Shooter/FuelPump/Control/PID/kD", kFuelPumpControlConfig.pdController().kD());
+  private final LoggedTunableNumber tFuelPumpKS = new LoggedTunableNumber("Shooter/FuelPump/Control/FF/kS", kFuelPumpControlConfig.feedforward().getKs());
+  private final LoggedTunableNumber tFuelPumpKV = new LoggedTunableNumber("Shooter/FuelPump/Control/FF/kV", kFuelPumpControlConfig.feedforward().getKv());
+  private final LoggedTunableNumber tFuelPumpKA = new LoggedTunableNumber("Shooter/FuelPump/Control/FF/kA", kFuelPumpControlConfig.feedforward().getKa());
+  private final LoggedTunableNumber tFuelPumpTolerance = new LoggedTunableNumber("Shooter/FuelPump/Control/Tolerance", FuelPumpConstants.kToleranceRPS);
+
   public FuelPumpSS(FuelPumpIO pLeaderFuelPumpIO, FuelPumpIO pFollowerFuelPumpIO) {
     this.mLeaderFuelPumpIO = pLeaderFuelPumpIO;
     this.mFollowerFuelPumpIO = pFollowerFuelPumpIO;
@@ -36,6 +46,7 @@ public class FuelPumpSS extends SubsystemBase {
     mLeaderFuelPumpIO.updateInputs(mLeaderFuelPumpInputs);
     mFollowerFuelPumpIO.updateInputs(mFollowerFuelPumpInputs);
 
+    refreshTuneables();
     executeState();
     mFollowerFuelPumpIO.enforceFollower();
 
@@ -91,5 +102,28 @@ public class FuelPumpSS extends SubsystemBase {
 
   public boolean isReadyToShoot() {
     return getAvgFuelPumpRPS().getRotations() >= FuelPumpConstants.kRPSForShooting.getRotations();
+  }
+
+  public void setBothPDConstants(double KP, double KD){
+    mFollowerFuelPumpIO.setPDConstants(0, KP, KD);
+    mLeaderFuelPumpIO.setPDConstants(0, KP, KD);
+  }
+
+  public void setFF(double pKS, double pKV, double pKA){
+    kFuelPumpControlConfig.feedforward().setKa(pKS);
+    kFuelPumpControlConfig.feedforward().setKa(pKV);
+    kFuelPumpControlConfig.feedforward().setKa(pKA);
+  }
+
+  private void refreshTuneables() {
+    LoggedTunableNumber.ifChanged( hashCode(), 
+      () -> setBothPDConstants(tFuelPumpKP.get(), tFuelPumpKD.get()), 
+      tFuelPumpKP, tFuelPumpKD
+    );
+
+    LoggedTunableNumber.ifChanged( hashCode(), 
+      () -> setFF(tFuelPumpKS.get(), tFuelPumpKV.get(), tFuelPumpKA.get()),
+      tFuelPumpKS, tFuelPumpKV, tFuelPumpKA
+    );
   }
 }

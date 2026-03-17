@@ -4,10 +4,15 @@ import java.util.HashMap;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
+import frc.lib.hardware.HardwareRecords.MotionMagicFOCControllerFF;
+import frc.lib.hardware.HardwareRecords.PDConstants;
+import frc.lib.hardware.HardwareRecords.SimpleController;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.RobotConstants;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
@@ -31,12 +36,17 @@ public class FuelPumpConstants {
         MotorAlignmentValue.Opposed
     );
 
+    public static final SimpleController kFuelPumpControlConfig = new SimpleController(
+        0, 
+        new PDConstants(0, 0), 
+        new SimpleMotorFeedforward(0, 0));
+
     public static final HashMap<FuelPumpState, LoggedTunableNumber> kStateToTuneableFuelPump = new HashMap<FuelPumpState, LoggedTunableNumber>();
 
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/FuelPump/TuneVoltage", 0.0);
-    public static final LoggedTunableNumber tIntakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/IntakeVolts", 10.014);
+    public static final LoggedTunableNumber tIntakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/IntakeVolts", 8.014);
     public static final LoggedTunableNumber tOuttakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/OuttakeVolts", -10.014);
-
++
     static {
         kStateToTuneableFuelPump.put(FuelPumpState.INTAKE_VOLT, tIntakeVolts);
         kStateToTuneableFuelPump.put(FuelPumpState.OUTTAKE_VOLT, tOuttakeVolts);

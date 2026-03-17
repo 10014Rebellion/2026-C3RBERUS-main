@@ -1,13 +1,9 @@
 package frc.robot.systems.shooter;
 
 import java.util.function.Supplier;
-
-import org.dyn4j.geometry.Rotatable;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.PneumaticsControlModule;
 import frc.robot.game.GameGoalPoseChooser;
 
 public class ShooterConstants {

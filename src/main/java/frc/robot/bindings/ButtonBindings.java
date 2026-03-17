@@ -72,14 +72,14 @@ public class ButtonBindings {
     }
 
     public void initCompBindings() {
-        Trigger wantToCloseShoot = new Trigger(() -> false);
-        Trigger wantToDynamicShoot = new Trigger(() -> false);
-        Trigger wantToFeed = new Trigger(() -> false);
-        Trigger wantToIntake = new Trigger(() -> false);
-        Trigger wantToStow = new Trigger(() -> false);
-        Trigger wantToTraverse = new Trigger(() -> false);
-        Trigger wantToInitiateClimb = new Trigger(() -> false);
-        Trigger wantToEndClimb = new Trigger(() -> false);
+        Trigger wantToCloseShoot = new Trigger(() -> false).and(kUsingPilotGunner);
+        Trigger wantToDynamicShoot = new Trigger(() -> false).and(kUsingPilotGunner);
+        Trigger wantToFeed = new Trigger(() -> false).and(kUsingPilotGunner);
+        Trigger wantToIntake = new Trigger(() -> false).and(kUsingPilotGunner);
+        Trigger wantToStow = new Trigger(() -> false).and(kUsingPilotGunner);
+        Trigger wantToTraverse = new Trigger(() -> false).and(kUsingPilotGunner);
+        Trigger wantToInitiateClimb = new Trigger(() -> false).and(kUsingPilotGunner);
+        Trigger wantToEndClimb = new Trigger(() -> false).and(kUsingPilotGunner);
 
         Trigger autonomousWorking = new Trigger(() -> true);
         Trigger inCenter = new Trigger(() -> GameGoalPoseChooser.inCenter(mDriveSS.getPoseEstimate()));
