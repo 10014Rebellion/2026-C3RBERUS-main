@@ -5,12 +5,20 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
@@ -400,6 +408,10 @@ public class ButtonBindings {
         new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN)
                 .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE)));
+
+        new Trigger(() -> mClimbNeutralModeButton.get() && DriverStation.isDisabled() && !DriverStation.isFMSAttached())
+            .whileTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)))
+            .whileFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)));
     }
 
     public Command rumbleDriverController(){

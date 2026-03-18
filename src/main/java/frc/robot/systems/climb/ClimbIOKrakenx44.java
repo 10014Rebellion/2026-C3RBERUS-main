@@ -4,11 +4,14 @@ package frc.robot.systems.climb;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.DifferentialMechanism;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -31,8 +34,10 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     private final StatusSignal<AngularAcceleration> mClimbAccelerationMPSS;
     private final StatusSignal<Angle> mClimbPosition;
     private final StatusSignal<Double> mClosedLoopReference;
+    private final BasicMotorHardware mConfigPlaceHolder;
 
     public ClimbIOKrakenx44(BasicMotorHardware pConfig) {
+        mConfigPlaceHolder = pConfig;
         mClimbMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
         var ClimbConfig = new TalonFXConfiguration();
 
@@ -115,4 +120,14 @@ public class ClimbIOKrakenx44 implements ClimbIO {
     public void stopMotor() {
         mClimbMotor.stopMotor();
     }
+
+    @Override
+    public void changeClimbNeutralMode(NeutralModeValue pNeutralMode) {
+        MotorOutputConfigs mConfig = new MotorOutputConfigs();
+        mConfig.NeutralMode = pNeutralMode;
+        mConfig.Inverted = mConfigPlaceHolder.direction();
+        mClimbMotor.getConfigurator().apply(mConfig);
+
+    }
+
 }

@@ -6,6 +6,8 @@ package frc.robot.systems.climb;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -86,6 +88,10 @@ public class ClimbSS extends SubsystemBase {
         mDesiredDirection = toDirection(pVolts);
         mClimbIO.setMotorVolts(pVolts);
         enforceSoftLimits();
+    }
+
+    public void changeClimbNeutralMode(NeutralModeValue pNeutralMode){
+        mClimbIO.changeClimbNeutralMode(pNeutralMode);
     }
 
     public boolean atGoal(double pGoal) {
