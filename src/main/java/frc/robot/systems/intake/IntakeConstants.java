@@ -73,6 +73,10 @@ public class IntakeConstants {
             "Intake/Setpoint/StowSetpointDegrees", 90.0);
         public static final Supplier<Rotation2d> kStowSetpointSup = () -> Rotation2d.fromDegrees(tStowSetpointDeg.get());
 
+        public static final LoggedTunableNumber tSafeStowSetpointDeg  = new LoggedTunableNumber(
+            "Intake/Setpoint/SafeStowSetpointDegrees", 80.0);
+        public static final Supplier<Rotation2d> kSafeStowSetpointSup = () -> Rotation2d.fromDegrees(tSafeStowSetpointDeg.get());
+
         public static final LoggedTunableNumber tCompactHighSetpointDeg  = new LoggedTunableNumber(
             "Intake/Setpoint/CompactHighSetpointDegrees", 48.0);
         public static final Supplier<Rotation2d> kCompactHighSetpointSup = () -> Rotation2d.fromDegrees(tCompactHighSetpointDeg.get());
@@ -94,6 +98,7 @@ public class IntakeConstants {
 
         static {
             kStateToSetpointMapIntake.put(IntakePivotStates.STOW, kStowSetpointSup);
+            kStateToSetpointMapIntake.put(IntakePivotStates.SAFESTOW, kSafeStowSetpointSup);
             kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_HIGH, kCompactHighSetpointSup);
             kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_LOW, kCompactLowSetpointSup);
             kStateToSetpointMapIntake.put(IntakePivotStates.INTAKE, kIntakeSetpointSup);

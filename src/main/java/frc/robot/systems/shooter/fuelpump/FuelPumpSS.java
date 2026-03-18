@@ -110,8 +110,8 @@ public class FuelPumpSS extends SubsystemBase {
   }
 
   public void setFF(double pKS, double pKV, double pKA){
-    kFuelPumpControlConfig.feedforward().setKa(pKS);
-    kFuelPumpControlConfig.feedforward().setKa(pKV);
+    kFuelPumpControlConfig.feedforward().setKs(pKS);
+    kFuelPumpControlConfig.feedforward().setKv(pKV);
     kFuelPumpControlConfig.feedforward().setKa(pKA);
   }
 

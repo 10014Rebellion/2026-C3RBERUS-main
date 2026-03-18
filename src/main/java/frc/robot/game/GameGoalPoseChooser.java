@@ -44,28 +44,32 @@ public class GameGoalPoseChooser {
 
     /* Non-static Trench */
     public static Pose2d getClosestTrench(Pose2d robotPose) {
-        return onLeftOrRightY(robotPose) ? getTL() : getTR(); 
+        Pose2d trenchPose = onLeftOrRightY(robotPose) ? getTL() : getTR();
+        Logger.recordOutput("GamePoses/ClosestTrench", trenchPose);
+        return trenchPose; 
     }
 
     public static Pose2d getTL() {
-        return AllianceFlipUtil.apply(new Pose2d());
+        return AllianceFlipUtil.apply(FieldConstants.kTrenchPoseLeft);
     }
 
     public static Pose2d getTR() {
-        return AllianceFlipUtil.apply(new Pose2d());
+        return AllianceFlipUtil.apply(FieldConstants.kTrenchPoseRight);
     }
 
     /* Nonstatic bump */
     public static Pose2d getClosestBump(Pose2d robotPose) {
-        return onLeftOrRightY(robotPose) ? getBL() : getBR(); 
+        Pose2d bumpPose = onLeftOrRightY(robotPose) ? getBL() : getBR();
+        Logger.recordOutput("GamePoses/ClosestBump", bumpPose);
+        return bumpPose; 
     }
 
     public static Pose2d getBL() {
-        return AllianceFlipUtil.apply(new Pose2d());
+        return AllianceFlipUtil.apply(FieldConstants.kBumpPoseLeft);
     }
 
     public static Pose2d getBR() {
-        return AllianceFlipUtil.apply(new Pose2d());
+        return AllianceFlipUtil.apply(FieldConstants.kBumpPoseRight);
     }
 
     public static Pose2d getHub() {

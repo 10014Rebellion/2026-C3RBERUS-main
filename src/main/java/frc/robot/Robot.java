@@ -36,8 +36,6 @@ public class Robot extends LoggedRobot {
         // ShotCalculator.getInstance().clearShootingParameters();
         CommandScheduler.getInstance().run();
         TransitionTracker.periodic();
-
-        
     }
 
     @Override

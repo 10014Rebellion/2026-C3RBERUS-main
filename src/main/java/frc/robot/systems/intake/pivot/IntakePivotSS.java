@@ -19,6 +19,7 @@ public class IntakePivotSS extends SubsystemBase {
         TUNING_VOLTAGE,
         TUNING_AMPS,
         STOW,
+        SAFESTOW,
         COMPACT_HIGH,
         COMPACT_LOW,
         COMPACT_AMPS,
@@ -88,7 +89,7 @@ public class IntakePivotSS extends SubsystemBase {
             } case TUNING_VOLTAGE -> {
             } case COMPACT_AMPS -> {
                 mIntakePivotIO.setMotorAmps(IntakeConstants.PivotConstants.tConstantCompactAmps.get() * mIntakeInputs.iIntakePivotRotation.getCos());
-            } case STOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
+            } case STOW, SAFESTOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
                 mIntakePivotIO.resetPPID();
             } case INVALID -> {}
             default -> {
@@ -110,7 +111,7 @@ public class IntakePivotSS extends SubsystemBase {
                 setIntakeAmps(IntakeConstants.PivotConstants.tPivotTuningAmp.get());
             } case COMPACT_AMPS -> {
                 setIntakeAmps(IntakeConstants.PivotConstants.tConstantCompactAmps.get());
-            } case STOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
+            } case STOW, SAFESTOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
                 setIntakePosition(IntakeConstants.PivotConstants.kStateToSetpointMapIntake.get(mCurrentIntakeState).get());
             } case INVALID -> {}
             default -> {

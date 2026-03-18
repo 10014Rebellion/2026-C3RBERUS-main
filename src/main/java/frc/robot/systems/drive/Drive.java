@@ -470,7 +470,7 @@ public class Drive extends SubsystemBase {
         return this.mModules;
     }
 
-    public boolean isRobotMoving() {
+    public boolean isRobotStationary() {
         return (getRobotChassisSpeeds().vxMetersPerSecond < 0.05) &&
                 (getRobotChassisSpeeds().vyMetersPerSecond < 0.05) &&
                 (Math.toDegrees(getRobotChassisSpeeds().omegaRadiansPerSecond) < 1.0);

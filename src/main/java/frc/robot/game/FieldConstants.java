@@ -39,8 +39,37 @@ public class FieldConstants {
     public static final double kStartingLineXM = eval(156.06 + 1, 156.61 + 1); // Added 1 to get it on the very center of the starting line
     public static final double kOutpostCenterYM = eval(25.62, 26.22);
 
-    private static final double kHubXM = eval(181.56, 182.11);
+    private static final double kAllianceBorder = eval(181.56, 182.11);
+    private static final double kHubXM = kAllianceBorder;
     private static final double kHubYM = kFieldYM / 2.0;
+
+    public static final double kTrenchWallLengthM = inToM(12);
+    public static final double kBumpLengthM = inToM(73.0);
+    public static final double kTrenchGapLengthM = eval(49.86, 50.67);
+
+    public static final Pose2d kTrenchPoseRight = new Pose2d(
+        kAllianceBorder, 
+        kTrenchGapLengthM / 2.0, 
+        Rotation2d.kZero
+    );
+
+    public static final Pose2d kTrenchPoseLeft = new Pose2d(
+        kAllianceBorder, 
+        kFieldYM - (kTrenchGapLengthM / 2.0), 
+        Rotation2d.kZero
+    );
+
+    public static final Pose2d kBumpPoseRight = new Pose2d(
+        kAllianceBorder, 
+        kTrenchGapLengthM + kTrenchWallLengthM + (kBumpLengthM / 2.0), 
+        Rotation2d.kZero
+    );
+
+    public static final Pose2d kBumpPoseLeft = new Pose2d(
+        kAllianceBorder, 
+        kFieldYM - (kTrenchGapLengthM + kTrenchWallLengthM + (kBumpLengthM / 2.0)), 
+        Rotation2d.kZero
+    );
 
     public static final Pose2d kHubPose = new Pose2d(new Translation2d(kHubXM, kHubYM), Rotation2d.kZero);
     public static final Pose3d kHubInnerPose = new Pose3d(new Translation3d(kHubXM, kHubYM, kHubInnerHeightM), Rotation3d.kZero);

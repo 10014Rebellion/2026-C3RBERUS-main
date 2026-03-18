@@ -81,6 +81,8 @@ public class ButtonBindings {
 
 
     public void initBindings() {
+        initTriggers();
+
         mDriveSS.getDriveManager().acceptJoystickInputs(
             () -> -mPilotController.getLeftY(),
             () -> -mPilotController.getLeftX(),
@@ -92,16 +94,20 @@ public class ButtonBindings {
         initButtonBoard();
         // initPilotBindings();
         // initGunnerBindings();
-        initTriggers();
     }
 
     public void initCompBindings() {
+        boolean isEli = true;
         Trigger wantToCloseShoot = mGunnerController.leftTrigger().and(kUsingPilotGunner);
         Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
-        Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
-        Trigger wantToIntake = mPilotController.leftBumper().and(kUsingPilotGunner);
+        Trigger wantToIntake = (isEli ? mPilotController.leftBumper() : mPilotController.rightBumper()).or(mGunnerController.rightBumper()).and(kUsingPilotGunner);
         Trigger wantToTraverse = mPilotController.rightTrigger().and(kUsingPilotGunner);
-        Trigger wantToStow = mGunnerController.rightBumper().and(kUsingPilotGunner);
+        Trigger wantToSafeStow = (isEli ? mPilotController.rightBumper() : mPilotController.leftBumper()).or(mGunnerController.leftBumper()).and(kUsingPilotGunner);
+        Trigger wantToLineAlignToBump = mPilotController.b();
+        Trigger wantToLineAlignToTrench = mPilotController.y();
+        Trigger wantToStow = new Trigger(() -> false);
+
+        Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
         Trigger wantToInitiateClimb = mGunnerController.povUp().and(kUsingPilotGunner);
         Trigger wantToEndClimb = mGunnerController.povDown().and(kUsingPilotGunner);
 
@@ -114,7 +120,7 @@ public class ButtonBindings {
         Trigger inCenter = new Trigger(() -> GameGoalPoseChooser.inCenter(mDriveSS.getPoseEstimate()));
         Trigger inCenterTraversalHeading = new Trigger(() -> mHeadingTraversalState.equals(HeadingTraversalState.ALLIANCE));
         Trigger inAllianceTraversalHeading = new Trigger(() -> mHeadingTraversalState.equals(HeadingTraversalState.CENTER));
-        Trigger isRobotMoving = new Trigger(() -> mDriveSS.isRobotMoving());
+        Trigger isRobotMoving = new Trigger(() -> !mDriveSS.isRobotStationary());
         Trigger driveIsHeadingXLocked = new Trigger(() -> mDriveSS.getDriveManager().getDriveState().equals(DriveState.HEADING_X_LOCK));
         
         Trigger inNoHoodZone = new Trigger(() -> 
@@ -179,6 +185,28 @@ public class ButtonBindings {
                 () -> GameGoalPoseChooser.getCloseShotPose(), 
                 ConstraintType.LINEAR))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        wantToLineAlignToTrench.and(autonomousWorking)
+            .onTrue(
+                mDriveSS.getDriveManager().setToGenericLineAlign(
+                    () -> GameGoalPoseChooser.getClosestTrench(mDriveSS.getPoseEstimate()), 
+                    () -> Rotation2d.kZero, 
+                    () -> 1, 
+                    () -> true
+                )
+            )
+        .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        wantToLineAlignToBump.and(autonomousWorking)
+            .onTrue(
+                mDriveSS.getDriveManager().setToGenericLineAlign(
+                    () -> GameGoalPoseChooser.getClosestBump(mDriveSS.getPoseEstimate()), 
+                    () -> Rotation2d.k180deg, 
+                    () -> 1, 
+                    () -> false
+                )
+            )
+        .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToCloseShoot.and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
@@ -267,6 +295,9 @@ public class ButtonBindings {
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        wantToSafeStow
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.SAFESTOW));
 
         wantToStow
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
@@ -403,15 +434,14 @@ public class ButtonBindings {
 
     public void initTriggers() {
         new Trigger(() -> DriverStation.isTeleopEnabled())
-            .onTrue(mDriveSS.getDriveManager().setToTeleop()
-                .alongWith(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-                .alongWith(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-                .alongWith(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            );
+            .onTrue(mDriveSS.getDriveManager().setToTeleop())
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
         
         new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
-            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN)
-                .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE)));
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
 
         new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed && DriverStation.isDisabled() && !DriverStation.isFMSAttached())
             .onTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))

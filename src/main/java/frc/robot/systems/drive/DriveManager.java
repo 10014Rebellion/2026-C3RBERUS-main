@@ -210,7 +210,9 @@ public class DriveManager {
         return new FunctionalCommand(
             () -> setDriveState(state), 
             () -> {}, (interrupted) -> {}, 
-            () -> false, mDrive);
+            () -> false, 
+            mDrive
+        );
     }
     
     /*
@@ -327,13 +329,13 @@ public class DriveManager {
             }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
     }
 
-    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pAngle, DoubleSupplier pTelScal, BooleanSupplier pTelInv) {
+    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pAngle, DoubleSupplier pTelScal, BooleanSupplier pTeleopInvert) {
         return new InstantCommand(() -> {
             mGoalPoseSup = pGoalPoseSup;
             mLineAlignController.setControllerGoalSettings(
                 pTelScal, 
                 () -> pAngle.get().getTan(), 
-                pTelInv);
+                pTeleopInvert);
             mLineAlignController.reset(
                 mDrive.getPoseEstimate(), 
                 mGoalPoseSup.get());
