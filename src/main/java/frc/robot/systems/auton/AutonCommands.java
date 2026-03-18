@@ -114,7 +114,7 @@ public class AutonCommands extends SubsystemBase {
 
         autoActivted
             .onTrue(firstSwipePath)
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             // .onTrue(Commands.waitSeconds(0.75).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
