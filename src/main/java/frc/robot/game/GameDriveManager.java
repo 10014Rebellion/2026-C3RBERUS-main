@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.lib.math.AllianceFlipUtil;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 
@@ -17,7 +18,8 @@ public class GameDriveManager {
         LINE_TO_BUMP,
         LINE_TO_O,
         LINE_TO_D,
-        DRIVE_TO_SAFE_SCORE
+        DRIVE_TO_SAFE_SCORE,
+        LINE_TO_CLIMB;
     }
 
     public Drive mDrive;
@@ -64,6 +66,13 @@ public class GameDriveManager {
                 return mDrive.getDriveManager().setToGenericAutoAlign(
                     () -> GameGoalPoseChooser.getSafeScoringPosition(), 
                     ConstraintType.LINEAR);
+
+            case LINE_TO_CLIMB:
+                return mDrive.getDriveManager().setToGenericLineAlign(
+                    () -> AllianceFlipUtil.apply(FieldConstants.kClimbLeftPose),
+                    () -> AllianceFlipUtil.apply(FieldConstants.kClimbLeftPose).getRotation(), 
+                    () -> 0.5, 
+                    () -> false);
             default:
                 return new InstantCommand(() -> DriverStation.reportError(
                         "<<< UNACCOUNTED DRIVE STATE \"" + pGameDriveState.toString() + "\" >>>", true));

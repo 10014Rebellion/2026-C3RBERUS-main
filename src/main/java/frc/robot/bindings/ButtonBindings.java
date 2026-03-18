@@ -26,6 +26,7 @@ import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.game.FieldConstants;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
@@ -88,6 +89,7 @@ public class ButtonBindings {
 
         initCompBindings();
         testBindings();
+        initButtonBoard();
         // initPilotBindings();
         // initGunnerBindings();
         initTriggers();
@@ -440,9 +442,13 @@ public class ButtonBindings {
 
     public void initButtonBoard() {
        
-        // mHID.button(3)
-        //     .whileTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
-        //     .whileFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
+        mPilotController.b()
+            .onTrue(mDriveSS.getDriveManager().setToGenericLineAlign(
+                () -> GameGoalPoseChooser.closestClimbPose(mDriveSS.getPoseEstimate()),
+                () -> GameGoalPoseChooser.closestClimbPose(mDriveSS.getPoseEstimate()).getRotation(), 
+                () -> 0.5, 
+                () -> false))
+            .onFalse(mDriveSS.getDriveManager().setDriveStateCommand(DriveState.TELEOP));
 
         // mHID.button(4)
         //     .whileTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT))

@@ -67,7 +67,8 @@ public class IntakeConstants {
 
         public static final LoggedTunableNumber tPivotTuningVoltage = new LoggedTunableNumber("Intake/Tuning/TuneVoltage", 0.0);
         public static final LoggedTunableNumber tPivotTuningAmp = new LoggedTunableNumber("Intake/Tuning/TuneAmperage", 0.0);
-
+        public static final LoggedTunableNumber tConstantCompactAmps = new LoggedTunableNumber("Intake/Setpoint/CompactConstantAmps", 0.0); 
+        
         public static final LoggedTunableNumber tStowSetpointDeg  = new LoggedTunableNumber(
             "Intake/Setpoint/StowSetpointDegrees", 90.0);
         public static final Supplier<Rotation2d> kStowSetpointSup = () -> Rotation2d.fromDegrees(tStowSetpointDeg.get());
@@ -87,6 +88,7 @@ public class IntakeConstants {
         public static final LoggedTunableNumber tTuningShotSetpointDeg  = new LoggedTunableNumber(
             "Intake/Setpoint/TuningShotSetpointDegrees", 0.0);
         public static final Supplier<Rotation2d> kTuningShotSetpointSup = () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get());
+
 
         public static final HashMap<IntakePivotStates, Supplier<Rotation2d>> kStateToSetpointMapIntake = new HashMap<IntakePivotStates, Supplier<Rotation2d>>();
 
@@ -113,7 +115,6 @@ public class IntakeConstants {
         public static final LoggedTunableNumber tIntakeTuningVoltage = new LoggedTunableNumber("Intake/Voltage/INTAKE", 11.014);
         public static final LoggedTunableNumber tOuttakeTuningVoltage = new LoggedTunableNumber("Intake/Voltage/OUTTAKE", -10.014);
         public static final LoggedTunableNumber tRollerTuningVoltage = new LoggedTunableNumber("Intake/Voltage/TUNING", 0.0);
-
         public static final HashMap<IntakeRollerState, LoggedTunableNumber> kStateToIntakeVoltage = new HashMap<>();
 
         static {

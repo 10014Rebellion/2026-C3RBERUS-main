@@ -37,12 +37,16 @@ public class Intake {
         return mIntakePivotSS.setStateCmd(pIntakePivotState);
     }
 
-    public Command trashCompactPivotContinuous() {
+    public Command trashCompactPivotRepeat() {
         return new RepeatCommand(
             new SequentialCommandGroup(
                 mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_HIGH).withTimeout(tIntakeCompactTime),
                 mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_LOW).withTimeout(tIntakeCompactTime)
             )
         );
+    }
+
+    public Command trashCompactPivotContinuous(){
+        return mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_AMPS);
     }
 }
