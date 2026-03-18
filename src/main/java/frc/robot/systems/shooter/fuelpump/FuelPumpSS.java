@@ -34,7 +34,7 @@ public class FuelPumpSS extends SubsystemBase {
   private final LoggedTunableNumber tFuelPumpKS = new LoggedTunableNumber("Shooter/FuelPump/Control/FF/kS", kFuelPumpControlConfig.feedforward().getKs());
   private final LoggedTunableNumber tFuelPumpKV = new LoggedTunableNumber("Shooter/FuelPump/Control/FF/kV", kFuelPumpControlConfig.feedforward().getKv());
   private final LoggedTunableNumber tFuelPumpKA = new LoggedTunableNumber("Shooter/FuelPump/Control/FF/kA", kFuelPumpControlConfig.feedforward().getKa());
-  private final LoggedTunableNumber tFuelPumpTolerance = new LoggedTunableNumber("Shooter/FuelPump/Control/Tolerance", FuelPumpConstants.kToleranceRPS);
+  // private final LoggedTunableNumber tFuelPumpTolerance = new LoggedTunableNumber("Shooter/FuelPump/Control/Tolerance", FuelPumpConstants.kToleranceRPS);
 
   public FuelPumpSS(FuelPumpIO pLeaderFuelPumpIO, FuelPumpIO pFollowerFuelPumpIO) {
     this.mLeaderFuelPumpIO = pLeaderFuelPumpIO;

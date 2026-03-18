@@ -5,8 +5,6 @@ package frc.robot.systems.drive;
 import static frc.robot.systems.drive.DriveConstants.*;
 
 import java.util.Optional;
-
-import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;

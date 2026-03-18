@@ -1,10 +1,7 @@
 package frc.robot.systems.shooter;
 
 import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -27,13 +24,13 @@ public class ShotMap {
     public record ShotMapSetpoint(double distance, Rotation2d pHoodSetpoint, Rotation2d flywheelSpeedPS) {}
 
     public ShotMapSetpoint[] setpoints = new ShotMapSetpoint[] {
-        new ShotMapSetpoint(1.25, Rotation2d.fromDegrees(7.0), Rotation2d.fromRotations(47.5)),
-        new ShotMapSetpoint(1.75, Rotation2d.fromDegrees(8.5), Rotation2d.fromRotations(49.0)),
-        new ShotMapSetpoint(2.25, Rotation2d.fromDegrees(10.5), Rotation2d.fromRotations(50.5)),
-        new ShotMapSetpoint(2.75, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(52.0)),
-        new ShotMapSetpoint(3.25, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(55.0)),
-        new ShotMapSetpoint(3.75, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(60.0)),
-        new ShotMapSetpoint(4.17, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(63.0)),
+        new ShotMapSetpoint(1.25, Rotation2d.fromDegrees(7.0), Rotation2d.fromRotations(50.0)),
+        new ShotMapSetpoint(1.75, Rotation2d.fromDegrees(8.5), Rotation2d.fromRotations(51.5)),
+        new ShotMapSetpoint(2.25, Rotation2d.fromDegrees(10.5), Rotation2d.fromRotations(53.0)),
+        new ShotMapSetpoint(2.75, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(54.5)),
+        new ShotMapSetpoint(3.25, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(57.5)),
+        new ShotMapSetpoint(3.75, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(62.5)),
+        new ShotMapSetpoint(4.17, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(65.5)),
     };
 
     public InterpolatingDoubleTreeMap distanceVelRPSMap = new InterpolatingDoubleTreeMap();

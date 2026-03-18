@@ -69,7 +69,7 @@ public class DriveManager {
     private final HeadingController mHeadingController = new HeadingController(TurnPointFeedforward.zeroTurnPointFF());
 
     private Supplier<Rotation2d> mGoalRotationSup = () -> new Rotation2d();
-    private final Debouncer mHeadingAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
+    // private final Debouncer mHeadingAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
 
     private final HolonomicController mAutoAlignController = new HolonomicController();
     private final LineController mLineAlignController = new LineController(

@@ -6,7 +6,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -18,7 +17,7 @@ import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 public class IntakeRollerIOKrakenX44 implements IntakeRollerIO{
     private final TalonFX mIntakeRollerMotor;
     private final VoltageOut mIntakeRollerVoltageControl = new VoltageOut(0.0);
-    
+
     private final StatusSignal<AngularVelocity> mIntakeRollerVelocityMPS;
     private final StatusSignal<Voltage> mIntakeRollerVoltage;
     private final StatusSignal<Current> mIntakeRollerSupplyCurrent;
@@ -83,7 +82,7 @@ public class IntakeRollerIOKrakenX44 implements IntakeRollerIO{
 
     @Override
     public void setMotorVolts(double pVolts) {
-        mIntakeRollerMotor.setControl(mIntakeRollerVoltageControl.withOutput(pVolts));
+        mIntakeRollerMotor.setControl(mIntakeRollerVoltageControl.withOutput(pVolts).withEnableFOC(true));
     }
 
     @Override

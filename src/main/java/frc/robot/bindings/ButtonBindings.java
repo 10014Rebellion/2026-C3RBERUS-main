@@ -86,12 +86,12 @@ public class ButtonBindings {
     public void initCompBindings() {
         Trigger wantToCloseShoot = mGunnerController.leftTrigger().and(kUsingPilotGunner);
         Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
-        Trigger wantToFeed = mGunnerController.povUp().and(kUsingPilotGunner);
+        Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
         Trigger wantToIntake = mPilotController.rightBumper().and(kUsingPilotGunner);
         Trigger wantToStow = mPilotController.leftBumper().and(kUsingPilotGunner);
         Trigger wantToTraverse = mPilotController.rightTrigger().and(kUsingPilotGunner);
-        Trigger wantToInitiateClimb = new Trigger(() -> false).and(kUsingPilotGunner);
-        Trigger wantToEndClimb = new Trigger(() -> false).and(kUsingPilotGunner);
+        Trigger wantToInitiateClimb = mGunnerController.povUp().and(kUsingPilotGunner);
+        Trigger wantToEndClimb = mGunnerController.povDown().and(kUsingPilotGunner);
 
         Trigger autonomousWorking = new Trigger(() -> true);
         Trigger doesRobotWantToMove = new Trigger(() -> 
