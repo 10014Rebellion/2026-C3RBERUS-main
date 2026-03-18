@@ -97,9 +97,9 @@ public class ButtonBindings {
         Trigger wantToCloseShoot = mGunnerController.leftTrigger().and(kUsingPilotGunner);
         Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
         Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
-        Trigger wantToIntake = mPilotController.rightBumper().and(kUsingPilotGunner);
-        Trigger wantToStow = mPilotController.leftBumper().and(kUsingPilotGunner);
+        Trigger wantToIntake = mPilotController.leftBumper().and(kUsingPilotGunner);
         Trigger wantToTraverse = mPilotController.rightTrigger().and(kUsingPilotGunner);
+        Trigger wantToStow = mGunnerController.rightBumper().and(kUsingPilotGunner);
         Trigger wantToInitiateClimb = mGunnerController.povUp().and(kUsingPilotGunner);
         Trigger wantToEndClimb = mGunnerController.povDown().and(kUsingPilotGunner);
 

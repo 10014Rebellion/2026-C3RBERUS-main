@@ -115,7 +115,7 @@ public class AutonCommands extends SubsystemBase {
         autoActivted
             .onTrue(firstSwipePath)
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            // .onTrue(Commands.waitSeconds(0.75).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         hasFirstSwipeEnded
@@ -139,13 +139,13 @@ public class AutonCommands extends SubsystemBase {
             mHoodSS.atGoal() &&
             mRobotDrive.getDriveManager().inHeadingTolerance())
             .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot)
-            .onTrue(mIntake.trashCompactPivotContinuous());
+            .onTrue(firstSwipeIndexShot);
+            // .onTrue(mIntake.trashCompactPivotContinuous());
 
         hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            // .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onTrue(secondSwipePath);
 
@@ -170,13 +170,13 @@ public class AutonCommands extends SubsystemBase {
             mHoodSS.atGoal() &&
             mRobotDrive.getDriveManager().inHeadingTolerance())
             .onTrue(secondSwipeIntakeShot)
-            .onTrue(secondSwipeIndexShot)
-            .onTrue(mIntake.trashCompactPivotContinuous());
+            .onTrue(secondSwipeIndexShot);
+            // .onTrue(mIntake.trashCompactPivotContinuous());
 
         hasSecondSwipeEnded.and(() -> secondSwipeIndexShot.hasEnded() && secondSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            // .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onTrue(secondSwipePath);
             
