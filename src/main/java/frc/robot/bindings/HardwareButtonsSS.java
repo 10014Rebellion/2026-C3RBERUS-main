@@ -1,5 +1,7 @@
 package frc.robot.bindings;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.hal.ConstantsJNI;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotConstants;
@@ -8,7 +10,7 @@ import frc.robot.bindings.DigitalInputButtonIO.DigitalInputButtonIOInputs;
 public class HardwareButtonsSS extends SubsystemBase{
     DigitalInputButtonIO climbButtonHardwareIO = (!RobotConstants.isSim()) ? new DigitalInputButtonLS() : new DigitalInputButtonIO() {};
 
-    DigitalInputButtonIOInputs inputs = new DigitalInputButtonIOInputs();
+    DigitalInputButtonIOInputsAutoLogged inputs = new DigitalInputButtonIOInputsAutoLogged();
 
     public HardwareButtonsSS() {
     }
@@ -16,9 +18,10 @@ public class HardwareButtonsSS extends SubsystemBase{
     @Override
     public void periodic() {
         climbButtonHardwareIO.updateInputs(inputs);
+        Logger.processInputs("HardwareButtonsSS", inputs);
     }
 
-    public DigitalInputButtonIOInputs getClimbButtonUpdateInputs() {
+    public DigitalInputButtonIOInputsAutoLogged getClimbButtonUpdateInputs() {
         return inputs;
     }
 }

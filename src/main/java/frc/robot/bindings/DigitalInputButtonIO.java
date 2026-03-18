@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public interface DigitalInputButtonIO {
     @AutoLog
     public static class DigitalInputButtonIOInputs {
-        public boolean iInput = false;
+        public boolean iPressed = false;
     }
 
     public default void updateInputs(DigitalInputButtonIOInputs pInputs) {}

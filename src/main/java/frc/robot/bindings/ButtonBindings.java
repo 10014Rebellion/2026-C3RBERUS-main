@@ -251,7 +251,7 @@ public class ButtonBindings {
 
         /* Makes flywheel stand by */
         wantToShoot.negate()
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* HOOD PROTECTION LOGIC */
@@ -411,9 +411,9 @@ public class ButtonBindings {
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN)
                 .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE)));
 
-        new Trigger(() -> !mHBSS.getClimbButtonUpdateInputs().iInput && DriverStation.isDisabled() && !DriverStation.isFMSAttached())
-            .whileTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
-            .whileFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)));
+        new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed && DriverStation.isDisabled() && !DriverStation.isFMSAttached())
+            .onTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
+            .onFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)).ignoringDisable(true));
     }
 
     public Command rumbleDriverController(){

@@ -29,6 +29,7 @@ public class FlywheelsSS extends SubsystemBase {
     BUMP_VELOCITY,
     MAX_VELOCITY,
     SHOTMAP_VELOCITY,
+    STANDBY_VELOCITY
   }
 
   private final FlywheelIO mLeaderFlywheelIO;

@@ -35,8 +35,8 @@ public class ATagVisionConstants {
     public static final Orientation kFrontLeftCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kFrontLeftCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(-3.936), // X: inches back // >>> TODO: TUNE ME
-            Units.inchesToMeters(12.747), // Y: inches left // >>> TODO: TUNE ME
+            Units.inchesToMeters(-4.4), // X: inches back // >>> TODO: TUNE ME
+            Units.inchesToMeters(12.6), // Y: inches left // >>> TODO: TUNE ME
             Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
@@ -51,8 +51,8 @@ public class ATagVisionConstants {
     public static final Orientation kFrontRightCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kFrontRightCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(-3.936), // X: inches back // >>> TODO: TUNE ME
-            Units.inchesToMeters(-12.747), // Y: inches right // >>> TODO: TUNE ME
+            Units.inchesToMeters(-4.3), // X: inches back // >>> TODO: TUNE ME
+            Units.inchesToMeters(-12.6), // Y: inches right // >>> TODO: TUNE ME
             Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
@@ -67,8 +67,8 @@ public class ATagVisionConstants {
     public static final Orientation kBackLeftCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kBackLeftCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(-7.5), // X: inches back // >>> TODO: TUNE ME
-            Units.inchesToMeters(15), // Y: inches left // >>> TODO: TUNE ME
+            Units.inchesToMeters(-9.1), // X: inches back // >>> TODO: TUNE ME
+            Units.inchesToMeters(14.1), // Y: inches left // >>> TODO: TUNE ME
             Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
@@ -83,8 +83,8 @@ public class ATagVisionConstants {
     public static final Orientation kBackRightCamOrientation = Orientation.FRONT; // >>> TODO: TUNE ME
     public static final Transform3d kBackRightCamTransform = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(-7.5), // Y: inches right // >>> TODO: TUNE ME
-            Units.inchesToMeters(-15), // Y: inches right // >>> TODO: TUNE ME
+            Units.inchesToMeters(-9.4), // Y: inches right // >>> TODO: TUNE ME
+            Units.inchesToMeters(-14.1), // Y: inches right // >>> TODO: TUNE ME
             Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(

@@ -8,6 +8,6 @@ public class DigitalInputButtonLS implements DigitalInputButtonIO {
     
     @Override
     public void updateInputs(DigitalInputButtonIOInputs pInputs) {
-        pInputs.iInput = mClimbNeutralModeButton.get();
+        pInputs.iPressed = mClimbNeutralModeButton.get();
     }
 }

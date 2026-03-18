@@ -38,7 +38,7 @@ public class FlywheelConstants {
         1,
         InvertedValue.CounterClockwise_Positive,
         NeutralModeValue.Coast,
-        new CurrentLimits(80, 80)
+        new CurrentLimits(40, 80)
     );
 
     public static final FollowerMotorHardware kFlywheelFollowerConfig = new FollowerMotorHardware(
@@ -61,11 +61,13 @@ public class FlywheelConstants {
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/Flywheels/SetpointsVoltage/TuneVoltage", 0.0);
     public static final LoggedTunableNumber tMaxVoltage = new LoggedTunableNumber("Shooter/Flywheels/SetpointsVoltage/MaxVoltage", 0.0);
     public static final LoggedTunableNumber tTuningVelocity = new LoggedTunableNumber("Shooter/Flywheels/TuneVelocityRPS", 0.0);
-    public static final LoggedTunableNumber tFeedVelocity = new LoggedTunableNumber("Shooter/Flywheels/FeedVelocity", 0.0);
+    public static final LoggedTunableNumber tFeedVelocity = new LoggedTunableNumber("Shooter/Flywheels/FeedVelocity", 60.0);
     public static final LoggedTunableNumber tCloseVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/CloseVelocity", 47.5);
     public static final LoggedTunableNumber tTowerVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/TowerVelocity", 57.5);
     public static final LoggedTunableNumber tBumpVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/BumpVelocity", 0.0);
     public static final LoggedTunableNumber tMaxVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointsRPS/MaxVelocity", 0.0);
+    public static final LoggedTunableNumber tStandbyVelocity = new LoggedTunableNumber("Shooter/Flywheels/SetpointRPS/StandbyVelocity", 17.5);
+
 
     static {
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.STANDBY_VOLTAGE, tStandbyVoltage);
@@ -77,5 +79,6 @@ public class FlywheelConstants {
         kFlywheelSetpointToVelocity.put(FlywheelStates.TOWER_VELOCITY, () -> Rotation2d.fromRotations(tTowerVelocity.get()));
         kFlywheelSetpointToVelocity.put(FlywheelStates.BUMP_VELOCITY, () -> Rotation2d.fromRotations(tBumpVelocity.get()));
         kFlywheelSetpointToVelocity.put(FlywheelStates.MAX_VELOCITY, () -> Rotation2d.fromRotations(tMaxVelocity.get()));
+        kFlywheelSetpointToVelocity.put(FlywheelStates.STANDBY_VELOCITY, () -> Rotation2d.fromRotations(tStandbyVelocity.get()));
     }
 }

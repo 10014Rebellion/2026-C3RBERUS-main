@@ -103,13 +103,13 @@ public class AutonCommands extends SubsystemBase {
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(Commands.waitSeconds(0.1).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
+            // .onTrue(Commands.waitSeconds(0.75).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
             .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
         shootingRange
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         autoActivted

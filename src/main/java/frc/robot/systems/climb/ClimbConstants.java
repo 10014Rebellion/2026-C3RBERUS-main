@@ -23,8 +23,8 @@ public class ClimbConstants {
 
     public static final LoggedTunableNumber kClimbUp = new LoggedTunableNumber("Climb/UpVoltage", 5.0);
     public static final LoggedTunableNumber kClimbDown = new LoggedTunableNumber("Climb/DownVoltage", -5.0);
-    public static final LoggedTunableNumber kClimbStay = new LoggedTunableNumber("Climb/StayVoltage", 0.5);
-        public static final LoggedTunableNumber kClimbStayRobot = new LoggedTunableNumber("Climb/StayRobotVoltage", 0.5);
+    public static final LoggedTunableNumber kClimbStay = new LoggedTunableNumber("Climb/StayVoltage", 0.0);
+        public static final LoggedTunableNumber kClimbStayRobot = new LoggedTunableNumber("Climb/StayRobotVoltage", 0.0);
     public static final LoggedTunableNumber kClimbIdle = new LoggedTunableNumber("Climb/IdleVoltage", 0.0);
 
     public static final HashMap<ClimbState, LoggedTunableNumber> kStateToVoltage = new HashMap<>();
@@ -43,7 +43,7 @@ public class ClimbConstants {
         60, // Motor ID // TODO: TUNE ME!
         RobotConstants.kSubsystemsCANBus, 
         16.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
-        InvertedValue.Clockwise_Positive,
+        InvertedValue.CounterClockwise_Positive,
         NeutralModeValue.Brake,
         new CurrentLimits(30, 40)
     );
