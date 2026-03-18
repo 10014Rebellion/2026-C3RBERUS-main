@@ -57,7 +57,7 @@ public class TransitionTracker {
     updateState(GameState.TRANSITION);
   }
 
-  public void periodic() {
+  public static void periodic() {
     if (mCurrentState == GameState.STANDBY) return;
 
     double matchTimeLeft = Timer.getMatchTime();

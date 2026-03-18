@@ -69,6 +69,7 @@ public class GameGoalPoseChooser {
     }
 
     public static Pose2d getHub() {
+        Logger.recordOutput("GamePoses/HubPose", AllianceFlipUtil.apply(FieldConstants.kHubPose));
         return AllianceFlipUtil.apply(FieldConstants.kHubPose);
     }
 
