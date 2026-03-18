@@ -86,7 +86,8 @@ public class IntakePivotSS extends SubsystemBase {
         switch (mCurrentIntakeState) {
             case STOPPED -> {
             } case TUNING_VOLTAGE -> {
-            } case TUNING_AMPS, COMPACT_AMPS -> {
+            } case COMPACT_AMPS -> {
+                mIntakePivotIO.setMotorAmps(IntakeConstants.PivotConstants.tConstantCompactAmps.get() * mIntakeInputs.iIntakePivotRotation.getCos());
             } case STOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
                 mIntakePivotIO.resetPPID();
             } case INVALID -> {}
