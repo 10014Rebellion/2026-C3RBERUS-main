@@ -72,6 +72,16 @@ public class GameGoalPoseChooser {
         return AllianceFlipUtil.apply(FieldConstants.kHubPose);
     }
 
+    public static Pose2d closestClimbPose(Pose2d robotPose){
+        if(
+            FieldConstants.kClimbLeftPose.getTranslation().getDistance(robotPose.getTranslation()) < 
+            FieldConstants.kClimbRightPose.getTranslation().getDistance(robotPose.getTranslation())){
+            return AllianceFlipUtil.apply(FieldConstants.kClimbLeftPose);
+        } 
+        
+        return AllianceFlipUtil.apply(FieldConstants.kClimbRightPose);
+    }
+
     /* Utils function */
     public static boolean onLeftOrRightY(Pose2d robotPose) {
         return 
