@@ -64,6 +64,8 @@ public class ButtonBindings {
     DriveState prevDriveState = DriveState.TELEOP;
     HeadingTraversalState mHeadingTraversalState = HeadingTraversalState.NONE;
 
+    private final HardwareButtonsSS mHBSS = new HardwareButtonsSS();
+
     private boolean inCenterFlag = false;
 
     public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, ClimbSS pClimbSS) {
@@ -409,8 +411,8 @@ public class ButtonBindings {
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN)
                 .alongWith(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE)));
 
-        new Trigger(() -> mClimbNeutralModeButton.get() && DriverStation.isDisabled() && !DriverStation.isFMSAttached())
-            .whileTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)))
+        new Trigger(() -> !mHBSS.getClimbButtonUpdateInputs().iInput && DriverStation.isDisabled() && !DriverStation.isFMSAttached())
+            .whileTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
             .whileFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)));
     }
 
