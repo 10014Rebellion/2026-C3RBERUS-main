@@ -69,6 +69,7 @@ public class IntakeRollerIOKrakenX44 implements IntakeRollerIO{
             mIntakeRollerAccelerationMPSS, 
             mIntakeRollerVoltage,
             mIntakeRollerSupplyCurrent,
+            mIntakeRollerStatorCurrent,
             mIntakeRollerTempCelsius);
     }
 
