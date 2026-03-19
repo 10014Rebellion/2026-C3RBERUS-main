@@ -36,6 +36,7 @@ import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVision.VisionObservation;
+import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.SpeedErrorController;
 import frc.robot.systems.drive.gyro.GyroIO;
 import frc.robot.systems.drive.gyro.GyroInputsAutoLogged;
@@ -92,7 +93,7 @@ public class Drive extends SubsystemBase {
     SwerveModulePosition[] moduleDeltasHighF = SwerveHelper.zeroPositions();
     ChassisSpeeds mRotationSpeed = new ChassisSpeeds(0.0, 0.0, 0.0);
 
-    private final boolean kUseGenerator = true;
+    private boolean kUseGenerator = true;
     private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
 
     private DriveManager mDriveManager;
@@ -279,6 +280,9 @@ public class Drive extends SubsystemBase {
         SwerveModuleState[] moduleTorques = SwerveHelper.zeroStates();
 
         mDefaultFF = mPreviousSetpoint.feedforwards();
+        
+        kUseGenerator = !mDriveManager.getDriveState().equals(DriveState.AUTON);
+
         // Telemetry.log("Drive/Odometry/generatedFieldSpeeds",
         // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
         for (int i = 0; i < 4; i++) {

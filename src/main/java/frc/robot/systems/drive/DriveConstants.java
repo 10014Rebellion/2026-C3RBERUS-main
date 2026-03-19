@@ -47,7 +47,7 @@ public class DriveConstants {
     public static final PathConstraints kAutoConstraints = new PathConstraints(
             kMaxLinearSpeedMPS, kMaxLinearAccelerationMPSS, kMaxRotationSpeedRadiansPS, kMaxRotationAccelRadiansPS);
 
-    public static final PIDConstants kPPTranslationPID = new PIDConstants(1.5, 0.0, 0.0); // TODO: TUNE ME
+    public static final PIDConstants kPPTranslationPID = new PIDConstants(3.75, 0.0, 0.0); // TODO: TUNE ME
     public static final PIDConstants kPPRotationPID = new PIDConstants(3.0, 0.0, 0.0); // TODO: TUNE ME
 
     /* DRIVEBASE TUNING / ODOMETRY / MISC*/
@@ -76,7 +76,7 @@ public class DriveConstants {
     public static final double kCANCoderToMechanismRatio = 1;
     public static final double kAzimuthMotorGearing = 25.464 / 1.0;
     public static final double kDriveMotorGearing = 5.50 / 1.0;
-    public static final double kWheelRadiusMeters = Units.inchesToMeters(1.4175);
+    public static final double kWheelRadiusMeters = Units.inchesToMeters((1.4175 + 1.5) / 2.0);
     public static final double kWheelCircumferenceMeters = 2 * Math.PI * kWheelRadiusMeters;
     public static final double kWheelInertia = 125.0 / 4.0;
 
@@ -97,7 +97,7 @@ public class DriveConstants {
     public static final ModuleControlConfig kModuleControllerConfigs = !RobotConstants.isSim()
         // kV is generally 0 for FOC control, so double check in ModuleIOKraken to see whether kV should be applied
         ? new ModuleControlConfig(
-            new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(4.0, 0.0, 1.0), // DRIVE // TODO: TUNE ME
+            new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(2.0, 0.0, 1.0), // DRIVE // TODO: TUNE ME
             new PIDController(7.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
         : new ModuleControlConfig(
             new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 3.0, 0.005),

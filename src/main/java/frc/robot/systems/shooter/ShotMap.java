@@ -20,13 +20,13 @@ public class ShotMap {
 
     private Supplier<Pose2d> robotPose = () -> new Pose2d();
     public double offsetM = 0.0;
-    public double velocityRPSOffset = 0.75;
+    public double velocityRPSOffset = 0.0;
 
     public record ShotMapSetpoint(double distance, Rotation2d pHoodSetpoint, Rotation2d flywheelSpeedPS) {}
 
     public ShotMapSetpoint[] setpoints = new ShotMapSetpoint[] {
         new ShotMapSetpoint(1.25, Rotation2d.fromDegrees(7.0), Rotation2d.fromRotations(50.0 + velocityRPSOffset)),
-        new ShotMapSetpoint(1.75, Rotation2d.fromDegrees(8.5), Rotation2d.fromRotations(51.5 +  + velocityRPSOffset)),
+        new ShotMapSetpoint(1.75, Rotation2d.fromDegrees(8.5), Rotation2d.fromRotations(51.5 + velocityRPSOffset)),
         new ShotMapSetpoint(2.25, Rotation2d.fromDegrees(10.5), Rotation2d.fromRotations(53.0 + velocityRPSOffset)),
         new ShotMapSetpoint(2.75, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(54.5 + velocityRPSOffset)),
         new ShotMapSetpoint(3.25, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(57.5 + velocityRPSOffset)),
