@@ -491,4 +491,10 @@ public class Drive extends SubsystemBase {
                 (getRobotChassisSpeeds().vyMetersPerSecond < 0.05) &&
                 (Math.toDegrees(getRobotChassisSpeeds().omegaRadiansPerSecond) < 1.0);
     }
+
+    public ChassisSpeeds getRobotChassisSpeedsFieldRelative() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(
+            getRobotChassisSpeeds(), 
+            mPoseEstimator.getEstimatedPosition().getRotation());
+    }
 }

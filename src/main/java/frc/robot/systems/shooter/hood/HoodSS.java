@@ -1,5 +1,7 @@
 package frc.robot.systems.shooter.hood;
 
+import java.util.Objects;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -11,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.shooter.ShotCalculator;
 import frc.robot.systems.shooter.ShotMap;
 
 public class HoodSS extends SubsystemBase {
@@ -117,7 +120,7 @@ public class HoodSS extends SubsystemBase {
                 } case HOLD_POSITION -> {
                     setHoodPosition(mLatestClosedLoopGoalRot);
                 } case SHOTMAP_POSITION -> {
-                    setHoodPosition(ShotMap.getInstance().getHoodAngle());
+                    setHoodPosition(Objects.requireNonNullElse(ShotCalculator.getInstance().getParameters().hoodAngleRad(), ShotMap.getInstance().getHoodAngle()));
                 }
             }
         }

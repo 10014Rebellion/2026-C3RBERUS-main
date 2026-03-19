@@ -2,6 +2,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -9,7 +10,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.PhoenixUtil;
 import frc.robot.RobotConstants.DashboardConstants;
 import frc.robot.game.TransitionTracker;
-// import frc.robot.systems.shooter.ShotCalculator;
+import frc.robot.systems.shooter.ShotCalculator;
+import java.util.Optional;
 
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -40,15 +42,22 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         PhoenixUtil.refreshAll();
-        // ShotCalculator.getInstance().clearShootingParameters();
+
+        ShotCalculator.getInstance().clearShootingParameters();
+
+        ShotCalculator.getInstance().computeParameters(
+            mRobotContainer.getDrivetrain().getPoseEstimate(), 
+            mRobotContainer.getDrivetrain().getRobotChassisSpeeds(),
+            mRobotContainer.getDrivetrain().getRobotChassisSpeedsFieldRelative()
+        );
+
         CommandScheduler.getInstance().run();
+
         TransitionTracker.periodic();
+
         Logger.recordOutput("GameStates/TELEOPERATED TIME", mTracker.getTeleopTimeLeft());
         Logger.recordOutput("GameStates/PHASE TIME", mTracker.getTimeLeftInPhase());
         Logger.recordOutput("GameStates/AUTONOMOUS TIME", mTracker.getAutonTimeLeft());
-
-
-
     }
 
     @Override
@@ -59,7 +68,9 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void disabledPeriodic() {}
+    public void disabledPeriodic() {
+        mRobotContainer.getDrivetrain().runSwerve(Optional.of(new ChassisSpeeds()));
+    }
 
     @Override
     public void autonomousInit() {

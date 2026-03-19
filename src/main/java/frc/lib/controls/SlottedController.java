@@ -50,7 +50,6 @@ public class SlottedController {
 
     }
 
-    @SuppressWarnings("unchecked")
     public <T> void setSlot(int slot, T controller) {
         switch (mMechanism) {
             case SIMPLE -> mSimpleControllers[slot] = (SimpleController) controller;

@@ -1,4 +1,5 @@
 package frc.robot.bindings;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -6,36 +7,25 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
-import frc.robot.game.FieldConstants;
 import frc.robot.game.GameGoalPoseChooser;
-import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
-import frc.robot.systems.drive.controllers.ManualTeleopController;
-import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
+import frc.robot.systems.shooter.ShotCalculator;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
@@ -228,18 +218,15 @@ public class ButtonBindings {
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
 
-        
-            
-
         wantToDynamicShoot.and(autonomousWorking)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
+                () -> Objects.requireNonNullElse(ShotCalculator.getInstance().getParameters().desiredRobotHeadingField(), GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate())), 
                 () -> GameGoalPoseChooser.getHub()))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToDynamicShoot.and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
+                () -> Objects.requireNonNullElse(ShotCalculator.getInstance().getParameters().desiredRobotHeadingField(), GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate())), 
                 () -> GameGoalPoseChooser.getHub()));
 
         // If at goal, shoot it in
@@ -291,10 +278,10 @@ public class ButtonBindings {
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* HOOD PROTECTION LOGIC */
-        inSuperNoHoodZone.or(inNoHoodZone.and(isRobotMoving))
-            .onTrue(Commands.runOnce(() -> prevHoodState = mHoodSS.getHoodState())
-                .andThen(mHoodSS.setStateCmd(HoodStates.MIN)))
-            .onFalse(mHoodSS.setStateCmd(prevHoodState));
+        // inSuperNoHoodZone.or(inNoHoodZone.and(isRobotMoving))
+        //     .onTrue(Commands.runOnce(() -> prevHoodState = mHoodSS.getHoodState())
+        //         .andThen(mHoodSS.setStateCmd(HoodStates.MIN)))
+        //     .onFalse(mHoodSS.setStateCmd(prevHoodState));
 
         /* INTAKE LOGIC */
         wantToIntake
