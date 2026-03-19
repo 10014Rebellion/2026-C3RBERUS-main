@@ -134,18 +134,23 @@ public class AutonCommands extends SubsystemBase {
                 mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
                 mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
 
-        hasFirstSwipeEnded.and(() -> wantToShoot).and(() -> 
+        Trigger hasFirstShotEnded = auto.loggedCondition(
+            firstSwipe+"/FirstShotEnded", 
+            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
+            true);
+
+        hasFirstSwipeEnded.and(() -> wantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
             mFlywheelsSS.atLatestClosedLoopGoal() && 
             mHoodSS.atGoal() &&
             mRobotDrive.getDriveManager().inHeadingTolerance())
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
-            .onTrue(mIntake.trashCompactPivotContinuous());
+            .onTrue(mIntake.trashCompactPivotRepeat());
 
         hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            // .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onTrue(secondSwipePath);
 
@@ -165,18 +170,23 @@ public class AutonCommands extends SubsystemBase {
                 mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
                 mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
 
+        Trigger hasSecondShotEnded = auto.loggedCondition(
+            secondSwipe+"/SecondShotEnded", 
+            () -> secondSwipeIntakeShot.hasEnded() && secondSwipeIndexShot.hasEnded(),
+            true);
+
         hasSecondSwipeEnded.and(() -> wantToShoot).and(() -> 
             mFlywheelsSS.atLatestClosedLoopGoal() && 
             mHoodSS.atGoal() &&
             mRobotDrive.getDriveManager().inHeadingTolerance())
             .onTrue(secondSwipeIntakeShot)
-            .onTrue(secondSwipeIndexShot);
-            // .onTrue(mIntake.trashCompactPivotContinuous());
+            .onTrue(secondSwipeIndexShot)
+            .onTrue(mIntake.trashCompactPivotRepeat());
 
         hasSecondSwipeEnded.and(() -> secondSwipeIndexShot.hasEnded() && secondSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            // .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onTrue(secondSwipePath);
             

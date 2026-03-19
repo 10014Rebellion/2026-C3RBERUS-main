@@ -5,6 +5,7 @@ package frc.robot.systems.drive;
 import static frc.robot.systems.drive.DriveConstants.*;
 
 import java.util.Optional;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -58,6 +59,7 @@ public class Drive extends SubsystemBase {
 
     @AutoLogOutput(key = "Drive/Odometry/AccountForSkidding")
     private boolean mHasSkidded = false;
+    private double mSkidRatio = 0.0;
     private double mSkidFactor = 0.0;
     private double mGyroFactor = 1.0;
     private double mTiltFactor = 1.0;
@@ -196,9 +198,12 @@ public class Drive extends SubsystemBase {
             mPoseEstimator.updateWithTime(mModules[0].getOdometryTimeStamps()[i], mRobotRotation, modulePositionsHighF);
         }
 
-        mHasSkidded = SwerveHelper.skidRatio(
+
+        mSkidRatio = SwerveHelper.skidRatio(
             getRobotChassisSpeeds(), 
-            mRotationSpeed) > kSkidRatioCap;
+            mRotationSpeed);
+
+        mHasSkidded = mSkidRatio > kSkidRatioCap;
 
         mSkidFactor = (mSkidFactorDebouncer.calculate(mHasSkidded)) 
             ? kSkidScalar 
@@ -231,6 +236,7 @@ public class Drive extends SubsystemBase {
         /* For logging purposes */
         mOdometry.update(mRobotRotation, getModulePositionsHighF());
         mField.setRobotPose(getPoseEstimate());
+        Logger.recordOutput("Drive/Odometry/SkidRatio", mSkidRatio);
         Logger.recordOutput("Drive/Odometry/SkidFactor", mSkidFactor);
         Logger.recordOutput("Drive/Odometry/SkidCount", mHasSkidded);
         Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
@@ -356,6 +362,13 @@ public class Drive extends SubsystemBase {
                 driveAmps, 
                 tDriveFFAggressiveness.get());
         }
+
+        if(!(
+            mDriveManager.getDriveState().equals(DriveManager.DriveState.AUTON)
+                ||
+            mDriveManager.getDriveState().equals(DriveManager.DriveState.AUTO_ALIGN))) {
+                driveAmps *= 0.0;
+            }
 
         mPrevDriveAmps[i] = driveAmps;
         return driveAmps;

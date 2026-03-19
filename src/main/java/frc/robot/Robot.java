@@ -49,7 +49,11 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void disabledInit() {}
+    public void disabledInit() {
+        if (mAutonomousCommand != null) {
+            mAutonomousCommand.cancel();
+        }
+    }
 
     @Override
     public void disabledPeriodic() {}
