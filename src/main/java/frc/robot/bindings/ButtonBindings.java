@@ -97,7 +97,7 @@ public class ButtonBindings {
     }
 
     public void initCompBindings() {
-        boolean isEli = true;
+        boolean isEli = false;
         Trigger wantToCloseShoot = mGunnerController.leftTrigger().and(kUsingPilotGunner);
         Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
         Trigger wantToIntake = (isEli ? mPilotController.leftBumper() : mPilotController.rightBumper()).or(mGunnerController.rightBumper()).and(kUsingPilotGunner);
@@ -443,9 +443,10 @@ public class ButtonBindings {
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
 
-        new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed && DriverStation.isDisabled() && !DriverStation.isFMSAttached())
-            .onTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
-            .onFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)).ignoringDisable(true));
+        Trigger climbButton = new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed);
+        climbButton.and(() -> DriverStation.isDisabled() && !DriverStation.isFMSAttached())
+            .onFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
+            .onTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)).ignoringDisable(true));
     }
 
     public Command rumbleDriverController(){

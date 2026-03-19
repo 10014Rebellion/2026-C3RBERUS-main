@@ -36,8 +36,8 @@ public class ClimbConstants {
         kStateToVoltage.put(ClimbState.IDLE, kClimbIdle);
     }
 
-    public static final double kClimbHeight = 1.0;
-    public static final double kClimbedHeight = 0.1;
+    public static final double kClimbHeight = 2.4;//changes values to fix encoder readings: Arya
+    public static final double kClimbedHeight = 1.14; //changed values to fix encoder readings: Arya
     
     public static final BasicMotorHardware kClimbMotorConstants = new BasicMotorHardware(
         60, // Motor ID // TODO: TUNE ME!
@@ -50,7 +50,7 @@ public class ClimbConstants {
     
     public static final PositionSoftLimits kSoftLimits = new PositionSoftLimits(
         0.00, 
-        2.583
+        2.7
     );
 
     public static final SimulatedElevator kSimElevator = new SimulatedElevator(
