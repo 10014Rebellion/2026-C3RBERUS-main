@@ -62,6 +62,7 @@ public class FlywheelConstants {
     public static final LoggedTunableNumber tMaxVoltage = new LoggedTunableNumber("Shooter/Flywheel/SetpointsVoltage/MaxVoltage", 0.0);
     public static final LoggedTunableNumber tTuningVelocity = new LoggedTunableNumber("Shooter/Flywheel/TuneVelocityRPS", 0.0);
     public static final LoggedTunableNumber tFeedVelocity = new LoggedTunableNumber("Shooter/Flywheel/FeedVelocity", 60.0);
+    public static final LoggedTunableNumber tOpponentFeedVelocity = new LoggedTunableNumber("Shooter/Flywheel/OpponentFeedVelocity", 110.0);
     public static final LoggedTunableNumber tCloseVelocity = new LoggedTunableNumber("Shooter/Flywheel/SetpointRPS/CloseVelocity", 47.5);
     public static final LoggedTunableNumber tTowerVelocity = new LoggedTunableNumber("Shooter/Flywheel/SetpointRPS/TowerVelocity", 57.5);
     public static final LoggedTunableNumber tBumpVelocity = new LoggedTunableNumber("Shooter/Flywheel/SetpointRPS/BumpVelocity", 0.0);
@@ -75,6 +76,7 @@ public class FlywheelConstants {
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.MAX_VOLTAGE, tMaxVoltage);
         kFlywheelSetpointToVelocity.put(FlywheelStates.TUNING_VELOCITY, () -> Rotation2d.fromRotations(tTuningVelocity.get()));
         kFlywheelSetpointToVelocity.put(FlywheelStates.FEED_VELOCITY, () -> Rotation2d.fromRotations(tFeedVelocity.get()));
+        kFlywheelSetpointToVelocity.put(FlywheelStates.OPPONENT_FEED_VELOCITY, () -> Rotation2d.fromRotations(tOpponentFeedVelocity.get()));
         kFlywheelSetpointToVelocity.put(FlywheelStates.CLOSE_VELOCITY, () -> Rotation2d.fromRotations(tCloseVelocity.get()));
         kFlywheelSetpointToVelocity.put(FlywheelStates.TOWER_VELOCITY, () -> Rotation2d.fromRotations(tTowerVelocity.get()));
         kFlywheelSetpointToVelocity.put(FlywheelStates.BUMP_VELOCITY, () -> Rotation2d.fromRotations(tBumpVelocity.get()));

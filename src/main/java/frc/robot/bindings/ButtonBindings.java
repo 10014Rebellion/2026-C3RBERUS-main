@@ -98,18 +98,18 @@ public class ButtonBindings {
 
     public void initCompBindings() {
         boolean isEli = false;
-        Trigger wantToCloseShoot = mGunnerController.leftTrigger().and(kUsingPilotGunner);
+        Trigger wantToOuttake = mGunnerController.leftTrigger().and(kUsingPilotGunner);
         Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
         Trigger wantToIntake = (isEli ? mPilotController.leftBumper() : mPilotController.rightBumper()).or(mGunnerController.rightBumper()).and(kUsingPilotGunner);
         Trigger wantToTraverse = mPilotController.rightTrigger().and(kUsingPilotGunner);
         Trigger wantToSafeStow = (isEli ? mPilotController.rightBumper() : mPilotController.leftBumper()).or(mGunnerController.leftBumper()).and(kUsingPilotGunner);
         Trigger wantToLineAlignToBump = mPilotController.b();
         Trigger wantToLineAlignToTrench = mPilotController.y();
-        Trigger wantToStow = new Trigger(() -> false);
-
+        Trigger wantToOpponentFeed = mGunnerController.a();
         Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
         Trigger wantToInitiateClimb = mGunnerController.povUp().and(kUsingPilotGunner);
         Trigger wantToEndClimb = mGunnerController.povDown().and(kUsingPilotGunner);
+        Trigger wantToStow = new Trigger(() -> false);
 
         Trigger autonomousWorking = new Trigger(() -> true);
         Trigger doesRobotWantToMove = new Trigger(() -> 
@@ -153,9 +153,7 @@ public class ButtonBindings {
             return 
                 wantToFeed.getAsBoolean()
                     ||
-                wantToDynamicShoot.getAsBoolean()
-                    ||
-                wantToCloseShoot.getAsBoolean();
+                wantToDynamicShoot.getAsBoolean();
         });
 
         final double kShootingReadyDebounceSeconds = 0.25;
@@ -176,15 +174,15 @@ public class ButtonBindings {
             .onTrue(mDriveSS.getDriveManager().setToTeleop());
 
         /* AUTO ALIGNS TO HUB AND SHOOTS */
-        wantToCloseShoot
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT));
+        // wantToCloseShoot
+        //     .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
+        //     .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT));
 
-        wantToCloseShoot.and(autonomousWorking)
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> GameGoalPoseChooser.getCloseShotPose(), 
-                ConstraintType.LINEAR))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // wantToCloseShoot.and(autonomousWorking)
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+        //         () -> GameGoalPoseChooser.getCloseShotPose(), 
+        //         ConstraintType.LINEAR))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToLineAlignToTrench.and(autonomousWorking)
             .onTrue(
@@ -208,26 +206,29 @@ public class ButtonBindings {
             )
         .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        wantToCloseShoot.and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> GameGoalPoseChooser.getCloseShotPose(), 
-                ConstraintType.LINEAR));
+        // wantToCloseShoot.and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+        //         () -> GameGoalPoseChooser.getCloseShotPose(), 
+        //         ConstraintType.LINEAR));
 
-        wantToCloseShoot.and(shooterAtGoal.and(atPositionalGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+        // wantToCloseShoot.and(shooterAtGoal.and(atPositionalGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
+        //     .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
+        //     .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+        //     .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
-        wantToCloseShoot
-            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));;
+        // wantToCloseShoot
+        //     .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+        //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+        //     .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+        //     .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* SHOOTS FROM ANYWHERE IN OUR FLYWHEEL RANGE */
         wantToDynamicShoot
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+
+        
+            
 
         wantToDynamicShoot.and(autonomousWorking)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
@@ -257,23 +258,27 @@ public class ButtonBindings {
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
-        wantToFeed.and(autonomousWorking)
+        wantToOpponentFeed
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.OPPONENT_FEED_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
+
+        wantToFeed.or(wantToOpponentFeed).and(autonomousWorking)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                 () -> AllianceFlipUtil.apply(Rotation2d.k180deg), 
                 TurnPointFeedforward.zeroTurnPointFF()))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        wantToFeed.and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
+        wantToFeed.or(wantToOpponentFeed).and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
             // .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
-        wantToFeed.and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
+        wantToFeed.or(wantToOpponentFeed).and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                 () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
                 () -> GameGoalPoseChooser.getHub()));
 
-        wantToFeed
+        wantToFeed.or(wantToOpponentFeed)
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
@@ -294,6 +299,11 @@ public class ButtonBindings {
         wantToIntake
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        wantToOuttake
+            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         wantToSafeStow

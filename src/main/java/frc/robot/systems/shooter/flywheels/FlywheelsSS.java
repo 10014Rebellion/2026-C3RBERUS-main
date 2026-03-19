@@ -24,6 +24,7 @@ public class FlywheelsSS extends SubsystemBase {
     MAX_VOLTAGE,
     TUNING_VELOCITY,
     FEED_VELOCITY,
+    OPPONENT_FEED_VELOCITY,
     CLOSE_VELOCITY,
     TOWER_VELOCITY,
     BUMP_VELOCITY,

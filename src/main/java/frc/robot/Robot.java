@@ -10,6 +10,8 @@ import frc.robot.RobotConstants.DashboardConstants;
 import frc.robot.game.TransitionTracker;
 // import frc.robot.systems.shooter.ShotCalculator;
 
+import javax.xml.transform.TransformerConfigurationException;
+
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -22,12 +24,14 @@ import com.ctre.phoenix6.SignalLogger;
 public class Robot extends LoggedRobot {
     private Command mAutonomousCommand;
     private RobotContainer mRobotContainer;
+    private TransitionTracker mTracker;
 
     public Robot() {
         beginAKLogger();
-
+        
         startWebServers();
-
+        
+        mTracker = new TransitionTracker();
         mRobotContainer = new RobotContainer();
     }
 
@@ -36,6 +40,12 @@ public class Robot extends LoggedRobot {
         // ShotCalculator.getInstance().clearShootingParameters();
         CommandScheduler.getInstance().run();
         TransitionTracker.periodic();
+        Logger.recordOutput("GameStates/TELEOPERATED TIME", mTracker.getTeleopTimeLeft());
+        Logger.recordOutput("GameStates/PHASE TIME", mTracker.getTimeLeftInPhase());
+        Logger.recordOutput("GameStates/AUTONOMOUS TIME", mTracker.getAutonTimeLeft());
+
+
+
     }
 
     @Override
@@ -63,7 +73,7 @@ public class Robot extends LoggedRobot {
             mAutonomousCommand.cancel();
         }
         TransitionTracker.teleopInit();
-
+        mRobotContainer.getDrivetrain().getDriveManager().setToTeleop();
         CommandScheduler.getInstance().schedule(mRobotContainer.getDriverProfileCommand());
     }
 

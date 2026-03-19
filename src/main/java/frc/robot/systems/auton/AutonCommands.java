@@ -103,7 +103,7 @@ public class AutonCommands extends SubsystemBase {
 
         intakingRange
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            // .onTrue(Commands.waitSeconds(0.75).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
+            .onTrue(Commands.waitSeconds(0.75).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
             .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
 
         shootingRange
@@ -115,7 +115,7 @@ public class AutonCommands extends SubsystemBase {
         autoActivted
             .onTrue(firstSwipePath)
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            // .onTrue(Commands.waitSeconds(0.75).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
+            .onTrue(Commands.waitSeconds(0.75).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
             .onTrue(Commands.runOnce(() -> wantToShoot = false));
 
         hasFirstSwipeEnded
@@ -139,8 +139,8 @@ public class AutonCommands extends SubsystemBase {
             mHoodSS.atGoal() &&
             mRobotDrive.getDriveManager().inHeadingTolerance())
             .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot);
-            // .onTrue(mIntake.trashCompactPivotContinuous());
+            .onTrue(firstSwipeIndexShot)
+            .onTrue(mIntake.trashCompactPivotContinuous());
 
         hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
