@@ -16,7 +16,7 @@ public interface FuelPumpIO {
       public double iFuelPumpSupplyCurrentAmps = 0.0;
       public double iFuelPumpStatorCurrentAmps = 0.0;
       public double iFuelPumpTempCelsius = 0.0;
-      public double iFuelPumpVelocityGoal = 0.0;
+      public Rotation2d iFuelPumpVelocityGoal = Rotation2d.kZero;
     }
 
     public default void setPDConstants(int pSlot, double pKP, double pKD) {}
@@ -27,7 +27,7 @@ public interface FuelPumpIO {
 
     public default void updateInputs(FuelPumpInputs pInputs) {}
 
-    public default void setMotorVelocity(double pVelocityRPS, double pFeedforward) {}
+    public default void setMotorVelocity(Rotation2d pVelocityRPS, double pFeedforward) {}
 
     public default void setMotorVolts(double pVolts) {}
 

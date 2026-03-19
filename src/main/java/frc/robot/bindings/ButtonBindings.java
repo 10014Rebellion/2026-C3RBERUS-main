@@ -97,6 +97,7 @@ public class ButtonBindings {
     }
 
     public void initCompBindings() {
+        boolean closedLoopFuelPump = true;
         boolean isEli = false;
         Trigger wantToOuttake = mGunnerController.leftTrigger().and(kUsingPilotGunner);
         Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
@@ -243,7 +244,7 @@ public class ButtonBindings {
 
         // If at goal, shoot it in
         wantToDynamicShoot.and(shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
+            .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
@@ -269,7 +270,7 @@ public class ButtonBindings {
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToFeed.or(wantToOpponentFeed).and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
+            .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
             // .onTrue(mIntakeSS.trashCompactPivotRepeat());
 

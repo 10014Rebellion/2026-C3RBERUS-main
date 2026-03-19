@@ -2,6 +2,8 @@ package frc.robot.systems.shooter.fuelpump;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -17,6 +19,7 @@ public class FuelPumpSS extends SubsystemBase {
     STOPPED,
     TUNING_VOLT,
     INTAKE_VOLT,
+    INTAKE_VELOCITY,
     OUTTAKE_VOLT,
   }
 
@@ -35,6 +38,8 @@ public class FuelPumpSS extends SubsystemBase {
   private final LoggedTunableNumber tFuelPumpKV = new LoggedTunableNumber("Shooter/FuelPump/Control/FF/kV", kFuelPumpControlConfig.feedforward().getKv());
   private final LoggedTunableNumber tFuelPumpKA = new LoggedTunableNumber("Shooter/FuelPump/Control/FF/kA", kFuelPumpControlConfig.feedforward().getKa());
   // private final LoggedTunableNumber tFuelPumpTolerance = new LoggedTunableNumber("Shooter/FuelPump/Control/Tolerance", FuelPumpConstants.kToleranceRPS);
+
+  private SimpleMotorFeedforward mFuelPumpFeedforward = new SimpleMotorFeedforward(tFuelPumpKS.get(), tFuelPumpKV.get(), tFuelPumpKA.get());
 
   public FuelPumpSS(FuelPumpIO pLeaderFuelPumpIO, FuelPumpIO pFollowerFuelPumpIO) {
     this.mLeaderFuelPumpIO = pLeaderFuelPumpIO;
@@ -55,8 +60,10 @@ public class FuelPumpSS extends SubsystemBase {
   }
 
   private void executeState() {
-    if(FuelPumpConstants.kStateToTuneableFuelPump.containsKey(mCurrentFuelPumpState)) {
-      setFuelPumpVolts(FuelPumpConstants.kStateToTuneableFuelPump.get(mCurrentFuelPumpState).get());
+    if(FuelPumpConstants.kStateToTuneableFuelPumpVelocity.containsKey(mCurrentFuelPumpState)) {
+      setFuelPumpVelocity(FuelPumpConstants.kStateToTuneableFuelPumpVelocity.get(mCurrentFuelPumpState).get());
+    } else if(FuelPumpConstants.kStateToTuneableFuelPumpVolts.containsKey(mCurrentFuelPumpState)) {
+      setFuelPumpVolts(FuelPumpConstants.kStateToTuneableFuelPumpVolts.get(mCurrentFuelPumpState).get());
     } else {
       switch (mCurrentFuelPumpState) {
         case STOPPED -> {
@@ -70,6 +77,14 @@ public class FuelPumpSS extends SubsystemBase {
         }
       }
     }
+  }
+
+  private void setFuelPumpVelocity(Rotation2d pRPS) {
+    mLeaderFuelPumpIO.setMotorVelocity(
+      pRPS,
+      kFuelPumpControlConfig.feedforward().calculate(pRPS.getRotations())
+    );
+    mFollowerFuelPumpIO.enforceFollower();
   }
 
   private void setFuelPumpVolts(double pVoltage) {
@@ -110,9 +125,9 @@ public class FuelPumpSS extends SubsystemBase {
   }
 
   public void setFF(double pKS, double pKV, double pKA){
-    kFuelPumpControlConfig.feedforward().setKs(pKS);
-    kFuelPumpControlConfig.feedforward().setKv(pKV);
-    kFuelPumpControlConfig.feedforward().setKa(pKA);
+    mFuelPumpFeedforward.setKs(pKS);
+    mFuelPumpFeedforward.setKv(pKV);
+    mFuelPumpFeedforward.setKa(pKA);
   }
 
   private void refreshTuneables() {

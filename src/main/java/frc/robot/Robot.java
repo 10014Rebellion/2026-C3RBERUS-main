@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.pathplanner.lib.commands.FollowPathCommand;
 
 public class Robot extends LoggedRobot {
     private Command mAutonomousCommand;
@@ -32,6 +33,8 @@ public class Robot extends LoggedRobot {
         
         mTracker = new TransitionTracker();
         mRobotContainer = new RobotContainer();
+
+        FollowPathCommand.warmupCommand().schedule();
     }
 
     @Override

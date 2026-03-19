@@ -1,5 +1,7 @@
 package frc.robot.systems.shooter.fuelpump;
 
+import static frc.robot.systems.shooter.fuelpump.FuelPumpConstants.kFuelPumpControlConfig;
+
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -9,6 +11,7 @@ import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
@@ -31,12 +34,13 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
     private final TalonFX mFuelPumpMotor;
     
     private final VoltageOut mFuelPumpVoltageControl = new VoltageOut(0.0);
-    private final VelocityTorqueCurrentFOC mFuelPumpVelocityControl = new VelocityTorqueCurrentFOC(0.0);
+    private final VelocityVoltage mFuelPumpVelocityControl = new VelocityVoltage(0.0);
 
     private double mFuelPumpVelocityGoal = 0.0;
 
     private final StatusSignal<ControlModeValue> mFuelPumpControlMode;
     private final StatusSignal<AngularVelocity> mFuelPumpVelocityRPS;
+    private final StatusSignal<Double> mFuelPumpVelocityRPSReference;
     private final StatusSignal<Voltage> mFuelPumpVoltage;
     private final StatusSignal<Current> mFuelPumpSupplyCurrent;
     private final StatusSignal<Current> mFuelPumpStatorCurrent;
@@ -74,10 +78,14 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
         FuelPumpConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
         FuelPumpConfig.Feedback.SensorToMechanismRatio = pHardware.rotorToMechanismRatio();
 
+        FuelPumpConfig.Slot0.kP = kFuelPumpControlConfig.pdController().kP();
+        FuelPumpConfig.Slot0.kD = kFuelPumpControlConfig.pdController().kD();
+
         mFuelPumpMotor.getConfigurator().apply(FuelPumpConfig);
 
         mFuelPumpControlMode = mFuelPumpMotor.getControlMode();
         mFuelPumpVelocityRPS = mFuelPumpMotor.getVelocity();
+        mFuelPumpVelocityRPSReference = mFuelPumpMotor.getClosedLoopReference();
         mFuelPumpAccelerationRPSS = mFuelPumpMotor.getAcceleration();
         mFuelPumpVoltage = mFuelPumpMotor.getMotorVoltage();
         mFuelPumpSupplyCurrent = mFuelPumpMotor.getSupplyCurrent();
@@ -88,6 +96,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
             50.0, 
             mFuelPumpControlMode,
             mFuelPumpVelocityRPS, 
+            mFuelPumpVelocityRPSReference,
             mFuelPumpAccelerationRPSS,
             mFuelPumpVoltage,
             mFuelPumpSupplyCurrent,
@@ -101,6 +110,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
             CanivoreBus.OVERWORLD, 
             mFuelPumpControlMode,
             mFuelPumpVelocityRPS, 
+            mFuelPumpVelocityRPSReference,
             mFuelPumpAccelerationRPSS,
             mFuelPumpVoltage,
             mFuelPumpSupplyCurrent,
@@ -113,6 +123,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
         pInputs.iIsFuelPumpConnected = BaseStatusSignal.refreshAll(
             mFuelPumpControlMode,
             mFuelPumpVelocityRPS,
+            mFuelPumpVelocityRPSReference,
             mFuelPumpAccelerationRPSS,
             mFuelPumpVoltage,
             mFuelPumpSupplyCurrent,
@@ -126,7 +137,7 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
         pInputs.iFuelPumpSupplyCurrentAmps = mFuelPumpSupplyCurrent.getValueAsDouble();
         pInputs.iFuelPumpStatorCurrentAmps = mFuelPumpStatorCurrent.getValueAsDouble();
         pInputs.iFuelPumpTempCelsius = mFuelPumpTempCelsius.getValueAsDouble();
-        pInputs.iFuelPumpVelocityGoal = getVelocityGoal();
+        pInputs.iFuelPumpVelocityGoal = Rotation2d.fromRotations(mFuelPumpVelocityRPSReference.getValueAsDouble());
     }
 
     private boolean isLeader() {
@@ -158,11 +169,11 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
     }
 
     @Override
-    public void setMotorVelocity(double pVelocityRPS, double pFeedforward) {
-        if(isLeader()) mFuelPumpMotor.setControl(mFuelPumpVelocityControl.withVelocity(pVelocityRPS).withFeedForward(pFeedforward));
+    public void setMotorVelocity(Rotation2d pVelocityRPS, double pFeedforward) {
+        if(isLeader()) mFuelPumpMotor.setControl(mFuelPumpVelocityControl.withVelocity(pVelocityRPS.getRotations()).withFeedForward(pFeedforward).withEnableFOC(true));
         else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
 
-        mFuelPumpVelocityGoal = pVelocityRPS;
+        mFuelPumpVelocityGoal = pVelocityRPS.getRotations();
         Logger.recordOutput("FuelPump/Goal", pVelocityRPS);
     }
 
@@ -176,19 +187,5 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
     public void stopMotor() {
         if(isLeader()) mFuelPumpMotor.stopMotor();
         else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
-    }
-
-    /**
-     * @return double value for velocity setpoint. Will be zero if voltage request is sent.
-     */
-    @SuppressWarnings("unlikely-arg-type")
-    private double getVelocityGoal(){
-        if(mFuelPumpControlMode.equals(ControlModeValue.VoltageOut)){
-            return 0.0;
-        }
-
-        else{
-            return mFuelPumpVelocityGoal;
-        }
     }
 }

@@ -1,6 +1,8 @@
 package frc.robot.systems.shooter.fuelpump;
 
 import java.util.HashMap;
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -37,17 +39,20 @@ public class FuelPumpConstants {
 
     public static final SimpleController kFuelPumpControlConfig = new SimpleController(
         0, 
-        new PDConstants(0, 0), 
-        new SimpleMotorFeedforward(0, 0));
+        new PDConstants(3, 0), 
+        new SimpleMotorFeedforward(0, 9.7));
 
-    public static final HashMap<FuelPumpState, LoggedTunableNumber> kStateToTuneableFuelPump = new HashMap<FuelPumpState, LoggedTunableNumber>();
+    public static final HashMap<FuelPumpState, LoggedTunableNumber> kStateToTuneableFuelPumpVolts = new HashMap<FuelPumpState, LoggedTunableNumber>();
+    public static final HashMap<FuelPumpState, Supplier<Rotation2d>> kStateToTuneableFuelPumpVelocity = new HashMap<FuelPumpState, Supplier<Rotation2d>>();
 
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/FuelPump/TuneVoltage", 0.0);
     public static final LoggedTunableNumber tIntakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/IntakeVolts", 6);
     public static final LoggedTunableNumber tOuttakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/OuttakeVolts", -10.014);
+    public static final LoggedTunableNumber tIntakeVelocity = new LoggedTunableNumber("Shooter/FuelPump/DesiredVelocity/IntakeVelocity", 40.0);
 
     static {
-        kStateToTuneableFuelPump.put(FuelPumpState.INTAKE_VOLT, tIntakeVolts);
-        kStateToTuneableFuelPump.put(FuelPumpState.OUTTAKE_VOLT, tOuttakeVolts);
+        kStateToTuneableFuelPumpVolts.put(FuelPumpState.INTAKE_VOLT, tIntakeVolts);
+        kStateToTuneableFuelPumpVolts.put(FuelPumpState.OUTTAKE_VOLT, tOuttakeVolts);
+        kStateToTuneableFuelPumpVelocity.put(FuelPumpState.INTAKE_VELOCITY, () -> Rotation2d.fromRotations(tIntakeVelocity.get()));
     }
 }
