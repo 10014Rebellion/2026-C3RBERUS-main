@@ -31,6 +31,10 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.systems.drive.DriveConstants.ModuleHardwareConfig;
+import frc.lib.PhoenixUtil;
+import frc.lib.PhoenixUtil.CanivoreBus;
+import frc.robot.RobotConstants;
+import frc.robot.systems.drive.DriveConstants;
 import frc.robot.systems.drive.PhoenixOdometryThread;
 
 public class ModuleIOKraken implements ModuleIO {
@@ -121,7 +125,7 @@ public class ModuleIOKraken implements ModuleIO {
         mAbsolutePositionSignal = mAbsoluteEncoder.getAbsolutePosition();
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, mAbsolutePositionSignal);
-        mAbsoluteEncoder.optimizeBusUtilization();
+        mAbsoluteEncoder.optimizeBusUtilization(0.0);
 
         /* AZIMUTH INSTANTIATION AND CONFIGURATION */
         mAzimuthMotor = new TalonFX(pConfig.azimuthID(), kCANBus);
@@ -178,19 +182,39 @@ public class ModuleIOKraken implements ModuleIO {
             mAzimuthStatorCurrent,
             mAzimuthSupplyCurrent,
             mAzimuthVoltage,
-            mAzimuthTemp);
+            mAzimuthTemp,
+            mAbsolutePositionSignal);
 
         mDriveMotor.optimizeBusUtilization(0.0);
         mAzimuthMotor.optimizeBusUtilization(0.0);
+        mAbsoluteEncoder.optimizeBusUtilization(0.0);
 
         timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
         turnPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(mAzimuthPosition.clone());
         drivePositionQueue = PhoenixOdometryThread.getInstance().registerSignal(mDrivePositionM.clone());
+
+        PhoenixUtil.registerSignals(
+            CanivoreBus.UNDERWORLD, 
+            mDrivePositionM,
+            mDriveVelocityMPS,
+            mDriveStatorCurrent,
+            mDriveSupplyCurrent,
+            mDriveTempCelsius,
+            mDriveTorqueCurrent,
+            mDriveVoltage,
+            mDriveAccelerationMPSS,
+            mAzimuthPosition,
+            mAzimuthVelocity,
+            mAzimuthStatorCurrent,
+            mAzimuthSupplyCurrent,
+            mAzimuthVoltage,
+            mAzimuthTemp,
+            mAbsolutePositionSignal);
     }
 
     @Override
     public void updateInputs(ModuleInputs pInputs) {
-        pInputs.iIsDriveConnected = BaseStatusSignal.refreshAll(
+        pInputs.iIsDriveConnected = BaseStatusSignal.isAllGood(
             mDriveVelocityMPS,
             mDrivePositionM,
             mDriveVoltage,
@@ -198,7 +222,7 @@ public class ModuleIOKraken implements ModuleIO {
             mDriveStatorCurrent,
             mDriveTorqueCurrent,
             mDriveTempCelsius,
-            mDriveAccelerationMPSS).isOK();
+            mDriveAccelerationMPSS);
         pInputs.iDrivePositionM = (mDrivePositionM.getValueAsDouble());
         pInputs.iDriveVelocityMPS = (mDriveVelocityMPS.getValueAsDouble());
         pInputs.iDriveAppliedVolts = mDriveAppliedVolts;
@@ -209,14 +233,14 @@ public class ModuleIOKraken implements ModuleIO {
         pInputs.iDriveTemperatureCelsius = mDriveTempCelsius.getValueAsDouble();
         pInputs.iDriveAccelerationMPSS = mDriveAccelerationMPSS.getValueAsDouble();
 
-        pInputs.iIsAzimuthConnected = BaseStatusSignal.refreshAll(
+        pInputs.iIsAzimuthConnected = BaseStatusSignal.isAllGood(
             mAzimuthVelocity,
             mAzimuthVoltage,
             mAzimuthStatorCurrent,
             mAzimuthSupplyCurrent,
             mAzimuthTemp,
             mAzimuthPosition,
-            mAzimuthTorqueCurrent).isOK();
+            mAzimuthTorqueCurrent);
         pInputs.iAzimuthPosition = Rotation2d.fromRotations(mAzimuthPosition.getValueAsDouble());
         pInputs.iAzimuthVelocity = Rotation2d.fromRotations(mAzimuthVelocity.getValueAsDouble());
         pInputs.iAzimuthAppliedVolts = mAzimuthAppliedVolts;
@@ -226,7 +250,7 @@ public class ModuleIOKraken implements ModuleIO {
         pInputs.iAzimuthTorqueCurrentAmps = mAzimuthTorqueCurrent.getValueAsDouble();
         pInputs.iAzimuthTemperatureCelsius = mAzimuthTemp.getValueAsDouble();
 
-        pInputs.iIsCancoderConnected = BaseStatusSignal.refreshAll(mAbsolutePositionSignal).isOK();
+        pInputs.iIsCancoderConnected = BaseStatusSignal.isAllGood(mAbsolutePositionSignal);
         pInputs.iAzimuthAbsolutePosition = Rotation2d.fromRotations(mAbsolutePositionSignal.getValueAsDouble());
 
         pInputs.odometryTimestamps =
@@ -287,8 +311,7 @@ public class ModuleIOKraken implements ModuleIO {
         /* Uses voltage PID with a arbitrary FF on the with Slot 0 gains */
         mAzimuthMotor.setControl(mAzimuthPositionControl
                 .withPosition(pRotation.getRotations())
-                .withFeedForward(pFeedforward)
-                .withSlot(0));
+                .withFeedForward(pFeedforward));
     }
 
     @Override

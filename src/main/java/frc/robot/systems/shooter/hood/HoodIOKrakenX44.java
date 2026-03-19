@@ -19,6 +19,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.lib.PhoenixUtil;
+import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 
@@ -102,6 +104,19 @@ public class HoodIOKrakenX44 implements HoodIO{
         );
 
         mHoodMotor.optimizeBusUtilization(0.0);
+
+        PhoenixUtil.registerSignals(
+            CanivoreBus.OVERWORLD, 
+            mHoodControlMode,
+            mHoodPosition, 
+            mHoodVelocityRPS,
+            mHoodAccelerationRPSS,
+            mHoodVoltage,
+            mHoodSupplyCurrent,
+            mHoodStatorCurrent,
+            mHoodTempCelsius,
+            mHoodClosedLoopReference,
+            mHoodClosedLoopReferenceSlope);
     }
 
 

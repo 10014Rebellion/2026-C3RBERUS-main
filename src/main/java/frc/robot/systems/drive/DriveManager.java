@@ -77,7 +77,7 @@ public class DriveManager {
         () -> 1.0, 
         () -> false);
 
-    @AutoLogOutput(key="Drive/GoalPoseSup")
+    // @AutoLogOutput(key="Drive/GoalPoseSup")
     private Supplier<Pose2d> mGoalPoseSup = () -> new Pose2d();
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
 

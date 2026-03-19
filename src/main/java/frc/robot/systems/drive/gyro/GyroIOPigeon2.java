@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import java.util.Queue;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -16,6 +15,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import frc.lib.PhoenixUtil;
+import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.lib.math.GeomUtil;
 import frc.robot.systems.drive.DriveConstants;
 import frc.robot.systems.drive.PhoenixOdometryThread;
@@ -54,16 +55,26 @@ public class GyroIOPigeon2 implements GyroIO {
         yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(mYaw.clone());
 
         mGyro.optimizeBusUtilization(0.0);
+
+        PhoenixUtil.registerSignals(
+            CanivoreBus.UNDERWORLD, 
+            mYaw,
+            mPitchPosition, 
+            mRollPosition, 
+            mYawVelocity, 
+            mYawAccelerationX, 
+            mYawAccelerationY, 
+            mYawAccelerationZ);
     }
 
     @Override
     public void updateInputs(GyroInputs pInputs) {
-        pInputs.iConnected = BaseStatusSignal.refreshAll(
+        pInputs.iConnected = BaseStatusSignal.isAllGood(
             mYaw, 
             mYawVelocity,
             mYawAccelerationX,
             mYawAccelerationY,
-            mYawAccelerationZ).equals(StatusCode.OK);
+            mYawAccelerationZ);
         pInputs.iYawPosition = Rotation2d.fromDegrees(mYaw.getValueAsDouble());
         pInputs.iPitchPosition = Rotation2d.fromDegrees(mPitchPosition.getValue().in(Degrees));
         pInputs.iRollPosition = Rotation2d.fromDegrees(mRollPosition.getValue().in(Degrees));

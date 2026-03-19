@@ -8,6 +8,8 @@ import com.ctre.phoenix6.signals.MagnetHealthValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.lib.PhoenixUtil;
+import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.lib.hardware.HardwareRecords.RelativeCANCoderHardware;
 import frc.robot.RobotConstants;
 
@@ -36,16 +38,22 @@ public class EncoderIOCANCoder implements EncoderIO{
             mMagnetHealth
         );
 
-        mCANCoder.optimizeBusUtilization();
+        mCANCoder.optimizeBusUtilization(0.0);
+
+        PhoenixUtil.registerSignals(
+            CanivoreBus.OVERWORLD, 
+            mPosition,
+            mVelocity,
+            mMagnetHealth);
     }
 
     @Override
     public void updateInputs(EncoderInputs pInputs) {
-        pInputs.iIsEncoderConnected = BaseStatusSignal.refreshAll(
+        pInputs.iIsEncoderConnected = BaseStatusSignal.isAllGood(
             mPosition,
             mVelocity,
             mMagnetHealth
-        ).isOK();
+        );
         pInputs.iEncoderPositionRot = Rotation2d.fromRotations(mPosition.getValueAsDouble());
         pInputs.iEncoderVelocityRPS = Rotation2d.fromRotations(mVelocity.getValueAsDouble());
         pInputs.iEncoderMagnetHealth = mMagnetHealth.getValue().toString();

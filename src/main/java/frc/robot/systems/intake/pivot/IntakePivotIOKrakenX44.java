@@ -21,6 +21,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.lib.PhoenixUtil;
+import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
 import frc.robot.RobotConstants;
@@ -54,6 +56,8 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         mEncoder.getConfigurator().apply(mEncoderConfiguration);
 
         mIntakeEncoderAbsolutePosition = mEncoder.getPWM1Position();
+
+        mEncoder.optimizeBusUtilization(0.0);
 
         // Motor
         mIntakePivotMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
@@ -97,6 +101,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0, 
+            mIntakeEncoderAbsolutePosition,
             mIntakePivotRotation,
             mIntakePivotVelocityRPS,
             mIntakePivotAccelerationRPSS, 
@@ -108,15 +113,28 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
             mIntakePivotReferencePositionSlope
         );
 
-        mIntakePivotMotor.optimizeBusUtilization();
+        mIntakePivotMotor.optimizeBusUtilization(0.0);
+
+        PhoenixUtil.registerSignals(
+            CanivoreBus.OVERWORLD, 
+            mIntakeEncoderAbsolutePosition,
+            mIntakePivotRotation,
+            mIntakePivotVelocityRPS,
+            mIntakePivotAccelerationRPSS, 
+            mIntakePivotVoltage,
+            mIntakePivotSupplyCurrent,
+            mIntakePivotStatorCurrent,
+            mIntakePivotTempCelsius,
+            mIntakePivotReferencePosition,
+            mIntakePivotReferencePositionSlope);
     }
 
     @Override
     public void updateInputs(IntakePivotInputs pInputs) {
-        pInputs.iIsEncoderConnected = BaseStatusSignal.refreshAll(mIntakeEncoderAbsolutePosition).isOK();
+        pInputs.iIsEncoderConnected = BaseStatusSignal.isAllGood(mIntakeEncoderAbsolutePosition);
         pInputs.iEncoderPosition = Rotation2d.fromRadians(mIntakeEncoderAbsolutePosition.getValue().in(Radian));
 
-        pInputs.iIsIntakePivotConnected = BaseStatusSignal.refreshAll(
+        pInputs.iIsIntakePivotConnected = BaseStatusSignal.isAllGood(
             mIntakePivotRotation,
             mIntakePivotVelocityRPS,
             mIntakePivotAccelerationRPSS,
@@ -126,7 +144,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
             mIntakePivotTempCelsius,
             mIntakePivotReferencePosition,
             mIntakePivotReferencePositionSlope
-        ).isOK();
+        );
         pInputs.iIntakePivotRotation = 
             Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
         pInputs.iIntakePivotVelocityRPS = Rotation2d.fromRotations(mIntakePivotVelocityRPS.getValueAsDouble());

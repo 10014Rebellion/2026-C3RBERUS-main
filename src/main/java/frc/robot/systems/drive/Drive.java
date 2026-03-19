@@ -166,7 +166,10 @@ public class Drive extends SubsystemBase {
         for (int i = 0; i < mModules[0].getOdometryTimeStamps().length; i++) {
             // Read wheel positions and deltas from each module
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-                modulePositionsHighF[moduleIndex] = mModules[moduleIndex].getOdometryPositions()[i];
+                modulePositionsHighF[moduleIndex] = new SwerveModulePosition(
+                    mModules[moduleIndex].getDrivePositions()[i],
+                    mModules[moduleIndex].getAzimuthRotatinos()[i]
+                );
 
                 mAngleDeltas[moduleIndex] = mAngleDeltas[moduleIndex].plus(
                     GeomUtil.getSmallestChangeInRotation(
@@ -222,7 +225,7 @@ public class Drive extends SubsystemBase {
                     observation.stdDevs().times(1.0 / mVisionFactor));
             }
 
-            Telemetry.logVisionObservationStdDevs(observation);
+            // Telemetry.logVisionObservationStdDevs(observation);
         }
 
         /* For logging purposes */

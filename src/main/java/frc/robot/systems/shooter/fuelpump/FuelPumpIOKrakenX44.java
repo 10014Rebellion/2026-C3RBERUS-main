@@ -23,6 +23,8 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.telemetry.Telemetry;
 import frc.robot.logging.MotorErrors;
+import frc.lib.PhoenixUtil;
+import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 
 public class FuelPumpIOKrakenX44 implements FuelPumpIO{
@@ -93,7 +95,17 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
             mFuelPumpTempCelsius
         );
 
-        mFuelPumpMotor.optimizeBusUtilization(0);
+        mFuelPumpMotor.optimizeBusUtilization(0.0);
+
+        PhoenixUtil.registerSignals(
+            CanivoreBus.OVERWORLD, 
+            mFuelPumpControlMode,
+            mFuelPumpVelocityRPS, 
+            mFuelPumpAccelerationRPSS,
+            mFuelPumpVoltage,
+            mFuelPumpSupplyCurrent,
+            mFuelPumpStatorCurrent,
+            mFuelPumpTempCelsius);
     }
 
     @Override

@@ -18,6 +18,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.lib.PhoenixUtil;
+import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.FollowerMotorHardware;
 import frc.lib.telemetry.Telemetry;
@@ -101,7 +103,19 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
             mFlywheelClosedLoopReferenceSlope
         );
 
-        mFlywheelMotor.optimizeBusUtilization(0);
+        mFlywheelMotor.optimizeBusUtilization(0.0);
+
+        PhoenixUtil.registerSignals(
+            CanivoreBus.OVERWORLD, 
+            mFlywheelControlMode,
+            mFlywheelVelocityRPS, 
+            mFlywheelAccelerationRPSS,
+            mFlywheelVoltage,
+            mFlywheelSupplyCurrent,
+            mFlywheelStatorCurrent,
+            mFlywheelTempCelsius,
+            mFlywheelClosedLoopReference,
+            mFlywheelClosedLoopReferenceSlope);
     }
 
     @Override
