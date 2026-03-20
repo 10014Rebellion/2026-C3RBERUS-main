@@ -33,8 +33,6 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.systems.drive.DriveConstants.ModuleHardwareConfig;
 import frc.lib.PhoenixUtil;
 import frc.lib.PhoenixUtil.CanivoreBus;
-import frc.robot.RobotConstants;
-import frc.robot.systems.drive.DriveConstants;
 import frc.robot.systems.drive.PhoenixOdometryThread;
 
 public class ModuleIOKraken implements ModuleIO {

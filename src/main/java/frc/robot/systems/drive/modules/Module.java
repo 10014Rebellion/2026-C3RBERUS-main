@@ -149,12 +149,12 @@ public class Module {
 
         mIO.setDriveVelocity(mVelocitySetpointMPS, ffDriveOutput);
 
-        // Logger.recordOutput("Drive/" + kModuleName + "/VelocitySetpointMPS", mVelocitySetpointMPS);
-        // Logger.recordOutput("Drive/" + kModuleName + (
-        //     (DriveConstants.kUseVoltageFeedforward) ? 
-        //         "/AmperageFeedforward" : "/VoltageFeedforward"), 
-        //     mAccelFeedforward);
-        // Logger.recordOutput("Drive/" + kModuleName + "/ffDriveOutput", ffDriveOutput);
+        Logger.recordOutput("Drive/" + kModuleName + "/VelocitySetpointMPS", mVelocitySetpointMPS);
+        Logger.recordOutput("Drive/" + kModuleName + (
+            (DriveConstants.kUseVoltageFeedforward) ? 
+                "/AmperageFeedforward" : "/VoltageFeedforward"), 
+            mAccelFeedforward);
+        Logger.recordOutput("Drive/" + kModuleName + "/ffDriveOutput", ffDriveOutput);
     }
 
     /* Sets Azimuth Rotation*/

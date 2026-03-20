@@ -76,7 +76,7 @@ public class DriveConstants {
     public static final double kCANCoderToMechanismRatio = 1;
     public static final double kAzimuthMotorGearing = 25.464 / 1.0;
     public static final double kDriveMotorGearing = 5.50 / 1.0;
-    public static final double kWheelRadiusMeters = Units.inchesToMeters((1.43) / 2.0);
+    public static final double kWheelRadiusMeters = Units.inchesToMeters(1.42);
     public static final double kWheelCircumferenceMeters = 2 * Math.PI * kWheelRadiusMeters;
     public static final double kWheelInertia = 125.0 / 4.0;
 

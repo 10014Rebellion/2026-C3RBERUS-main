@@ -1,9 +1,9 @@
 package frc.robot.systems.auton;
 
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.lib.telemetry.Telemetry;
 
@@ -11,6 +11,8 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
+import choreo.auto.AutoFactory;
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -51,6 +53,8 @@ public class AutonCommands extends SubsystemBase {
 
     private boolean wantToShoot = false;
 
+    private final AutoFactory mAutoFactory;
+
     public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS) {
         this.mRobotDrive = pRobotDrive;
         this.mIntake = pIntake;
@@ -58,26 +62,79 @@ public class AutonCommands extends SubsystemBase {
         this.mFlywheelsSS = pFlywheelsSS;
         this.mFuelPumpSS = pFuelPumpSS;
 
+        mAutoFactory = new AutoFactory(
+            mRobotDrive::getPoseEstimate, 
+            mRobotDrive::setPose, 
+            (SwerveSample s) -> {
+                Logger.recordOutput(
+                    "Drive/Choreo/TrajectorySetpoint", 
+                    new Pose2d(
+                        s.x,
+                        s.y,
+                        Rotation2d.fromRadians(s.heading)
+                    ));                
+
+                mRobotDrive.getDriveManager().setToAuton();
+                mRobotDrive.getDriveManager().setPPDesiredSpeeds(
+                    mRobotDrive
+                        .getDriveManager()
+                        .getChoreoHolonomicController()
+                        .calculateFromSwerveSample(
+                            s,
+                            mRobotDrive.getPoseEstimate()));
+                mRobotDrive.setDriveFeedforwardsFromChoreo(s);
+            }, 
+            true, 
+            mRobotDrive,
+            (sample, isStart) -> {
+                Logger.recordOutput("Drive/Choreo/Trajectory", sample.getPoses());
+                Logger.recordOutput("Drive/Choreo/IsTrajectoryRunning", isStart);
+            });
+
+        /* Loads cache */
+        mAutoFactory.trajectoryCmd("L_IT_IC_ST");
+        mAutoFactory.trajectoryCmd("L_ST_IB_ST");
+        mAutoFactory.trajectoryCmd("R_IT_IC_ST");
+        mAutoFactory.trajectoryCmd("R_ST_IB_ST");
+
         mAutoChooser = new SendableChooser<>();
 
         mAutoChooser.setDefaultOption("Stationary", () -> backUpAuton());
+
         // tryToAddPathToChooser("FirstTestPath", () -> firstPathTest("FirstPathTest", "FirstPath"));
         // tryToAddPathToChooser("FirstAuto", () -> autoTest("FirstAuto","FirstPath", "SecondPath"));
         // tryToAddPathToChooser("LeftFullPath", () -> leftFullPath());
         // tryToAddPathToChooser("RightFullPath", () -> rightFullPath());
         // tryToAddPathToChooser("Troll", () -> troll());
         // tryToAddPathToChooser("DisruptLeft", () -> disruptLeft());
-        tryToAddPathToChooser("LeftFirstSwipe", 
+        tryToAddPathToChooser("LeftSingleSwipe", 
             () -> singleSwipe(
-                "LeftSignleSwipe",
-                "L_IT_IC_ST")
+                "LeftSingleSwipe",
+                "L_IT_IC_ST",
+                true)
+        );
+
+        tryToAddPathToChooser("LeftDoubleSwipe", 
+            () -> doubleSwipe(
+                "LeftDoubleSwipe",
+                "L_IT_IC_ST",
+                "L_ST_IB_ST",
+                true)
+        );
+
+        tryToAddPathToChooser("RightSingleSwipe", 
+            () -> singleSwipe(
+                "RightSingleSwipe",
+                "R_IT_IC_ST",
+                false)
         );
 
         tryToAddPathToChooser("RightDoubleSwipe", 
             () -> doubleSwipe(
                 "RightDoubleSwipe",
                 "R_IT_IC_ST",
-                "R_ST_IB_ST")
+                "R_ST_IB_ST",
+                true)
         );
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
@@ -88,7 +145,7 @@ public class AutonCommands extends SubsystemBase {
         return new InstantCommand();
     }
 
-    public Command singleSwipe(String autoName, String firstSwipe) {
+    public Command singleSwipe(String autoName, String firstSwipe, boolean useChoreLib) {
         AutoEvent auto = new AutoEvent(autoName, this);
 
         Trigger autoActivted = auto.getIsRunningTrigger();
@@ -96,7 +153,10 @@ public class AutonCommands extends SubsystemBase {
         Trigger intakingRange = inIntakeRange(auto);
         Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
 
-        SequentialEndingCommandGroup firstSwipePath = followChoreoPath(firstSwipe, true);
+        SequentialEndingCommandGroup firstSwipePath = (useChoreLib) ?
+            followChorePathUsingCL(firstSwipe, true)
+                : 
+            followChoreoPath(firstSwipe, true);
         Trigger isFirstSwipeRunning = auto.loggedCondition(firstSwipe+"/isRunning", () -> firstSwipePath.isRunning(), true);
         Trigger hasFirstSwipeEnded = auto.loggedCondition(firstSwipe+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
 
@@ -156,7 +216,7 @@ public class AutonCommands extends SubsystemBase {
         return auto;
     }
 
-    public Command doubleSwipe(String autoName, String firstSwipe, String secondSwipe) {
+    public Command doubleSwipe(String autoName, String firstSwipe, String secondSwipe, boolean useChoreoLib) {
         AutoEvent auto = new AutoEvent(autoName, this);
 
         Trigger autoActivted = auto.getIsRunningTrigger();
@@ -168,19 +228,7 @@ public class AutonCommands extends SubsystemBase {
         Trigger isFirstSwipeRunning = auto.loggedCondition(firstSwipe+"/isRunning", () -> firstSwipePath.isRunning(), true);
         Trigger hasFirstSwipeEnded = auto.loggedCondition(firstSwipe+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
 
-        SequentialEndingCommandGroup secondSwipePath = new SequentialEndingCommandGroup(
-            followChoreoPath(secondSwipe, false)
-                .andThen(new ConditionalCommand(
-                    mRobotDrive.getDriveManager().setToGenericAutoAlign(
-                        () -> new Pose2d(
-                            3.3132424354553223,
-                            5.198512077331543,
-                            Rotation2d.k180deg
-                        ), 
-                        ConstraintType.LINEAR),
-                    new InstantCommand(),
-                    () -> mRobotDrive.getPoseEstimate().getX() > 4.2 && mRobotDrive.getPoseEstimate().getX() < 6.5
-                ).until(mRobotDrive.getDriveManager().waitUntilAutoAlignFinishes())));
+        SequentialEndingCommandGroup secondSwipePath = followChoreoPath(secondSwipe, false);
         Trigger isSecondSwipeRunning = auto.loggedCondition(secondSwipe+"/isRunning", () -> secondSwipePath.isRunning(), true);
         Trigger hasSecondSwipeEnded = auto.loggedCondition(secondSwipe+"/hasEnded", () -> secondSwipePath.hasEnded(), true);
 
@@ -230,7 +278,7 @@ public class AutonCommands extends SubsystemBase {
             .onTrue(firstSwipeIndexShot)
             .onTrue(mIntake.trashCompactPivotRepeat());
 
-        hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
+        hasFirstSwipeEnded.and(hasFirstShotEnded)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
@@ -266,12 +314,12 @@ public class AutonCommands extends SubsystemBase {
             .onTrue(secondSwipeIndexShot)
             .onTrue(mIntake.trashCompactPivotRepeat());
 
-        hasSecondSwipeEnded.and(() -> secondSwipeIndexShot.hasEnded() && secondSwipeIntakeShot.hasEnded())
+        hasSecondSwipeEnded.and(hasSecondShotEnded)
             .onTrue(Commands.runOnce(() -> wantToShoot = false))
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onTrue(secondSwipePath);
+            .onTrue(endAuto(auto));
             
         return auto;
     }
@@ -638,83 +686,9 @@ public class AutonCommands extends SubsystemBase {
         return auto;
     }
 
-    public Command autoTest(String pAutoName, String pName1, String pName2) {
-        AutoEvent auto = new AutoEvent(pAutoName, this);
-        SequentialEndingCommandGroup autoPath1 = followChoreoPath(pName1, true);
-        SequentialEndingCommandGroup autoPath2 = followChoreoPath(pName2, false);
-
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        Trigger isPath1Running = auto.loggedCondition(pName1+"IsRunning", autoPath1::isRunning, true);
-        Trigger hasPath1Ended = auto.loggedCondition(pName1+"HasEnded", autoPath1::hasEnded, true);
-
-        Trigger isPath2Running = auto.loggedCondition(pName2+"IsRunning", autoPath2::isRunning, true);
-        Trigger hasPath2Ended = auto.loggedCondition(pName2+"HasEnded", autoPath2::hasEnded, true);
-
-        Trigger inScoringRange = inScoringRange(auto);
-        Trigger inIntakeRange = inIntakeRange(auto);
-        Trigger flywheelsReady = flywheelsReady(auto);
-        Trigger hoodReady = hoodReady(auto);
-
-        autoActivted
-            .onTrue(autoPath1);
-        
-        hasPath1Ended
-            .onTrue(autoPath2);
-
-        auto.loggedCondition(pName2+"isIntaking", isPath2Running.and(inIntakeRange), true)
-            .onTrue(bindexCommand())
-            .onTrue(intakeCommand());
-
-        hasPath2Ended
-            .onTrue(Commands.runOnce(() -> auto.cancel()));
-
-        return auto;
-    }
-
     ///////////////// SUPERSTRUCTURE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\
-    public Command intakeCommand() {
-        return mIntake.setPivotStateCmd(IntakePivotStates.INTAKE).alongWith(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE));
-    }
-
-    public Command deployIntakeCommand() {
-        return mIntake.setPivotStateCmd(IntakePivotStates.INTAKE);
-    }
-
-    public Command bindexCommand() {
-        return new InstantCommand();
-    }
-
-    // public Command shotIndexCommand() {
-    //     return mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).alongWith(mConveyorSS.setConveyorStateCmd(ConveyorState.INTAKE));
-    // }
-    
-    // public Command spinFlywheelsCommand() {
-    //     return mFlywheelsSS.setStateCmd(FlywheelStates.SHOOT_CLOSE);
-    // }
-
-    public Command turnToHubCommand() {
-        return mRobotDrive.getDriveManager().setToGenericHeadingAlign(() -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), mRobotDrive.getDriveManager().getDefaultTurnPointFF());
-    }
-
-    public Command climbCommand() {
-        return new InstantCommand();
-    }
-
     public Command endAuto(AutoEvent auto) {
         return Commands.runOnce(() -> auto.cancel());
-    }
-
-    public BooleanSupplier inScoringRange() {
-        return () -> false;
-    }
-
-    public BooleanSupplier flywheelsReady() {
-        return () -> false;
-    }
-
-    public BooleanSupplier hoodReady() {
-        return () -> false;
     }
 
     public Trigger inIntakeRange(AutoEvent auto) {
@@ -742,18 +716,6 @@ public class AutonCommands extends SubsystemBase {
             true);
     }
 
-    // public Trigger inIntakeRange(AutoEvent auto) {
-    //     return auto.loggedCondition("inIntakeRange", inIntakeRange(), true);
-    // }
-
-    public Trigger flywheelsReady(AutoEvent auto) {
-        return auto.loggedCondition("flywheelsReady", flywheelsReady(), true);
-    }
-
-    public Trigger hoodReady(AutoEvent auto) {
-        return auto.loggedCondition("hoodReady", hoodReady(), true);
-    }
-
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\
     public SequentialEndingCommandGroup followChoreoPath(String pPathName, boolean pIsFirst) {
         PathPlannerPath path = getTraj(pPathName).get();
@@ -777,6 +739,17 @@ public class AutonCommands extends SubsystemBase {
             }),
             mRobotDrive.getDriveManager().followPathCommand(path, pPID)
                 .withTimeout(idealTraj.getTotalTimeSeconds()),
+            mRobotDrive.getDriveManager().setToStop()
+        );
+    }
+
+    public SequentialEndingCommandGroup followChorePathUsingCL(String pPathName, boolean isFirst) {
+        return new SequentialEndingCommandGroup(
+            new ConditionalCommand(
+                mAutoFactory.resetOdometry(pPathName), 
+                new InstantCommand(() -> {}, mRobotDrive), 
+                () -> isFirst),
+            mAutoFactory.trajectoryCmd(pPathName),
             mRobotDrive.getDriveManager().setToStop()
         );
     }
