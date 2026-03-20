@@ -113,6 +113,7 @@ public class ButtonBindings {
         Trigger wantToLineAlignToBump = mPilotController.b();
         Trigger wantToLineAlignToTrench = mPilotController.y();
         Trigger wantToOpponentFeed = mGunnerController.a();
+        Trigger wantToFeedWithNoCompact = mGunnerController.b().and(kUsingPilotGunner);
         Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
         Trigger wantToInitiateClimb = mGunnerController.povUp().and(kUsingPilotGunner);
         Trigger wantToEndClimb = mGunnerController.povDown().and(kUsingPilotGunner);
@@ -159,6 +160,10 @@ public class ButtonBindings {
         Trigger wantToShoot = new Trigger(() -> {
             return 
                 wantToFeed.getAsBoolean()
+                    ||
+                wantToFeedWithNoCompact.getAsBoolean()
+                    ||
+                wantToOpponentFeed.getAsBoolean()
                     ||
                 wantToDynamicShoot.getAsBoolean();
         });
@@ -258,7 +263,7 @@ public class ButtonBindings {
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* Feeding Logic */
-        wantToFeed
+        wantToFeed.or(wantToFeedWithNoCompact)
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
@@ -266,7 +271,7 @@ public class ButtonBindings {
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.OPPONENT_FEED_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
-        wantToFeed.or(wantToOpponentFeed).and(autonomousWorking)
+        wantToFeed.or(wantToOpponentFeed).or(wantToFeedWithNoCompact).and(autonomousWorking)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                 () -> AllianceFlipUtil.apply(Rotation2d.k180deg), 
                 TurnPointFeedforward.zeroTurnPointFF()))
@@ -277,12 +282,16 @@ public class ButtonBindings {
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
-        wantToFeed.or(wantToOpponentFeed).and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
+        wantToFeedWithNoCompact.and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
+            .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
+
+        wantToFeed.or(wantToOpponentFeed).or(wantToFeedWithNoCompact).and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                 () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
                 () -> GameGoalPoseChooser.getHub()));
 
-        wantToFeed.or(wantToOpponentFeed)
+        wantToFeed.or(wantToOpponentFeed).or(wantToFeedWithNoCompact)
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
