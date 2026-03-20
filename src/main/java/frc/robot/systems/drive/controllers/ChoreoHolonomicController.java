@@ -104,8 +104,8 @@ public class ChoreoHolonomicController {
             tOmegaI.get(), 
             tOmegaD.get());
         tOmegaController.enableContinuousInput(
-            -180.0, 
-            180.0);
+            -Math.PI, 
+            Math.PI);
         tOmegaController.setIntegratorRange(
             -tOmegaIRange.get(), 
             tOmegaIRange.get());

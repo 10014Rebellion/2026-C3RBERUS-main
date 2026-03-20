@@ -111,7 +111,7 @@ public class AutonCommands extends SubsystemBase {
             () -> singleSwipe(
                 "LeftSingleSwipe",
                 "L_IT_IC_ST",
-                true)
+                false)
         );
 
         tryToAddPathToChooser("LeftDoubleSwipe", 
@@ -119,7 +119,7 @@ public class AutonCommands extends SubsystemBase {
                 "LeftDoubleSwipe",
                 "L_IT_IC_ST",
                 "L_ST_IB_ST",
-                true)
+                false)
         );
 
         tryToAddPathToChooser("RightSingleSwipe", 
@@ -134,7 +134,7 @@ public class AutonCommands extends SubsystemBase {
                 "RightDoubleSwipe",
                 "R_IT_IC_ST",
                 "R_ST_IB_ST",
-                true)
+                false)
         );
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
