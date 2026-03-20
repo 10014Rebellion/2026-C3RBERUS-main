@@ -48,7 +48,7 @@ public class HeadingController {
                 new TrapezoidProfile.Constraints(mSnapMaxVDPS.get(), mSnapMaxADPSS.get()));
 
         mSnapController.enableContinuousInput(0, 360);
-        mSnapController.setTolerance(1.0);
+        mSnapController.setTolerance(3.0);
 
         setTurnPointFF(pTurnPointFF);
 
@@ -123,5 +123,9 @@ public class HeadingController {
 
     public void setTurnPointFF(TurnPointFeedforward pTurnPointFF) {
         mTurnPointFF = pTurnPointFF;
+    }
+
+    public boolean inTolerance() {
+        return mSnapController.atGoal();
     }
 }

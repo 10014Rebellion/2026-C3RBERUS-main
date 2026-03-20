@@ -40,7 +40,8 @@ public class FuelPumpConstants {
     public static final SimpleController kFuelPumpControlConfig = new SimpleController(
         0, 
         new PDConstants(3, 0), 
-        new SimpleMotorFeedforward(0, 9.7));
+        new SimpleMotorFeedforward(0, 9.7)
+    );
 
     public static final HashMap<FuelPumpState, LoggedTunableNumber> kStateToTuneableFuelPumpVolts = new HashMap<FuelPumpState, LoggedTunableNumber>();
     public static final HashMap<FuelPumpState, Supplier<Rotation2d>> kStateToTuneableFuelPumpVelocity = new HashMap<FuelPumpState, Supplier<Rotation2d>>();

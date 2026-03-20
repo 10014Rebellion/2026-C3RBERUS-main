@@ -99,18 +99,24 @@ public class ButtonBindings {
     public void initCompBindings() {
         boolean closedLoopFuelPump = true;
         boolean isEli = false;
-        Trigger wantToOuttake = mGunnerController.leftTrigger().and(kUsingPilotGunner);
-        Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
-        Trigger wantToIntake = (isEli ? mPilotController.leftBumper() : mPilotController.rightBumper()).or(mGunnerController.rightBumper()).and(kUsingPilotGunner);
+        Trigger wantToOuttake = 
+            mGunnerController.leftTrigger().and(kUsingPilotGunner);
+        Trigger wantToDynamicShoot = 
+            mGunnerController.rightTrigger().and(kUsingPilotGunner);
+        Trigger wantToIntake = 
+            (isEli ? 
+                mPilotController.leftBumper() : 
+                mPilotController.rightBumper()).or(
+                    mGunnerController.rightBumper()).and(kUsingPilotGunner);
         Trigger wantToTraverse = mPilotController.rightTrigger().and(kUsingPilotGunner);
-        Trigger wantToSafeStow = (isEli ? mPilotController.rightBumper() : mPilotController.leftBumper()).or(mGunnerController.leftBumper()).and(kUsingPilotGunner);
+        Trigger wantToSafeStow = (isEli ? mPilotController.rightBumper() : mPilotController.leftBumper()).and(kUsingPilotGunner);
         Trigger wantToLineAlignToBump = mPilotController.b();
         Trigger wantToLineAlignToTrench = mPilotController.y();
         Trigger wantToOpponentFeed = mGunnerController.a();
         Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
         Trigger wantToInitiateClimb = mGunnerController.povUp().and(kUsingPilotGunner);
         Trigger wantToEndClimb = mGunnerController.povDown().and(kUsingPilotGunner);
-        Trigger wantToStow = new Trigger(() -> false);
+        Trigger wantToStow = mGunnerController.leftBumper().and(kUsingPilotGunner);
 
         Trigger autonomousWorking = new Trigger(() -> true);
         Trigger doesRobotWantToMove = new Trigger(() -> 
@@ -228,9 +234,6 @@ public class ButtonBindings {
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
 
-        
-            
-
         wantToDynamicShoot.and(autonomousWorking)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                 () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
@@ -244,7 +247,7 @@ public class ButtonBindings {
 
         // If at goal, shoot it in
         wantToDynamicShoot.and(shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
-            .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
@@ -271,8 +274,8 @@ public class ButtonBindings {
 
         wantToFeed.or(wantToOpponentFeed).and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
-            // .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
         wantToFeed.or(wantToOpponentFeed).and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(

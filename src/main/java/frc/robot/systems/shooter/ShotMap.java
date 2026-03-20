@@ -20,7 +20,7 @@ public class ShotMap {
 
     private Supplier<Pose2d> robotPose = () -> new Pose2d();
     public double offsetM = 0.0;
-    public double velocityRPSOffset = 0.65;
+    public double velocityRPSOffset = 0.475;
 
     public record ShotMapSetpoint(double distance, Rotation2d pHoodSetpoint, Rotation2d flywheelSpeedPS) {}
 
@@ -32,7 +32,7 @@ public class ShotMap {
         new ShotMapSetpoint(3.25, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(57.5 + velocityRPSOffset)),
         new ShotMapSetpoint(3.75, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(62.5 + velocityRPSOffset)),
         new ShotMapSetpoint(4.17, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(65.5 + velocityRPSOffset)),
-        new ShotMapSetpoint(5.05, Rotation2d.fromDegrees(16.0), Rotation2d.fromRotations(65.5 + velocityRPSOffset))
+        // new ShotMapSetpoint(5.05, Rotation2d.fromDegrees(16.0), Rotation2d.fromRotations(65.5 + velocityRPSOffset))
     };
 
     public InterpolatingDoubleTreeMap distanceVelRPSMap = new InterpolatingDoubleTreeMap();

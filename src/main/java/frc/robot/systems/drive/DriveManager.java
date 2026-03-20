@@ -418,7 +418,7 @@ public class DriveManager {
     @AutoLogOutput(key = "Drive/Tolerance/HeadingController")
     public boolean inHeadingTolerance() {
         /* Accounts for angle wrapping issues with rotation 2D error */
-        return Math.abs(GeomUtil.getSmallestChangeInRotation(
+        return mHeadingController.inTolerance() || Math.abs(GeomUtil.getSmallestChangeInRotation(
             mDrive.getPoseEstimate().getRotation(), 
             mGoalRotationSup.get()).getDegrees())
             < HeadingController.mToleranceDegrees.get();
