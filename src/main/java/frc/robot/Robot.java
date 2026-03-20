@@ -4,7 +4,9 @@ package frc.robot;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.PhoenixUtil;
@@ -49,9 +51,7 @@ public class Robot extends LoggedRobot {
         Logger.recordOutput("GameStates/TELEOPERATED TIME", mTracker.getTeleopTimeLeft());
         Logger.recordOutput("GameStates/PHASE TIME", mTracker.getTimeLeftInPhase());
         Logger.recordOutput("GameStates/AUTONOMOUS TIME", mTracker.getAutonTimeLeft());
-
-
-
+        Logger.recordOutput("IS ACTIVE", mTracker.isHubActive());
     }
 
     @Override
@@ -90,7 +90,9 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void teleopPeriodic() {}
+    public void teleopPeriodic() {
+        SmartDashboard.putNumber("MATCH TIME", DriverStation.getMatchTime());
+    }
 
     @Override
     public void testInit() {
