@@ -261,22 +261,24 @@ public class Drive extends SubsystemBase {
                 speeds.get(), 
                 tDriftRate.get()));
 
-        if(DriverStation.isDisabled()) mPreviousSetpoint = 
-            new SwerveSetpoint(
-                mDesiredSpeeds, 
-                new SwerveModuleState[] {
+        if(DriverStation.isDisabled()) {
+            mDesiredSpeeds = new ChassisSpeeds();
+            mPreviousSetpoint = 
+                new SwerveSetpoint(
+                    mDesiredSpeeds, 
+                    new SwerveModuleState[] {
+                        new SwerveModuleState(
+                            0.0,
+                            mModules[0].getCurrentState().angle),
+                        new SwerveModuleState(
+                            0.0,
+                            mModules[1].getCurrentState().angle),
+                        new SwerveModuleState(
+                            0.0,
+                            mModules[2].getCurrentState().angle),
                     new SwerveModuleState(
-                        0.0,
-                        mModules[0].getCurrentState().angle),
-                    new SwerveModuleState(
-                        0.0,
-                        mModules[1].getCurrentState().angle),
-                    new SwerveModuleState(
-                        0.0,
-                        mModules[2].getCurrentState().angle),
-                    new SwerveModuleState(
-                        0.0,
-                        mModules[3].getCurrentState().angle)
+                            0.0,
+                            mModules[3].getCurrentState().angle)
                 }, 
                 DriveFeedforwards.zeros(4), 
                 new AzimuthFeedForward(new double[] {
