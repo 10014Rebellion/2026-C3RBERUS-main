@@ -312,7 +312,9 @@ public class ButtonBindings {
         wantToIntake
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            // .onTrue(mDriveSS.getDriveManager().setToTeleopSniper())
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+            // .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToOuttake
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
