@@ -286,6 +286,7 @@ public class Drive extends SubsystemBase {
                     0.0, 
                     0.0, 
                     0.0}));
+        }
 
         /* Logs all the possible drive states, great for debugging */
         SwerveHelper.logPossibleDriveStates(
