@@ -53,7 +53,7 @@ public class ButtonBindings {
     private final HoodSS mHoodSS;
     private final FlywheelsSS mFlywheelsSS;
     private final Intake mIntakeSS;
-    private final ClimbSS mClimbSS;
+    // private final ClimbSS mClimbSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
 
@@ -69,13 +69,13 @@ public class ButtonBindings {
 
     private boolean inCenterFlag = false;
 
-    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, ClimbSS pClimbSS) {
+    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake) {
         this.mDriveSS = pDriveSS;
         this.mFuelPumpSS = pFuelPumpSS;
         this.mHoodSS = pHoodSS;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mIntakeSS = pIntake;
-        this.mClimbSS = pClimbSS;
+        // this.mClimbSS = pClimbSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.getDriveManager().setToTeleop());
     }
 
@@ -118,7 +118,6 @@ public class ButtonBindings {
         Trigger wantToInitiateClimb = mGunnerController.povUp().and(kUsingPilotGunner);
         Trigger wantToEndClimb = mGunnerController.povDown().and(kUsingPilotGunner);
         Trigger wantToStow = mGunnerController.leftBumper().and(kUsingPilotGunner);
-
         Trigger autonomousWorking = new Trigger(() -> true);
         Trigger doesRobotWantToMove = new Trigger(() -> 
             (Math.abs(mPilotController.getLeftX()) > 0.1)
@@ -277,12 +276,12 @@ public class ButtonBindings {
                 TurnPointFeedforward.zeroTurnPointFF()))
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        wantToFeed.or(wantToOpponentFeed).and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
+        wantToFeed.and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
-        wantToFeedWithNoCompact.and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
+        wantToFeedWithNoCompact.or(wantToOpponentFeed).and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
 
@@ -346,13 +345,13 @@ public class ButtonBindings {
         wantToTraverse
             .onFalse(noneTraversalHeadingState().andThen(mDriveSS.getDriveManager().setToTeleop()));
 
-        wantToInitiateClimb
-            .onTrue(mClimbSS.goUpTillClimbHeightThenStay())
-            .onFalse(mClimbSS.setStateCmd(ClimbState.STAY));
+        // wantToInitiateClimb
+        //     .onTrue(mClimbSS.goUpTillClimbHeightThenStay())
+        //     .onFalse(mClimbSS.setStateCmd(ClimbState.STAY));
 
-        wantToEndClimb
-            .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed())
-            .onFalse(mClimbSS.setStateCmd(ClimbState.STAY));
+        // wantToEndClimb
+        //     .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed())
+        //     .onFalse(mClimbSS.setStateCmd(ClimbState.STAY));
     }
 
     public void testBindings() {
@@ -468,10 +467,10 @@ public class ButtonBindings {
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
 
-        Trigger climbButton = new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed);
-        climbButton.and(() -> DriverStation.isDisabled() && !DriverStation.isFMSAttached())
-            .onFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
-            .onTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)).ignoringDisable(true));
+        // Trigger climbButton = new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed);
+        // climbButton.and(() -> DriverStation.isDisabled() && !DriverStation.isFMSAttached())
+        //     .onFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
+            // .onTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)).ignoringDisable(true));
     }
 
     public Command rumbleDriverController(){
