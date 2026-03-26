@@ -10,7 +10,6 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -35,8 +34,6 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
     
     private final VoltageOut mFuelPumpVoltageControl = new VoltageOut(0.0);
     private final VelocityVoltage mFuelPumpVelocityControl = new VelocityVoltage(0.0);
-
-    private double mFuelPumpVelocityGoal = 0.0;
 
     private final StatusSignal<ControlModeValue> mFuelPumpControlMode;
     private final StatusSignal<AngularVelocity> mFuelPumpVelocityRPS;
@@ -172,8 +169,6 @@ public class FuelPumpIOKrakenX44 implements FuelPumpIO{
     public void setMotorVelocity(Rotation2d pVelocityRPS, double pFeedforward) {
         if(isLeader()) mFuelPumpMotor.setControl(mFuelPumpVelocityControl.withVelocity(pVelocityRPS.getRotations()).withFeedForward(pFeedforward).withEnableFOC(true));
         else Telemetry.reportIssue(new MotorErrors.SettingControlToFollower(this));
-
-        mFuelPumpVelocityGoal = pVelocityRPS.getRotations();
         Logger.recordOutput("FuelPump/Goal", pVelocityRPS);
     }
 

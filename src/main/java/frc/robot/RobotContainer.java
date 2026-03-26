@@ -48,13 +48,6 @@ import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
-// import frc.robot.systems.climb.ClimbConstants;
-// import frc.robot.systems.climb.ClimbIOKrakenx44;
-// import frc.robot.systems.climb.ClimbIOSim;
-// import frc.robot.systems.climb.ClimbIO;
-// import frc.robot.systems.climb.ClimbSS;
-// import frc.robot.systems.climb.AngularServoIO;
-// import frc.robot.systems.climb.AngularServoIOPWM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
