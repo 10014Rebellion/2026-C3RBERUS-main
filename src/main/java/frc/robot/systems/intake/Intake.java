@@ -8,9 +8,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.systems.intake.pivot.IntakePivotSS;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
+// Intake pivot states migrated to string-based behaviors; use setPivotStateCmd("NAME") or convenience commands.
 import frc.robot.systems.intake.roller.IntakeRollerSS;
-import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 
 public class Intake {
     public static final double tIntakeCompactTime = 0.3;
@@ -23,30 +22,27 @@ public class Intake {
         this.mIntakeRollerSS = pIntakeRollerSS;
     }
 
-    // ROLLER COMMANDS //
-    public Command setRollerStateCmd(IntakeRollerState rollerState) {
-        return mIntakeRollerSS.setStateCmd(rollerState);
-    }
-  
-    public Command stopRollerCmd() {
-        return mIntakeRollerSS.setStateCmd(IntakeRollerState.IDLE);
-    }
+    // ROLLER COMMANDS -- now explicit per-behavior methods
+    public Command rollerIdleCmd() { return mIntakeRollerSS.idleCmd(); }
+    public Command rollerIntakeCmd() { return mIntakeRollerSS.intakeCmd(); }
+    public Command rollerOuttakeCmd() { return mIntakeRollerSS.outtakeCmd(); }
+    public Command rollerTuningCmd() { return mIntakeRollerSS.tuningCmd(); }
 
     // PIVOT COMMANDS //
-    public Command setPivotStateCmd(IntakePivotStates pIntakePivotState) {
+    public Command setPivotStateCmd(String pIntakePivotState) {
         return mIntakePivotSS.setStateCmd(pIntakePivotState);
     }
 
     public Command trashCompactPivotRepeat() {
         return new RepeatCommand(
             new SequentialCommandGroup(
-                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_HIGH).withTimeout(tIntakeCompactTime),
-                mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_LOW).withTimeout(tIntakeCompactTime)
+                mIntakePivotSS.compactHighCmd().withTimeout(tIntakeCompactTime),
+                mIntakePivotSS.compactLowCmd().withTimeout(tIntakeCompactTime)
             )
         );
     }
 
     public Command trashCompactPivotContinuous(){
-        return mIntakePivotSS.setStateCmd(IntakePivotStates.COMPACT_AMPS);
+        return mIntakePivotSS.compactAmpsCmd();
     }
 }

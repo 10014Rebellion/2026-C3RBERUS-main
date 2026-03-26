@@ -7,33 +7,14 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.shooter.ShotMap;
 
 public class HoodSS extends SubsystemBase {
-    public static enum HoodStates {
-        STOPPED,
-        TUNING_VOLTAGE,
-        TUNING_AMPS,
-        INCREMENTING,
-        DECREMENTING,
-        HOLD_POSITION,
-        SHOTMAP_POSITION,
-        STEP_INCREMENT,
-        STEP_DECREMENT,
-
-        // CONSTANT SETPOINTS
-        TUNING_SETPOINT,
-        MAX,
-        MID,
-        MIN,
-        CLOSE_SHOT,
-        TOWER_SHOT,
-        BUMP_SHOT,
-    }
+    // Hood behavior commands replace the previous enum/state-machine.
 
     private final HoodIO mHoodIO;
     private final ArmFeedforward mHoodFF;
@@ -54,8 +35,9 @@ public class HoodSS extends SubsystemBase {
     private final LoggedTunableNumber tHoodTolerance = 
         new LoggedTunableNumber("Shooter/Hood/Control/Tolerance", HoodConstants.kTolerance.getDegrees());
   
+    // For telemetry compatibility we keep a simple string id for the current behavior.
     @AutoLogOutput(key = "Shooter/Hood/States/CurrentState")
-    private HoodStates mCurrentHoodState = HoodStates.STOPPED;
+    private String mCurrentHoodBehavior = "STOPPED";
 
     @AutoLogOutput(key = "Shooter/Hood/LatestClosedLoopGoalRot")
     private Rotation2d mLatestClosedLoopGoalRot = Rotation2d.kZero;
@@ -74,7 +56,7 @@ public class HoodSS extends SubsystemBase {
         mHoodIO.updateInputs(mHoodInputs);
 
         refreshTuneables();
-        executeState();
+        // periodic work is minimal now; behavior commands perform outputs directly.
 
         Logger.processInputs("Hood", mHoodInputs);
     }
@@ -82,63 +64,113 @@ public class HoodSS extends SubsystemBase {
     /*
      * Performs variable updates or parameter intializations when a state is set, SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
-    @SuppressWarnings("incomplete-switch")
-    private void initializeState(HoodStates pStateToInit) {
-        switch (pStateToInit) {
-            case HOLD_POSITION -> {
-                setHoodPosition(mHoodInputs.iHoodAngle);
-            } case STEP_INCREMENT -> {
-                setHoodPosition(mHoodInputs.iHoodAngle.plus(HoodConstants.kAdjustStepAmount));
-            } case STEP_DECREMENT -> {
-                setHoodPosition(mHoodInputs.iHoodAngle.minus(HoodConstants.kAdjustStepAmount));
-            }
-        }
-    }
+    // Per-behavior command factories. Each returns a Command that performs the
+    // same outputs as the old state machine. Commands hold the subsystem while active.
 
-    /*
-     * Runs actions periodically to execute state, SHOULD NOT CHANGE THE STATE THROUGH HERE.
-     */
-    @SuppressWarnings("incomplete-switch")
-    private void executeState() {
-        if(HoodConstants.kStateToSetpointMapHood.containsKey(mCurrentHoodState)) {
-            setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
-        } else {
-            switch (mCurrentHoodState) {
-                case STOPPED -> {
-                    mHoodIO.stopMotor();
-                } case TUNING_VOLTAGE -> {
-                    setHoodVoltage(HoodConstants.tTuningVoltage.get());
-                } case TUNING_AMPS -> {
-                    setHoodAmps(HoodConstants.tTuningAmp.get());
-                } case INCREMENTING -> {
-                    setHoodPosition(mHoodInputs.iHoodAngle.plus(Rotation2d.fromDegrees(1)));
-                } case DECREMENTING -> {
-                    setHoodPosition(mHoodInputs.iHoodAngle.minus(Rotation2d.fromDegrees(1)));
-                } case HOLD_POSITION -> {
-                    setHoodPosition(mLatestClosedLoopGoalRot);
-                } case SHOTMAP_POSITION -> {
-                    setHoodPosition(ShotMap.getInstance().getHoodAngle());
-                }
-            }
-        }
-    }
-
-    public Command setStateCmd(HoodStates pNewState) {
-        return setStateCmd(pNewState, true);
-    }
-
-    public Command setStateCmd(HoodStates pNewState, boolean holdRequirementContinuously) {
-        return new FunctionalCommand(
-            () -> setState(pNewState), 
-            () -> {}, (interrupted) ->  {}, 
-            () -> !holdRequirementContinuously, 
+    // Exposed concise factories (public API). These replace the old setStateCmd/HoodStates API.
+    public Command stopCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "STOPPED"; mHoodIO.stopMotor(); },
+            () -> {},
             this
         );
     }
 
-    private void setState(HoodStates pNewState) {
-        mCurrentHoodState = pNewState;
-        initializeState(pNewState);
+    public Command tuningVoltageCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "TUNING_VOLTAGE"; setHoodVoltage(HoodConstants.tTuningVoltage.get()); },
+            () -> {},
+            this
+        );
+    }
+
+    public Command tuningAmpsCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "TUNING_AMPS"; setHoodAmps(HoodConstants.tTuningAmp.get()); },
+            () -> {},
+            this
+        );
+    }
+
+    public Command incrementingCmd() {
+        return Commands.runOnce(() -> { mCurrentHoodBehavior = "INCREMENTING"; setHoodPosition(mHoodInputs.iHoodAngle.plus(Rotation2d.fromDegrees(1))); });
+    }
+
+    public Command decrementingCmd() {
+        return Commands.runOnce(() -> { mCurrentHoodBehavior = "DECREMENTING"; setHoodPosition(mHoodInputs.iHoodAngle.minus(Rotation2d.fromDegrees(1))); });
+    }
+
+    public Command holdPositionCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "HOLD_POSITION"; setHoodPosition(mHoodInputs.iHoodAngle); },
+            () -> {},
+            this
+        );
+    }
+
+    public Command shotmapPositionCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "SHOTMAP_POSITION"; setHoodPosition(ShotMap.getInstance().getHoodAngle()); },
+            () -> {},
+            this
+        );
+    }
+
+    public Command stepIncrementCmd() { return incrementingCmd(); }
+    public Command stepDecrementCmd() { return decrementingCmd(); }
+
+    public Command tuningSetpointCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "TUNING_SETPOINT"; setHoodPosition(Rotation2d.fromDegrees(HoodConstants.tTuningShotSetpointDeg.get())); },
+            () -> {}, this
+        );
+    }
+
+    public Command maxCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "MAX"; setHoodPosition(Rotation2d.fromDegrees(HoodConstants.tMaxSetpointDeg.get())); },
+            () -> {}, this
+        );
+    }
+
+    public Command midCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "MID"; setHoodPosition(Rotation2d.fromDegrees(HoodConstants.tMidSetpointDeg.get())); },
+            () -> {}, this
+        );
+    }
+
+    public Command minCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "MIN"; setHoodPosition(Rotation2d.fromDegrees(HoodConstants.tMinSetpointDeg.get())); },
+            () -> {}, this
+        );
+    }
+
+    public Command closeShotCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "CLOSE_SHOT"; setHoodPosition(Rotation2d.fromDegrees(HoodConstants.tCloseShotSetpointDeg.get())); },
+            () -> {}, this
+        );
+    }
+
+    public Command towerShotCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "TOWER_SHOT"; setHoodPosition(Rotation2d.fromDegrees(HoodConstants.tTowerShotSetpointDeg.get())); },
+            () -> {}, this
+        );
+    }
+
+    public Command bumpShotCmd() {
+        return Commands.startEnd(
+            () -> { mCurrentHoodBehavior = "BUMP_SHOT"; setHoodPosition(Rotation2d.fromDegrees(HoodConstants.tBumpShotSetpointDeg.get())); },
+            () -> {}, this
+        );
+    }
+
+    // Return a lightweight token representing the current behavior to let callers snapshot/restore.
+    public String getHoodState() {
+        return mCurrentHoodBehavior;
     }
 
     private void setHoodPosition(Rotation2d pRot) {
@@ -205,8 +237,28 @@ public class HoodSS extends SubsystemBase {
         mHoodFF.setKa(kA);
     }
 
-    public HoodStates getHoodState() {
-        return mCurrentHoodState;
+    // Restore a previously-captured behavior id by returning the corresponding Command.
+    public Command restoreBehaviorCmd(String id) {
+        if (id == null) return stopCmd();
+        return switch (id) {
+            case "STOPPED" -> stopCmd();
+            case "TUNING_VOLTAGE" -> tuningVoltageCmd();
+            case "TUNING_AMPS" -> tuningAmpsCmd();
+            case "INCREMENTING" -> incrementingCmd();
+            case "DECREMENTING" -> decrementingCmd();
+            case "HOLD_POSITION" -> holdPositionCmd();
+            case "SHOTMAP_POSITION" -> shotmapPositionCmd();
+            case "STEP_INCREMENT" -> stepIncrementCmd();
+            case "STEP_DECREMENT" -> stepDecrementCmd();
+            case "TUNING_SETPOINT" -> tuningSetpointCmd();
+            case "MAX" -> maxCmd();
+            case "MID" -> midCmd();
+            case "MIN" -> minCmd();
+            case "CLOSE_SHOT" -> closeShotCmd();
+            case "TOWER_SHOT" -> towerShotCmd();
+            case "BUMP_SHOT" -> bumpShotCmd();
+            default -> stopCmd();
+        };
     }
   
     @AutoLogOutput(key = "Shooter/Hood/Feedback/ErrorRotation")

@@ -8,7 +8,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.RobotConstants;
-import frc.robot.systems.climb.ClimbSS.ClimbState;
+// ClimbState enum migrated to per-behavior command factories; use String keys here.
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
@@ -27,13 +27,13 @@ public class ClimbConstants {
         public static final LoggedTunableNumber kClimbStayRobot = new LoggedTunableNumber("Climb/StayRobotVoltage", 0.0);
     public static final LoggedTunableNumber kClimbIdle = new LoggedTunableNumber("Climb/IdleVoltage", 0.0);
 
-    public static final HashMap<ClimbState, LoggedTunableNumber> kStateToVoltage = new HashMap<>();
+    public static final java.util.HashMap<String, LoggedTunableNumber> kStateToVoltage = new java.util.HashMap<>();
     static {
-        kStateToVoltage.put(ClimbState.UP, kClimbUp);
-        kStateToVoltage.put(ClimbState.DOWN, kClimbDown);
-        kStateToVoltage.put(ClimbState.STAY, kClimbStay);
-        kStateToVoltage.put(ClimbState.STAY_ROBOT, kClimbStayRobot);
-        kStateToVoltage.put(ClimbState.IDLE, kClimbIdle);
+        kStateToVoltage.put("UP", kClimbUp);
+        kStateToVoltage.put("DOWN", kClimbDown);
+        kStateToVoltage.put("STAY", kClimbStay);
+        kStateToVoltage.put("STAY_ROBOT", kClimbStayRobot);
+        kStateToVoltage.put("IDLE", kClimbIdle);
     }
 
     public static final double kClimbHeight = 2.4;//changes values to fix encoder readings: Arya

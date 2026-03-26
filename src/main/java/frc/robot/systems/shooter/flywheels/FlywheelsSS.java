@@ -4,7 +4,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
@@ -17,21 +17,7 @@ import static frc.robot.systems.shooter.flywheels.FlywheelConstants.kFlywheelCon
 
 
 public class FlywheelsSS extends SubsystemBase {
-  public static enum FlywheelStates {
-    STOPPED,
-    STANDBY_VOLTAGE,
-    TUNING_VOLTAGE,
-    MAX_VOLTAGE,
-    TUNING_VELOCITY,
-    FEED_VELOCITY,
-    OPPONENT_FEED_VELOCITY,
-    CLOSE_VELOCITY,
-    TOWER_VELOCITY,
-    BUMP_VELOCITY,
-    MAX_VELOCITY,
-    SHOTMAP_VELOCITY,
-    STANDBY_VELOCITY
-  }
+  // Behavior id for telemetry and restore semantics.
 
   private final FlywheelIO mLeaderFlywheelIO;
   private final FlywheelIO mFollowerFlywheelIO;
@@ -54,7 +40,7 @@ public class FlywheelsSS extends SubsystemBase {
   private Rotation2d mLastestClosedLoopGoalRPS = Rotation2d.kZero;
 
   @AutoLogOutput(key = "Shooter/Flywheel/States/CurrentState")
-  private FlywheelStates mCurrentFlywheelState = FlywheelStates.STOPPED;
+  private String mCurrentFlywheelBehavior = "STOPPED";
 
   public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
     this.mLeaderFlywheelIO = pLeaderFlywheelIO;
@@ -68,33 +54,15 @@ public class FlywheelsSS extends SubsystemBase {
     mFollowerFlywheelIO.updateInputs(mFollowerFlywheelInputs);
     mFlywheelEncoder.updateInputs(mEncoderInputs);
     
-    refreshTuneables();
-    executeState();
+  refreshTuneables();
+  // Behavior commands manage outputs; no enum-driven execute loop.
     
     Logger.processInputs("Shooter/Flywheel/Leader", mLeaderFlywheelInputs);
     Logger.processInputs("Shooter/Flywheel/Follower", mFollowerFlywheelInputs);
     Logger.processInputs("Shooter/Flywheel/Encoder", mEncoderInputs);
   }
 
-  private void executeState() {
-    if(FlywheelConstants.kFlywheelSetpointToVelocity.containsKey(mCurrentFlywheelState)) {
-      setFlywheelVelocity(FlywheelConstants.kFlywheelSetpointToVelocity.get(mCurrentFlywheelState).get());
-    } else if(FlywheelConstants.kFlywheelSetpointToVoltageTuneable.containsKey(mCurrentFlywheelState)) {
-      setFlywheelVoltage(FlywheelConstants.kFlywheelSetpointToVoltageTuneable.get(mCurrentFlywheelState).get());
-    } else{
-      switch (mCurrentFlywheelState) {
-        case STOPPED -> {
-          stopFlywheels();
-        }
-        case SHOTMAP_VELOCITY -> {
-          setFlywheelVelocity(ShotMap.getInstance().getFlywheelVel());
-        }
-        default -> {
-          Telemetry.reportIssue(new UnaccountedEnum(mCurrentFlywheelState.toString()));
-        }
-      }
-    }
-  }
+  // Per-behavior command factories
 
   private void stopFlywheels() {
     mLeaderFlywheelIO.stopMotor();
@@ -116,21 +84,37 @@ public class FlywheelsSS extends SubsystemBase {
     mFollowerFlywheelIO.enforceFollower();
   }
 
-  public Command setStateCmd(FlywheelStates pNewState) {
-    return setStateCmd(pNewState, true);
+  // Public factories
+  public Command stoppedCmd() {
+    return Commands.startEnd(() -> { mCurrentFlywheelBehavior = "STOPPED"; stopFlywheels(); }, () -> {}, this);
   }
 
-  public Command setStateCmd(FlywheelStates pNewState, boolean holdRequirementContinuously) {
-    return new FunctionalCommand(
-      () -> setState(pNewState), 
-      () -> {}, (interrupted) ->  {}, 
-      () -> !holdRequirementContinuously, 
-      this
-    );
+  public Command standbyVoltageCmd() {
+    return Commands.startEnd(() -> { mCurrentFlywheelBehavior = "STANDBY_VOLTAGE"; setFlywheelVoltage(FlywheelConstants.tStandbyVoltage.get()); }, () -> {}, this);
   }
 
-  private void setState(FlywheelStates pNewState) {
-    mCurrentFlywheelState = pNewState;
+  public Command tuningVoltageCmd() {
+    return Commands.startEnd(() -> { mCurrentFlywheelBehavior = "TUNING_VOLTAGE"; setFlywheelVoltage(FlywheelConstants.tTuningVoltage.get()); }, () -> {}, this);
+  }
+
+  public Command maxVoltageCmd() {
+    return Commands.startEnd(() -> { mCurrentFlywheelBehavior = "MAX_VOLTAGE"; setFlywheelVoltage(FlywheelConstants.tMaxVoltage.get()); }, () -> {}, this);
+  }
+
+  private Command makeVelocityCmd(String id, LoggedTunableNumber velocity) {
+    return Commands.startEnd(() -> { mCurrentFlywheelBehavior = id; setFlywheelVelocity(Rotation2d.fromRotations(velocity.get())); }, () -> {}, this);
+  }
+
+  public Command tuningVelocityCmd() { return makeVelocityCmd("TUNING_VELOCITY", FlywheelConstants.tTuningVelocity); }
+  public Command feedVelocityCmd() { return makeVelocityCmd("FEED_VELOCITY", FlywheelConstants.tFeedVelocity); }
+  public Command opponentFeedVelocityCmd() { return makeVelocityCmd("OPPONENT_FEED_VELOCITY", FlywheelConstants.tOpponentFeedVelocity); }
+  public Command closeVelocityCmd() { return makeVelocityCmd("CLOSE_VELOCITY", FlywheelConstants.tCloseVelocity); }
+  public Command towerVelocityCmd() { return makeVelocityCmd("TOWER_VELOCITY", FlywheelConstants.tTowerVelocity); }
+  public Command bumpVelocityCmd() { return makeVelocityCmd("BUMP_VELOCITY", FlywheelConstants.tBumpVelocity); }
+  public Command maxVelocityCmd() { return makeVelocityCmd("MAX_VELOCITY", FlywheelConstants.tMaxVelocity); }
+
+  public Command shotmapVelocityCmd() {
+    return Commands.startEnd(() -> { mCurrentFlywheelBehavior = "SHOTMAP_VELOCITY"; setFlywheelVelocity(ShotMap.getInstance().getFlywheelVel()); }, () -> {}, this);
   }
 
   public Rotation2d getFlywheelRPS() {
@@ -148,9 +132,7 @@ public class FlywheelsSS extends SubsystemBase {
     kFlywheelControlConfig.feedforward().setKa(pKA);
   }
 
-  public FlywheelStates getFlywheelState() {
-    return mCurrentFlywheelState;
-  }
+  public String getFlywheelState() { return mCurrentFlywheelBehavior; }
 
   @AutoLogOutput(key = "Shooter/Flywheel/Feedback/ErrorRPS")
   public double getErrorRPS() {

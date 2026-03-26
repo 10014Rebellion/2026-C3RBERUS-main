@@ -4,29 +4,16 @@
 
 package frc.robot.systems.intake.roller;
 
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
-
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.systems.intake.IntakeConstants;
 
 public class IntakeRollerSS extends SubsystemBase {
-    public static enum IntakeRollerState {
-        IDLE,
-        INTAKE,
-        OUTTAKE,
-        TUNING,
-        INVALID;
-    }
-
     private final IntakeRollerIO mIntakeRollerIO;
     private final IntakeRollerInputsAutoLogged mIntakeRollerInputs = new IntakeRollerInputsAutoLogged();
-
-    @AutoLogOutput(key="IntakeRoller/State")
-    private IntakeRollerState mIntakeRollerState = IntakeRollerState.IDLE;
 
     public IntakeRollerSS(IntakeRollerIO pIntakeRollerIO) {
         this.mIntakeRollerIO = pIntakeRollerIO;
@@ -36,27 +23,40 @@ public class IntakeRollerSS extends SubsystemBase {
     public void periodic() {
         mIntakeRollerIO.updateInputs(mIntakeRollerInputs);
         Logger.processInputs("Intake/Roller", mIntakeRollerInputs);
+    }
+    // Commands that encapsulate the previous per-state output logic. Each command
+    // sets the motor voltage for the corresponding behavior and holds until
+    // interrupted (matching the prior setStateCmd behavior).
 
-        executeState();
+    public Command idleCmd() {
+        return Commands.startEnd(
+            () -> mIntakeRollerIO.setMotorVolts(IntakeConstants.RollerConstants.tIdleTuningVoltage.get()),
+            () -> {},
+            this
+        );
     }
 
-    public void executeState() {
-        switch (mIntakeRollerState) {
-            case IDLE, INTAKE, OUTTAKE, TUNING -> {
-                mIntakeRollerIO.setMotorVolts(
-                    IntakeConstants.RollerConstants.kStateToIntakeVoltage.get(mIntakeRollerState).get());
-            } 
-            case INVALID -> {}
-            default -> {}
-        }
+    public Command intakeCmd() {
+        return Commands.startEnd(
+            () -> mIntakeRollerIO.setMotorVolts(IntakeConstants.RollerConstants.tIntakeTuningVoltage.get()),
+            () -> {},
+            this
+        );
     }
-  
-    public Command setStateCmd(IntakeRollerState pIntakeRollerState) {
-        return new FunctionalCommand(
-            () -> mIntakeRollerState = pIntakeRollerState, 
-            () -> {}, 
-            (interrupted) -> {}, 
-            () -> false, 
-            this);
+
+    public Command outtakeCmd() {
+        return Commands.startEnd(
+            () -> mIntakeRollerIO.setMotorVolts(IntakeConstants.RollerConstants.tOuttakeTuningVoltage.get()),
+            () -> {},
+            this
+        );
+    }
+
+    public Command tuningCmd() {
+        return Commands.startEnd(
+            () -> mIntakeRollerIO.setMotorVolts(IntakeConstants.RollerConstants.tRollerTuningVoltage.get()),
+            () -> {},
+            this
+        );
     }
 }

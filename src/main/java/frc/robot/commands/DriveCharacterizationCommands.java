@@ -5,7 +5,6 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.tuning.SysIDCharacterization;
 import frc.robot.systems.drive.Drive;
 
@@ -75,17 +74,17 @@ public class DriveCharacterizationCommands {
     }
 
     public static Command characterizeAzimuthsVoltage(DoubleSupplier voltage, Drive pDrive, int... pModNumbers) {
-        return new FunctionalCommand(
-            () -> pDrive.getDriveManager().setToSysIDCharacterization().initialize(), 
+        // Initialize characterization once, then continuously apply the requested azimuth voltage
+        return Commands.startEnd(
+            () -> pDrive.getDriveManager().setToSysIDCharacterization().initialize(),
             () -> {
-                for(int moduleNumber : pModNumbers) {
+                for (int moduleNumber : pModNumbers) {
                     pDrive.getModules()[moduleNumber].setDriveVoltage(0.0);
                     pDrive.getModules()[moduleNumber].setAzimuthVoltage(voltage.getAsDouble());
                 }
-            }, 
-            (interrupted) -> {}, 
-            () -> false, 
-            pDrive);
+            },
+            pDrive
+        );
     }
 
     public static Command testAzimuthsAmps(Drive pDrive, int... pModNumber) {
@@ -93,16 +92,16 @@ public class DriveCharacterizationCommands {
     }
 
     public static Command characterizeAzimuthsAmps(DoubleSupplier amps, Drive pDrive, int... pModNumbers) {
-        return new FunctionalCommand(
-            () -> pDrive.getDriveManager().setToSysIDCharacterization().initialize(), 
+        // Initialize characterization once, then continuously apply the requested azimuth amperage
+        return Commands.startEnd(
+            () -> pDrive.getDriveManager().setToSysIDCharacterization().initialize(),
             () -> {
-                for(int moduleNumber : pModNumbers) {
+                for (int moduleNumber : pModNumbers) {
                     pDrive.getModules()[moduleNumber].setDriveVoltage(0.0);
                     pDrive.getModules()[moduleNumber].setAzimuthAmps(amps.getAsDouble());
                 }
-            }, 
-            (interrupted) -> {}, 
-            () -> false, 
-            pDrive);
+            },
+            pDrive
+        );
     }
 }

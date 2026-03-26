@@ -19,7 +19,7 @@ import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.RelativeCANCoderHardware;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.RobotConstants;
-import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
+// FlywheelStates enum migrated to per-behavior commands; use string keys here.
 
 public class FlywheelConstants {
     public static final double kMaxFlywheelTestedRPS = 115;
@@ -54,8 +54,8 @@ public class FlywheelConstants {
         new MotionMagicConstants(0.0, 1000.0, 0.0)
     );
 
-    public static final HashMap<FlywheelStates, LoggedTunableNumber> kFlywheelSetpointToVoltageTuneable = new HashMap<FlywheelStates, LoggedTunableNumber>();
-    public static final HashMap<FlywheelStates, Supplier<Rotation2d>> kFlywheelSetpointToVelocity = new HashMap<FlywheelStates, Supplier<Rotation2d>>();
+    public static final HashMap<String, LoggedTunableNumber> kFlywheelSetpointToVoltageTuneable = new HashMap<String, LoggedTunableNumber>();
+    public static final HashMap<String, Supplier<Rotation2d>> kFlywheelSetpointToVelocity = new HashMap<String, Supplier<Rotation2d>>();
 
     public static final LoggedTunableNumber tStandbyVoltage = new LoggedTunableNumber("Shooter/Flywheel/SetpointsVoltage/StandbyVoltage", 0.0);
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/Flywheel/SetpointsVoltage/TuneVoltage", 0.0);
@@ -71,16 +71,16 @@ public class FlywheelConstants {
 
 
     static {
-        kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.STANDBY_VOLTAGE, tStandbyVoltage);
-        kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.TUNING_VOLTAGE, tTuningVoltage);
-        kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.MAX_VOLTAGE, tMaxVoltage);
-        kFlywheelSetpointToVelocity.put(FlywheelStates.TUNING_VELOCITY, () -> Rotation2d.fromRotations(tTuningVelocity.get()));
-        kFlywheelSetpointToVelocity.put(FlywheelStates.FEED_VELOCITY, () -> Rotation2d.fromRotations(tFeedVelocity.get()));
-        kFlywheelSetpointToVelocity.put(FlywheelStates.OPPONENT_FEED_VELOCITY, () -> Rotation2d.fromRotations(tOpponentFeedVelocity.get()));
-        kFlywheelSetpointToVelocity.put(FlywheelStates.CLOSE_VELOCITY, () -> Rotation2d.fromRotations(tCloseVelocity.get()));
-        kFlywheelSetpointToVelocity.put(FlywheelStates.TOWER_VELOCITY, () -> Rotation2d.fromRotations(tTowerVelocity.get()));
-        kFlywheelSetpointToVelocity.put(FlywheelStates.BUMP_VELOCITY, () -> Rotation2d.fromRotations(tBumpVelocity.get()));
-        kFlywheelSetpointToVelocity.put(FlywheelStates.MAX_VELOCITY, () -> Rotation2d.fromRotations(tMaxVelocity.get()));
-        kFlywheelSetpointToVelocity.put(FlywheelStates.STANDBY_VELOCITY, () -> Rotation2d.fromRotations(tStandbyVelocity.get()));
+    kFlywheelSetpointToVoltageTuneable.put("STANDBY_VOLTAGE", tStandbyVoltage);
+    kFlywheelSetpointToVoltageTuneable.put("TUNING_VOLTAGE", tTuningVoltage);
+    kFlywheelSetpointToVoltageTuneable.put("MAX_VOLTAGE", tMaxVoltage);
+    kFlywheelSetpointToVelocity.put("TUNING_VELOCITY", () -> Rotation2d.fromRotations(tTuningVelocity.get()));
+    kFlywheelSetpointToVelocity.put("FEED_VELOCITY", () -> Rotation2d.fromRotations(tFeedVelocity.get()));
+    kFlywheelSetpointToVelocity.put("OPPONENT_FEED_VELOCITY", () -> Rotation2d.fromRotations(tOpponentFeedVelocity.get()));
+    kFlywheelSetpointToVelocity.put("CLOSE_VELOCITY", () -> Rotation2d.fromRotations(tCloseVelocity.get()));
+    kFlywheelSetpointToVelocity.put("TOWER_VELOCITY", () -> Rotation2d.fromRotations(tTowerVelocity.get()));
+    kFlywheelSetpointToVelocity.put("BUMP_VELOCITY", () -> Rotation2d.fromRotations(tBumpVelocity.get()));
+    kFlywheelSetpointToVelocity.put("MAX_VELOCITY", () -> Rotation2d.fromRotations(tMaxVelocity.get()));
+    kFlywheelSetpointToVelocity.put("STANDBY_VELOCITY", () -> Rotation2d.fromRotations(tStandbyVelocity.get()));
     }
 }

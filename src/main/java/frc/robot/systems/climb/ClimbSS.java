@@ -4,30 +4,25 @@
 
 package frc.robot.systems.climb;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimbSS extends SubsystemBase {
-    public enum ClimbState {
-        UP,
-        DOWN,
-        STAY,
-        STAY_ROBOT,
-        IDLE,
-        INVALID;
-    }
-  
+    // Behavior IDs (string keys) used for telemetry and restore semantics
     private final ClimbIO mClimbIO;
     private final ClimbInputsAutoLogged mClimbInputs = new ClimbInputsAutoLogged();
 
     private final AngularServoIO mServo;
 
-    private ClimbState mClimbState = ClimbState.IDLE;
+    @AutoLogOutput(key = "Climb/State")
+    private String mCurrentClimbBehavior = "IDLE";
+
     private int mDesiredDirection = 0;
     private boolean mLimitEnforced = false;
 
@@ -41,47 +36,49 @@ public class ClimbSS extends SubsystemBase {
         mClimbIO.updateInputs(mClimbInputs);
         Logger.processInputs("Climb", mClimbInputs);
         Logger.recordOutput("Climb/LimitsEnforced", mLimitEnforced);
-        Logger.recordOutput("Climb/State", mClimbState);
+        // mCurrentClimbBehavior is AutoLogged above
         executeState();
     }
 
-    public void initiateState(ClimbState pClimbState) {
-        mClimbState = pClimbState;
+    public void initiateState(String pClimbState) {
+        mCurrentClimbBehavior = pClimbState;
     }
 
     public void executeState() {
-        switch (mClimbState) {
-            case UP, DOWN, STAY, STAY_ROBOT -> {
-                setClimbVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
+        switch (mCurrentClimbBehavior) {
+            case "UP", "DOWN", "STAY", "STAY_ROBOT" -> {
+                setClimbVolts(ClimbConstants.kStateToVoltage.get(mCurrentClimbBehavior).get());
                 mServo.setPosition(ClimbConstants.kHookOutPosition);
             }
-            case IDLE -> {
-                setClimbVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
+            case "IDLE" -> {
+                setClimbVolts(ClimbConstants.kStateToVoltage.get(mCurrentClimbBehavior).get());
                 mServo.setPosition(ClimbConstants.kHookInPosition);
-            } case INVALID -> {}
+            }
             default  -> {}
         }
     }
 
-    public Command setStateCmd(ClimbState pState) {
-        return new FunctionalCommand(
-            () -> initiateState(pState), 
-            () -> {}, 
-            (interrupted) -> {}, 
-            () -> false, 
-            this);
+    /* Generic replacement for the old setStateCmd — accepts a string behavior id. */
+    public Command setStateCmd(String pNewBehavior) { return setStateCmd(pNewBehavior, true); }
+
+    public Command setStateCmd(String pNewBehavior, boolean holdRequirementContinuously) {
+        if (holdRequirementContinuously) {
+            return Commands.startEnd(() -> setState(pNewBehavior), () -> {}, this);
+        } else {
+            return Commands.runOnce(() -> setState(pNewBehavior));
+        }
     }
 
     public Command goUpTillClimbHeightThenStay() {
-        return setStateCmd(ClimbState.UP)
+        return setStateCmd("UP")
             .until(() -> mClimbInputs.iClimbPositionMeters > ClimbConstants.kClimbHeight)
-            .andThen(setStateCmd(ClimbState.STAY));
+            .andThen(setStateCmd("STAY"));
     }
 
     public Command goDownTillClimbedThenStayClimbed() {
-        return setStateCmd(ClimbState.DOWN)
+        return setStateCmd("DOWN")
             .until(() -> mClimbInputs.iClimbPositionMeters < ClimbConstants.kClimbedHeight)
-            .andThen(setStateCmd(ClimbState.STAY_ROBOT));
+            .andThen(setStateCmd("STAY_ROBOT"));
     }
 
     public void setClimbVolts(double pVolts) {
@@ -117,4 +114,25 @@ public class ClimbSS extends SubsystemBase {
         if(val < 0) return -1;
         else return 0;
     }
+
+    /* Generic state setter used by the command factories */
+    private void setState(String pNewBehavior) {
+        // no-op end/initialize hooks for now, but keep for parity with other SS
+        endState(mCurrentClimbBehavior);
+        mCurrentClimbBehavior = pNewBehavior;
+        initializeState(pNewBehavior);
+    }
+
+    @SuppressWarnings("unused")
+    private void initializeState(String pBehaviorToInit) { }
+
+    @SuppressWarnings("unused")
+    private void endState(String pBehaviorToEnd) { }
+
+    /* Convenience command factories for Climb states */
+    public Command upCmd() { return setStateCmd("UP"); }
+    public Command downCmd() { return setStateCmd("DOWN"); }
+    public Command stayCmd() { return setStateCmd("STAY"); }
+    public Command stayRobotCmd() { return setStateCmd("STAY_ROBOT"); }
+    public Command idleCmd() { return setStateCmd("IDLE"); }
 }

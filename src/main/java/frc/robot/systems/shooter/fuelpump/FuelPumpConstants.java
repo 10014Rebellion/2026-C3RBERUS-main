@@ -16,8 +16,6 @@ import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.SimpleController;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.RobotConstants;
-import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
-
 public class FuelPumpConstants {
     public static final double kToleranceRPS = 3.0;
     public static final Rotation2d kRPSForShooting = Rotation2d.fromRotations(80);
@@ -43,8 +41,8 @@ public class FuelPumpConstants {
         new SimpleMotorFeedforward(0, 9.7)
     );
 
-    public static final HashMap<FuelPumpState, LoggedTunableNumber> kStateToTuneableFuelPumpVolts = new HashMap<FuelPumpState, LoggedTunableNumber>();
-    public static final HashMap<FuelPumpState, Supplier<Rotation2d>> kStateToTuneableFuelPumpVelocity = new HashMap<FuelPumpState, Supplier<Rotation2d>>();
+    public static final HashMap<String, LoggedTunableNumber> kStateToTuneableFuelPumpVolts = new HashMap<String, LoggedTunableNumber>();
+    public static final HashMap<String, Supplier<Rotation2d>> kStateToTuneableFuelPumpVelocity = new HashMap<String, Supplier<Rotation2d>>();
 
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/FuelPump/TuneVoltage", 0.0);
     public static final LoggedTunableNumber tIntakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/IntakeVolts", 6);
@@ -52,8 +50,8 @@ public class FuelPumpConstants {
     public static final LoggedTunableNumber tIntakeVelocity = new LoggedTunableNumber("Shooter/FuelPump/DesiredVelocity/IntakeVelocity", 40.0);
 
     static {
-        kStateToTuneableFuelPumpVolts.put(FuelPumpState.INTAKE_VOLT, tIntakeVolts);
-        kStateToTuneableFuelPumpVolts.put(FuelPumpState.OUTTAKE_VOLT, tOuttakeVolts);
-        kStateToTuneableFuelPumpVelocity.put(FuelPumpState.INTAKE_VELOCITY, () -> Rotation2d.fromRotations(tIntakeVelocity.get()));
+    kStateToTuneableFuelPumpVolts.put("INTAKE_VOLT", tIntakeVolts);
+    kStateToTuneableFuelPumpVolts.put("OUTTAKE_VOLT", tOuttakeVolts);
+    kStateToTuneableFuelPumpVelocity.put("INTAKE_VELOCITY", () -> Rotation2d.fromRotations(tIntakeVelocity.get()));
     }
 }

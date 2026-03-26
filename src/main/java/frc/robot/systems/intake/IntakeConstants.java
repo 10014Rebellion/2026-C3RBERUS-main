@@ -10,8 +10,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.RobotConstants;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
-import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
+// IntakePivotStates enum removed; intake pivot behaviors are referenced by string keys now.
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CANdiEncoder;
@@ -94,15 +93,15 @@ public class IntakeConstants {
         public static final Supplier<Rotation2d> kTuningShotSetpointSup = () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get());
 
 
-        public static final HashMap<IntakePivotStates, Supplier<Rotation2d>> kStateToSetpointMapIntake = new HashMap<IntakePivotStates, Supplier<Rotation2d>>();
+        public static final HashMap<String, Supplier<Rotation2d>> kStateToSetpointMapIntake = new HashMap<String, Supplier<Rotation2d>>();
 
         static {
-            kStateToSetpointMapIntake.put(IntakePivotStates.STOW, kStowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.SAFESTOW, kSafeStowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_HIGH, kCompactHighSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_LOW, kCompactLowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.INTAKE, kIntakeSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.TUNING_SETPOINT, kTuningShotSetpointSup);
+            kStateToSetpointMapIntake.put("STOW", kStowSetpointSup);
+            kStateToSetpointMapIntake.put("SAFESTOW", kSafeStowSetpointSup);
+            kStateToSetpointMapIntake.put("COMPACT_HIGH", kCompactHighSetpointSup);
+            kStateToSetpointMapIntake.put("COMPACT_LOW", kCompactLowSetpointSup);
+            kStateToSetpointMapIntake.put("INTAKE", kIntakeSetpointSup);
+            kStateToSetpointMapIntake.put("TUNING_SETPOINT", kTuningShotSetpointSup);
         }
     }
 
@@ -120,13 +119,6 @@ public class IntakeConstants {
         public static final LoggedTunableNumber tIntakeTuningVoltage = new LoggedTunableNumber("Intake/Voltage/INTAKE", 11.014);
         public static final LoggedTunableNumber tOuttakeTuningVoltage = new LoggedTunableNumber("Intake/Voltage/OUTTAKE", -10.014);
         public static final LoggedTunableNumber tRollerTuningVoltage = new LoggedTunableNumber("Intake/Voltage/TUNING", 0.0);
-        public static final HashMap<IntakeRollerState, LoggedTunableNumber> kStateToIntakeVoltage = new HashMap<>();
-
-        static {
-            kStateToIntakeVoltage.put(IntakeRollerState.IDLE, tIdleTuningVoltage);
-            kStateToIntakeVoltage.put(IntakeRollerState.INTAKE, tIntakeTuningVoltage);
-            kStateToIntakeVoltage.put(IntakeRollerState.OUTTAKE, tOuttakeTuningVoltage);
-            kStateToIntakeVoltage.put(IntakeRollerState.TUNING, tRollerTuningVoltage);
-        }
+        // Deprecated: previous enum-to-voltage map removed in favor of explicit commands
     }
 }

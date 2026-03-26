@@ -22,7 +22,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
@@ -211,12 +210,8 @@ public class DriveManager {
 
     /* Set's state initially, and doesn't end till interruped by another drive command */
     public Command setDriveStateCommandContinued(DriveState state) {
-        return new FunctionalCommand(
-            () -> setDriveState(state), 
-            () -> {}, (interrupted) -> {}, 
-            () -> false, 
-            mDrive
-        );
+        // Start the drive state on initialize and hold the drive subsystem until interrupted.
+        return Commands.startEnd(() -> setDriveState(state), () -> {}, mDrive);
     }
     
     /*

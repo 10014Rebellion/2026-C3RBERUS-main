@@ -17,7 +17,7 @@ import frc.lib.hardware.HardwareRecords.PDConstants;
 import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.RobotConstants;
-import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
+// HoodStates enum was migrated to command factories; constants use string IDs now.
 
 public class HoodConstants {
     public static final BasicMotorHardware kHoodConfig = new BasicMotorHardware(
@@ -50,7 +50,7 @@ public class HoodConstants {
     public static final double kHoodMass = Units.inchesToMeters(1.258);
 
     // Only add states that have constant setpoint throughout a real match.
-    public static final HashMap<HoodStates, Supplier<Rotation2d>> kStateToSetpointMapHood = new HashMap<HoodStates, Supplier<Rotation2d>>();
+    public static final HashMap<String, Supplier<Rotation2d>> kStateToSetpointMapHood = new HashMap<String, Supplier<Rotation2d>>();
 
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Hood/TuneVoltage", 0.0);
     public static final LoggedTunableNumber tTuningAmp = new LoggedTunableNumber("Hood/TuneAmperage", 0.0);
@@ -64,13 +64,13 @@ public class HoodConstants {
     public static final LoggedTunableNumber tIncrementSpeedDPS = new LoggedTunableNumber("Hood/IncrementSpeedDPS", 1.0);
 
     static {
-        kStateToSetpointMapHood.put(HoodStates.MAX, () -> Rotation2d.fromDegrees(tMaxSetpointDeg.get()));
-        kStateToSetpointMapHood.put(HoodStates.MID, () -> Rotation2d.fromDegrees(tMidSetpointDeg.get()));
-        kStateToSetpointMapHood.put(HoodStates.MIN, () -> Rotation2d.fromDegrees(tMinSetpointDeg.get()));
-        kStateToSetpointMapHood.put(HoodStates.CLOSE_SHOT, () -> Rotation2d.fromDegrees(tCloseShotSetpointDeg.get()));
-        kStateToSetpointMapHood.put(HoodStates.TOWER_SHOT, () -> Rotation2d.fromDegrees(tTowerShotSetpointDeg.get()));
-        kStateToSetpointMapHood.put(HoodStates.BUMP_SHOT, () -> Rotation2d.fromDegrees(tBumpShotSetpointDeg.get()));
-        kStateToSetpointMapHood.put(HoodStates.TUNING_SETPOINT, () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get()));
+    kStateToSetpointMapHood.put("MAX", () -> Rotation2d.fromDegrees(tMaxSetpointDeg.get()));
+    kStateToSetpointMapHood.put("MID", () -> Rotation2d.fromDegrees(tMidSetpointDeg.get()));
+    kStateToSetpointMapHood.put("MIN", () -> Rotation2d.fromDegrees(tMinSetpointDeg.get()));
+    kStateToSetpointMapHood.put("CLOSE_SHOT", () -> Rotation2d.fromDegrees(tCloseShotSetpointDeg.get()));
+    kStateToSetpointMapHood.put("TOWER_SHOT", () -> Rotation2d.fromDegrees(tTowerShotSetpointDeg.get()));
+    kStateToSetpointMapHood.put("BUMP_SHOT", () -> Rotation2d.fromDegrees(tBumpShotSetpointDeg.get()));
+    kStateToSetpointMapHood.put("TUNING_SETPOINT", () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get()));
     }
 
 }

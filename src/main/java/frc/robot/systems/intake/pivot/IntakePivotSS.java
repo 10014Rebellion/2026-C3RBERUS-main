@@ -7,26 +7,14 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.intake.IntakeConstants;
 
 public class IntakePivotSS extends SubsystemBase {
-    public static enum IntakePivotStates {
-        STOPPED, // At rest
-        TUNING_VOLTAGE,
-        TUNING_AMPS,
-        STOW,
-        SAFESTOW,
-        COMPACT_HIGH,
-        COMPACT_LOW,
-        COMPACT_AMPS,
-        INTAKE,
-        TUNING_SETPOINT,
-        INVALID
-    }
+    // Behavior IDs (was an enum previously) kept as string keys for telemetry and snapshot/restore
 
     private final IntakePivotIO mIntakePivotIO;
     private final ArmFeedforward mIntakeFF;
@@ -54,7 +42,7 @@ public class IntakePivotSS extends SubsystemBase {
         IntakeConstants.PivotConstants.kPivotMotorToleranceRotations.getDegrees());
   
     @AutoLogOutput(key = "IntakePivot/States/CurrentState")
-    private IntakePivotStates mCurrentIntakeState = IntakePivotStates.STOPPED;
+    private String mCurrentIntakeBehavior = "STOPPED";
 
     @AutoLogOutput(key = "IntakePivot/RotationGoal/CurrentGoal")
     private Rotation2d mGoalAngle = Rotation2d.kZero;
@@ -72,8 +60,8 @@ public class IntakePivotSS extends SubsystemBase {
     public void periodic() {
         mIntakePivotIO.updateInputs(mIntakeInputs);
 
-        refreshTuneables();
-        executeState();
+    refreshTuneables();
+    executeState();
 
         Logger.processInputs("Intake", mIntakeInputs);
     }
@@ -82,18 +70,17 @@ public class IntakePivotSS extends SubsystemBase {
      * Performs variable updates or parameter intializations when a state is set, SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
     @SuppressWarnings("incomplete-switch")
-    private void initializeState(IntakePivotStates pStateToInit) {
-        mCurrentIntakeState = pStateToInit;
-        switch (mCurrentIntakeState) {
-            case STOPPED -> {
-            } case TUNING_VOLTAGE -> {
-            } case COMPACT_AMPS -> {
+    private void initializeState(String pBehaviorToInit) {
+        mCurrentIntakeBehavior = pBehaviorToInit;
+        switch (mCurrentIntakeBehavior) {
+            case "STOPPED" -> {
+            } case "TUNING_VOLTAGE" -> {
+            } case "COMPACT_AMPS" -> {
                 mIntakePivotIO.setMotorAmps(IntakeConstants.PivotConstants.tConstantCompactAmps.get() * mIntakeInputs.iIntakePivotRotation.getCos());
-            } case STOW, SAFESTOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
+            } case "STOW", "SAFESTOW", "COMPACT_HIGH", "COMPACT_LOW", "INTAKE", "TUNING_SETPOINT" -> {
                 mIntakePivotIO.resetPPID();
-            } case INVALID -> {}
-            default -> {
-                Telemetry.reportIssue(null);
+            } default -> {
+                // keep silent for unknowns; telemetry will show the string
             }
         }
     }
@@ -102,49 +89,48 @@ public class IntakePivotSS extends SubsystemBase {
      * Runs actions periodically to execute state, SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
     private void executeState() {
-        switch (mCurrentIntakeState) {
-            case STOPPED -> {
+        switch (mCurrentIntakeBehavior) {
+            case "STOPPED" -> {
                 mIntakePivotIO.stopMotor();
-            } case TUNING_VOLTAGE -> {
+            } case "TUNING_VOLTAGE" -> {
                 setIntakeVoltage(IntakeConstants.PivotConstants.tPivotTuningVoltage.get());
-            } case TUNING_AMPS -> {
+            } case "TUNING_AMPS" -> {
                 setIntakeAmps(IntakeConstants.PivotConstants.tPivotTuningAmp.get());
-            } case COMPACT_AMPS -> {
+            } case "COMPACT_AMPS" -> {
                 setIntakeAmps(IntakeConstants.PivotConstants.tConstantCompactAmps.get());
-            } case STOW, SAFESTOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
-                setIntakePosition(IntakeConstants.PivotConstants.kStateToSetpointMapIntake.get(mCurrentIntakeState).get());
-            } case INVALID -> {}
-            default -> {
-                Telemetry.reportIssue(null);
+            } case "STOW", "SAFESTOW", "COMPACT_HIGH", "COMPACT_LOW", "INTAKE", "TUNING_SETPOINT" -> {
+                setIntakePosition(IntakeConstants.PivotConstants.kStateToSetpointMapIntake.get(mCurrentIntakeBehavior).get());
+            } default -> {
+                // unknown behavior — no-op
             }
         }
     }
     /*
      * Performs variable updates or parameter resets when a state ends, SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
-    @SuppressWarnings("incomplete-switch")
-    private void endState(IntakePivotStates pStateToEnd) {
-        switch (pStateToEnd) {}
-    }
+    @SuppressWarnings("unused")
+    private void endState(String pBehaviorToEnd) { }
 
-    public Command setStateCmd(IntakePivotStates pNewState) {
-        return setStateCmd(pNewState, true);
-    }
+    /* Generic replacement for the old setStateCmd — accepts a string behavior id. */
+    public Command setStateCmd(String pNewBehavior) { return setStateCmd(pNewBehavior, true); }
 
-    public Command setStateCmd(IntakePivotStates pNewState, boolean holdRequirementContinuously) {
-        return new FunctionalCommand(
-            () -> setState(pNewState), 
-            () -> {}, (interrupted) ->  {}, 
-            () -> !holdRequirementContinuously, 
-            this
-        );
+    public Command setStateCmd(String pNewBehavior, boolean holdRequirementContinuously) {
+        if (holdRequirementContinuously) {
+            return Commands.startEnd(
+                () -> setState(pNewBehavior),
+                () -> {},
+                this
+            );
+        } else {
+            return Commands.runOnce(() -> setState(pNewBehavior));
+        }
     }
 
     /* SETTERS */
-    private void setState(IntakePivotStates pNewState) {
-        endState(mCurrentIntakeState);
-        mCurrentIntakeState = pNewState;
-        initializeState(pNewState);
+    private void setState(String pNewBehavior) {
+        endState(mCurrentIntakeBehavior);
+        mCurrentIntakeBehavior = pNewBehavior;
+        initializeState(pNewBehavior);
     }
 
     public void setIntakePosition(Rotation2d pRot) {
@@ -189,8 +175,8 @@ public class IntakePivotSS extends SubsystemBase {
     }
 
     /* GETTERS */
-    public IntakePivotStates getIntakeState() {
-        return mCurrentIntakeState;
+    public String getIntakeState() {
+        return mCurrentIntakeBehavior;
     }
   
     @AutoLogOutput(key = "Intake/Feedback/ErrorRotation")
@@ -258,4 +244,16 @@ public class IntakePivotSS extends SubsystemBase {
         if(val < 0) return -1;
         else return 0;
     }
+
+    /* Convenience command factories for intake pivot states */
+    public Command stoppedCmd() { return setStateCmd("STOPPED"); }
+    public Command tuningVoltageCmd() { return setStateCmd("TUNING_VOLTAGE"); }
+    public Command tuningAmpsCmd() { return setStateCmd("TUNING_AMPS"); }
+    public Command stowCmd() { return setStateCmd("STOW"); }
+    public Command safestowCmd() { return setStateCmd("SAFESTOW"); }
+    public Command compactHighCmd() { return setStateCmd("COMPACT_HIGH"); }
+    public Command compactLowCmd() { return setStateCmd("COMPACT_LOW"); }
+    public Command compactAmpsCmd() { return setStateCmd("COMPACT_AMPS"); }
+    public Command intakeCmd() { return setStateCmd("INTAKE"); }
+    public Command tuningSetpointCmd() { return setStateCmd("TUNING_SETPOINT"); }
 }

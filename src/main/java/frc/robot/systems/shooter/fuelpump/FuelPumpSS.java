@@ -6,7 +6,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
@@ -15,16 +15,8 @@ import frc.robot.logging.InvalidValueErrors.UnaccountedEnum;
 import static frc.robot.systems.shooter.fuelpump.FuelPumpConstants.kFuelPumpControlConfig;
 
 public class FuelPumpSS extends SubsystemBase {
-  public static enum FuelPumpState {
-    STOPPED,
-    TUNING_VOLT,
-    INTAKE_VOLT,
-    INTAKE_VELOCITY,
-    OUTTAKE_VOLT,
-  }
-
   @AutoLogOutput(key = "Shooter/FuelPump/States/CurrentState")
-  private FuelPumpState mCurrentFuelPumpState = FuelPumpState.STOPPED;
+  private String mCurrentFuelPumpBehavior = "STOPPED";
 
   private final FuelPumpIO mLeaderFuelPumpIO;
   private final FuelPumpIO mFollowerFuelPumpIO;
@@ -60,20 +52,16 @@ public class FuelPumpSS extends SubsystemBase {
   }
 
   private void executeState() {
-    if(FuelPumpConstants.kStateToTuneableFuelPumpVelocity.containsKey(mCurrentFuelPumpState)) {
-      setFuelPumpVelocity(FuelPumpConstants.kStateToTuneableFuelPumpVelocity.get(mCurrentFuelPumpState).get());
-    } else if(FuelPumpConstants.kStateToTuneableFuelPumpVolts.containsKey(mCurrentFuelPumpState)) {
-      setFuelPumpVolts(FuelPumpConstants.kStateToTuneableFuelPumpVolts.get(mCurrentFuelPumpState).get());
+    if(FuelPumpConstants.kStateToTuneableFuelPumpVelocity.containsKey(mCurrentFuelPumpBehavior)) {
+      setFuelPumpVelocity(FuelPumpConstants.kStateToTuneableFuelPumpVelocity.get(mCurrentFuelPumpBehavior).get());
+    } else if(FuelPumpConstants.kStateToTuneableFuelPumpVolts.containsKey(mCurrentFuelPumpBehavior)) {
+      setFuelPumpVolts(FuelPumpConstants.kStateToTuneableFuelPumpVolts.get(mCurrentFuelPumpBehavior).get());
     } else {
-      switch (mCurrentFuelPumpState) {
-        case STOPPED -> {
-          stopMotors();
-        }
-        case TUNING_VOLT -> {
-          setFuelPumpVolts(FuelPumpConstants.tTuningVoltage.get());
-        }
+      switch (mCurrentFuelPumpBehavior) {
+        case "STOPPED" -> stopMotors();
+        case "TUNING_VOLT" -> setFuelPumpVolts(FuelPumpConstants.tTuningVoltage.get());
         default -> {
-          Telemetry.reportIssue(new UnaccountedEnum(mCurrentFuelPumpState.toString()));
+          // unknown behavior string - no-op
         }
       }
     }
@@ -97,18 +85,18 @@ public class FuelPumpSS extends SubsystemBase {
     mFollowerFuelPumpIO.enforceFollower();
   }
 
-  public Command setStateCmd(FuelPumpState pNewState) {
-    return setStateCmd(pNewState, true);
+  public Command setStateCmd(String pNewBehavior) { return setStateCmd(pNewBehavior, true); }
+
+  public Command setStateCmd(String pNewBehavior, boolean holdRequirementContinuously) {
+    if (holdRequirementContinuously) {
+      return Commands.startEnd(() -> setState(pNewBehavior), () -> {}, this);
+    } else {
+      return Commands.runOnce(() -> setState(pNewBehavior));
+    }
   }
 
-  public Command setStateCmd(FuelPumpState pNewState, boolean holdRequirementContinuously) {
-    return new FunctionalCommand(
-      () -> setState(pNewState), () -> {}, (interrupted) -> {},
-      () -> !holdRequirementContinuously, this);
-  }
-
-  private void setState(FuelPumpState pNewState) {
-    mCurrentFuelPumpState = pNewState;
+  private void setState(String pNewBehavior) {
+    mCurrentFuelPumpBehavior = pNewBehavior;
   }
 
   public Rotation2d getAvgFuelPumpRPS() {
@@ -129,6 +117,13 @@ public class FuelPumpSS extends SubsystemBase {
     mFuelPumpFeedforward.setKv(pKV);
     mFuelPumpFeedforward.setKa(pKA);
   }
+
+  /* Convenience command factories for FuelPump states */
+  public Command stoppedCmd() { return setStateCmd("STOPPED"); }
+  public Command tuningVoltCmd() { return setStateCmd("TUNING_VOLT"); }
+  public Command intakeVoltCmd() { return setStateCmd("INTAKE_VOLT"); }
+  public Command intakeVelocityCmd() { return setStateCmd("INTAKE_VELOCITY"); }
+  public Command outtakeVoltCmd() { return setStateCmd("OUTTAKE_VOLT"); }
 
   private void refreshTuneables() {
     LoggedTunableNumber.ifChanged( hashCode(), 
