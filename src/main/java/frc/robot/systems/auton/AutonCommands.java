@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
@@ -897,5 +898,26 @@ public class AutonCommands extends SubsystemBase {
             mAutoChooser.addOption("Failed: "+pPathName, () -> backUpAuton());
             Telemetry.reportException(e);
         }
+    }
+
+    /* Subsystem Getters */
+    public Drive getDriveSubsystem() {
+        return mRobotDrive;
+    }
+
+    public FlywheelsSS getFlywheelSubsystem() {
+        return mFlywheelsSS;
+    }
+
+    public HoodSS getHoodSubsystem() {
+        return mHoodSS;
+    }
+
+    public FuelPumpSS getFuelPumpSubsystem() {
+        return mFuelPumpSS;
+    }
+
+    public Intake getIntakeSubsystem() {
+        return mIntake;
     }
 }
