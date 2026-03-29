@@ -28,14 +28,12 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.AllianceFlipUtil;
-import frc.lib.math.GeomUtil;
 import frc.lib.optimizations.PPRobotConfigLoader;
 import frc.lib.pathplanner.AzimuthFeedForward;
 import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
-import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVision.VisionObservation;
 import frc.robot.systems.drive.DriveManager.DriveState;
@@ -87,7 +85,7 @@ public class Drive extends SubsystemBase {
     private final PathConstraints mDriveConstraints = DriveConstants.kAutoConstraints;
 
     private SwerveModulePosition[] mPrevPositions = SwerveHelper.zeroPositions();
-    private Rotation2d[] mAngleDeltas = SwerveHelper.zeroRotations();
+    // private Rotation2d[] mAngleDeltas = SwerveHelper.zeroRotations();
     @AutoLogOutput(key="Drive/Swerve/PreviousDriveAmps")
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
@@ -176,10 +174,10 @@ public class Drive extends SubsystemBase {
                     mModules[moduleIndex].getAzimuthRotatinos()[i]
                 );
 
-                mAngleDeltas[moduleIndex] = mAngleDeltas[moduleIndex].plus(
-                    GeomUtil.getSmallestChangeInRotation(
-                        modulePositionsHighF[moduleIndex].angle, 
-                        mPrevPositions[moduleIndex].angle));
+                // mAngleDeltas[moduleIndex] = mAngleDeltas[moduleIndex].plus(
+                //     GeomUtil.getSmallestChangeInRotation(
+                //         modulePositionsHighF[moduleIndex].angle, 
+                //         mPrevPositions[moduleIndex].angle));
 
                 moduleDeltasHighF[moduleIndex] = new SwerveModulePosition(
                     modulePositionsHighF[moduleIndex].distanceMeters 
@@ -241,14 +239,10 @@ public class Drive extends SubsystemBase {
         mField.setRobotPose(getPoseEstimate());
         Logger.recordOutput("Drive/Odometry/SkidRatio", mSkidRatio);
         Logger.recordOutput("Drive/Odometry/SkidFactor", mSkidFactor);
-        Logger.recordOutput("Drive/Odometry/SkidCount", mHasSkidded);
+        Logger.recordOutput("Drive/Odometry/HasSkidded", mHasSkidded);
+        Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
         Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
         Logger.recordOutput("Drive/Odometry/VisionFactor", mVisionFactor);
-
-        Logger.recordOutput("Drive/DistanceToHub", 
-            Math.hypot(
-                getPoseEstimate().getX() - GameGoalPoseChooser.getHub().getX(), 
-                getPoseEstimate().getY() - GameGoalPoseChooser.getHub().getY()));
     }
 
     ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
@@ -323,7 +317,7 @@ public class Drive extends SubsystemBase {
         for (int i = 0; i < 4; i++) {
             if (kUseGenerator) {
                 /* Logs the drive feedforward stuff */
-                SwerveHelper.logDriveFeedforward(mDefaultFF, i);
+                // SwerveHelper.logDriveFeedforward(mDefaultFF, i);
 
                 setpointStates[i] = new SwerveModuleState(
                     mPreviousSetpoint.moduleStates()[i].speedMetersPerSecond,
@@ -337,9 +331,7 @@ public class Drive extends SubsystemBase {
 
                 /* Feedforward cases based on driveState */
                 double driveAmps = 
-                    calculateDriveFeedforward(unOptimizedSetpointStates, i) + SwerveHelper.deadReckoningFeedforward(mAngleDeltas[i]);
-                Rotation2d desiredAzimuthVelocity = Rotation2d.fromRadians(
-                    mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i]);
+                    calculateDriveFeedforward(unOptimizedSetpointStates, i);
 
                 // Multiplies by cos(angleError) to stop the drive from going in the wrong direction
                 setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
@@ -347,7 +339,8 @@ public class Drive extends SubsystemBase {
                 optimizedSetpointStates[i] = mModules[i].setDesiredStateWithFF(
                     setpointStates[i], 
                     driveAmps, 
-                    desiredAzimuthVelocity);
+                    Rotation2d.fromRadians(
+                        mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i]));
 
                 /* Normalized for logging */
                 moduleTorques[i] = new SwerveModuleState(

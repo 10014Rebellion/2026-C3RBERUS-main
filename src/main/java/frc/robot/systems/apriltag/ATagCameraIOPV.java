@@ -14,8 +14,11 @@ import frc.robot.systems.apriltag.ATagVisionConstants.ATagCameraHardware;
 import frc.robot.systems.apriltag.ATagVisionConstants.CameraSimConfigs;
 import frc.robot.systems.apriltag.ATagVisionConstants.Orientation;
 
+import org.littletonrobotics.junction.Logger;
+
 import java.util.List;
 import java.util.Optional;
+
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -37,6 +40,8 @@ public class ATagCameraIOPV implements ATagCameraIO {
     private VisionSystemSim mVisionSim;
     private PhotonCameraSim mCameraSim;
 
+    private AprilTagCameraIOConfigInputsAutoLogged mConfigInputs = new AprilTagCameraIOConfigInputsAutoLogged();
+
     public ATagCameraIOPV(ATagCameraHardware camHardware) {
         this(camHardware.name(), camHardware.camTransform(), camHardware.orientation());
     }
@@ -50,31 +55,12 @@ public class ATagCameraIOPV implements ATagCameraIO {
         mPoseEstimator = new PhotonPoseEstimator(FieldConstants.kApriltagLayout, pCameraTransform);
 
         if (RobotConstants.isSim()) setupSimulation();
-    }
 
-    private void setupSimulation() {
-        mVisionSim = new VisionSystemSim("main");
-        mVisionSim.addAprilTags(FieldConstants.kApriltagLayout);
-
-        SimCameraProperties cameraProps = new SimCameraProperties();
-        cameraProps.setCalibration(
-                (int) CameraSimConfigs.resWidth.value,
-                (int) CameraSimConfigs.resHeight.value,
-                new Rotation2d(CameraSimConfigs.fovDeg.value));
-        cameraProps.setCalibError(CameraSimConfigs.avgErrorPx.value, CameraSimConfigs.errorStdDevPx.value);
-        cameraProps.setFPS(CameraSimConfigs.fps.value);
-        cameraProps.setAvgLatencyMs(CameraSimConfigs.avgLatencyMs.value);
-        cameraProps.setLatencyStdDevMs(CameraSimConfigs.latencyStdDevMs.value);
-
-        mCameraSim = new PhotonCameraSim(mPhotonCam, cameraProps);
-        mVisionSim.addCamera(mCameraSim, mCameraTransform);
+        processConfigInputs();
     }
 
     @Override
     public void updateInputs(AprilTagIOInputs pInputs, Pose2d pLastRobotPose, Pose2d pSimOdomPose) {
-        pInputs.iCamName = mCamName;
-        pInputs.iCameraToRobot = mCameraTransform;
-
         try {
             if (RobotConstants.isSim()) mVisionSim.update(pSimOdomPose);
             
@@ -90,8 +76,6 @@ public class ATagCameraIOPV implements ATagCameraIO {
 
             if(pInputs.iHasTarget) {
                 PhotonTrackedTarget target = latestValidResult.getBestTarget();
-                pInputs.iCameraToApriltag = target.getBestCameraToTarget();
-                pInputs.iRobotToApriltag = target.getBestCameraToTarget().plus(mCameraTransform);
                 pInputs.iSingleTagAprilTagID = target.getFiducialId();
                 pInputs.iPoseAmbiguity = target.getPoseAmbiguity();
                 pInputs.iYaw = target.getYaw();
@@ -134,6 +118,36 @@ public class ATagCameraIOPV implements ATagCameraIO {
         }
     }
 
+    @Override
+    public AprilTagCameraIOConfigInputs getConfigInputs() {
+        return mConfigInputs;
+    }
+
+    private void setupSimulation() {
+        mVisionSim = new VisionSystemSim("main");
+        mVisionSim.addAprilTags(FieldConstants.kApriltagLayout);
+
+        SimCameraProperties cameraProps = new SimCameraProperties();
+        cameraProps.setCalibration(
+                (int) CameraSimConfigs.resWidth.value,
+                (int) CameraSimConfigs.resHeight.value,
+                new Rotation2d(CameraSimConfigs.fovDeg.value));
+        cameraProps.setCalibError(CameraSimConfigs.avgErrorPx.value, CameraSimConfigs.errorStdDevPx.value);
+        cameraProps.setFPS(CameraSimConfigs.fps.value);
+        cameraProps.setAvgLatencyMs(CameraSimConfigs.avgLatencyMs.value);
+        cameraProps.setLatencyStdDevMs(CameraSimConfigs.latencyStdDevMs.value);
+
+        mCameraSim = new PhotonCameraSim(mPhotonCam, cameraProps);
+        mVisionSim.addCamera(mCameraSim, mCameraTransform);
+    }
+
+    private void processConfigInputs() {
+        mConfigInputs.iCamName = mCamName;
+        mConfigInputs.iCameraTransform = mCameraTransform;
+
+        Logger.processInputs("Vision/"+mCamName+"/ConfigInputs", mConfigInputs);
+    }
+
     private void resetInputs(AprilTagIOInputs pInputs) {
         pInputs.iIsConnected = false;
         pInputs.iHasTarget = false;
@@ -146,8 +160,6 @@ public class ATagCameraIOPV implements ATagCameraIO {
         pInputs.iSingleTagAprilTagID = 0;
         pInputs.iNumberOfTargets = 0;
         pInputs.iLatestTimestamp = 0.0;
-        pInputs.iCameraToApriltag = new Transform3d();
-        pInputs.iRobotToApriltag = new Transform3d();
         pInputs.iLatestEstimatedRobotPose = new Pose3d();
         pInputs.iLatestTagTransforms = new Transform3d[0];
         pInputs.iLatestTagAmbiguities = new double[0];

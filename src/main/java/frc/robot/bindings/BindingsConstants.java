@@ -13,12 +13,12 @@ public class BindingsConstants {
     public static final DriverProfiles kDefaultProfile =
         new DriverProfiles(
             "Default", // Name
-            0.8, // Linear Scalar
+            1.0, // Linear Scalar
             3,  // Linear Exponent
-            0.075, // Left Joystick Deadband
+            0.05, // Left Joystick Deadband
             1.0, // Rotational Scalar
             3.0, // Rotational Exponent
-            0.1, // Right Joystick Deadband
+            0.05, // Right Joystick Deadband
             0.2, // Sniper Scalar
             new DefaultBindings()
         );
@@ -27,18 +27,18 @@ public class BindingsConstants {
         new DriverProfiles(
             "Bosco", // Name
             0.8, // Linear Scalar
-            3, // Linear Exponent
-            0.075, // Left Joystick Deadband
+            4.0, // Linear Exponent
+            0.05, // Left Joystick Deadband
             1.0, // Rotational Scalar
-            3.0, // Rotational Exponent
-            0.1, //     Right Joystick Deadband
+            4.0, // Rotational Exponent
+            0.05, //     Right Joystick Deadband
             0.2, // Sniper Scalar
             new BoscoBindings()
         ),
 
         new DriverProfiles(
             "Eli", // Name
-            0.8, // Linear Scalar
+            1.0, // Linear Scalar
             3,  // Linear Exponent
             0.075, // Left Joystick Deadband
             1.0, // Rotational Scalar
@@ -50,9 +50,9 @@ public class BindingsConstants {
 
         new DriverProfiles(
             "Taha", // Name
-            0.8, // Linear Scalar
+            1.0, // Linear Scalar
             3,  // Linear Exponent
-            0.075, // Left Joystick Deadband
+            0.05, // Left Joystick Deadband
             1.0, // Rotational Scalar
             3.0, // Rotational Exponent
             0.1, // Right Joystick Deadband

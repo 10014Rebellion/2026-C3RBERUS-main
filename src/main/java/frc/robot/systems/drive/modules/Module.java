@@ -29,19 +29,21 @@ public class Module {
     private final ModuleInputsAutoLogged mInputs = new ModuleInputsAutoLogged();
 
     private final String kModuleName;
+    private final String kFeedforwardTypeKeyName = (DriveConstants.kUseVoltageFeedforward) ? 
+        "/AmperageFeedforward" : "/VoltageFeedforward";
 
     private double mVelocitySetpointMPS = 0.0;
     private double mAccelFeedforward = 0.0;
+    private double mFFDriveOutput = 0.0;
     private SimpleMotorFeedforward mDriveFF = DriveConstants.kModuleControllerConfigs.driveFF();
 
     private Rotation2d mAzimuthSetpointAngle = Rotation2d.kZero;
     private Rotation2d mAzimuthSetpointAngularVelocity = Rotation2d.kZero;
+    private double mFFAzimuthOutput = 0.0;
     private SimpleMotorFeedforward mAzimuthFF = DriveConstants.kModuleControllerConfigs.azimuthFF();
 
     private SwerveModuleState mCurrentState = new SwerveModuleState();
     private SwerveModulePosition mCurrentPosition = new SwerveModulePosition();
-
-    // private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
     public Module(String pKey, ModuleIO pIO) {
         this.mIO = pIO;
@@ -54,14 +56,6 @@ public class Module {
 
         mCurrentState = new SwerveModuleState(mInputs.iDriveVelocityMPS, mInputs.iAzimuthPosition);
         mCurrentPosition = new SwerveModulePosition(mInputs.iDrivePositionM, mInputs.iAzimuthPosition);
-
-        /* Works because signals are sampled together */
-        // int sampleCount = mInputs.odometryTimestamps.length;
-        // odometryPositions = new SwerveModulePosition[sampleCount];
-        // for (int i = 0; i < sampleCount; i++) {
-        //     odometryPositions[i] = new SwerveModulePosition(
-        //         mInputs.odometryDrivePositionsM[i], mInputs.odometryTurnPositions[i]);
-        // }
 
         if (DriverStation.isDisabled()) stop();
 
@@ -142,19 +136,15 @@ public class Module {
         setDesiredVelocity(pVelocitySetpointMPS);
         setAccelFeedforward(pAccelFeedforward);
 
-        double ffDriveOutput = 
+        mFFDriveOutput = 
                 mDriveFF.getKs() * Math.signum(mVelocitySetpointMPS)
             + mDriveFF.getKv() * mVelocitySetpointMPS
             + mDriveFF.getKa() * mAccelFeedforward;
 
-        mIO.setDriveVelocity(mVelocitySetpointMPS, ffDriveOutput);
+        mIO.setDriveVelocity(mVelocitySetpointMPS, mFFDriveOutput);
 
-        Logger.recordOutput("Drive/" + kModuleName + "/VelocitySetpointMPS", mVelocitySetpointMPS);
-        Logger.recordOutput("Drive/" + kModuleName + (
-            (DriveConstants.kUseVoltageFeedforward) ? 
-                "/AmperageFeedforward" : "/VoltageFeedforward"), 
-            mAccelFeedforward);
-        Logger.recordOutput("Drive/" + kModuleName + "/ffDriveOutput", ffDriveOutput);
+        Logger.recordOutput("Drive/" + kModuleName + kFeedforwardTypeKeyName, mAccelFeedforward);
+        Logger.recordOutput("Drive/" + kModuleName + "/ffDriveOutput", mFFDriveOutput);
     }
 
     /* Sets Azimuth Rotation*/
@@ -162,12 +152,11 @@ public class Module {
         setDesiredRotation(pAzimuthSetpointAngle);
         setDesiredAzimuthVelocity(pAzimuthSetpointAngularVelocity);
 
-        double ffAzimuthOutput = mAzimuthFF.calculate(mAzimuthSetpointAngularVelocity.getRadians());
-        mIO.setAzimuthPosition(mAzimuthSetpointAngle, ffAzimuthOutput);
+        mFFAzimuthOutput = mAzimuthFF.calculate(mAzimuthSetpointAngularVelocity.getRadians());
+        mIO.setAzimuthPosition(mAzimuthSetpointAngle, mFFAzimuthOutput);
 
-        // Logger.recordOutput("Drive/" + kModuleName + "/AzimuthSetpointAngle", mAzimuthSetpointAngle);
-        // Logger.recordOutput("Drive/" + kModuleName + "/ffAzimuthOutput", ffAzimuthOutput);
-        // Logger.recordOutput("Drive/" + kModuleName + "/DesiredAzimuthRotationSpeed", mAzimuthSetpointAngularVelocity);
+        Logger.recordOutput("Drive/" + kModuleName + "/DesiredAzimuthRotationSpeed", mAzimuthSetpointAngularVelocity);
+        Logger.recordOutput("Drive/" + kModuleName + "/ffAzimuthOutput", mFFAzimuthOutput);
     }
 
     /* Sets drive motor's voltage
@@ -240,10 +229,6 @@ public class Module {
     public Rotation2d[] getAzimuthRotatinos() {
         return mInputs.odometryTurnPositions;
     }
-
-    // public SwerveModulePosition[] getOdometryPositions() {
-    //     return odometryPositions;
-    // }
 
     public String getModuleName() {
         return kModuleName;

@@ -10,7 +10,6 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ATagCameraIO {
     @AutoLog
     public static class AprilTagIOInputs {
-        public String iCamName = "";
         public boolean iIsConnected = false;
         public boolean iHasTarget = false;
         public boolean iHasBeenUpdated = false;
@@ -23,12 +22,20 @@ public interface ATagCameraIO {
         public int iNumberOfTargets = 0;
         public int iSingleTagAprilTagID = 0;
         public Pose3d iLatestEstimatedRobotPose = new Pose3d();
-        public Transform3d iCameraToRobot = new Transform3d();
-        public Transform3d iCameraToApriltag = new Transform3d();
-        public Transform3d iRobotToApriltag = new Transform3d();
+
         public Transform3d[] iLatestTagTransforms = new Transform3d[] {};
         public double[] iLatestTagAmbiguities = new double[] {};
     }
 
+    @AutoLog
+    public static class AprilTagCameraIOConfigInputs {
+        public String iCamName = "";
+        public Transform3d iCameraTransform = new Transform3d();
+    }
+
     public default void updateInputs(AprilTagIOInputs pInputs, Pose2d pLastRobotPose, Pose2d pSimOdomPose) {}
+
+    public default AprilTagCameraIOConfigInputs getConfigInputs() {
+        return new AprilTagCameraIOConfigInputs();
+    }
 }
