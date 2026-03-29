@@ -4,6 +4,7 @@ package frc.robot.systems.drive.controllers;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,33 +21,33 @@ public class HolonomicController {
         LINEAR
     }
 
-    public static final LoggedTunableNumber tXP = new LoggedTunableNumber("AutoAlign/X/kP", 5.75);
+    public static final LoggedTunableNumber tXP = new LoggedTunableNumber("AutoAlign/X/kP", 5.0);
     public static final LoggedTunableNumber tXD = new LoggedTunableNumber("AutoAlign/X/kD", 0.0);
     public static final LoggedTunableNumber tXI = new LoggedTunableNumber("AutoAlign/X/kI", 0.0);
     public static final LoggedTunableNumber tXIZone = new LoggedTunableNumber("AutoAlign/X/kIZone", 0.0);
     public static final LoggedTunableNumber tXIRange = new LoggedTunableNumber("AutoAlign/X/kIRange", 0.0);
-    public static final LoggedTunableNumber tXMaxVMPS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPS", 3.5);
+    public static final LoggedTunableNumber tXMaxVMPS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPS", 3.4);
     public static final LoggedTunableNumber tXMaxAMPSS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPSS", 10.0);
 
     public static final LoggedTunableNumber tXS = new LoggedTunableNumber("AutoAlign/X/kS", 0.0);
-    public static final LoggedTunableNumber tXV = new LoggedTunableNumber("AutoAlign/X/kV", 0.65);
+    public static final LoggedTunableNumber tXV = new LoggedTunableNumber("AutoAlign/X/kV", 0.7);
 
     public static final LoggedTunableNumber tXToleranceMeters = new LoggedTunableNumber("AutoAlign/X/ToleranceMeters", 0.03);
 
-    public static final LoggedTunableNumber tYP = new LoggedTunableNumber("AutoAlign/Y/kP", 5.75);
+    public static final LoggedTunableNumber tYP = new LoggedTunableNumber("AutoAlign/Y/kP", 5.0);
     public static final LoggedTunableNumber tYD = new LoggedTunableNumber("AutoAlign/Y/kD", 0.0);
     public static final LoggedTunableNumber tYI = new LoggedTunableNumber("AutoAlign/Y/kI", 0.0);
     public static final LoggedTunableNumber tYIZone = new LoggedTunableNumber("AutoAlign/Y/kIZone", 0.0);
     public static final LoggedTunableNumber tYIRange = new LoggedTunableNumber("AutoAlign/Y/kIRange", 0.0);
-    public static final LoggedTunableNumber tYMaxVMPS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPS", 3.3);
+    public static final LoggedTunableNumber tYMaxVMPS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPS", 3.4);
     public static final LoggedTunableNumber tYMaxAMPSS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPSS", 10.0);
 
     public static final LoggedTunableNumber tYS = new LoggedTunableNumber("AutoAlign/Y/kS", 0.0);
-    public static final LoggedTunableNumber tYV = new LoggedTunableNumber("AutoAlign/Y/kV", 0.65);
+    public static final LoggedTunableNumber tYV = new LoggedTunableNumber("AutoAlign/Y/kV", 0.7);
 
     public static final LoggedTunableNumber tYToleranceMeters = new LoggedTunableNumber("AutoAlign/Y/ToleranceMeters", 0.05);
 
-    public static final LoggedTunableNumber tOmegaP = new LoggedTunableNumber("AutoAlign/Omega/kP", 3.0);
+    public static final LoggedTunableNumber tOmegaP = new LoggedTunableNumber("AutoAlign/Omega/kP", 2.5);
     public static final LoggedTunableNumber tOmegaD = new LoggedTunableNumber("AutoAlign/Omega/kD", 0.0);
 
     public static final LoggedTunableNumber tOmegaI = new LoggedTunableNumber("AutoAlign/Omega/kI", 0.0);
@@ -57,15 +58,15 @@ public class HolonomicController {
     public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPSS", 1000);
 
     public static final LoggedTunableNumber tOmegaS = new LoggedTunableNumber("AutoAlign/Omega/kS", 0.0);
-    public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("AutoAlign/Omega/kV", 1.0);
+    public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("AutoAlign/Omega/kV", 0.5);
 
     public static final LoggedTunableNumber tOmegaToleranceDegrees = new LoggedTunableNumber("AutoAlign/Omega/ToleranceDegrees", 1.5);
-    public static final LoggedTunableNumber tDistanceMaxVMPS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPS", 3.3);
-    public static final LoggedTunableNumber tDistanceMaxAMPSS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPSS", 14.5);
+    public static final LoggedTunableNumber tDistanceMaxVMPS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPS", 3.4);
+    public static final LoggedTunableNumber tDistanceMaxAMPSS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPSS", 13.0);
 
     public static final LoggedTunableNumber tDistanceToleranceMeters = new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.03);
 
-    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 1.0);
+    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 0.25);
 
     private ProfiledPIDController tXController;
     private ProfiledPIDController tYController;
@@ -76,6 +77,9 @@ public class HolonomicController {
     private SimpleMotorFeedforward tOmegaFeedforward;
 
     private ConstraintType tType = ConstraintType.AXIS;
+
+    private LinearFilter xValueFilter = LinearFilter.movingAverage(5);
+    private LinearFilter yValueFilter = LinearFilter.movingAverage(5);
 
     public HolonomicController() {
         this.tXController = new ProfiledPIDController(
@@ -156,23 +160,25 @@ public class HolonomicController {
         double ffScalar = Math.min(
                 Math.hypot(pGoalPose.getX() - pCurrentPose.getX(), pGoalPose.getY() - pCurrentPose.getY()) / tFFRadius.get(),
                 1.0);
+        Pose2d currentPose = filterTranslationOfPose(pCurrentPose);
+
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
             (tXController.calculate(
-                pCurrentPose.getX(),
+                currentPose.getX(),
                 new TrapezoidProfile.State(pGoalPose.getX(), pGoalSpeed.vxMetersPerSecond))
             + ffScalar * tXFeedforward.calculate(tXController.getSetpoint().velocity)),
             (tYController.calculate(
-                pCurrentPose.getY(),
+                currentPose.getY(),
                     new TrapezoidProfile.State(pGoalPose.getY(), pGoalSpeed.vyMetersPerSecond))
             + ffScalar * tYFeedforward.calculate(tYController.getSetpoint().velocity)),
             (Math.toRadians(tOmegaController.calculate(
-                pCurrentPose.getRotation().getDegrees(),
+                currentPose.getRotation().getDegrees(),
                 new TrapezoidProfile.State(
                     pGoalPose.getRotation().getDegrees(),
                     Math.toDegrees(pGoalSpeed.omegaRadiansPerSecond)))
             + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity))),
-            pCurrentPose.getRotation());
+            currentPose.getRotation());
     }
 
     ////////////////////////// GETTERS \\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -222,6 +228,14 @@ public class HolonomicController {
                 tXController.getPositionError(),
                 tYController.getPositionError(),
                 new Rotation2d(tOmegaController.getPositionError()));
+    }
+
+    public Pose2d filterTranslationOfPose(Pose2d pose) {
+        return new Pose2d(
+            xValueFilter.calculate(pose.getX()),
+            yValueFilter.calculate(pose.getY()),
+            pose.getRotation()
+        );
     }
 
     ////////////////////////// SETTERS \\\\\\\\\\\\\\\\\\\\\\\\\\\\

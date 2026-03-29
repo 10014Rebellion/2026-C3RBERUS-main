@@ -18,6 +18,7 @@ import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
+import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
@@ -84,6 +85,8 @@ public class ButtonBindings {
     public void initCompBindings() {
         boolean closedLoopFuelPump = true;
         boolean isEli = false;
+        Trigger wantToAutoAlignToHub = mPilotController.a();
+
         Trigger wantToOuttake = 
             mGunnerController.leftTrigger().and(kUsingPilotGunner);
         Trigger wantToDynamicShoot = 
@@ -174,11 +177,11 @@ public class ButtonBindings {
         //     .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
         //     .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT));
 
-        // wantToCloseShoot.and(autonomousWorking)
-        //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-        //         () -> GameGoalPoseChooser.getCloseShotPose(), 
-        //         ConstraintType.LINEAR))
-        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        wantToAutoAlignToHub.and(autonomousWorking)
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> GameGoalPoseChooser.getCloseShotPose(), 
+                ConstraintType.LINEAR))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToLineAlignToTrench.and(autonomousWorking)
             .onTrue(

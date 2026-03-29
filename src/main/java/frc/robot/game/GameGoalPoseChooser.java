@@ -136,7 +136,7 @@ public class GameGoalPoseChooser {
 
     public static Pose2d getCloseShotPose() {
         return AllianceFlipUtil.apply(new Pose2d(
-            3.351194381713867 - 0.1, 
+            3.351194381713867 - 1.0, 
             4.036095142364502, 
             Rotation2d.kZero));
     }
