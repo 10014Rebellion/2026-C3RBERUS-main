@@ -38,7 +38,7 @@ public class DriveCharacterizationCommands {
     public static void setDriveAmperagesForAllModules(double amps, Drive pDrive) {
         for (int i = 0; i < 4; i++) {
             pDrive.getModules()[i].setDriveAmperage(amps);
-            pDrive.getModules()[i].setAzimuthRotation(Rotation2d.kZero, Rotation2d.kZero);
+            pDrive.getModules()[i].setAzimuthRotation(Rotation2d.k180deg, Rotation2d.kZero);
         }
     }
 

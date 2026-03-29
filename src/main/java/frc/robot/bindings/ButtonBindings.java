@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
+import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
@@ -392,9 +393,9 @@ public class ButtonBindings {
         //     .onTrue(DriveCharacterizationCommands.testAzimuthsVoltage(mDriveSS, 0, 1, 2, 3))
         //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        // mPilotController.leftTrigger().and(isTesting())
-        //     .onTrue(DriveCharacterizationCommands.testDriveAmpCharacterization(mDriveSS))
-        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        mPilotController.leftTrigger().and(isTesting())
+            .onTrue(DriveCharacterizationCommands.testDriveAmpCharacterization(mDriveSS))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         mPilotController.rightBumper().and(isTesting())
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))

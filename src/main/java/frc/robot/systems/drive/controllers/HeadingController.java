@@ -13,15 +13,15 @@ import frc.lib.tuning.LoggedTunableNumber;
 import java.util.function.Supplier;
 
 public class HeadingController {
-    public static final LoggedTunableNumber mSnapP = new LoggedTunableNumber("SwerveHeadingController/Snap/kP", 3.0);
+    public static final LoggedTunableNumber mSnapP = new LoggedTunableNumber("SwerveHeadingController/Snap/kP", 2.5);
     public static final LoggedTunableNumber mSnapI = new LoggedTunableNumber("SwerveHeadingController/Snap/kI", 0.0);
     public static final LoggedTunableNumber mSnapD = new LoggedTunableNumber("SwerveHeadingController/Snap/kD", 0.0);
     public static final LoggedTunableNumber mSnapMaxVDPS =
             new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxV", 600.0);
     public static final LoggedTunableNumber mSnapMaxADPSS =
-            new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxA", 2000.0);
+            new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxA", 12000.0);
 
-    public static final LoggedTunableNumber tKv = new LoggedTunableNumber("SwerveHeadingController/Snap/kV", 0.25);
+    public static final LoggedTunableNumber tKv = new LoggedTunableNumber("SwerveHeadingController/Snap/kV", 5.0);
 
     // public static final LoggedTunableNumber stablizingP =
     //     new LoggedTunableNumber("SwerveHeadingController/Stabilizing/kP", 2.5);
