@@ -1,19 +1,18 @@
 package frc.robot.systems.auton;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.commands.SequentialEndingCommandGroup;
-import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
+import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
-import frc.robot.game.GameGoalPoseChooser;
 
 public class SingleSwipe extends Auton {
     private boolean mWantToShoot = false;
@@ -47,6 +46,9 @@ public class SingleSwipe extends Auton {
         Trigger isFirstSwipeRunning = auto.loggedCondition(mFirstSwipePathName+"/isRunning", () -> firstSwipePath.isRunning(), true);
         Trigger hasFirstSwipeEnded = auto.loggedCondition(mFirstSwipePathName+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
 
+        Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
+            mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
+
         intakingRange
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
@@ -66,9 +68,9 @@ public class SingleSwipe extends Auton {
 
         hasFirstSwipeEnded
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
-            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> lastPoseOfFirstSwipe,
+                ConstraintType.LINEAR));
 
         SequentialEndingCommandGroup firstSwipeIntakeShot = 
             new SequentialEndingCommandGroup(
@@ -88,7 +90,7 @@ public class SingleSwipe extends Auton {
         hasFirstSwipeEnded.and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
             mFlywheelsSS.atLatestClosedLoopGoal() && 
             mHoodSS.atGoal() &&
-            mDriveSS.getDriveManager().inHeadingTolerance())
+            mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean())
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
             .onTrue(mIntakeSS.trashCompactPivotRepeat());
