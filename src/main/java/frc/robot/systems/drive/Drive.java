@@ -368,8 +368,8 @@ public class Drive extends SubsystemBase {
                 setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
                 optimizedSetpointStates[i] = mModules[i].setDesiredStateWithFF(
                     setpointStates[i],
-                    /* Set to zero due to lack of data to justify using feedforward */
-                    0.0);
+                    /* GOT THE DATA -> Set to zero due to lack of data to justify using feedforward */
+                    driveAmps);
 
                 mPrevDriveAmps[i] = driveAmps;
 
