@@ -25,7 +25,7 @@ public class ATagVision {
     private ATagCameraIO[] mCameras;
     private AprilTagIOInputsAutoLogged[] mCamerasData;
 
-    private VisionObservation[] mCurrentVisionObservation;
+    private VisionObservation[] mCurrentVisionObservation = new VisionObservation[4];
 
 
     public ATagVision(ATagCameraIO[] pCameras) {

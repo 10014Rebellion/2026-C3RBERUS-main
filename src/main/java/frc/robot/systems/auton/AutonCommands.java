@@ -103,17 +103,22 @@ public class AutonCommands extends SubsystemBase {
 
         mAutoChooser.setDefaultOption("Stationary", () -> backUpAuton());
 
-        // tryToAddPathToChooser("FirstTestPath", () -> firstPathTest("FirstPathTest", "FirstPath"));
-        // tryToAddPathToChooser("FirstAuto", () -> autoTest("FirstAuto","FirstPath", "SecondPath"));
-        // tryToAddPathToChooser("LeftFullPath", () -> leftFullPath());
-        // tryToAddPathToChooser("RightFullPath", () -> rightFullPath());
-        // tryToAddPathToChooser("Troll", () -> troll());
-        // tryToAddPathToChooser("DisruptLeft", () -> disruptLeft());
+        SingleSwipe mLeftSingleSwipeAuto = 
+            new SingleSwipe(
+                this, 
+                "LeftSingleSwipe", 
+                "L_IT_IC_ST", 
+                false);
+
+        SingleSwipe mRightSingleSwipeAuto = 
+            new SingleSwipe(
+                this, 
+                "LeftSingleSwipe", 
+                "R_IT_IC_ST", 
+                false);
+
         tryToAddPathToChooser("LeftSingleSwipe", 
-            () -> singleSwipe(
-                "LeftSingleSwipe",
-                "L_IT_IC_ST",
-                false)
+            () -> mLeftSingleSwipeAuto.getAuton()
         );
 
         tryToAddPathToChooser("LeftSingleSwipeAndOut", 
@@ -133,10 +138,7 @@ public class AutonCommands extends SubsystemBase {
         );
 
         tryToAddPathToChooser("RightSingleSwipe", 
-            () -> singleSwipe(
-                "RightSingleSwipe",
-                "R_IT_IC_ST",
-                false)
+            () -> mRightSingleSwipeAuto.getAuton()
         );
 
         tryToAddPathToChooser("RightSingleSwipeAndOut", 

@@ -1,10 +1,13 @@
 package frc.robot.systems.auton;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.commands.SequentialEndingCommandGroup;
+import frc.robot.game.GameGoalPoseChooser;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
@@ -69,7 +72,14 @@ public class SingleSwipe extends Auton {
         hasFirstSwipeEnded
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> lastPoseOfFirstSwipe,
+                () -> AllianceFlipUtil.apply(
+                    new Pose2d(
+                        lastPoseOfFirstSwipe.getX(),
+                        lastPoseOfFirstSwipe.getY(),
+                        GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(lastPoseOfFirstSwipe))
+                            .plus((AllianceFlipUtil.shouldFlip()) ? Rotation2d.k180deg : Rotation2d.kZero)
+                    )
+                ),
                 ConstraintType.LINEAR));
 
         SequentialEndingCommandGroup firstSwipeIntakeShot = 
