@@ -369,7 +369,7 @@ public class Drive extends SubsystemBase {
                 optimizedSetpointStates[i] = mModules[i].setDesiredStateWithFF(
                     setpointStates[i],
                     /* GOT THE DATA -> Set to zero due to lack of data to justify using feedforward */
-                    driveAmps);
+                    0.0);
 
                 mPrevDriveAmps[i] = driveAmps;
 

@@ -21,7 +21,7 @@ public class HeadingController {
     public static final LoggedTunableNumber mSnapMaxADPSS =
             new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxA", 12000.0);
 
-    public static final LoggedTunableNumber tKv = new LoggedTunableNumber("SwerveHeadingController/Snap/kV", 5.0);
+    public static final LoggedTunableNumber tKv = new LoggedTunableNumber("SwerveHeadingController/Snap/kV", 0.5);
 
     // public static final LoggedTunableNumber stablizingP =
     //     new LoggedTunableNumber("SwerveHeadingController/Stabilizing/kP", 2.5);
@@ -48,7 +48,7 @@ public class HeadingController {
                 new TrapezoidProfile.Constraints(mSnapMaxVDPS.get(), mSnapMaxADPSS.get()));
 
         mSnapController.enableContinuousInput(0, 360);
-        mSnapController.setTolerance(3.0);
+        mSnapController.setTolerance(5.0);
 
         setTurnPointFF(pTurnPointFF);
 

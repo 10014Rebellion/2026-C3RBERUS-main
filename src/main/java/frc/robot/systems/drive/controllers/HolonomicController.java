@@ -162,6 +162,15 @@ public class HolonomicController {
                 1.0);
         Pose2d currentPose = filterTranslationOfPose(pCurrentPose);
 
+        if(pGoalPose.minus(currentPose).getTranslation().getNorm() < 0.03) return new ChassisSpeeds(
+            0.0, 0.0,
+            (Math.toRadians(tOmegaController.calculate(
+                currentPose.getRotation().getDegrees(),
+                new TrapezoidProfile.State(
+                    pGoalPose.getRotation().getDegrees(),
+                    Math.toDegrees(pGoalSpeed.omegaRadiansPerSecond)))
+            + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity)))
+        );
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
             (tXController.calculate(
