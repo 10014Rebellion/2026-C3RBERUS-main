@@ -37,16 +37,14 @@ public class SingleSwipe extends Auton {
 
     @Override
     protected AutoEvent getAuton() {
-        AutoEvent auto = new AutoEvent(mAutoName, mAutos);
+        AutoEvent auto = new AutoEvent(mAutoName, mAutos, mAutos.getAutoFactory());
 
         Trigger autoActivted = auto.getIsRunningTrigger();
 
         Trigger intakingRange = mAutos.inIntakeRange(auto);
         Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> mWantToShoot, true);
 
-        SequentialEndingCommandGroup firstSwipePath = (mUseChoreoLib) ?
-            followChorePathUsingCL(mFirstSwipePathName, true)
-                : 
+        SequentialEndingCommandGroup firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true);
         Trigger isFirstSwipeRunning = auto.loggedCondition(mFirstSwipePathName+"/isRunning", () -> firstSwipePath.isRunning(), true);
         Trigger hasFirstSwipeEnded = auto.loggedCondition(mFirstSwipePathName+"/hasEnded", () -> firstSwipePath.hasEnded(), true);

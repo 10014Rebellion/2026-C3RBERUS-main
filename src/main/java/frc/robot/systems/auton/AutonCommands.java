@@ -20,24 +20,16 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.commands.SequentialEndingCommandGroup;
-import frc.robot.game.GameGoalPoseChooser;
-import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
-import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
-import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
-import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
-import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.lib.math.AllianceFlipUtil;
 
 public class AutonCommands extends SubsystemBase {
@@ -51,11 +43,16 @@ public class AutonCommands extends SubsystemBase {
     private final SendableChooser<Supplier<Command>> mAutoChooser;
     private final LoggedDashboardChooser<Supplier<Command>> mAutoChooserLogged;
 
-    private boolean wantToShoot = false;
-
     private final AutoFactory mAutoFactory;
 
-    private boolean shot1 = true;
+    private String[] usedPathNames = new String[] {
+        "L_IT_IC_ST",
+        "L_ST_IB_ST",
+        "L_ST_IB_ST_BUMP",
+        "R_IT_IC_ST",
+        "R_ST_IB_ST",
+        "R_ST_IB_ST_BUMP"
+    };
 
     public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS) {
         this.mRobotDrive = pRobotDrive;
@@ -71,19 +68,15 @@ public class AutonCommands extends SubsystemBase {
                 Logger.recordOutput(
                     "Drive/Choreo/TrajectorySetpoint", 
                     new Pose2d(
-                        s.x,
-                        s.y,
-                        Rotation2d.fromRadians(s.heading)
+                        s.x, s.y, Rotation2d.fromRadians(s.heading)
                     ));                
-
                 mRobotDrive.getDriveManager().setToAuton();
                 mRobotDrive.getDriveManager().setPPDesiredSpeeds(
                     mRobotDrive
                         .getDriveManager()
                         .getChoreoHolonomicController()
                         .calculateFromSwerveSample(
-                            s,
-                            mRobotDrive.getPoseEstimate()));
+                            s, mRobotDrive.getPoseEstimate()));
                 mRobotDrive.setDriveFeedforwardsFromChoreo(s);
             }, 
             true, 
@@ -93,11 +86,7 @@ public class AutonCommands extends SubsystemBase {
                 Logger.recordOutput("Drive/Choreo/IsTrajectoryRunning", isStart);
             });
 
-        /* Loads cache */
-        mAutoFactory.trajectoryCmd("L_IT_IC_ST");
-        mAutoFactory.trajectoryCmd("L_ST_IB_ST_BUMP");
-        mAutoFactory.trajectoryCmd("R_IT_IC_ST");
-        mAutoFactory.trajectoryCmd("R_ST_IB_ST_BUMP");
+        loadCacheForAllPaths();
 
         mAutoChooser = new SendableChooser<>();
 
@@ -152,566 +141,16 @@ public class AutonCommands extends SubsystemBase {
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     }
 
+    private void loadCacheForAllPaths() {
+        for(int i = 0; i < usedPathNames.length; i++) {
+            mAutoFactory.trajectoryCmd(usedPathNames[i]);
+            getTraj(usedPathNames[i]);
+        }
+    }
+
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
     public Command backUpAuton() {
         return new InstantCommand();
-    }
-
-    public Command firstSwipeAndOut(String autoName, String firstSwipe, String secondSwipe, boolean useChoreLib) {
-        AutoEvent auto = new AutoEvent(autoName, this);
-
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        Trigger intakingRange = inIntakeRange(auto);
-        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
-
-        SequentialEndingCommandGroup firstSwipePath = (useChoreLib) ?
-            followChorePathUsingCL(firstSwipe, true)
-                : 
-            followChoreoPath(firstSwipe, true);
-        Trigger isFirstSwipeRunning = auto.loggedCondition(firstSwipe+"/isRunning", () -> firstSwipePath.isRunning(), true);
-        Trigger hasFirstSwipeEnded = auto.loggedCondition(firstSwipe+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
-
-        SequentialEndingCommandGroup outPath = (useChoreLib) ?
-            followChorePathUsingCL(secondSwipe, false)
-                : 
-            followChoreoPath(secondSwipe, false);
-        Trigger isOutPathRunning = auto.loggedCondition(outPath+"/isRunning", () -> outPath.isRunning(), true);
-        Trigger hasOutPathEnded = auto.loggedCondition(outPath+"/hasEnded", () -> outPath.hasEnded(), true);
-
-        intakingRange
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
-
-        shootingRange
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
-
-        autoActivted
-            .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(Commands.runOnce(() -> shot1 = true));
-
-        hasFirstSwipeEnded
-            .onTrue(Commands.runOnce(() -> wantToShoot = true))
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
-
-        SequentialEndingCommandGroup firstSwipeIntakeShot = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(6.5),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.05));
-
-        SequentialEndingCommandGroup firstSwipeIndexShot = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(6.5),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.05));
-
-        Trigger hasFirstShotEnded = auto.loggedCondition(
-            firstSwipe+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
-            true);
-
-        hasFirstSwipeEnded.and(() -> wantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
-            mFlywheelsSS.atLatestClosedLoopGoal() && 
-            mHoodSS.atGoal() &&
-            mRobotDrive.getDriveManager().inHeadingTolerance())
-            .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot)
-            .onTrue(mIntake.trashCompactPivotRepeat());
-
-        hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(outPath)
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
-
-        hasOutPathEnded
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(endAuto(auto));
-
-        return auto;
-    }
-
-    public Command doubleSwipe(String autoName, String firstSwipe, String secondSwipe, boolean useChoreoLib) {
-        AutoEvent auto = new AutoEvent(autoName, this);
-
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        Trigger intakingRange = inIntakeRange(auto);
-        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
-
-        SequentialEndingCommandGroup firstSwipePath = followChoreoPath(firstSwipe, true);
-        Trigger isFirstSwipeRunning = auto.loggedCondition(firstSwipe+"/isRunning", () -> firstSwipePath.isRunning(), true);
-        Trigger hasFirstSwipeEnded = auto.loggedCondition(firstSwipe+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
-
-        SequentialEndingCommandGroup secondSwipePath = followChoreoPath(secondSwipe, false);
-        Trigger isSecondSwipeRunning = auto.loggedCondition(secondSwipe+"/isRunning", () -> secondSwipePath.isRunning(), true);
-        Trigger hasSecondSwipeEnded = auto.loggedCondition(secondSwipe+"/hasEnded", () -> secondSwipePath.hasEnded(), true);
-
-        intakingRange
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
-
-        shootingRange
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
-
-        autoActivted
-            .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(Commands.runOnce(() -> {
-                wantToShoot = false; 
-                shot1 = true;
-            }));
-
-        hasFirstSwipeEnded
-            .onTrue(Commands.runOnce(() -> wantToShoot = true))
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
-
-        SequentialEndingCommandGroup firstSwipeIntakeShot = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(6.5),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.05));
-
-        SequentialEndingCommandGroup firstSwipeIndexShot = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(6.5),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.05));
-
-        Trigger hasFirstShotEnded = auto.loggedCondition(
-            firstSwipe+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
-            true);
-
-        (hasFirstSwipeEnded.and(() -> wantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
-            mFlywheelsSS.atLatestClosedLoopGoal() && 
-            mHoodSS.atGoal() &&
-            mRobotDrive.getDriveManager().inHeadingTolerance())).and(() -> shot1)
-            .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot)
-            .onTrue(mIntake.trashCompactPivotRepeat());
-
-        hasFirstSwipeEnded.and(hasFirstShotEnded)
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onTrue(Commands.runOnce(() -> shot1 = false))
-            .onTrue(secondSwipePath);
-
-        hasSecondSwipeEnded
-            .onTrue(Commands.runOnce(() -> wantToShoot = true))
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
-
-        SequentialEndingCommandGroup secondSwipeIntakeShot = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(6.5),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.05));
-
-        SequentialEndingCommandGroup secondSwipeIndexShot = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(6.5),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.05));
-
-        Trigger hasSecondShotEnded = auto.loggedCondition(
-            secondSwipe+"/SecondShotEnded", 
-            () -> secondSwipeIntakeShot.hasEnded() && secondSwipeIndexShot.hasEnded(),
-            true);
-
-        (hasSecondSwipeEnded.and(() -> wantToShoot).and(hasSecondShotEnded.negate()).and(() -> 
-            mFlywheelsSS.atLatestClosedLoopGoal() && 
-            mHoodSS.atGoal() &&
-            mRobotDrive.getDriveManager().inHeadingTolerance())).and(() -> !shot1)
-            .onTrue(secondSwipeIntakeShot)
-            .onTrue(secondSwipeIndexShot)
-            .onTrue(mIntake.trashCompactPivotRepeat());
-
-        hasSecondSwipeEnded.and(hasSecondShotEnded)
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onTrue(endAuto(auto));
-            
-        return auto;
-    }
-
-    public Command swipeAlliance(String autoName, String firstSwipe, String centerAlliance, String allianceShoot) {
-                AutoEvent auto = new AutoEvent(autoName, this);
-
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        Trigger intakingRange = inIntakeRange(auto);
-        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
-
-        SequentialEndingCommandGroup firstSwipePath = followChoreoPath(firstSwipe, true);
-        Trigger isFirstSwipeRunning = auto.loggedCondition(firstSwipe+"/isRunning", () -> firstSwipePath.isRunning(), true);
-        Trigger hasFirstSwipeEnded = auto.loggedCondition(firstSwipe+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
-
-        SequentialEndingCommandGroup centerAlliancePath = followChoreoPath(centerAlliance, false);
-        Trigger isCenterAllianceRunning = auto.loggedCondition(centerAlliance+"/isRunning", () -> centerAlliancePath.isRunning(), true);
-        Trigger hasCenterAllianceEnded = auto.loggedCondition(centerAlliance+"/hasEnded", () -> centerAlliancePath.hasEnded(), true);
-
-        SequentialEndingCommandGroup allianceShootPath = followChoreoPath(allianceShoot, false);
-        Trigger isAllianceShootRunning = auto.loggedCondition(allianceShoot+"/isRunning", () -> allianceShootPath.isRunning(), true);
-        Trigger hasAllianceShootEnded = auto.loggedCondition(allianceShoot+"/hasEnded", () -> allianceShootPath.hasEnded(), true);
-
-        intakingRange
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(Commands.waitSeconds(0.1).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
-            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
-
-        shootingRange
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
-
-        autoActivted
-            .onTrue(firstSwipePath)
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(Commands.runOnce(() -> wantToShoot = false));
-
-        hasFirstSwipeEnded
-            .onTrue(Commands.runOnce(() -> wantToShoot = true))
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
-
-        SequentialEndingCommandGroup firstSwipeIntakeShot = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
-
-        SequentialEndingCommandGroup firstSwipeIndexShot = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
-
-        hasFirstSwipeEnded.and(() -> wantToShoot).and(() -> 
-            mFlywheelsSS.atLatestClosedLoopGoal() && 
-            mHoodSS.atGoal() &&
-            mRobotDrive.getDriveManager().inHeadingTolerance())
-            .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot)
-            .onTrue(mIntake.trashCompactPivotContinuous());
-
-        hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onTrue(centerAlliancePath);
-
-        hasCenterAllianceEnded
-            .onTrue(Commands.runOnce(() -> wantToShoot = true))
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
-
-        SequentialEndingCommandGroup centerAllianceIntakeShot = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
-
-        SequentialEndingCommandGroup centerAllianceIndexShot = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
-
-        hasCenterAllianceEnded.and(() -> wantToShoot).and(() -> 
-            mFlywheelsSS.atLatestClosedLoopGoal() && 
-            mHoodSS.atGoal() &&
-            mRobotDrive.getDriveManager().inHeadingTolerance())
-            .onTrue(centerAllianceIntakeShot)
-            .onTrue(centerAllianceIndexShot)
-            .onTrue(mIntake.trashCompactPivotContinuous());
-
-        hasCenterAllianceEnded.and(() -> centerAllianceIndexShot.hasEnded() && centerAllianceIntakeShot.hasEnded())
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onTrue(endAuto(auto));
-
-        return auto;
-    }
-
-    public Command disruptLeft() {
-        AutoEvent auto = new AutoEvent("Disruptleft", this);
-
-        Trigger autoActivated = auto.getIsRunningTrigger();
-
-        String path1ShootingName = "ITL_IFL";
-        SequentialEndingCommandGroup autoPath1 = followChoreoPath(path1ShootingName, true);
-        Trigger isPath1Running = auto.loggedCondition(path1ShootingName+"/isRunning", () -> autoPath1.isRunning(), true);
-        Trigger hasPath1Ended = auto.loggedCondition(path1ShootingName+"/hasEnded", () -> autoPath1.hasEnded(), true);
-
-        autoActivated
-            .onTrue(autoPath1);
-
-        hasPath1Ended
-            .onTrue(endAuto(auto));
-
-        return auto;
-    }
-
-    public Command troll() {
-        AutoEvent auto = new AutoEvent("Troll", this);
-
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        Trigger intakingRange = inIntakeRange(auto);
-        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
-        Trigger scoreReady = auto.condition(shootingRange);
-
-        String path1ShootingName = "TOWER_SHOOT";
-        SequentialEndingCommandGroup autoPath1 = followChoreoPath(path1ShootingName, true);
-        Trigger isPath1Running = auto.loggedCondition(path1ShootingName+"/isRunning", () -> autoPath1.isRunning(), true);
-        Trigger hasPath1Ended = auto.loggedCondition(path1ShootingName+"/hasEnded", () -> autoPath1.hasEnded(), true);
-
-        String path2Name = "OVER_BUMP";
-        SequentialEndingCommandGroup autoPath2 = followChoreoPath(path2Name, false);
-        Trigger isPath2Running = auto.loggedCondition(path2Name+"/isRunning", () -> autoPath2.isRunning(), true);
-        Trigger hasPath2Ended = auto.loggedCondition(path2Name+"/hasEnded", () -> autoPath2.hasEnded(), true);
-
-        String path3Name = "TROLL";
-        SequentialEndingCommandGroup autoPath3 = followChoreoPath(path3Name, false);
-        Trigger isPath3Running = auto.loggedCondition(path3Name+"/isRunning", () -> autoPath3.isRunning(), true);
-        Trigger hasPath3Ended = auto.loggedCondition(path3Name+"/hasEnded", () -> autoPath3.hasEnded(), true);
-
-        shootingRange
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
-
-        autoActivted
-            .onTrue(autoPath1)
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.STOW))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
-            .onTrue(Commands.runOnce(() -> wantToShoot = false));
-
-        hasPath1Ended
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-            () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-            () -> GameGoalPoseChooser.getHub()))
-            .onTrue(Commands.runOnce(() -> wantToShoot = true));
-
-        SequentialEndingCommandGroup path1FPShooting = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(2.5),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.01));
-
-        SequentialEndingCommandGroup path1IShooting = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(2.5),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.01));
-
-
-        hasPath1Ended.and(shootingRange.debounce(1.0))
-            .onTrue(path1FPShooting)
-            .onTrue(path1IShooting);
-
-        auto.loggedCondition(
-            "Path1/ShootingHasEnded", 
-                () -> path1FPShooting.hasEnded()
-                && path1IShooting.hasEnded(), true)
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-            .onTrue(autoPath2);
-
-        hasPath2Ended
-            .onTrue(autoPath3);
-
-        hasPath3Ended
-            .onTrue(endAuto(auto))
-            .onTrue(mRobotDrive.getDriveManager().setToTeleop());
-
-        return auto;
-    }
-
-    public Command rightFullPath() {
-        AutoEvent auto = new AutoEvent("RightScore", this);
-
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        Trigger intakingRange = inIntakeRange(auto);
-        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
-        Trigger scoreReady = auto.condition(shootingRange);
-
-        String path1Name = "ITR_ICR";
-        SequentialEndingCommandGroup autoPath1 = followChoreoPath(path1Name, true);
-        Trigger isPath1Running = auto.loggedCondition(path1Name+"/isRunning", () -> autoPath1.isRunning(), true);
-        Trigger hasPath1Ended = auto.loggedCondition(path1Name+"/hasEnded", () -> autoPath1.hasEnded(), true);
-
-        String path2ShootingName = "ICR_STR";
-        SequentialEndingCommandGroup autoPath2Shoot = followChoreoPath(path2ShootingName, false);
-        Trigger isPath2Running = auto.loggedCondition(path2ShootingName+"/isRunning", () -> autoPath2Shoot.isRunning(), true);
-        Trigger hasPath2Ended = auto.loggedCondition(path2ShootingName+"/hasEnded", () -> autoPath2Shoot.hasEnded(), true);
-
-        autoActivted
-            .onTrue(autoPath1)
-            // .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
-            .onTrue(Commands.runOnce(() -> wantToShoot = false));
-
-        intakingRange
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
-            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
-
-        shootingRange
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
-
-        hasPath1Ended
-            .onTrue(autoPath2Shoot);
-
-        /* Shooting Logic*/
-        hasPath2Ended
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()))
-            .onTrue(Commands.runOnce(() -> wantToShoot = true));
-
-        SequentialEndingCommandGroup path2FPShooting = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
-
-        SequentialEndingCommandGroup path2IShooting = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
-
-        hasPath2Ended.and(shootingRange.debounce(0.5))
-            .onTrue(path2FPShooting)
-            .onTrue(path2IShooting)
-            .onTrue(mIntake.trashCompactPivotContinuous());
-
-        auto.loggedCondition(
-            "Path2/ShootingHasEnded", 
-            () -> path2FPShooting.hasEnded()
-                && path2IShooting.hasEnded(), true)
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-            .onTrue(mRobotDrive.getDriveManager().setToTeleop())
-            .onTrue(endAuto(auto));
-            
-        return auto;
-    }
-
-    public Command leftFullPath() {
-        AutoEvent auto = new AutoEvent("LeftScore", this);
-
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        Trigger intakingRange = inIntakeRange(auto);
-        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> wantToShoot, true);
-        Trigger scoreReady = auto.condition(shootingRange);
-
-        String path1Name = "ITL_ICL";
-        SequentialEndingCommandGroup autoPath1 = followChoreoPath(path1Name, true);
-        Trigger isPath1Running = auto.loggedCondition(path1Name+"/isRunning", () -> autoPath1.isRunning(), true);
-        Trigger hasPath1Ended = auto.loggedCondition(path1Name+"/hasEnded", () -> autoPath1.hasEnded(), true);
-
-        String path2ShootingName = "ICL_STL";
-        SequentialEndingCommandGroup autoPath2Shoot = followChoreoPath(path2ShootingName, false);
-        Trigger isPath2Running = auto.loggedCondition(path2ShootingName+"/isRunning", () -> autoPath2Shoot.isRunning(), true);
-        Trigger hasPath2Ended = auto.loggedCondition(path2ShootingName+"/hasEnded", () -> autoPath2Shoot.hasEnded(), true);
-
-        autoActivted
-            .onTrue(autoPath1)
-            // .onTrue(Commands.waitSeconds(1.75).andThen(mIntake.setPivotStateCmd(IntakePivotState.INTAKE)))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE))
-            .onTrue(Commands.runOnce(() -> wantToShoot = false));
-
-        intakingRange
-            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(Commands.waitSeconds(0.25).andThen(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE)))
-            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
-
-        shootingRange
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.CLOSE_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.CLOSE_SHOT))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
-
-        hasPath1Ended
-            .onTrue(autoPath2Shoot);
-
-        /* Shooting Logic*/
-        hasPath2Ended
-            .onTrue(mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()))
-            .onTrue(Commands.runOnce(() -> wantToShoot = true));
-
-        SequentialEndingCommandGroup path2FPShooting = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(5.0),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(0.1));
-
-        SequentialEndingCommandGroup path2IShooting = 
-            new SequentialEndingCommandGroup(
-                mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(5.0),
-                mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(0.1));
-
-        hasPath2Ended.and(shootingRange.debounce(0.5))
-            .onTrue(path2FPShooting)
-            .onTrue(path2IShooting)
-            .onTrue(mIntake.trashCompactPivotContinuous());
-
-        auto.loggedCondition(
-            "Path2/ShootingHasEnded", 
-            () -> path2FPShooting.hasEnded()
-                && path2IShooting.hasEnded(), true)
-            .onTrue(Commands.runOnce(() -> wantToShoot = false))
-            .onTrue(mIntake.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-            .onTrue(mRobotDrive.getDriveManager().setToTeleop())
-            .onTrue(endAuto(auto));
-            
-        return auto;
-    }
-
-    public Command firstPathTest(String pAutoName, String pName) {
-        AutoEvent auto = new AutoEvent(pAutoName, this);
-        SequentialEndingCommandGroup autoPath1 = followChoreoPath(pName, true);
-
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        Trigger isPath1Running = auto.loggedCondition(pName+"IsFinished", () -> autoPath1.isRunning(), true);
-        Trigger hasPath1Ended = auto.loggedCondition(pName+"IsFinished", () -> autoPath1.hasEnded(), true);
-
-        autoActivted
-            .onTrue(autoPath1);
-
-        hasPath1Ended
-            .onTrue(Commands.runOnce(() -> auto.cancel()));
-
-        return auto;
     }
 
     ///////////////// SUPERSTRUCTURE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\
@@ -767,17 +206,6 @@ public class AutonCommands extends SubsystemBase {
             }),
             mRobotDrive.getDriveManager().followPathCommand(path, pPID)
                 .withTimeout(idealTraj.getTotalTimeSeconds()),
-            mRobotDrive.getDriveManager().setToStop()
-        );
-    }
-
-    public SequentialEndingCommandGroup followChorePathUsingCL(String pPathName, boolean isFirst) {
-        return new SequentialEndingCommandGroup(
-            new ConditionalCommand(
-                mAutoFactory.resetOdometry(pPathName), 
-                new InstantCommand(() -> {}, mRobotDrive), 
-                () -> isFirst),
-            mAutoFactory.trajectoryCmd(pPathName),
             mRobotDrive.getDriveManager().setToStop()
         );
     }
@@ -842,5 +270,9 @@ public class AutonCommands extends SubsystemBase {
 
     public Intake getIntakeSubsystem() {
         return mIntake;
+    }
+
+    public AutoFactory getAutoFactory() {
+        return mAutoFactory;
     }
 }

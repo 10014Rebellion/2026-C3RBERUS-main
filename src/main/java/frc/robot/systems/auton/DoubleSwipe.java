@@ -1,5 +1,6 @@
 package frc.robot.systems.auton;
 
+import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.math.AllianceFlipUtil;
@@ -22,7 +23,6 @@ public class DoubleSwipe extends Auton {
     private final String mAutoName;
     private final String mFirstSwipePathName;
     private final String mSecondSwipePathName;
-    private final boolean mUseChoreoLib;
 
     private final double kShotTime1Seconds = 3.0;
     private final double kShotTime2Seconds = 6.5;
@@ -33,37 +33,40 @@ public class DoubleSwipe extends Auton {
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mSecondSwipePathName = pSecondSwipePathName;
-        mUseChoreoLib = pUseChoreoLib;
+        // mUseChoreoLib = pUseChoreoLib;
     }
 
     @Override
     protected AutoEvent getAuton() {
-        AutoEvent auto = new AutoEvent(mAutoName, mAutos);
+        AutoEvent auto = new AutoEvent(mAutoName, mAutos, mAutos.getAutoFactory());
 
         Trigger autoActivted = auto.getIsRunningTrigger();
 
         Trigger intakingRange = mAutos.inIntakeRange(auto);
         Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> mWantToShoot, true);
 
-        SequentialEndingCommandGroup firstSwipePath = (mUseChoreoLib) ?
-            followChorePathUsingCL(mFirstSwipePathName, true)
-                : 
-            followChoreoPath(mFirstSwipePathName, true);
-        Trigger isFirstSwipeRunning = auto.loggedCondition(mFirstSwipePathName+"/isRunning", () -> firstSwipePath.isRunning(), true);
-        Trigger hasFirstSwipeEnded = auto.loggedCondition(mFirstSwipePathName+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
+        // SequentialEndingCommandGroup firstSwipePath = (mUseChoreoLib) ?
+        //     followChorePathUsingCL(mFirstSwipePathName, true)
+        //         : 
+        //     followChoreoPath(mFirstSwipePathName, true);
+        // Trigger isFirstSwipeRunning = auto.loggedCondition(mFirstSwipePathName+"/isRunning", () -> firstSwipePath.isRunning(), true);
+        // Trigger hasFirstSwipeEnded = auto.loggedCondition(mFirstSwipePathName+"/hasEnded", () -> firstSwipePath.hasEnded(), true);
+
+        AutoTrajectory firstSwipePath = auto.getAutoRoutine().trajectory(mFirstSwipePathName);
 
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
+        double firstSwipePathTime = firstSwipePath.getRawTrajectory().getTotalTime();
+        double autoAlignTakeOverParamerFirstSwipe = 0.8;
+        Trigger hasFirstSwipeEnded = firstSwipePath.inactive();
 
-        SequentialEndingCommandGroup secondSwipePath = (mUseChoreoLib) ?
-            followChorePathUsingCL(mSecondSwipePathName, false)
-                : 
-            followChoreoPath(mSecondSwipePathName, false);
-        Trigger isSecondSwipeRunning = auto.loggedCondition(mSecondSwipePathName+"/isRunning", () -> secondSwipePath.isRunning(), true);
-        Trigger hasSecondSwipeEnded = auto.loggedCondition(mSecondSwipePathName+"/hasEnded", () -> secondSwipePath.hasEnded(), true);
+        AutoTrajectory secondSwipePath = auto.getAutoRoutine().trajectory(mSecondSwipePathName);
 
         Pose2d lastPoseOfSecondSwipe = mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().size() - 1);
+        double secondSwipePathTime = secondSwipePath.getRawTrajectory().getTotalTime();
+        double autoAlignTakeOverParamerSecondSwipe = 0.9;
+        Trigger hasSecondSwipeEnded = secondSwipePath.inactive();
 
         intakingRange
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
@@ -88,12 +91,12 @@ public class DoubleSwipe extends Auton {
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         autoActivted
-            .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
+            .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath.cmd()))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(Commands.runOnce(() -> mWantToShoot = false));
 
-        hasFirstSwipeEnded
+        firstSwipePath.atTime(firstSwipePathTime * autoAlignTakeOverParamerFirstSwipe)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
                 () -> AllianceFlipUtil.apply(
@@ -121,7 +124,7 @@ public class DoubleSwipe extends Auton {
             () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
             true);
 
-        hasFirstSwipeEnded.and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
+        hasFirstShotEnded.and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
             mFlywheelsSS.atLatestClosedLoopGoal() && 
             mHoodSS.atGoal() &&
             mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean())
@@ -134,9 +137,9 @@ public class DoubleSwipe extends Auton {
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onTrue(secondSwipePath);
+            .onTrue(secondSwipePath.cmd());
 
-        hasSecondSwipeEnded
+        secondSwipePath.atTime(secondSwipePathTime * autoAlignTakeOverParamerSecondSwipe)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
                 () -> AllianceFlipUtil.apply(

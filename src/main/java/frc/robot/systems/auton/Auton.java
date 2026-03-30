@@ -1,16 +1,9 @@
 package frc.robot.systems.auton;
 
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.AutoEvent;
 import frc.robot.commands.SequentialEndingCommandGroup;
-import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
@@ -43,11 +36,7 @@ public class Auton {
         return mAutos.followChoreoPath(pPathName, pPID, pIsFirst);
     }
 
-    protected SequentialEndingCommandGroup followChorePathUsingCL(String pPathName, boolean isFirst) {
-        return mAutos.followChorePathUsingCL(pPathName, isFirst);
-    }
-
     protected AutoEvent getAuton() {
-        return new AutoEvent("EmptyAuto", mAutos);
+        return new AutoEvent("EmptyAuto", mAutos, mAutos.getAutoFactory());
     }
 }

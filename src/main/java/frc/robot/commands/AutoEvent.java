@@ -8,6 +8,8 @@ import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -15,13 +17,17 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.telemetry.Telemetry;
 
 public class AutoEvent extends Command {
-    private final EventLoop mAutoEventLoop = new EventLoop();
+    private final AutoRoutine mAutoRoutine;
+    private final EventLoop mAutoEventLoop;
     private boolean mIsRunning = false; 
     private final Trigger mIsRunningTrigger;
     private String mAutoName;
   
-    public AutoEvent(String pAutoName, Subsystem pSubsystem) {
+    public AutoEvent(String pAutoName, Subsystem pSubsystem, AutoFactory pAutoFactory) {
         mAutoName = pAutoName;
+
+        mAutoRoutine = pAutoFactory.newRoutine(pAutoName);
+        mAutoEventLoop = mAutoRoutine.loop();
 
         mIsRunningTrigger = loggedCondition("IsRunning", () -> mIsRunning, false);
 
@@ -59,6 +65,10 @@ public class AutoEvent extends Command {
 
     public Trigger condition(BooleanSupplier condition) {
         return new Trigger(mAutoEventLoop, condition);
+    }
+
+    public AutoRoutine getAutoRoutine() {
+        return mAutoRoutine;
     }
 
     public Trigger loggedCondition(String key, BooleanSupplier condition, boolean useTuneableOverride) {
