@@ -15,6 +15,11 @@ import frc.robot.systems.drive.modules.Module;
 import frc.robot.systems.drive.modules.ModuleIO;
 import frc.robot.systems.drive.modules.ModuleIOKraken;
 import frc.robot.systems.drive.modules.ModuleIOSim;
+import frc.robot.systems.efi.FuelInjectorConstants;
+import frc.robot.systems.efi.FuelInjectorIO;
+import frc.robot.systems.efi.FuelInjectorIOKrakenX60;
+import frc.robot.systems.efi.FuelInjectorIOSim;
+import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.pivot.IntakePivotIO;
@@ -52,11 +57,12 @@ import frc.robot.systems.auton.AutonCommands;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
-    private final Drive mDrive;
+    private final Drive mDriveSS;
     private final FuelPumpSS mFuelPumpSS;
     private final HoodSS mHoodSS;
     private final FlywheelsSS mFlywheelsSS;
-    private final Intake mIntake;
+    private final Intake mIntakeSS;
+    private final FuelInjectorSS mFuelInjectorSS;
     // private final ClimbSS mClimbSS;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
@@ -66,7 +72,7 @@ public class RobotContainer {
     public RobotContainer() {
         switch (RobotConstants.kCurrentMode) {
             case REAL: {
-                mDrive = new Drive(
+                mDriveSS = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIOKraken(kFrontLeftHardware)),
                         new Module("FR", new ModuleIOKraken(kFrontRightHardware)),
@@ -95,7 +101,7 @@ public class RobotContainer {
                         new EncoderIOCANCoder(FlywheelConstants.kCANCoderConfig)
                 );
 
-                mIntake = new Intake(
+                mIntakeSS = new Intake(
                     new IntakePivotSS(new IntakePivotIOKrakenX44(
                         IntakeConstants.PivotConstants.kPivotMotorConfig, 
                         IntakeConstants.PivotConstants.kPivotEncoderConfig)),
@@ -106,10 +112,11 @@ public class RobotContainer {
                 //     new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants),
                 //     new AngularServoIOPWM(ClimbConstants.kHookPort));
 
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig));
                 break;
             }
             case SIM: {
-                mDrive = new Drive(
+                mDriveSS = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIOSim()),
                         new Module("FR", new ModuleIOSim()),
@@ -141,12 +148,14 @@ public class RobotContainer {
                     new EncoderIO() {}
                 );
 
-                mIntake = new Intake(
+                mIntakeSS = new Intake(
                     new IntakePivotSS(new IntakePivotIOSim(
                         IntakeConstants.PivotConstants.kPivotMotorConfig, 
                         IntakeConstants.PivotConstants.kPivotEncoderConfig)),
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
+
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOSim());
 
                 // mClimbSS = new ClimbSS(
                 //     new ClimbIOSim(
@@ -159,7 +168,7 @@ public class RobotContainer {
             }
 
             default: {
-                mDrive = new Drive(
+                mDriveSS = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIO() {}),
                         new Module("FR", new ModuleIO() {}),
@@ -188,7 +197,7 @@ public class RobotContainer {
                     new EncoderIO() {}
                 );
 
-                mIntake = new Intake(
+                mIntakeSS = new Intake(
                     new IntakePivotSS(new IntakePivotIO() {}),
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
@@ -197,27 +206,29 @@ public class RobotContainer {
                 //     new ClimbIO() {},
                 //     new AngularServoIO() {});
 
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIO() {});
+
                 break;
             }
         }
 
-        ShotMap.getInstance().setPoseSupplier(() -> mDrive.getPoseEstimate());
+        ShotMap.getInstance().setPoseSupplier(() -> mDriveSS.getPoseEstimate());
         
-        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake);
+        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS);
 
         initBindings();
         initBaseTriggers();
 
         mDriverProfileChooser.addDefaultOption(
-                BindingsConstants.kDefaultProfile.key(), mDrive.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
+                BindingsConstants.kDefaultProfile.key(), mDriveSS.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
         for (DriverProfiles profile : BindingsConstants.kProfiles)
-            mDriverProfileChooser.addOption(profile.key(), mDrive.getDriveManager().setDriveProfile(profile));
+            mDriverProfileChooser.addOption(profile.key(), mDriveSS.getDriveManager().setDriveProfile(profile));
 
-        autos = new AutonCommands(mDrive, mIntake, mFuelPumpSS, mHoodSS, mFlywheelsSS);
+        autos = new AutonCommands(mDriveSS, mIntakeSS, mFuelPumpSS, mHoodSS, mFlywheelsSS);
     }
 
     public Drive getDrivetrain() {
-        return mDrive;
+        return mDriveSS;
     }
 
     private void initBindings() {
