@@ -96,14 +96,14 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftSingleSwipe", 
                 "L_IT_IC_ST", 
-                4.2);
+                4.19);
 
         SingleSwipe mRightSingleSwipeAuto = 
             new SingleSwipe(
                 this, 
                 "RightSingleSwipe", 
                 "R_IT_IC_ST", 
-                4.12);
+                4.13);
 
         DoubleSwipe mLeftDoubleSwipeAuto =
             new DoubleSwipe(
@@ -112,7 +112,7 @@ public class AutonCommands extends SubsystemBase {
                 "L_IT_IC_ST", 
                 4.2,
                 "L_ST_IB_ST_BUMP",
-                4.59);
+                4.52);
 
         DoubleSwipe mRightDoubleSwipeAuto =
             new DoubleSwipe(
