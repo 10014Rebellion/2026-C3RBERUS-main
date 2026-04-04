@@ -15,7 +15,7 @@ import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 public class FuelInjectorConstants {
 
     public static final BasicMotorHardware kFuelInjectorConfig = new BasicMotorHardware(
-        0, 
+        43, 
         RobotConstants.kSubsystemsCANBus,
         1, 
         InvertedValue.Clockwise_Positive, 
