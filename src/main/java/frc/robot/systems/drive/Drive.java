@@ -241,26 +241,6 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
         Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
         Logger.recordOutput("Drive/Odometry/VisionFactor", mVisionFactor);
-
-        testFunction();
-    }
-
-    public void testFunction() {
-        SwerveModuleState[] states = kKinematics.toSwerveModuleStates(
-            new ChassisSpeeds(4.5, 4.5, 5.0)
-        );
-
-        states[3] = new SwerveModuleState(states[3].speedMetersPerSecond / 2.0, states[3].angle);
-
-        // SwerveModuleState[] states = new SwerveModuleState[] {
-        //     new SwerveModuleState(3.0, Rotation2d.fromDegrees(45)),
-        //     new SwerveModuleState(3.0, Rotation2d.fromDegrees(45)),
-        //     new SwerveModuleState(3.0, Rotation2d.fromDegrees(45)),
-        //     new SwerveModuleState(0.5, Rotation2d.fromDegrees(45)),
-        // };
-
-        Logger.recordOutput("Drive/ODOMETRYTEST/SkidTestStates", states);
-        Logger.recordOutput("Drive/ODOMETRYTEST/TestSkidRatio", SwerveHelper.skidRatio(states));
     }
 
     ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
