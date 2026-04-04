@@ -22,7 +22,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -43,6 +42,7 @@ import frc.robot.systems.drive.gyro.GyroInputsAutoLogged;
 import frc.robot.systems.drive.modules.Module;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class Drive extends SubsystemBase {
     private final Module[] mModules;
@@ -107,7 +107,7 @@ public class Drive extends SubsystemBase {
     public static final LoggedTunableNumber tDriveCharacterizationAmperage = new LoggedTunableNumber("Drive/DriveCharacterizationAmperage", 0);
     public static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
     public static final LoggedTunableNumber tAzimuthCharacterizationAmps = new LoggedTunableNumber("Drive/AzimuthCharacterizationAmps", 0);
-    
+
     public Drive(Module[] modules, GyroIO gyro, ATagVision vision) {
         this.mModules = modules;
         this.mGyro = gyro;
@@ -199,10 +199,7 @@ public class Drive extends SubsystemBase {
             mPoseEstimator.updateWithTime(mModules[0].getOdometryTimeStamps()[i], mRobotRotation, modulePositionsHighF);
         }
 
-
-        mSkidRatio = SwerveHelper.skidRatio(
-            getRobotChassisSpeeds(), 
-            mRotationSpeed);
+        mSkidRatio = SwerveHelper.skidRatio(getModuleStates());
 
         mHasSkidded = mSkidRatio > kSkidRatioCap;
 
@@ -210,15 +207,18 @@ public class Drive extends SubsystemBase {
             ? kSkidScalar 
             : 0;
 
-        mGyroFactor = ( mCollisionDebouncer.calculate(shouldAccountForCollision()) ) 
+        mGyroFactor = ( mCollisionDebouncer.calculate(shouldAccountForCollision())) 
             ? kCollisionScalar 
             : 1.0;
 
         mTiltFactor = mTiltDebouncer.calculate(shouldAccountForFlip()) 
-            ? mGyroInputs.iPitchPosition.getSin() * mGyroInputs.iPitchPosition.getSin() + 1.0
+            ? Math.min(
+                kMinimumTiltFactor, 
+                mGyroInputs.iPitchPosition.getCos() 
+                    * mGyroInputs.iPitchPosition.getCos())
             : 1.0;
         
-        mVisionFactor = (mSkidFactor + mGyroFactor) * mTiltFactor;
+        mVisionFactor = (mSkidFactor + mGyroFactor);
         
         /* VISION */
         mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
@@ -228,10 +228,8 @@ public class Drive extends SubsystemBase {
                 mPoseEstimator.addVisionMeasurement(
                     observation.pose(), 
                     observation.timeStamp(), 
-                    observation.stdDevs().times(1.0 / mVisionFactor));
+                    observation.stdDevs().times(mTiltFactor / mVisionFactor));
             }
-
-            // Telemetry.logVisionObservationStdDevs(observation);
         }
 
         /* For logging purposes */
@@ -243,6 +241,26 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
         Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
         Logger.recordOutput("Drive/Odometry/VisionFactor", mVisionFactor);
+
+        testFunction();
+    }
+
+    public void testFunction() {
+        SwerveModuleState[] states = kKinematics.toSwerveModuleStates(
+            new ChassisSpeeds(4.5, 4.5, 5.0)
+        );
+
+        states[3] = new SwerveModuleState(states[3].speedMetersPerSecond / 2.0, states[3].angle);
+
+        // SwerveModuleState[] states = new SwerveModuleState[] {
+        //     new SwerveModuleState(3.0, Rotation2d.fromDegrees(45)),
+        //     new SwerveModuleState(3.0, Rotation2d.fromDegrees(45)),
+        //     new SwerveModuleState(3.0, Rotation2d.fromDegrees(45)),
+        //     new SwerveModuleState(0.5, Rotation2d.fromDegrees(45)),
+        // };
+
+        Logger.recordOutput("Drive/ODOMETRYTEST/SkidTestStates", states);
+        Logger.recordOutput("Drive/ODOMETRYTEST/TestSkidRatio", SwerveHelper.skidRatio(states));
     }
 
     ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\

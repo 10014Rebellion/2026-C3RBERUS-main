@@ -59,14 +59,15 @@ public class DriveConstants {
     public static final double kDriftRate = RobotBase.isReal() ? 2.5 : 5.57; // TODO: TUNE ME
     public static final double kDriveFFAggressiveness = RobotBase.isReal() ? 0.0001 : 0.5;
     public static final double kAzimuthDriveScalar = RobotBase.isReal() ? 0.0 : 0.0;
-    public static final double kSkidRatioCap = 2.0; // TODO: TUNE ME
+    public static final double kSkidRatioCap = 1.5; // TODO: TUNE ME
     public static final double kSkidScalar = 1.0; // TODO: TUNE ME
-    public static final double kCollisionCapG = 1.75; // TODO: TUNE ME
+    public static final double kCollisionCapG = 1.95; // TODO: TUNE ME
     public static final double kCollisionScalar = 1.0; // TODO: TUNE ME
     public static final boolean kAccountForTilt = true; 
+    public static final double kMinimumTiltFactor = 0.25;
     public static final Rotation2d kTiltCutOffPitch = Rotation2d.fromDegrees(5.0);
     public static final Rotation2d kTiltCutOffRoll = Rotation2d.fromDegrees(5.0);
-    public static final double kTrustTime = 0.5; 
+    public static final double kTrustTime = 1.5; 
 
     public static final boolean kDoExtraLogging = false;
 
