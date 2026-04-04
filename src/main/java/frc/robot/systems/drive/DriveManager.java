@@ -2,6 +2,8 @@ package frc.robot.systems.drive;
 
 import static frc.robot.systems.drive.DriveConstants.kPPRotationPID;
 import static frc.robot.systems.drive.DriveConstants.kPPTranslationPID;
+import static frc.robot.systems.drive.DriveConstants.kTrackWidthXMeters;
+import static frc.robot.systems.drive.DriveConstants.kTrackWidthYMeters;
 
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -22,7 +24,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -130,10 +131,10 @@ public class DriveManager {
                 break;
             case HEADING_X_LOCK:
                 desiredSpeeds = Optional.empty();
-                mDrive.getModules()[0].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(45.0)));
-                mDrive.getModules()[1].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45.0)));
-                mDrive.getModules()[2].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45.0)));
-                mDrive.getModules()[3].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(45.0)));
+                SwerveHelper.runXLock(
+                    kTrackWidthXMeters, 
+                    kTrackWidthYMeters, 
+                    mDrive.getModules());
                 break;
             case AUTO_ALIGN:
                 desiredSpeeds = of(mAutoAlignController.calculate(

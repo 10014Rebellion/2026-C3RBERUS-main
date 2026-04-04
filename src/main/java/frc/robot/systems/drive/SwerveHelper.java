@@ -18,6 +18,9 @@ import java.util.Arrays;
 
 import org.littletonrobotics.junction.Logger;
 
+import frc.lib.pathplanner.AzimuthFeedForward;
+import frc.lib.pathplanner.SwerveSetpoint;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,9 +31,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.math.EqualsUtil;
-import frc.lib.pathplanner.SwerveSetpoint;
-// import frc.lib.swerve.LocalADStarAK;
 import frc.lib.telemetry.Telemetry;
+import frc.robot.systems.drive.modules.Module;
 
 public class SwerveHelper {
     public static final double dt = 0.02;
@@ -277,5 +279,60 @@ public class SwerveHelper {
         double accelerationM = (2 * distM) / (dt * dt);
 
         return -kKrakenFOCModel.getCurrent(kWheelRadiusMeters * accelerationM * kWheelInertia) * kAzimuthDriveScalar;
+    }
+
+    public static SwerveSetpoint emptySwerveSetpoint(Module[] quadModules) {
+        return new SwerveSetpoint(
+            new ChassisSpeeds(), 
+            new SwerveModuleState[] {
+                new SwerveModuleState(
+                    0.0,
+                    quadModules[0].getCurrentState().angle),
+                new SwerveModuleState(
+                    0.0,
+                    quadModules[1].getCurrentState().angle),
+                new SwerveModuleState(
+                    0.0,
+                    quadModules[2].getCurrentState().angle),
+                new SwerveModuleState(
+                    0.0,
+                    quadModules[3].getCurrentState().angle)
+            }, 
+            DriveFeedforwards.zeros(4), 
+            new AzimuthFeedForward(new double[] {
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0}));
+    }
+
+    public static void runXLock(double pTrackWidthXMeters, double pTrackWidthYMeters, Module[] pModules) {
+        pModules[0].setDesiredState(
+            new SwerveModuleState(
+                0.0, 
+                new Rotation2d(
+                    pTrackWidthXMeters, 
+                    pTrackWidthYMeters)));
+        pModules[1].setDesiredState(
+            new SwerveModuleState(
+                0.0, 
+                new Rotation2d(
+                    -pTrackWidthXMeters,
+                     pTrackWidthYMeters
+        )));
+        pModules[2].setDesiredState(
+            new SwerveModuleState(
+                0.0, 
+                new Rotation2d(
+                     pTrackWidthXMeters,
+                    -pTrackWidthYMeters
+        )));
+        pModules[3].setDesiredState(
+            new SwerveModuleState(
+                0.0, 
+                new Rotation2d(
+                    -pTrackWidthXMeters,
+                    -pTrackWidthYMeters
+        )));
     }
 }

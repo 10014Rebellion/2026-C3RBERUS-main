@@ -215,7 +215,7 @@ public class Drive extends SubsystemBase {
             : 1.0;
 
         mTiltFactor = mTiltDebouncer.calculate(shouldAccountForFlip()) 
-            ? mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iPitchPosition.getCos()
+            ? mGyroInputs.iPitchPosition.getSin() * mGyroInputs.iPitchPosition.getSin() + 1.0
             : 1.0;
         
         mVisionFactor = (mSkidFactor + mGyroFactor) * mTiltFactor;
@@ -257,29 +257,7 @@ public class Drive extends SubsystemBase {
 
         if(DriverStation.isDisabled()) {
             mDesiredSpeeds = new ChassisSpeeds();
-            mPreviousSetpoint = 
-                new SwerveSetpoint(
-                    mDesiredSpeeds, 
-                    new SwerveModuleState[] {
-                        new SwerveModuleState(
-                            0.0,
-                            mModules[0].getCurrentState().angle),
-                        new SwerveModuleState(
-                            0.0,
-                            mModules[1].getCurrentState().angle),
-                        new SwerveModuleState(
-                            0.0,
-                            mModules[2].getCurrentState().angle),
-                        new SwerveModuleState(
-                            0.0,
-                            mModules[3].getCurrentState().angle)
-                }, 
-                DriveFeedforwards.zeros(4), 
-                new AzimuthFeedForward(new double[] {
-                    0.0, 
-                    0.0, 
-                    0.0, 
-                    0.0}));
+            mPreviousSetpoint = SwerveHelper.emptySwerveSetpoint(mModules);
         }
 
         /* Logs all the possible drive states, great for debugging */
