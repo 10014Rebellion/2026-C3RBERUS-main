@@ -21,7 +21,7 @@ import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.Intake;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
+import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
@@ -205,7 +205,7 @@ public class ButtonBindings {
         // wantToCloseShoot
         //     .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
         //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-        //     .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+        //     .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
         //     .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* SHOOTS FROM ANYWHERE IN OUR FLYWHEEL RANGE */
@@ -233,7 +233,7 @@ public class ButtonBindings {
         wantToDynamicShoot
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* Feeding Logic */
@@ -268,7 +268,7 @@ public class ButtonBindings {
         wantToFeed.or(wantToOpponentFeed).or(wantToFeedWithNoCompact)
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* Makes flywheel stand by */
@@ -284,22 +284,22 @@ public class ButtonBindings {
 
         /* INTAKE LOGIC */
         wantToIntake
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             // .onTrue(mDriveSS.getDriveManager().setToTeleopSniper())
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
             // .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToOuttake
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         wantToSafeStow
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.SAFESTOW));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.SAFESTOW));
 
         wantToStow
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.STOW));
 
         wantToTraverse
             .onTrue(Commands.runOnce(() -> inCenterFlag = inCenter.getAsBoolean()));
@@ -342,12 +342,12 @@ public class ButtonBindings {
             .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
         
         mPilotController.x().and(isTesting())
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOW));
 
         mPilotController.y().and(isTesting())
             .onTrue(mIntakeSS.trashCompactPivotRepeat())
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOW));
 
         // mPilotController.y().and(isTesting())
         //     .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
@@ -365,7 +365,7 @@ public class ButtonBindings {
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         mPilotController.leftTrigger().and(isTesting())
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
@@ -396,7 +396,7 @@ public class ButtonBindings {
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
         mGunnerController.leftTrigger().and(isTesting())
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
@@ -414,7 +414,7 @@ public class ButtonBindings {
             .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED))
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE));
 
         mGunnerController.povUp().and(isTesting())
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
@@ -440,7 +440,7 @@ public class ButtonBindings {
         
         new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE));
 
         // Trigger climbButton = new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed);
         // climbButton.and(() -> DriverStation.isDisabled() && !DriverStation.isFMSAttached())
