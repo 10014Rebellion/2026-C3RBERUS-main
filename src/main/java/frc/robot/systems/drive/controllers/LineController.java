@@ -3,14 +3,18 @@ package frc.robot.systems.drive.controllers;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import frc.lib.math.GeomUtil;
 import frc.lib.tuning.LoggedTunableNumber;
 
 public class LineController {
@@ -54,6 +58,8 @@ public class LineController {
     private DoubleSupplier mTeleopScalar;
     private BooleanSupplier mInvertTeleop;
 
+    private Pose2d mGoalPose;
+
     public LineController(DoubleSupplier pSlope, DoubleSupplier pTeleopScalar, BooleanSupplier pInvertTeleop) {
         mSlope = pSlope;
         mTeleopScalar = pTeleopScalar;
@@ -77,8 +83,29 @@ public class LineController {
         this.tOmegaFeedforward = new SimpleMotorFeedforward(tOmegaS.get(), tOmegaV.get());
     }
 
+    @AutoLogOutput(key = "Drive/LineAlignController/AutoAlign")
+    public boolean atGoal(){
+        return tXController.atGoal() && tOmegaController.atGoal();
+    }
+
+    public boolean atPositionTimeout(){
+        return (getPositionGoal().getX() == getPositionSetpoint().getX()) && (getPositionGoal().getRotation() == getPositionSetpoint().getRotation());
+    }
+
+    public Pose2d getPositionSetpoint() {
+        return new Pose2d(
+                new Translation2d(tXController.getSetpoint().position, 0.0),
+                Rotation2d.fromDegrees(tOmegaController.getSetpoint().position));
+    }
+
+    public Pose2d getPositionGoal(){
+        return mGoalPose;
+    }
+
 
     public ChassisSpeeds calculate(ChassisSpeeds teleopSpeeds, Pose2d goalPose, Pose2d robotPose) {
+        mGoalPose = goalPose;
+
         double distance = getDistanceFromLine(
             mSlope.getAsDouble(), 
             goalPose.getX(), 

@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.lib.math.AllianceFlipUtil;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /* Chooses pose based of strategy and psoe */
@@ -44,7 +46,7 @@ public class GameGoalPoseChooser {
 
     /* Non-static Trench */
     public static Pose2d getClosestTrench(Pose2d robotPose) {
-        Pose2d trenchPose = onLeftOrRightY(robotPose) ? getTL() : getTR();
+        Pose2d trenchPose = onLeftY(robotPose) ? getTL() : getTR();
         Logger.recordOutput("GamePoses/ClosestTrench", trenchPose);
         return trenchPose; 
     }
@@ -59,8 +61,14 @@ public class GameGoalPoseChooser {
 
     /* Nonstatic bump */
     public static Pose2d getClosestBump(Pose2d robotPose) {
-        Pose2d bumpPose = onLeftOrRightY(robotPose) ? getBL() : getBR();
+        Pose2d bumpPose = onLeftY(robotPose) ? getBL() : getBR();
         Logger.recordOutput("GamePoses/ClosestBump", bumpPose);
+        return bumpPose; 
+    }
+
+    public static Pose2d getClosestClimbPose(Pose2d robotPose){
+        Pose2d bumpPose = onLeftY(robotPose) ? getCL() : getCR();
+        Logger.recordOutput("GamePoses/ClosestClimb", bumpPose);
         return bumpPose; 
     }
 
@@ -72,31 +80,40 @@ public class GameGoalPoseChooser {
         return AllianceFlipUtil.apply(FieldConstants.kBumpPoseRight);
     }
 
+    public static Pose2d getCL() {
+        return AllianceFlipUtil.apply(FieldConstants.kClimbLeftPose);
+    }
+
+    public static Pose2d getCR(){
+        return AllianceFlipUtil.apply(FieldConstants.kClimbRightPose);
+    }
+
     public static Pose2d getHub() {
         Logger.recordOutput("GamePoses/HubPose", AllianceFlipUtil.apply(FieldConstants.kHubPose));
         return AllianceFlipUtil.apply(FieldConstants.kHubPose);
     }
 
-    public static Pose2d closestClimbPose(Pose2d robotPose){
-        if(
-            FieldConstants.kClimbLeftPose.getTranslation().getDistance(robotPose.getTranslation()) < 
-            FieldConstants.kClimbRightPose.getTranslation().getDistance(robotPose.getTranslation())){
-            return AllianceFlipUtil.apply(FieldConstants.kClimbLeftPose);
-        } 
-        
-        return AllianceFlipUtil.apply(FieldConstants.kClimbRightPose);
-    }
-
     /* Utils function */
-    public static boolean onLeftOrRightY(Pose2d robotPose) {
-        return 
-            (robotPose.getY() > FieldConstants.kFieldYM / 2.0
-                &&
-            DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)) 
-                ||
-            (!(robotPose.getY() > FieldConstants.kFieldYM / 2.0)
-                &&
-            !DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue));
+    public static boolean onLeftY(Pose2d robotPose) {
+
+        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue) && robotPose.getY() > FieldConstants.kFieldYM / 2.0){
+            return true;
+        }
+
+        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red) && robotPose.getY() < FieldConstants.kFieldYM / 2.0){
+            return true;
+        }
+
+        return false;
+
+        // return 
+        //     (robotPose.getY() > FieldConstants.kFieldYM / 2.0
+        //         &&
+        //     DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)) 
+        //         ||
+        //     (!(robotPose.getY() > FieldConstants.kFieldYM / 2.0)
+        //         &&
+        //     !DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red));
     }
 
     public static boolean inCenter(Pose2d robotPose) {

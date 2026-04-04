@@ -16,6 +16,7 @@ import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
@@ -39,7 +40,7 @@ public class ButtonBindings {
     private final HoodSS mHoodSS;
     private final FlywheelsSS mFlywheelsSS;
     private final Intake mIntakeSS;
-    // private final ClimbSS mClimbSS;
+    private final ClimbSS mClimbSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
 
@@ -55,13 +56,13 @@ public class ButtonBindings {
 
     private boolean inCenterFlag = false;
 
-    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake) {
+    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, ClimbSS pClimbSS) {
         this.mDriveSS = pDriveSS;
         this.mFuelPumpSS = pFuelPumpSS;
         this.mHoodSS = pHoodSS;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mIntakeSS = pIntake;
-        // this.mClimbSS = pClimbSS;
+        this.mClimbSS = pClimbSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.getDriveManager().setToTeleop());
     }
 
@@ -83,6 +84,10 @@ public class ButtonBindings {
     }
 
     public void initCompBindings() {
+        Trigger wantToClimb = mPilotController.povUp().and(kUsingPilotGunner);
+        Trigger isLineAligned = new Trigger(() -> mDriveSS.getDriveManager().getLineAlignController().atPositionTimeout());
+        Trigger isPoseAligned = new Trigger(() -> mDriveSS.getDriveManager().getAutoAlignController().atGoal());
+
         boolean closedLoopFuelPump = true;
         boolean isEli = false;
         Trigger wantToAutoAlignToHub = mPilotController.a();
@@ -103,8 +108,6 @@ public class ButtonBindings {
         Trigger wantToOpponentFeed = mGunnerController.a();
         Trigger wantToFeedWithNoCompact = mGunnerController.b().and(kUsingPilotGunner);
         Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
-        Trigger wantToInitiateClimb = mGunnerController.povUp().and(kUsingPilotGunner);
-        Trigger wantToEndClimb = mGunnerController.povDown().and(kUsingPilotGunner);
         Trigger wantToStow = mGunnerController.leftBumper().and(kUsingPilotGunner);
         Trigger autonomousWorking = new Trigger(() -> true);
         Trigger doesRobotWantToMove = new Trigger(() -> 
@@ -205,7 +208,30 @@ public class ButtonBindings {
             )
         .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        // wantToCloseShoot.and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
+        wantToClimb.and(autonomousWorking).and(isLineAligned.negate())
+            .onTrue(
+                mDriveSS.getDriveManager().setToGenericLineAlign(
+                    () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), 
+                    () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()).getRotation(), 
+                    () -> 1, 
+                    () -> false))
+                    .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        wantToClimb.and(autonomousWorking).and(isLineAligned)
+            .onTrue(
+                mDriveSS.getDriveManager().setToGenericAutoAlign(() -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), ConstraintType.LINEAR))
+            .onTrue(
+                mClimbSS.goUpTillClimbHeightThenStay()
+            )
+            .onFalse(
+                mDriveSS.getDriveManager().setToTeleop()
+            );
+
+        wantToClimb.and(autonomousWorking).and(isPoseAligned)
+            .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed())
+            .onFalse(mClimbSS.idle());
+
+        // wantToCloseShoot.and(autonomousWorking)s.and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
         //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
         //         () -> GameGoalPoseChooser.getCloseShotPose(), 
         //         ConstraintType.LINEAR));
@@ -236,6 +262,7 @@ public class ButtonBindings {
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                 () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
                 () -> GameGoalPoseChooser.getHub()));
+                
 
         // If at goal, shoot it in
         wantToDynamicShoot.and(shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
@@ -487,8 +514,8 @@ public class ButtonBindings {
        
         mPilotController.b()
             .onTrue(mDriveSS.getDriveManager().setToGenericLineAlign(
-                () -> GameGoalPoseChooser.closestClimbPose(mDriveSS.getPoseEstimate()),
-                () -> GameGoalPoseChooser.closestClimbPose(mDriveSS.getPoseEstimate()).getRotation(), 
+                () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()),
+                () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()).getRotation(), 
                 () -> 0.5, 
                 () -> false))
             .onFalse(mDriveSS.getDriveManager().setDriveStateCommand(DriveState.TELEOP));

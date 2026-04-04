@@ -30,8 +30,8 @@ public class FieldConstants {
     private static final double kHubHexOuterOffsetM = inToM(24.2487115); // Offset from center of hub to outer point of a hexagon
     private static final double kHubHexInnerOffsetM = inToM(13.7578975); // Offset from center of hub to inner point of a hexagon
     
-    public static final Pose2d kClimbRightPose = new Pose2d(1.078, 4.7616, Rotation2d.fromDegrees(90));
-    public static final Pose2d kClimbLeftPose = new Pose2d(1.0878, 2.7556, Rotation2d.fromDegrees(-90));
+    public static final Pose2d kClimbLeftPose = new Pose2d(1.078, 4.7616, Rotation2d.fromDegrees(90));
+    public static final Pose2d kClimbRightPose = new Pose2d(1.0878, 2.7556, Rotation2d.fromDegrees(-90));
 
     public static final double kFieldXM = eval(650.12, 651.22);
     public static final double kFieldYM = eval(316.64, 317.69);

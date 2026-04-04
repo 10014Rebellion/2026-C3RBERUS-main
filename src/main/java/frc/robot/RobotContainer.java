@@ -48,6 +48,13 @@ import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
+import frc.robot.systems.climb.AngularServoIO;
+import frc.robot.systems.climb.AngularServoIOPWM;
+import frc.robot.systems.climb.ClimbConstants;
+import frc.robot.systems.climb.ClimbIO;
+import frc.robot.systems.climb.ClimbIOKrakenx44;
+import frc.robot.systems.climb.ClimbIOSim;
+import frc.robot.systems.climb.ClimbSS;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -57,7 +64,7 @@ public class RobotContainer {
     private final HoodSS mHoodSS;
     private final FlywheelsSS mFlywheelsSS;
     private final Intake mIntake;
-    // private final ClimbSS mClimbSS;
+    private final ClimbSS mClimbSS;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
@@ -102,9 +109,9 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
-                // mClimbSS = new ClimbSS(
-                //     new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants),
-                //     new AngularServoIOPWM(ClimbConstants.kHookPort));
+                mClimbSS = new ClimbSS(
+                    new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants),
+                    new AngularServoIOPWM(ClimbConstants.kHookPort));
 
                 break;
             }
@@ -148,12 +155,12 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
-                // mClimbSS = new ClimbSS(
-                //     new ClimbIOSim(
-                //         ClimbConstants.kSimElevator, 
-                //         ClimbConstants.kClimbMotorConstants, 
-                //         ClimbConstants.kSoftLimits),
-                //     new AngularServoIO() {});
+                mClimbSS = new ClimbSS(
+                    new ClimbIOSim(
+                        ClimbConstants.kSimElevator, 
+                        ClimbConstants.kClimbMotorConstants, 
+                        ClimbConstants.kSoftLimits),
+                    new AngularServoIO() {});
 
                 break;
             }
@@ -193,9 +200,9 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
-                // mClimbSS = new ClimbSS(
-                //     new ClimbIO() {},
-                //     new AngularServoIO() {});
+                mClimbSS = new ClimbSS(
+                    new ClimbIO() {},
+                    new AngularServoIO() {});
 
                 break;
             }
@@ -203,7 +210,7 @@ public class RobotContainer {
 
         ShotMap.getInstance().setPoseSupplier(() -> mDrive.getPoseEstimate());
         
-        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake);
+        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake, mClimbSS);
 
         initBindings();
         initBaseTriggers();
