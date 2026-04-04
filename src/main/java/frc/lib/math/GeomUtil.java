@@ -172,6 +172,16 @@ public class GeomUtil {
         }
     }
 
+    public static boolean withinTolerance(Rotation2d lhs, Rotation2d rhs, Rotation2d tolerance) {
+        if (tolerance.getRadians() > Math.PI) {
+            return true;
+        }
+        double dot = lhs.getCos() * rhs.getCos() + lhs.getSin() * rhs.getSin();
+        // cos(θ) >= cos(tolerance) means |θ| <= tolerance, for tolerance in [-pi, pi], as pre-checked
+        // above.
+        return dot > tolerance.getCos();
+    }
+
     public static double hypot(double x, double y) {
         return Math.hypot(x, y);
     }

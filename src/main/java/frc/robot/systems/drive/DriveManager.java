@@ -10,7 +10,9 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
-import com.pathplanner.lib.commands.FollowPathCommand;
+// import com.pathplanner.lib.commands.FollowPathCommand;
+import frc.robot.commands.AutoEvent;
+import frc.robot.commands.FollowPathCommand;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 
@@ -20,6 +22,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -282,14 +285,20 @@ public class DriveManager {
     /*
      * FOLLOWS PATHPLANNER PATH WITH DEFAULT PID
      */
-    public Command followPathCommand(PathPlannerPath path) {
-        return followPathCommand(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
+    public FollowPathCommand followPathCommand(PathPlannerPath path, boolean isFirst) {
+        return followPathCommand(
+            path, 
+            new PPHolonomicDriveController(
+                kPPTranslationPID, 
+                kPPRotationPID), 
+            isFirst);
     }
 
     /*
      * FOLLOWS PATHPLANNER PATH WITH CUSTOM PID
      */
-    public Command followPathCommand(PathPlannerPath path, PPHolonomicDriveController drivePID) {
+    public FollowPathCommand followPathCommand(
+        PathPlannerPath path, PPHolonomicDriveController drivePID, boolean isFirst) {
         return new FollowPathCommand(
             path, mDrive::getPoseEstimate, 
             mDrive::getRobotChassisSpeeds,
@@ -301,6 +310,43 @@ public class DriveManager {
             drivePID, 
             mDrive.getPPRobotConfig(), 
             () -> AllianceFlipUtil.shouldFlip(), 
+            isFirst,
+            mDrive::setPose,
+            mDrive);
+    }
+
+    /*
+     * FOLLOWS PATHPLANNER PATH WITH DEFAULT PID
+     */
+    public FollowPathCommand followPathCommand(PathPlannerPath path, boolean isFirst, AutoEvent pAuto) {
+        return followPathCommand(
+            path, 
+            new PPHolonomicDriveController(
+                kPPTranslationPID, 
+                kPPRotationPID), 
+            isFirst,
+            pAuto);
+    }
+
+    /*
+     * FOLLOWS PATHPLANNER PATH WITH CUSTOM PID
+     */
+    public FollowPathCommand followPathCommand(
+        PathPlannerPath path, PPHolonomicDriveController drivePID, boolean isFirst, AutoEvent pAuto) {
+        return new FollowPathCommand(
+            path, mDrive::getPoseEstimate, 
+            mDrive::getRobotChassisSpeeds,
+            (speeds, ff) -> {
+                setDriveState(DriveState.AUTON);
+                mPPDesiredSpeeds = speeds;
+                mDrive.setDriveFeedforwards(ff);
+            }, 
+            drivePID, 
+            mDrive.getPPRobotConfig(), 
+            () -> AllianceFlipUtil.shouldFlip(), 
+            isFirst,
+            mDrive::setPose,
+            pAuto,
             mDrive);
     }
 

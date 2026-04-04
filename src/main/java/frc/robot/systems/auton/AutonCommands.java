@@ -7,6 +7,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.lib.telemetry.Telemetry;
 
+import frc.robot.commands.FollowPathCommand;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
@@ -24,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
-import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
@@ -35,7 +35,6 @@ import frc.lib.math.AllianceFlipUtil;
 public class AutonCommands extends SubsystemBase {
     private final Drive mRobotDrive;
     private final Intake mIntake;
-    // private final Shooter mShooter;
     private final HoodSS mHoodSS;
     private final FuelPumpSS mFuelPumpSS;
     private final FlywheelsSS mFlywheelsSS;
@@ -97,30 +96,32 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftSingleSwipe", 
                 "L_IT_IC_ST", 
-                false);
+                4.2);
 
         SingleSwipe mRightSingleSwipeAuto = 
             new SingleSwipe(
                 this, 
                 "RightSingleSwipe", 
                 "R_IT_IC_ST", 
-                false);
+                4.12);
 
         DoubleSwipe mLeftDoubleSwipeAuto =
             new DoubleSwipe(
                 this, 
                 "LeftDoubleSwipeBump", 
                 "L_IT_IC_ST", 
+                4.2,
                 "L_ST_IB_ST_BUMP",
-                false);
+                4.59);
 
         DoubleSwipe mRightDoubleSwipeAuto =
             new DoubleSwipe(
                 this, 
                 "RightDoubleSwipeBump", 
                 "R_IT_IC_ST", 
+                4.12,
                 "R_ST_IB_ST_BUMP",
-                false);
+                4.33);
 
         tryToAddPathToChooser("LeftSingleSwipe", 
             () -> mLeftSingleSwipeAuto.getAuton()
@@ -139,13 +140,6 @@ public class AutonCommands extends SubsystemBase {
         );
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
-    }
-
-    private void loadCacheForAllPaths() {
-        for(int i = 0; i < usedPathNames.length; i++) {
-            mAutoFactory.trajectoryCmd(usedPathNames[i]);
-            getTraj(usedPathNames[i]);
-        }
     }
 
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
@@ -184,30 +178,21 @@ public class AutonCommands extends SubsystemBase {
     }
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\
-    public SequentialEndingCommandGroup followChoreoPath(String pPathName, boolean pIsFirst) {
-        PathPlannerPath path = getTraj(pPathName).get();
-        PathPlannerTrajectory idealTraj = path.getIdealTrajectory(Drive.mRobotConfig).get();
-        return new SequentialEndingCommandGroup(
-            Commands.runOnce(() -> {
-                if(pIsFirst) setPoseFromTrajectory(idealTraj);
-            }),
-            mRobotDrive.getDriveManager().followPathCommand(path)
-                .withTimeout(idealTraj.getTotalTimeSeconds()),
-            mRobotDrive.getDriveManager().setToStop()
-        );
+    public FollowPathCommand followChoreoPath(
+            String pPathName, boolean pIsFirst, AutoEvent pAuto) {
+        return mRobotDrive.getDriveManager().followPathCommand(
+            getTraj(pPathName).get(), 
+            pIsFirst,
+            pAuto);
     }
 
-    public SequentialEndingCommandGroup followChoreoPath(String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst) {
-        PathPlannerPath path = getTraj(pPathName).get();
-        PathPlannerTrajectory idealTraj = path.getIdealTrajectory(Drive.mRobotConfig).get();
-        return new SequentialEndingCommandGroup(
-            Commands.runOnce(() -> { 
-                if(pIsFirst) setPoseFromTrajectory(idealTraj);
-            }),
-            mRobotDrive.getDriveManager().followPathCommand(path, pPID)
-                .withTimeout(idealTraj.getTotalTimeSeconds()),
-            mRobotDrive.getDriveManager().setToStop()
-        );
+    public FollowPathCommand followChoreoPath(
+            String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst, AutoEvent pAuto) {
+        return mRobotDrive.getDriveManager().followPathCommand(
+            getTraj(pPathName).get(),
+            pPID, 
+            pIsFirst,
+            pAuto);
     }
 
     public Optional<PathPlannerPath> getTraj(String pPathName) {
@@ -274,5 +259,12 @@ public class AutonCommands extends SubsystemBase {
 
     public AutoFactory getAutoFactory() {
         return mAutoFactory;
+    }
+
+    private void loadCacheForAllPaths() {
+        for(int i = 0; i < usedPathNames.length; i++) {
+            mAutoFactory.trajectoryCmd(usedPathNames[i]);
+            getTraj(usedPathNames[i]);
+        }
     }
 }
