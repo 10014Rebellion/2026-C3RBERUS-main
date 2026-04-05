@@ -57,6 +57,14 @@ public class DoubleSwipe extends Auton {
             () -> mWantToShoot, 
             true);
 
+        Trigger inShootingTolerance = auto.loggedCondition(
+            auto.getName()+"/ShootingTolerance", 
+            () -> 
+                mFlywheelsSS.atLatestClosedLoopGoal() && 
+                mHoodSS.atGoal() &&
+                mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
         FollowPathCommand firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true, auto);
 
@@ -80,6 +88,28 @@ public class DoubleSwipe extends Auton {
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
+        SequentialEndingCommandGroup firstSwipeIntakeShot = 
+            mAutos.timedIntakeShot(kShotTime1Seconds, kShotEndTimeSeconds);
+
+        SequentialEndingCommandGroup firstSwipeIndexShot = 
+            mAutos.timedIndexShot(kShotTime1Seconds, kShotEndTimeSeconds);
+
+        Trigger hasFirstShotEnded = auto.loggedCondition(
+            mFirstSwipePathName+"/FirstShotEnded", 
+            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
+            true);
+
+        SequentialEndingCommandGroup secondSwipeIntakeShot = 
+            mAutos.timedIntakeShot(kShotTime2Seconds, kShotEndTimeSeconds);
+
+        SequentialEndingCommandGroup secondSwipeIndexShot = 
+            mAutos.timedIndexShot(kShotTime2Seconds, kShotEndTimeSeconds);
+
+        Trigger hasSecondShotEnded = auto.loggedCondition(
+            mSecondSwipePathName+"/SecondShotEnded", 
+            () -> (secondSwipeIntakeShot.hasEnded() && secondSwipeIndexShot.hasEnded()),
+            true);
+
         //////////////////// FIRST SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
         autoActivted
             .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
@@ -90,40 +120,15 @@ public class DoubleSwipe extends Auton {
         firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> AllianceFlipUtil.apply(
-                    new Pose2d(
-                        lastPoseOfFirstSwipe.getX(),
-                        lastPoseOfFirstSwipe.getY(),
-                        GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(lastPoseOfFirstSwipe))
-                            .plus((AllianceFlipUtil.shouldFlip()) ? Rotation2d.k180deg : Rotation2d.kZero)
-                    )
-                ),
+                () -> getSwipeEndPose(lastPoseOfFirstSwipe),
                 ConstraintType.LINEAR));
 
-        SequentialEndingCommandGroup firstSwipeIntakeShot = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(kShotTime1Seconds),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(kShotEndTimeSeconds));
-
-        SequentialEndingCommandGroup firstSwipeIndexShot = 
-            new SequentialEndingCommandGroup(
-                mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(kShotTime1Seconds),
-                mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(kShotEndTimeSeconds));
-
-        Trigger hasFirstShotEnded = auto.loggedCondition(
-            mFirstSwipePathName+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
-            true);
-
-        firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
-            mFlywheelsSS.atLatestClosedLoopGoal() && 
-            mHoodSS.atGoal() &&
-            mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean())
+        firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingTolerance)
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
             .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
-        firstSwipePath.hasEnded().and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
+        firstSwipePath.hasEnded().and(hasFirstShotEnded)
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
@@ -134,46 +139,32 @@ public class DoubleSwipe extends Auton {
         secondSwipePath.atTime(mSecondSwipeSwitchToAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> AllianceFlipUtil.apply(
-                    new Pose2d(
-                        lastPoseOfSecondSwipe.getX(),
-                        lastPoseOfSecondSwipe.getY(),
-                        GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(lastPoseOfSecondSwipe))
-                            .plus((AllianceFlipUtil.shouldFlip()) ? Rotation2d.k180deg : Rotation2d.kZero)
-                    )
-                ),
+                () -> getSwipeEndPose(lastPoseOfSecondSwipe),
                 ConstraintType.LINEAR));
 
-        SequentialEndingCommandGroup secondSwipeIntakeShot = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(kShotTime2Seconds),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(kShotEndTimeSeconds));
-
-        SequentialEndingCommandGroup secondSwipeIndexShot = 
-            new SequentialEndingCommandGroup(
-                mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(kShotTime2Seconds),
-                mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(kShotEndTimeSeconds));
-
-        Trigger hasSecondShotEnded = auto.loggedCondition(
-            mFirstSwipePathName+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
-            true);
-
-        secondSwipePath.hasEnded().and(() -> mWantToShoot).and(hasSecondShotEnded.negate()).and(() -> 
-            mFlywheelsSS.atLatestClosedLoopGoal() && 
-            mHoodSS.atGoal() &&
-            mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean())
-            .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot)
+        secondSwipePath.hasEnded().and(() -> mWantToShoot).and(hasSecondShotEnded.negate()).and(inShootingTolerance)
+            .onTrue(secondSwipeIntakeShot)
+            .onTrue(secondSwipeIndexShot)
             .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
-        secondSwipePath.hasEnded().and(() -> secondSwipeIndexShot.hasEnded() && secondSwipeIntakeShot.hasEnded())
+        secondSwipePath.hasEnded().and(hasSecondShotEnded)
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onTrue(secondSwipePath);
+            .onTrue(mAutos.endAuto(auto));
 
         return auto;
+    }
+
+    private Pose2d getSwipeEndPose(Pose2d pose) {
+        return AllianceFlipUtil.apply(
+            new Pose2d(
+                pose.getX(), pose.getY(),
+                GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(pose))
+                    .plus((AllianceFlipUtil.shouldFlip()) 
+                        ? Rotation2d.k180deg 
+                        : Rotation2d.kZero)
+        ));
     }
 }

@@ -49,6 +49,17 @@ public class SingleSwipe extends Auton {
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
+        SequentialEndingCommandGroup firstSwipeIntakeShot = 
+            mAutos.timedIntakeShot(kShotTimeSeconds, kShotEndTimeSeconds);
+
+        SequentialEndingCommandGroup firstSwipeIndexShot = 
+            mAutos.timedIndexShot(kShotTimeSeconds, kShotEndTimeSeconds);
+
+        Trigger hasFirstShotEnded = auto.loggedCondition(
+            mFirstSwipePathName+"/FirstShotEnded", 
+            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
+            true);
+
         intakingRange
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
@@ -78,21 +89,6 @@ public class SingleSwipe extends Auton {
                     )
                 ),
                 ConstraintType.LINEAR));
-
-        SequentialEndingCommandGroup firstSwipeIntakeShot = 
-            new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(kShotTimeSeconds),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(kShotEndTimeSeconds));
-
-        SequentialEndingCommandGroup firstSwipeIndexShot = 
-            new SequentialEndingCommandGroup(
-                mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(kShotTimeSeconds),
-                mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(kShotEndTimeSeconds));
-
-        Trigger hasFirstShotEnded = auto.loggedCondition(
-            mFirstSwipePathName+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
-            true);
 
         firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
             mFlywheelsSS.atLatestClosedLoopGoal() && 

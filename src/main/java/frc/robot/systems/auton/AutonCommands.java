@@ -8,6 +8,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.lib.telemetry.Telemetry;
 
 import frc.robot.commands.FollowPathCommand;
+import frc.robot.commands.SequentialEndingCommandGroup;
+
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
@@ -27,8 +29,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
+import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
+import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
 import frc.lib.math.AllianceFlipUtil;
 
@@ -175,6 +179,19 @@ public class AutonCommands extends SubsystemBase {
                 }
             }, 
             true);
+    }
+
+    /* Shoot Commands */
+    public SequentialEndingCommandGroup timedIndexShot(double timeout, double endTimeout) {
+        return new SequentialEndingCommandGroup(
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(timeout),
+                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(endTimeout));
+    }
+
+    public SequentialEndingCommandGroup timedIntakeShot(double timeout, double endTimeout) {
+        return new SequentialEndingCommandGroup(
+            mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(timeout),
+            mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(endTimeout));
     }
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\

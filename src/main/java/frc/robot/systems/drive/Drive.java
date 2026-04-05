@@ -76,6 +76,12 @@ public class Drive extends SubsystemBase {
             AzimuthFeedForward.zeros());
 
     private ChassisSpeeds mDesiredSpeeds = new ChassisSpeeds();
+
+    private SwerveModuleState[] mModuleTorques = SwerveHelper.zeroStates();
+    private SwerveModuleState[] mUnOptimizedStates = SwerveHelper.zeroStates();
+    private SwerveModuleState[] mSetpointStates = SwerveHelper.zeroStates();
+    private SwerveModuleState[] mOptimizedStates = SwerveHelper.zeroStates();
+
     private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
     private DriveFeedforwards mDefaultFF = DriveFeedforwards.zeros(4);
     @AutoLogOutput(key = "Drive/Feedforward/Choreo")
@@ -89,8 +95,8 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key="Drive/Swerve/PreviousDriveAmps")
     private double[] mPrevDriveAmps = new double[] {0.0, 0.0, 0.0, 0.0};
 
-    SwerveModulePosition[] modulePositionsHighF = SwerveHelper.zeroPositions();
-    SwerveModulePosition[] moduleDeltasHighF = SwerveHelper.zeroPositions();
+    private SwerveModulePosition[] modulePositionsHighF = SwerveHelper.zeroPositions();
+    private SwerveModulePosition[] moduleDeltasHighF = SwerveHelper.zeroPositions();
     ChassisSpeeds mRotationSpeed = new ChassisSpeeds(0.0, 0.0, 0.0);
 
     private boolean kUseGenerator = true;
@@ -266,11 +272,11 @@ public class Drive extends SubsystemBase {
             mPreviousSetpoint, 
             mRobotRotation);
 
-        SwerveModuleState[] unOptimizedSetpointStates = new SwerveModuleState[4];
-        SwerveModuleState[] setpointStates = kKinematics.toSwerveModuleStates(mDesiredSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, kMaxLinearSpeedMPS);
+        // mUnOptimizedStates = new SwerveModuleState[4];
+        mSetpointStates = kKinematics.toSwerveModuleStates(mDesiredSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(mSetpointStates, kMaxLinearSpeedMPS);
 
-        SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
+        // mOptimizedStates = new SwerveModuleState[4];
 
         mPreviousSetpoint = mSetpointGenerator.generateSetpoint(
             mPreviousSetpoint, 
@@ -281,7 +287,7 @@ public class Drive extends SubsystemBase {
             SwerveHelper.dt);
 
         /* Only for logging purposes */
-        SwerveModuleState[] moduleTorques = SwerveHelper.zeroStates();
+        mModuleTorques = SwerveHelper.zeroStates();
 
         mDefaultFF = mPreviousSetpoint.feedforwards();
         
@@ -295,74 +301,75 @@ public class Drive extends SubsystemBase {
                 /* Logs the drive feedforward stuff */
                 // SwerveHelper.logDriveFeedforward(mDefaultFF, i);
 
-                setpointStates[i] = new SwerveModuleState(
+                mSetpointStates[i] = new SwerveModuleState(
                     mPreviousSetpoint.moduleStates()[i].speedMetersPerSecond,
                     /* setpointAngle = currentAngle if the speed is less than 0.01 */
                     SwerveHelper.removeAzimuthJitter(
                         mPreviousSetpoint.moduleStates()[i], 
                         mModules[i].getCurrentState()));
-                unOptimizedSetpointStates[i] = SwerveHelper.copyState(setpointStates[i]);
+                mUnOptimizedStates[i] = SwerveHelper.copyState(mSetpointStates[i]);
 
-                setpointStates[i].optimize(mModules[i].getCurrentState().angle);
+                mSetpointStates[i].optimize(mModules[i].getCurrentState().angle);
 
                 /* Feedforward cases based on driveState */
                 double driveAmps = 
-                    calculateDriveFeedforward(unOptimizedSetpointStates, i);
+                    calculateDriveFeedforward(mUnOptimizedStates, i);
 
                 // Multiplies by cos(angleError) to stop the drive from going in the wrong direction
-                setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
+                mSetpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
 
-                optimizedSetpointStates[i] = mModules[i].setDesiredStateWithFF(
-                    setpointStates[i], 
+                mOptimizedStates[i] = mModules[i].setDesiredStateWithFF(
+                    mSetpointStates[i], 
                     driveAmps, 
                     Rotation2d.fromRadians(
                         mPreviousSetpoint.azimuthFeedforwards().azimuthSpeedRadiansPS()[i]));
 
                 /* Normalized for logging */
-                moduleTorques[i] = new SwerveModuleState(
+                mModuleTorques[i] = new SwerveModuleState(
                     (driveAmps * kMaxLinearSpeedMPS) 
                         / kDriveFOCAmpLimit, 
-                    optimizedSetpointStates[i].angle);
+                    mOptimizedStates[i].angle);
             } else {
-                setpointStates[i] = new SwerveModuleState(
-                    setpointStates[i].speedMetersPerSecond,
+                mSetpointStates[i] = new SwerveModuleState(
+                    mSetpointStates[i].speedMetersPerSecond,
                     SwerveHelper.removeAzimuthJitter(
-                        setpointStates[i], 
+                        mSetpointStates[i], 
                         mModules[i].getCurrentState()));
-                unOptimizedSetpointStates[i] = SwerveHelper.copyState(setpointStates[i]);
+                mUnOptimizedStates[i] = SwerveHelper.copyState(mSetpointStates[i]);
 
                 double driveAmps = 0.0;
                 if(mUseChoreoFeedForward && mDriveManager.getDriveState().equals(DriveState.AUTON)) {
                     driveAmps = SwerveHelper.convertChoreoNewtonsToAmps(
                         getModuleStates()[i], 
-                        unOptimizedSetpointStates[i],
+                        mUnOptimizedStates[i],
                         mPathPlanningFF, 
                         i);
                 }
 
-                setpointStates[i].optimize(mModules[i].getCurrentState().angle);
-                setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
-                optimizedSetpointStates[i] = mModules[i].setDesiredStateWithFF(
-                    setpointStates[i],
+                mSetpointStates[i].optimize(mModules[i].getCurrentState().angle);
+                mSetpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
+                mOptimizedStates[i] = mModules[i].setDesiredStateWithFF(
+                    mSetpointStates[i],
                     /* GOT THE DATA -> Set to zero due to lack of data to justify using feedforward */
                     0.0);
 
                 mPrevDriveAmps[i] = driveAmps;
 
-                moduleTorques[i] = new SwerveModuleState(
+                mUnOptimizedStates[i] = SwerveHelper.copyState(mSetpointStates[i]);
+
+                mModuleTorques[i] = new SwerveModuleState(
                     (driveAmps * kMaxLinearSpeedMPS) 
                         / kDriveFOCAmpLimit, 
-                    optimizedSetpointStates[i].angle);
+                    mOptimizedStates[i].angle);
             }
         }
 
-        // mPrevSetpointStates = optimizedSetpointStates;
-        if(kUseGenerator) Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
-        Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
-        Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(optimizedSetpointStates));
+        if(kUseGenerator) Telemetry.log("Drive/Swerve/Setpoints", mUnOptimizedStates);
+        Telemetry.log("Drive/Swerve/SetpointsOptimized", mOptimizedStates);
+        Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(mOptimizedStates));
         Telemetry.log("Drive/Odometry/FieldSetpointChassisSpeed", ChassisSpeeds.fromRobotRelativeSpeeds(
-            kKinematics.toChassisSpeeds(optimizedSetpointStates), mRobotRotation));
-        Telemetry.log("Drive/Swerve/ModuleTorqueFF", moduleTorques);
+            kKinematics.toChassisSpeeds(mOptimizedStates), mRobotRotation));
+        Telemetry.log("Drive/Swerve/ModuleTorqueFF", mModuleTorques);
     }
 
     /* Calculates DriveFeedforward based off state */
