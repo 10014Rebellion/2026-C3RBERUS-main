@@ -41,7 +41,18 @@ public class SingleSwipe extends Auton {
         Trigger autoActivted = auto.getIsRunningTrigger();
 
         Trigger intakingRange = mAutos.inIntakeRange(auto);
-        Trigger shootingRange = auto.loggedCondition(auto.getName()+"/WantToShoot", () -> mWantToShoot, true);
+        Trigger shootingRange = auto.loggedCondition(
+            auto.getName()+"/WantToShoot", 
+            () -> mWantToShoot, 
+            true);
+
+        Trigger inShootingTolerance = auto.loggedCondition(
+            auto.getName()+"/ShootingTolerance", 
+            () -> 
+                mFlywheelsSS.atLatestClosedLoopGoal() && 
+                mHoodSS.atGoal() &&
+                mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
 
         FollowPathCommand firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true, auto);
@@ -80,20 +91,10 @@ public class SingleSwipe extends Auton {
         firstSwipePath.atTime(mFirstSwipeAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
             .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> AllianceFlipUtil.apply(
-                    new Pose2d(
-                        lastPoseOfFirstSwipe.getX(),
-                        lastPoseOfFirstSwipe.getY(),
-                        GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(lastPoseOfFirstSwipe))
-                            .plus((AllianceFlipUtil.shouldFlip()) ? Rotation2d.k180deg : Rotation2d.kZero)
-                    )
-                ),
+                () -> getSwipeEndPose(lastPoseOfFirstSwipe),
                 ConstraintType.LINEAR));
 
-        firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(() -> 
-            mFlywheelsSS.atLatestClosedLoopGoal() && 
-            mHoodSS.atGoal() &&
-            mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean())
+        firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingTolerance)
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
             .onTrue(mIntakeSS.trashCompactPivotRepeat());
@@ -106,5 +107,16 @@ public class SingleSwipe extends Auton {
             .onTrue(mAutos.endAuto(auto));
 
         return auto;
+    }
+
+    private Pose2d getSwipeEndPose(Pose2d pose) {
+        return AllianceFlipUtil.apply(
+            new Pose2d(
+                pose.getX(), pose.getY(),
+                GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(pose))
+                    .plus((AllianceFlipUtil.shouldFlip()) 
+                        ? Rotation2d.k180deg 
+                        : Rotation2d.kZero)
+        ));
     }
 }
