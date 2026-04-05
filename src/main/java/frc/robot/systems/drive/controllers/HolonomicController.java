@@ -32,7 +32,7 @@ public class HolonomicController {
     public static final LoggedTunableNumber tXS = new LoggedTunableNumber("AutoAlign/X/kS", 0.0);
     public static final LoggedTunableNumber tXV = new LoggedTunableNumber("AutoAlign/X/kV", 0.7);
 
-    public static final LoggedTunableNumber tXToleranceMeters = new LoggedTunableNumber("AutoAlign/X/ToleranceMeters", 0.03);
+    public static final LoggedTunableNumber tXToleranceMeters = new LoggedTunableNumber("AutoAlign/X/ToleranceMeters", 0.05);
 
     public static final LoggedTunableNumber tYP = new LoggedTunableNumber("AutoAlign/Y/kP", 5.0);
     public static final LoggedTunableNumber tYD = new LoggedTunableNumber("AutoAlign/Y/kD", 0.0);
@@ -60,11 +60,11 @@ public class HolonomicController {
     public static final LoggedTunableNumber tOmegaS = new LoggedTunableNumber("AutoAlign/Omega/kS", 0.0);
     public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("AutoAlign/Omega/kV", 0.5);
 
-    public static final LoggedTunableNumber tOmegaToleranceDegrees = new LoggedTunableNumber("AutoAlign/Omega/ToleranceDegrees", 1.5);
+    public static final LoggedTunableNumber tOmegaToleranceDegrees = new LoggedTunableNumber("AutoAlign/Omega/ToleranceDegrees", 5.0);
     public static final LoggedTunableNumber tDistanceMaxVMPS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPS", 3.4);
     public static final LoggedTunableNumber tDistanceMaxAMPSS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPSS", 13.0);
 
-    public static final LoggedTunableNumber tDistanceToleranceMeters = new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.03);
+    public static final LoggedTunableNumber tDistanceToleranceMeters = new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.05);
 
     public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 0.25);
 

@@ -9,6 +9,7 @@ import frc.lib.telemetry.Telemetry;
 
 import frc.robot.commands.FollowPathCommand;
 import frc.robot.commands.SequentialEndingCommandGroup;
+import frc.robot.game.FieldConstants;
 
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
+import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
@@ -42,6 +44,7 @@ public class AutonCommands extends SubsystemBase {
     private final HoodSS mHoodSS;
     private final FuelPumpSS mFuelPumpSS;
     private final FlywheelsSS mFlywheelsSS;
+    private final ClimbSS mClimbSS;
 
     private final SendableChooser<Supplier<Command>> mAutoChooser;
     private final LoggedDashboardChooser<Supplier<Command>> mAutoChooserLogged;
@@ -57,12 +60,13 @@ public class AutonCommands extends SubsystemBase {
         "R_ST_IB_ST_BUMP"
     };
 
-    public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS) {
+    public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, ClimbSS pClimbSS) {
         this.mRobotDrive = pRobotDrive;
         this.mIntake = pIntake;
         this.mHoodSS = pHoodSS;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mFuelPumpSS = pFuelPumpSS;
+        this.mClimbSS = pClimbSS;
 
         mAutoFactory = new AutoFactory(
             mRobotDrive::getPoseEstimate, 
@@ -102,6 +106,33 @@ public class AutonCommands extends SubsystemBase {
                 "L_IT_IC_ST", 
                 4.19);
 
+        SingleSwipeClimb mLeftSingleSwipeClimbAuto =
+            new SingleSwipeClimb(
+                this, 
+                "LeftSingleSwipeClimb", 
+                "L_IT_IC_ST", 
+                4.19, 
+                FieldConstants.kClimbLeftPose);
+
+        DoubleSwipe mLeftDoubleSwipeBumpAuto =
+            new DoubleSwipe(
+                this, 
+                "LeftDoubleSwipeBump", 
+                "L_IT_IC_ST", 
+                4.19,
+                "L_ST_IB_ST_BUMP",
+                4.52);
+
+        DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
+            new DoubleSwipeClimb(
+                this, 
+                "LeftDoubleSwipeBumpClimb", 
+                "L_IT_IC_ST", 
+                4.19,
+                "L_ST_IB_ST_BUMP",
+                4.52,
+                FieldConstants.kClimbLeftPose);
+
         SingleSwipe mRightSingleSwipeAuto = 
             new SingleSwipe(
                 this, 
@@ -109,38 +140,63 @@ public class AutonCommands extends SubsystemBase {
                 "R_IT_IC_ST", 
                 4.13);
 
-        DoubleSwipe mLeftDoubleSwipeAuto =
-            new DoubleSwipe(
+        SingleSwipeClimb mRightSingleSwipeClimbAuto =
+            new SingleSwipeClimb(
                 this, 
-                "LeftDoubleSwipeBump", 
-                "L_IT_IC_ST", 
-                4.2,
-                "L_ST_IB_ST_BUMP",
-                4.52);
+                "RightSingleSwipeClimb", 
+                "R_IT_IC_ST", 
+                4.13, 
+                FieldConstants.kClimbRightPose);
 
-        DoubleSwipe mRightDoubleSwipeAuto =
+        DoubleSwipe mRightDoubleSwipeBumpAuto =
             new DoubleSwipe(
                 this, 
                 "RightDoubleSwipeBump", 
                 "R_IT_IC_ST", 
-                4.12,
+                4.13,
                 "R_ST_IB_ST_BUMP",
                 4.33);
+
+        DoubleSwipeClimb mRightDoubleSwipeBumpClimbAuto =
+            new DoubleSwipeClimb(
+                this, 
+                "RightDoubleSwipeBumpClimb", 
+                "R_IT_IC_ST", 
+                4.13,
+                "R_ST_IB_ST_BUMP",
+                4.33,
+                FieldConstants.kClimbRightPose);
 
         tryToAddPathToChooser("LeftSingleSwipe", 
             () -> mLeftSingleSwipeAuto.getAuton()
         );
 
+        tryToAddPathToChooser("LeftSingleSwipeClimb", 
+            () -> mLeftSingleSwipeClimbAuto.getAuton()
+        );
+
         tryToAddPathToChooser("LeftDoubleSwipeBump", 
-            () -> mLeftDoubleSwipeAuto.getAuton()
+            () -> mLeftDoubleSwipeBumpAuto.getAuton()
+        );
+
+        tryToAddPathToChooser("LeftDoubleSwipeBumpClimb", 
+            () -> mLeftDoubleSwipeBumpClimbAuto.getAuton()
         );
 
         tryToAddPathToChooser("RightSingleSwipe", 
             () -> mRightSingleSwipeAuto.getAuton()
         );
 
+        tryToAddPathToChooser("RightSingleSwipeClimb", 
+            () -> mRightSingleSwipeClimbAuto.getAuton()
+        );
+
         tryToAddPathToChooser("RightDoubleSwipeBump", 
-            () -> mRightDoubleSwipeAuto.getAuton()
+            () -> mRightDoubleSwipeBumpAuto.getAuton()
+        );
+
+        tryToAddPathToChooser("RightDoubleSwipeBumpClimb", 
+            () -> mRightDoubleSwipeBumpClimbAuto.getAuton()
         );
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
@@ -272,6 +328,10 @@ public class AutonCommands extends SubsystemBase {
 
     public Intake getIntakeSubsystem() {
         return mIntake;
+    }
+
+    public ClimbSS getClimbSubsystem() {
+        return mClimbSS;
     }
 
     public AutoFactory getAutoFactory() {

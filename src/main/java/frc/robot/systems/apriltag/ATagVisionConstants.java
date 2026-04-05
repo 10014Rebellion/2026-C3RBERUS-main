@@ -102,6 +102,8 @@ public class ATagVisionConstants {
     public static final Vector<N3> kMultiStdDevs =
             (RobotBase.isReal()) ? VecBuilder.fill(0.23188, 0.23188, 5.0) : VecBuilder.fill(0.23, 0.23, 5.0);
 
+    public static final double kRotStdDevScalar = 50.0;
+
     /* NOTE: SET TO FALSE UNLESS YOU ACTUALLY KNOW WHAT THIS DOES
      * This turns on a implementation of single tag vision algorithm that may be more accurate
      * https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2025-build-thread/477314/85

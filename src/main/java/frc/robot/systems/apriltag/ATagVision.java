@@ -12,6 +12,7 @@ import frc.robot.systems.apriltag.ATagCameraIO.AprilTagCameraIOConfigInputs;
 
 import static frc.robot.systems.apriltag.ATagVisionConstants.kAmbiguityThreshold;
 import static frc.robot.systems.apriltag.ATagVisionConstants.kMultiStdDevs;
+import static frc.robot.systems.apriltag.ATagVisionConstants.kRotStdDevScalar;
 import static frc.robot.systems.apriltag.ATagVisionConstants.kSingleStdDevs;
 
 import org.littletonrobotics.junction.Logger;
@@ -82,7 +83,8 @@ public class ATagVision {
                 pCamData.iLatestEstimatedRobotPose.toPose2d(), 
                 tMultiXYStdev.get() * xyScalar, 
                 pCamData, 
-                pCamConfig.iCamName);
+                pCamConfig.iCamName,
+                true);
         }
 
         Telemetry.logVisionObservationStdDevs(mCurrentVisionObservation[id]);
@@ -98,14 +100,14 @@ public class ATagVision {
 
         Pose2d pose = pCamData.iLatestEstimatedRobotPose.toPose2d();
 
-        return makeVisionObservation(pose, tSingleXYStdev.get() * pXYScalar, pCamData, pCamConfig.iCamName);
+        return makeVisionObservation(pose, tSingleXYStdev.get() * pXYScalar, pCamData, pCamConfig.iCamName, false);
     }
 
-    private VisionObservation makeVisionObservation(Pose2d pPose, double pXYStdev, AprilTagIOInputsAutoLogged pCamData, String pCamName) {
+    private VisionObservation makeVisionObservation(Pose2d pPose, double pXYStdev, AprilTagIOInputsAutoLogged pCamData, String pCamName, boolean useRotation) {
         return new VisionObservation(
             true,
             pPose,
-            VecBuilder.fill(pXYStdev, pXYStdev, Double.MAX_VALUE),
+            VecBuilder.fill(pXYStdev, pXYStdev, (useRotation) ? pXYStdev * kRotStdDevScalar : Double.MAX_VALUE),
             pCamData.iLatestTimestamp,
             pCamName);
     }

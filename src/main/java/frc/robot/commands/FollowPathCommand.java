@@ -34,7 +34,7 @@ import java.util.function.Supplier;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import frc.lib.math.AllianceFlipUtil;
 
-/** Base command for following a path */
+/** Base command for following a path. Uses pathplanner's pathing command with Choreo's trigger system */
 public class FollowPathCommand extends Command {
     private final Timer timer = new Timer();
     private final PathPlannerPath originalPath;

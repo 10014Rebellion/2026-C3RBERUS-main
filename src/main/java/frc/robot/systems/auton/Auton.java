@@ -4,6 +4,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import frc.robot.commands.FollowPathCommand;
 
 import frc.robot.commands.AutoEvent;
+import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
@@ -17,6 +18,7 @@ public class Auton {
     protected final HoodSS mHoodSS;
     protected final FuelPumpSS mFuelPumpSS;
     protected final Intake mIntakeSS;
+    protected final ClimbSS mClimbSS;
 
     public Auton(AutonCommands pAutos) {
         mAutos = pAutos;
@@ -26,6 +28,7 @@ public class Auton {
         this.mHoodSS = pAutos.getHoodSubsystem();
         this.mFuelPumpSS = pAutos.getFuelPumpSubsystem();
         this.mIntakeSS = pAutos.getIntakeSubsystem();
+        this.mClimbSS = pAutos.getClimbSubsystem();
     }
 
     protected FollowPathCommand followChoreoPath(

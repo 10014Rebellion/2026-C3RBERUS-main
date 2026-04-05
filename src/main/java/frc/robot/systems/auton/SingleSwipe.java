@@ -1,5 +1,6 @@
 package frc.robot.systems.auton;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.math.AllianceFlipUtil;
@@ -54,6 +55,10 @@ public class SingleSwipe extends Auton {
                 mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
             true);
 
+        Trigger inShootingToleranceDebounced = inShootingTolerance
+            .debounce(0.05, DebounceType.kRising)
+            .debounce(5.0, DebounceType.kFalling);
+
         FollowPathCommand firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true, auto);
 
@@ -94,7 +99,7 @@ public class SingleSwipe extends Auton {
                 () -> getSwipeEndPose(lastPoseOfFirstSwipe),
                 ConstraintType.LINEAR));
 
-        firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingTolerance)
+        firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
             .onTrue(mIntakeSS.trashCompactPivotRepeat());

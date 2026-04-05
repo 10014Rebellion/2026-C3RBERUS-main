@@ -3,6 +3,7 @@ package frc.robot.systems.auton;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -19,7 +20,7 @@ import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 
-public class DoubleSwipe extends Auton {
+public class DoubleSwipeClimb extends Auton {
     private boolean mWantToShoot = false;
 
     private final String mAutoName;
@@ -32,19 +33,23 @@ public class DoubleSwipe extends Auton {
     private final double kShotTime2Seconds = 6.5;
     private final double kShotEndTimeSeconds = 0.02; 
 
-    public DoubleSwipe(
+    private final Pose2d mClimbPose;
+
+    public DoubleSwipeClimb(
         AutonCommands pAutos, 
         String pAutoName, 
         String pFirstSwipePathName,
         double pFirstSwipeSwitchToAlignTime,
         String pSecondSwipePathName, 
-        double pSecondSwipeSwitchToAlignTime) {
+        double pSecondSwipeSwitchToAlignTime,
+        Pose2d pClimbPose) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
         mSecondSwipePathName = pSecondSwipePathName;
         mSecondSwipeSwitchToAlignTime = pSecondSwipeSwitchToAlignTime;
+        mClimbPose = pClimbPose;
     }
 
     @Override
@@ -115,6 +120,48 @@ public class DoubleSwipe extends Auton {
             () -> (secondSwipeIntakeShot.hasEnded() && secondSwipeIndexShot.hasEnded()),
             true);
 
+        SequentialEndingCommandGroup goToPreClimbPose = new SequentialEndingCommandGroup(
+            mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> getClimbEndPose(mClimbPose.transformBy(new Transform2d(0.0, -0.05, Rotation2d.kZero))), 
+                ConstraintType.LINEAR));
+
+        Trigger atPreClimbPose = auto.loggedCondition(
+            "ClimbEnd/AtPreClimbPose", 
+            () -> 
+                goToPreClimbPose.isRunning()
+                    &&
+                mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
+        SequentialEndingCommandGroup goToClimbPose = new SequentialEndingCommandGroup(
+            mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> getClimbEndPose(mClimbPose), 
+                ConstraintType.LINEAR));
+
+        Trigger atClimbPose = auto.loggedCondition(
+            "ClimbEnd/ReadyToPreClimb", 
+            () -> 
+                goToPreClimbPose.isRunning()
+                    &&
+                mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
+        SequentialEndingCommandGroup prepareForClimb = 
+            new SequentialEndingCommandGroup(mClimbSS.goUpTillClimbHeightThenStay());
+
+        Trigger preparedForClimb = auto.loggedCondition(
+            "ClimbEnd/PreparedForClimb", 
+            () -> prepareForClimb.hasEnded(), 
+            true);
+
+        SequentialEndingCommandGroup climb = 
+            new SequentialEndingCommandGroup(mClimbSS.goUpTillClimbHeightThenStay());
+
+        Trigger hasClimbed = auto.loggedCondition(
+            "ClimbEnd/HasClimbed", 
+            () -> climb.hasEnded(), 
+            true);
+
         //////////////////// FIRST SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
         autoActivted
             .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
@@ -157,6 +204,17 @@ public class DoubleSwipe extends Auton {
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(goToPreClimbPose)
+            .onTrue(prepareForClimb);
+
+        /* GO CLIMB */
+        atPreClimbPose.and(preparedForClimb)
+            .onTrue(goToClimbPose);
+
+        atClimbPose.and(preparedForClimb)
+            .onTrue(climb);
+
+        hasClimbed
             .onTrue(mAutos.endAuto(auto));
 
         return auto;
@@ -171,5 +229,9 @@ public class DoubleSwipe extends Auton {
                         ? Rotation2d.k180deg 
                         : Rotation2d.kZero)
         ));
+    }
+
+    private Pose2d getClimbEndPose(Pose2d pose) {
+        return AllianceFlipUtil.apply(pose);
     }
 }
