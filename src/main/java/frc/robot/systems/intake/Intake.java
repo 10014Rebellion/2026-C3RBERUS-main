@@ -39,8 +39,8 @@ public class Intake {
 
     public Command trashCompactRepeat() {
         return new SequentialCommandGroup(
-            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_HIGH),
-            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_LOW)
+            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_HIGH).withTimeout(0.2),
+            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_LOW).withTimeout(0.2)
         );
     }
 

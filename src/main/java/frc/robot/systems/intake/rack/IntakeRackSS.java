@@ -80,7 +80,7 @@ public class IntakeRackSS extends SubsystemBase {
         refreshTuneables();
         executeState();
 
-        Logger.processInputs("Intake", mIntakeRackInputs);
+        Logger.processInputs("Intake/Rack", mIntakeRackInputs);
     }
 
     /*
@@ -90,8 +90,9 @@ public class IntakeRackSS extends SubsystemBase {
     private void initializeState(IntakeRackState pStateToInit) {
         mCurrentIntakeState = pStateToInit;
         switch (mCurrentIntakeState) {
-            case STOPPED -> {
+            case STOPPED, INCREMENTING, DECREMENTING -> {
             } case TUNING_VOLTAGE -> {
+                mIntakeRackIO.setMotorVolts(IntakeConstants.RackConstants.tRackTuningVoltage.get());
             } case STOW, SAFESTOW, INTAKE, TUNING_SETPOINT, COMPACT_HIGH, COMPACT_LOW -> {
                 mIntakeRackIO.resetPPID();
             } case COMPACT -> {
@@ -181,7 +182,7 @@ public class IntakeRackSS extends SubsystemBase {
 
         mIntakeRackIO.setMotorPosition(pPositionM, ffOutput);
 
-        mDesiredDirection = toDirection(getErrorPosition().getDegrees());
+        mDesiredDirection = toDirection(getErrorPosition());
         enforceSoftLimits();
     }
 
@@ -210,8 +211,8 @@ public class IntakeRackSS extends SubsystemBase {
     }
   
     @AutoLogOutput(key = "Intake/Feedback/ErrorRotation")
-    public Rotation2d getErrorPosition() {
-        return Rotation2d.fromRotations(getCurrentGoal() - mIntakeRackInputs.iIntakeRackPositionM);
+    public double getErrorPosition() {
+        return (getCurrentGoal() - mIntakeRackInputs.iIntakeRackPositionM);
     }
 
     @AutoLogOutput(key = "Intake/Feedback/CurrentGoal")
@@ -221,7 +222,7 @@ public class IntakeRackSS extends SubsystemBase {
 
     @AutoLogOutput(key = "Intake/Feedback/AtGoal")
     public boolean atGoal() {
-        return Math.abs(getErrorPosition().getDegrees()) < tIntakeToleranceDegrees.get();
+        return Math.abs(getErrorPosition()) < tIntakeToleranceDegrees.get();
     }
 
     /* LOGICCC */

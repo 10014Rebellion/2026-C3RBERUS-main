@@ -334,12 +334,12 @@ public class ButtonBindings {
             .onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
 
         mPilotController.a().and(isTesting())
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INCREMENTING))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOW));
 
         mPilotController.b().and(isTesting())
-            .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.TUNING_SETPOINT))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOW));
         
         mPilotController.x().and(isTesting())
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))

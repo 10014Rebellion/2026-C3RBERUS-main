@@ -53,8 +53,8 @@ public class IntakeConstants {
                 :
             new MotionMagicFOCElevatorFF(
                 0, 
-                new PDConstants(20, 0.0), 
-                new ElevatorFeedforward(0.0, 1.65, 0, 0),
+                new PDConstants(40, 6.0), 
+                new ElevatorFeedforward(0.0, 0.0, 0.1, 0),
                 new MotionMagicConstants(300.0, 300.0, 0)
             );
 
