@@ -169,7 +169,7 @@ public class LineController {
         mInvertTeleop = pInvertTeleop;
     }
 
-        public void updateControllers() {
+    public void updateControllers() {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
