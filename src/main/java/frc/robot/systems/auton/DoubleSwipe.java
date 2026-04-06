@@ -129,7 +129,7 @@ public class DoubleSwipe extends Auton {
             mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean())
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(mIntakeSS.trashCompact());
 
         hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))
@@ -172,7 +172,7 @@ public class DoubleSwipe extends Auton {
             mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean())
             .onTrue(secondSwipeIntakeShot)
             .onTrue(secondSwipeIntakeShot)
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(mIntakeSS.trashCompact());
 
         hasSecondSwipeEnded.and(() -> secondSwipeIndexShot.hasEnded() && secondSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))

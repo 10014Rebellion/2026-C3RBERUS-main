@@ -63,30 +63,27 @@ public class IntakeConstants {
             1.2 // Positive voltage limit
         );
 
-        public static final double kArmLengthMeters = 0.5376418;
+        public static final double kArmLengthMeters = Units.inchesToMeters(12.0);
         public static final double kArmMassKg = 5.0;
 
         public static final LoggedTunableNumber tRackTuningVoltage = new LoggedTunableNumber("Intake/Tuning/TuneVoltage", 0.0);
         public static final LoggedTunableNumber tRackTuningAmp = new LoggedTunableNumber("Intake/Tuning/TuneAmperage", 0.0);
         public static final LoggedTunableNumber tConstantCompactAmps = new LoggedTunableNumber("Intake/Setpoint/CompactConstantAmps", 0.0); 
+
+        public static final LoggedTunableNumber tIncrementSpeedMPS = new LoggedTunableNumber("Intake/IncrementMPS", 0.04);
         
-        public static final LoggedTunableNumber tStowSetpointMeters  = new LoggedTunableNumber(
-            "Intake/Setpoint/StowSetpointMeters", 0);
+        public static final LoggedTunableNumber tStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/StowSetpointMeters", 0);
 
-        public static final LoggedTunableNumber tSafeStowSetpointMeters  = new LoggedTunableNumber(
-            "Intake/Setpoint/SafeStowSetpointMeters", 0);
+        public static final LoggedTunableNumber tSafeStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/SafeStowSetpointMeters", 0);
 
-        public static final LoggedTunableNumber tCompactHighSetpointMeters  = new LoggedTunableNumber(
-            "Intake/Setpoint/CompactHighSetpointMeters", 0);
+        public static final LoggedTunableNumber tIntakeSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/IntakeSetpointMeters", 0);
 
-        public static final LoggedTunableNumber tCompactLowSetpointMeters  = new LoggedTunableNumber(
-            "Intake/Setpoint/CompactLowSetpointMeters", 0);
+        public static final LoggedTunableNumber tTuningShotSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/TuningShotSetpointMeters", 0);
 
-        public static final LoggedTunableNumber tIntakeSetpointMeters  = new LoggedTunableNumber(
-            "Intake/Setpoint/IntakeSetpointMeters", 0);
 
-        public static final LoggedTunableNumber tTuningShotSetpointMeters  = new LoggedTunableNumber(
-            "Intake/Setpoint/TuningShotSetpointMeters", 0);
+        public static final LoggedTunableNumber tCompactHighSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactHighSetpointMeters", 0);
+
+        public static final LoggedTunableNumber tCompactLowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactLowSetpointMeters", 0);
 
 
         public static final HashMap<IntakeRackState, LoggedTunableNumber> kStateToSetpointMapIntake = new HashMap<>();
@@ -94,10 +91,10 @@ public class IntakeConstants {
         static {
             kStateToSetpointMapIntake.put(IntakeRackState.STOW, tStowSetpointMeters);
             kStateToSetpointMapIntake.put(IntakeRackState.SAFESTOW, tSafeStowSetpointMeters);
-            kStateToSetpointMapIntake.put(IntakeRackState.COMPACT_HIGH, tCompactHighSetpointMeters);
-            kStateToSetpointMapIntake.put(IntakeRackState.COMPACT_LOW, tCompactLowSetpointMeters);
             kStateToSetpointMapIntake.put(IntakeRackState.INTAKE, tIntakeSetpointMeters);
             kStateToSetpointMapIntake.put(IntakeRackState.TUNING_SETPOINT, tTuningShotSetpointMeters);
+            kStateToSetpointMapIntake.put(IntakeRackState.COMPACT_HIGH, tCompactHighSetpointMeters);
+            kStateToSetpointMapIntake.put(IntakeRackState.COMPACT_LOW, tCompactLowSetpointMeters);
         }
     }
 

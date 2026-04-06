@@ -108,7 +108,7 @@ public class SingleSwipe extends Auton {
             mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean())
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(mIntakeSS.trashCompact());
 
         hasFirstSwipeEnded.and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))

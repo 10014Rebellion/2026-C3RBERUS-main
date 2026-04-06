@@ -200,7 +200,7 @@ public class ButtonBindings {
         // wantToCloseShoot.and(shooterAtGoal.and(atPositionalGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
         //     .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
         //     .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-        //     .onTrue(mIntakeSS.trashCompactPivotRepeat());
+        //     .onTrue(mIntakeSS.trashCompact());
 
         // wantToCloseShoot
         //     .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
@@ -228,7 +228,7 @@ public class ButtonBindings {
         wantToDynamicShoot.and(shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(mIntakeSS.trashCompact());
 
         wantToDynamicShoot
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
@@ -254,7 +254,7 @@ public class ButtonBindings {
         wantToFeed.and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(mIntakeSS.trashCompact());
 
         wantToFeedWithNoCompact.or(wantToOpponentFeed).and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
@@ -346,7 +346,7 @@ public class ButtonBindings {
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOW));
 
         mPilotController.y().and(isTesting())
-            .onTrue(mIntakeSS.trashCompactPivotRepeat())
+            .onTrue(mIntakeSS.trashCompact())
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOW));
 
         // mPilotController.y().and(isTesting())
@@ -354,7 +354,7 @@ public class ButtonBindings {
         //     .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT));
 
         // mPilotController.y().and(isTesting()).and(new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal() && mHoodSS.atGoal()))
-        //     .onTrue(mIntakeSS.trashCompactPivotRepeat())
+        //     .onTrue(mIntakeSS.trashCompact())
         //     .onTrue(null);
 
             // TO DO: Tune this
@@ -407,7 +407,7 @@ public class ButtonBindings {
         mGunnerController.rightTrigger().and(new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal() && mHoodSS.atGoal()).debounce(0.08)).and(isTesting())
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(mIntakeSS.trashCompact());
 
         mGunnerController.rightTrigger().and(isTesting())
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))

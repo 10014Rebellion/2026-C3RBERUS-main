@@ -82,7 +82,7 @@ public class IntakeRackIOSim implements IntakeRackIO{
     }
 
     public double getPos(){
-        return 0.0;
+        return mRackSim.getPositionMeters();
     }
 
     @Override
