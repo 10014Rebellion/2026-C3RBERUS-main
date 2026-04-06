@@ -535,8 +535,7 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key = "Drive/Odometry/AccelNoGrav")
     public double getAccelerationVectorWithoutGravityMPS2() {
         return GeomUtil.hypot(
-            mGyroInputs.iAccXG - mGyroInputs.iPitchPosition.getSin(), 
-            mGyroInputs.iAccYG - mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iRollPosition.getSin(), 
-            mGyroInputs.iAccZG - mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iRollPosition.getCos());
+            mGyroInputs.iAccXG, 
+            mGyroInputs.iAccYG);
     }
 }
