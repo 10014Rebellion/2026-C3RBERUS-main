@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.AllianceFlipUtil;
+import frc.lib.math.GeomUtil;
 import frc.lib.optimizations.PPRobotConfigLoader;
 import frc.lib.pathplanner.AzimuthFeedForward;
 import frc.lib.pathplanner.SwerveSetpoint;
@@ -501,7 +502,7 @@ public class Drive extends SubsystemBase {
 
     @AutoLogOutput(key = "Drive/Odometry/AccountForCollision")
     public boolean shouldAccountForCollision() {
-        return mGyro.getAccMagG() > kCollisionCapG;
+        return getAccelerationVectorWithoutGravityMPS2() > kCollisionCapG;
     }
 
     public RobotConfig getPPRobotConfig() {
@@ -529,5 +530,13 @@ public class Drive extends SubsystemBase {
             new double[] {0.0, 0.0, 0.0, 0.0}, 
             sample.moduleForcesX(), 
             sample.moduleForcesY()));
+    }
+
+    @AutoLogOutput(key = "Drive/Odometry/AccelNoGrav")
+    public double getAccelerationVectorWithoutGravityMPS2() {
+        return GeomUtil.hypot(
+            mGyroInputs.iAccXG - mGyroInputs.iPitchPosition.getSin(), 
+            mGyroInputs.iAccYG - mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iRollPosition.getSin(), 
+            mGyroInputs.iAccZG - mGyroInputs.iPitchPosition.getCos() * mGyroInputs.iRollPosition.getCos());
     }
 }
