@@ -6,6 +6,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -76,6 +77,40 @@ public class ButtonBindings {
 
         initCompBindings();
         testBindings();
+    }
+
+    public void initButtonBoardBindings(){
+        final GenericHID mButtonBoard1 = new GenericHID(0);
+        final GenericHID mButtonBoard2 = new GenericHID(1); 
+
+        Trigger wantToClimbUp = new Trigger(() -> mButtonBoard1.getRawButton(1));
+        Trigger wantToClimbDescend = new Trigger(() -> mButtonBoard1.getRawButton(2));
+        Trigger wantToTrashCompact = new Trigger(() -> mButtonBoard1.getRawButton(3));
+
+        Trigger wantToSlowIntake = new Trigger(() -> mButtonBoard2.getRawButton(6));
+        Trigger wantToIntakeOut = new Trigger(() -> mButtonBoard1.getRawButton(4));
+
+        Trigger wantToOutakeRoller = new Trigger(() -> mButtonBoard2.getRawButton(5));
+        Trigger wantToIntakeRoller = new Trigger(() -> mButtonBoard2.getRawButton(4));
+
+        Trigger wantToRevFlywheels = new Trigger(() -> mButtonBoard2.getRawAxis(0) < 0.5);
+        Trigger wantToStopFlywheels = new Trigger(() -> mButtonBoard2.getRawAxis(0) > 0.5);
+
+
+        Trigger wantToBumpShot = new Trigger(() -> mButtonBoard1.getRawButton(5));
+        Trigger wantToClimbShot = new Trigger(() -> mButtonBoard1.getRawButton(6));
+        Trigger wantToTrenchShot = new Trigger(() -> mButtonBoard2.getRawButton(9));
+        Trigger wantToCornerShot = new Trigger(() -> mButtonBoard2.getRawAxis(1) > 0.5);
+
+        Trigger wantToHailstorm = new Trigger(() -> mButtonBoard2.getRawButton(10));
+        Trigger wantToSnowPlow = new Trigger(() -> mButtonBoard2.getRawButton(7));
+        Trigger wantToShoot = new Trigger((() -> mButtonBoard2.getRawAxis(1) < 0.5));
+
+        Trigger wantToDisableCams = new Trigger(() -> mButtonBoard2.getRawButton(1));
+        Trigger wantToDisableCANRange = new Trigger(() -> mButtonBoard2.getRawButton(2));
+        Trigger wantToAfterBurn = new Trigger(() -> mButtonBoard2.getRawButton(3));
+
+
     }
 
     public void initCompBindings() {
