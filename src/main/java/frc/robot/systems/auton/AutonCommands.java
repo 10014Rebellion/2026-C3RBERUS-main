@@ -71,21 +71,7 @@ public class AutonCommands extends SubsystemBase {
         mAutoFactory = new AutoFactory(
             mRobotDrive::getPoseEstimate, 
             mRobotDrive::setPose, 
-            (SwerveSample s) -> {
-                Logger.recordOutput(
-                    "Drive/Choreo/TrajectorySetpoint", 
-                    new Pose2d(
-                        s.x, s.y, Rotation2d.fromRadians(s.heading)
-                    ));                
-                mRobotDrive.getDriveManager().setToAuton();
-                mRobotDrive.getDriveManager().setPPDesiredSpeeds(
-                    mRobotDrive
-                        .getDriveManager()
-                        .getChoreoHolonomicController()
-                        .calculateFromSwerveSample(
-                            s, mRobotDrive.getPoseEstimate()));
-                mRobotDrive.setDriveFeedforwardsFromChoreo(s);
-            }, 
+            (SwerveSample s) -> {}, 
             true, 
             mRobotDrive,
             (sample, isStart) -> {

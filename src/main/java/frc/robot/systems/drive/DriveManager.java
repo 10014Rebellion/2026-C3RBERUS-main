@@ -31,7 +31,6 @@ import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
 import frc.lib.math.GeomUtil;
 import frc.lib.telemetry.Telemetry;
-import frc.robot.systems.drive.controllers.ChoreoHolonomicController;
 import frc.robot.systems.drive.controllers.HeadingController;
 import frc.robot.systems.drive.controllers.HolonomicController;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
@@ -80,9 +79,6 @@ public class DriveManager {
         () -> 1.0, 
         () -> false);
 
-    private final ChoreoHolonomicController mChoreoHolonomicController 
-        = new ChoreoHolonomicController();
-
     // @AutoLogOutput(key="Drive/GoalPoseSup")
     private Supplier<Pose2d> mGoalPoseSup = () -> new Pose2d();
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
@@ -101,7 +97,6 @@ public class DriveManager {
         mHeadingController.updateController();
         mAutoAlignController.updateControllers();
         mLineAlignController.updateControllers();
-        mChoreoHolonomicController.updateControllers();
 
         ChassisSpeeds teleopSpeeds = mTeleopController.computeChassisSpeeds(
             mDrive.getPoseEstimate().getRotation(), 
@@ -497,10 +492,6 @@ public class DriveManager {
 
     public LineController getLineAlignController() {
         return mLineAlignController;
-    }
-
-    public ChoreoHolonomicController getChoreoHolonomicController() {
-        return mChoreoHolonomicController;
     }
 
     public DriveState getDriveState() {
