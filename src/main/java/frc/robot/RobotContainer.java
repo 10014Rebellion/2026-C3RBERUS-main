@@ -17,10 +17,10 @@ import frc.robot.systems.drive.modules.ModuleIOKraken;
 import frc.robot.systems.drive.modules.ModuleIOSim;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.IntakeConstants;
-import frc.robot.systems.intake.pivot.IntakePivotIO;
-import frc.robot.systems.intake.pivot.IntakePivotIOKrakenX44;
-import frc.robot.systems.intake.pivot.IntakePivotIOSim;
-import frc.robot.systems.intake.pivot.IntakePivotSS;
+import frc.robot.systems.intake.rack.IntakeRackIO;
+import frc.robot.systems.intake.rack.IntakeRackIOKrakenX60;
+import frc.robot.systems.intake.rack.IntakeRackIOSim;
+import frc.robot.systems.intake.rack.IntakeRackSS;
 import frc.robot.systems.intake.roller.IntakeRollerIO;
 import frc.robot.systems.intake.roller.IntakeRollerIOKrakenX44;
 import frc.robot.systems.intake.roller.IntakeRollerIOSim;
@@ -101,9 +101,8 @@ public class RobotContainer {
                 );
 
                 mIntake = new Intake(
-                    new IntakePivotSS(new IntakePivotIOKrakenX44(
-                        IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                        IntakeConstants.PivotConstants.kPivotEncoderConfig)),
+                    new IntakeRackSS(new IntakeRackIOKrakenX60(
+                        IntakeConstants.RackConstants.kRackMotorConfig)),
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
@@ -145,9 +144,9 @@ public class RobotContainer {
                 );
 
                 mIntake = new Intake(
-                    new IntakePivotSS(new IntakePivotIOSim(
-                        IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                        IntakeConstants.PivotConstants.kPivotEncoderConfig)),
+                    new IntakeRackSS(new IntakeRackIOSim(
+                        IntakeConstants.RackConstants.kRackElevator,
+                        IntakeConstants.RackConstants.kRackMotorConfig)),
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
@@ -190,7 +189,7 @@ public class RobotContainer {
                 );
 
                 mIntake = new Intake(
-                    new IntakePivotSS(new IntakePivotIO() {}),
+                    new IntakeRackSS(new IntakeRackIO() {}),
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 

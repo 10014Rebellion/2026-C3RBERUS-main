@@ -10,11 +10,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.GameGoalPoseChooser;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.commands.FollowPathCommand;
+import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;import frc.robot.commands.FollowPathCommand;
 
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
@@ -84,7 +83,7 @@ public class DoubleSwipe extends Auton {
 
         intakingRange
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         shootingRange
@@ -92,6 +91,25 @@ public class DoubleSwipe extends Auton {
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+
+        autoActivted
+            .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath.cmd()))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
+            .onTrue(Commands.runOnce(() -> mWantToShoot = false));
+
+        firstSwipePath.atTime(firstSwipePathTime * autoAlignTakeOverParamerFirstSwipe)
+            .onTrue(Commands.runOnce(() -> mWantToShoot = true))
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> AllianceFlipUtil.apply(
+                    new Pose2d(
+                        lastPoseOfFirstSwipe.getX(),
+                        lastPoseOfFirstSwipe.getY(),
+                        GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(lastPoseOfFirstSwipe))
+                            .plus((AllianceFlipUtil.shouldFlip()) ? Rotation2d.k180deg : Rotation2d.kZero)
+                    )
+                ),
+                ConstraintType.LINEAR));
 
         SequentialEndingCommandGroup firstSwipeIntakeShot = 
             mAutos.timedIntakeShot(kShotTime1Seconds, kShotEndTimeSeconds);
@@ -131,12 +149,12 @@ public class DoubleSwipe extends Auton {
         firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(mIntakeSS.trashCompact());
 
         firstSwipePath.hasEnded().and(hasFirstShotEnded)
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onTrue(secondSwipePath);
 
@@ -149,13 +167,13 @@ public class DoubleSwipe extends Auton {
 
         secondSwipePath.hasEnded().and(() -> mWantToShoot).and(hasSecondShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(secondSwipeIntakeShot)
-            .onTrue(secondSwipeIndexShot)
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+            .onTrue(secondSwipeIntakeShot)
+            .onTrue(mIntakeSS.trashCompact());
 
         secondSwipePath.hasEnded().and(hasSecondShotEnded)
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onTrue(mAutos.endAuto(auto));
 

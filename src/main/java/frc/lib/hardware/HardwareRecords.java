@@ -88,6 +88,13 @@ public class HardwareRecords {
         SimpleMotorFeedforward feedforward
     ) {}
 
+    public static record MotionMagicFOCElevatorFF(
+        int slot,
+        PDConstants pdController,
+        ElevatorFeedforward feedforward,
+        MotionMagicConstants motionMagicConstants   
+    ) {}
+
     public static record MotionMagicFOCController(
         int slot,
         PDConstants pdController,

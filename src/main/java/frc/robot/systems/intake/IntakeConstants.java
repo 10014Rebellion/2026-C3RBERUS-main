@@ -1,108 +1,100 @@
 package frc.robot.systems.intake;
 
 import java.util.HashMap;
-import java.util.function.Supplier;
 
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import frc.robot.RobotConstants;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
+import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
-import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.CANdiEncoder;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.hardware.HardwareRecords.MotionMagicConstants;
+import frc.lib.hardware.HardwareRecords.MotionMagicFOCElevatorFF;
 import frc.lib.hardware.HardwareRecords.PDConstants;
-import frc.lib.hardware.HardwareRecords.RotationSoftLimits;
+import frc.lib.hardware.HardwareRecords.PositionSoftLimits;
+import frc.lib.simulation.SimulationRecords.SimulatedElevator;
 import frc.lib.tuning.LoggedTunableNumber;
 
 public class IntakeConstants {
-    public static class PivotConstants {
-        public static Rotation2d kPivotMotorToleranceRotations = Rotation2d.fromDegrees(2.0);
+    public static class RackConstants {
+        public static double kRackToleranceMeters = Units.inchesToMeters(0.5);
 
-        public static final BasicMotorHardware kPivotMotorConfig = new BasicMotorHardware(
+        public static final BasicMotorHardware kRackMotorConfig = new BasicMotorHardware(
             41, // TODO: TUNE ME;
             RobotConstants.kSubsystemsCANBus,
-            15.0,
+            2 + 1/12.0,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Brake,
             new CurrentLimits(60, 80)
         );
 
-        public static final CANdiEncoder kPivotEncoderConfig = new CANdiEncoder(
-            40, 
-            FeedbackSensorSourceValue.FusedCANdiPWM1,
-            1.0,
-            Rotation2d.fromRotations(-0.241699 - 0.29 + 0.055555) // 0.055555 is to account for the fact that our CG is 20deg off the ground
+        public static final SimulatedElevator kRackElevator = new SimulatedElevator(
+            DCMotor.getKrakenX60(1), 
+            9, 
+            0.05,
+            // Pertend is perfectly horizontal // 
+            false, 
+            0.0, 
+            0.001
         );
 
         // WITH POSITION VOLTAGE
-        public static final ArmControllerMotionMagic kPivotController = (!RobotConstants.isSim()) ?
-            new ArmControllerMotionMagic(
+        public static final MotionMagicFOCElevatorFF kRackController = (!RobotConstants.isSim()) ?
+            new MotionMagicFOCElevatorFF(
                 0, 
-                new PDConstants(35.0, 4.5), 
-                new MotionMagicConstants(1800.0 / 360.0, 2400.0 / 360.0, 0 / 360.0),
-                new ArmFeedforward(0.5, 0.4, 0, 0)
+                new PDConstants(0.0, 0.0), 
+                new ElevatorFeedforward(0, 0, 0, 0),
+                new MotionMagicConstants(0, 0, 0)
             )
                 :
-            new ArmControllerMotionMagic(
+            new MotionMagicFOCElevatorFF(
                 0, 
-                new PDConstants(20, 0.0), 
-                new MotionMagicConstants(300.0, 300.0, 0),
-                new ArmFeedforward(0.0, 1.65, 0, 0)
+                new PDConstants(40, 6.0), 
+                new ElevatorFeedforward(0.0, 0.0, 0.1, 0),
+                new MotionMagicConstants(300.0, 300.0, 0)
             );
 
-        public static final RotationSoftLimits kPivotLimits = new RotationSoftLimits(
-            Rotation2d.fromRotations(-0.068), // Negative voltage limit
-            Rotation2d.fromRotations(0.318) // Positive voltage limit
+        public static final PositionSoftLimits kRackLimitsMeters = new PositionSoftLimits(
+            0.0, // Negative voltage limit
+            1.2 // Positive voltage limit
         );
 
-        public static final double kArmLengthMeters = 0.5376418;
-        public static final double kArmMass = 5.0;
+        public static final double kArmLengthMeters = Units.inchesToMeters(12.0);
+        public static final double kArmMassKg = 5.0;
 
-        public static final LoggedTunableNumber tPivotTuningVoltage = new LoggedTunableNumber("Intake/Tuning/TuneVoltage", 0.0);
-        public static final LoggedTunableNumber tPivotTuningAmp = new LoggedTunableNumber("Intake/Tuning/TuneAmperage", 0.0);
+        public static final LoggedTunableNumber tRackTuningVoltage = new LoggedTunableNumber("Intake/Tuning/TuneVoltage", 0.0);
+        public static final LoggedTunableNumber tRackTuningAmp = new LoggedTunableNumber("Intake/Tuning/TuneAmperage", 0.0);
         public static final LoggedTunableNumber tConstantCompactAmps = new LoggedTunableNumber("Intake/Setpoint/CompactConstantAmps", 0.0); 
+
+        public static final LoggedTunableNumber tIncrementSpeedMPS = new LoggedTunableNumber("Intake/IncrementMPS", 0.04);
         
-        public static final LoggedTunableNumber tStowSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/StowSetpointDegrees", 90.0);
-        public static final Supplier<Rotation2d> kStowSetpointSup = () -> Rotation2d.fromDegrees(tStowSetpointDeg.get());
+        public static final LoggedTunableNumber tStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/StowSetpointMeters", 0);
 
-        public static final LoggedTunableNumber tSafeStowSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/SafeStowSetpointDegrees", 80.0);
-        public static final Supplier<Rotation2d> kSafeStowSetpointSup = () -> Rotation2d.fromDegrees(tSafeStowSetpointDeg.get());
+        public static final LoggedTunableNumber tSafeStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/SafeStowSetpointMeters", 0);
 
-        public static final LoggedTunableNumber tCompactHighSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/CompactHighSetpointDegrees", 48.0);
-        public static final Supplier<Rotation2d> kCompactHighSetpointSup = () -> Rotation2d.fromDegrees(tCompactHighSetpointDeg.get());
+        public static final LoggedTunableNumber tIntakeSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/IntakeSetpointMeters", 0);
 
-        public static final LoggedTunableNumber tCompactLowSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/CompactLowSetpointDegrees", 18.0);
-        public static final Supplier<Rotation2d> kCompactLowSetpointSup = () -> Rotation2d.fromDegrees(tCompactLowSetpointDeg.get());
-
-        public static final LoggedTunableNumber tIntakeSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/IntakeSetpointDegrees", -6.5);
-        public static final Supplier<Rotation2d> kIntakeSetpointSup = () -> Rotation2d.fromDegrees(tIntakeSetpointDeg.get());
-
-        public static final LoggedTunableNumber tTuningShotSetpointDeg  = new LoggedTunableNumber(
-            "Intake/Setpoint/TuningShotSetpointDegrees", 0.0);
-        public static final Supplier<Rotation2d> kTuningShotSetpointSup = () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get());
+        public static final LoggedTunableNumber tTuningShotSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/TuningShotSetpointMeters", 0);
 
 
-        public static final HashMap<IntakePivotStates, Supplier<Rotation2d>> kStateToSetpointMapIntake = new HashMap<IntakePivotStates, Supplier<Rotation2d>>();
+        public static final LoggedTunableNumber tCompactHighSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactHighSetpointMeters", 0);
+
+        public static final LoggedTunableNumber tCompactLowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactLowSetpointMeters", 0);
+
+
+        public static final HashMap<IntakeRackState, LoggedTunableNumber> kStateToSetpointMapIntake = new HashMap<>();
 
         static {
-            kStateToSetpointMapIntake.put(IntakePivotStates.STOW, kStowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.SAFESTOW, kSafeStowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_HIGH, kCompactHighSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_LOW, kCompactLowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.INTAKE, kIntakeSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.TUNING_SETPOINT, kTuningShotSetpointSup);
+            kStateToSetpointMapIntake.put(IntakeRackState.STOW, tStowSetpointMeters);
+            kStateToSetpointMapIntake.put(IntakeRackState.SAFESTOW, tSafeStowSetpointMeters);
+            kStateToSetpointMapIntake.put(IntakeRackState.INTAKE, tIntakeSetpointMeters);
+            kStateToSetpointMapIntake.put(IntakeRackState.TUNING_SETPOINT, tTuningShotSetpointMeters);
+            kStateToSetpointMapIntake.put(IntakeRackState.COMPACT_HIGH, tCompactHighSetpointMeters);
+            kStateToSetpointMapIntake.put(IntakeRackState.COMPACT_LOW, tCompactLowSetpointMeters);
         }
     }
 
