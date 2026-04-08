@@ -98,7 +98,6 @@ public class Drive extends SubsystemBase {
 
     private SwerveModulePosition[] modulePositionsHighF = SwerveHelper.zeroPositions();
     private SwerveModulePosition[] moduleDeltasHighF = SwerveHelper.zeroPositions();
-    ChassisSpeeds mRotationSpeed = new ChassisSpeeds(0.0, 0.0, 0.0);
 
     private boolean kUseGenerator = true;
     private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
@@ -194,14 +193,11 @@ public class Drive extends SubsystemBase {
                 mPrevPositions[moduleIndex] = modulePositionsHighF[moduleIndex];
             }
 
-            mRotationSpeed = new ChassisSpeeds(
-                0.0, 0.0, kKinematics.toTwist2d(moduleDeltasHighF).dtheta);
-
             // Update gyro angle
             // Use the real gyro angle
             if (mGyroInputs.iConnected) mRobotRotation = mGyroInputs.odometryYawPositions[i];
             // Use the angle delta from the kinematics and module deltas
-            else mRobotRotation = mRobotRotation.plus(Rotation2d.fromRadians(mRotationSpeed.omegaRadiansPerSecond));
+            else mRobotRotation = mRobotRotation.plus(Rotation2d.fromRadians(kKinematics.toTwist2d(moduleDeltasHighF).dtheta));
 
             mPoseEstimator.updateWithTime(mModules[0].getOdometryTimeStamps()[i], mRobotRotation, modulePositionsHighF);
         }
