@@ -23,9 +23,9 @@ public class HolonomicController {
 
     public static final LoggedTunableNumber tXP = new LoggedTunableNumber("AutoAlign/X/kP", 5.0);
     public static final LoggedTunableNumber tXD = new LoggedTunableNumber("AutoAlign/X/kD", 0.0);
-    public static final LoggedTunableNumber tXI = new LoggedTunableNumber("AutoAlign/X/kI", 0.0);
-    public static final LoggedTunableNumber tXIZone = new LoggedTunableNumber("AutoAlign/X/kIZone", 0.0);
-    public static final LoggedTunableNumber tXIRange = new LoggedTunableNumber("AutoAlign/X/kIRange", 0.0);
+    // public static final LoggedTunableNumber tXI = new LoggedTunableNumber("AutoAlign/X/kI", 0.0);
+    // public static final LoggedTunableNumber tXIZone = new LoggedTunableNumber("AutoAlign/X/kIZone", 0.0);
+    // public static final LoggedTunableNumber tXIRange = new LoggedTunableNumber("AutoAlign/X/kIRange", 0.0);
     public static final LoggedTunableNumber tXMaxVMPS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPS", 3.4);
     public static final LoggedTunableNumber tXMaxAMPSS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPSS", 10.0);
 
@@ -36,9 +36,9 @@ public class HolonomicController {
 
     public static final LoggedTunableNumber tYP = new LoggedTunableNumber("AutoAlign/Y/kP", 5.0);
     public static final LoggedTunableNumber tYD = new LoggedTunableNumber("AutoAlign/Y/kD", 0.0);
-    public static final LoggedTunableNumber tYI = new LoggedTunableNumber("AutoAlign/Y/kI", 0.0);
-    public static final LoggedTunableNumber tYIZone = new LoggedTunableNumber("AutoAlign/Y/kIZone", 0.0);
-    public static final LoggedTunableNumber tYIRange = new LoggedTunableNumber("AutoAlign/Y/kIRange", 0.0);
+    // public static final LoggedTunableNumber tYI = new LoggedTunableNumber("AutoAlign/Y/kI", 0.0);
+    // public static final LoggedTunableNumber tYIZone = new LoggedTunableNumber("AutoAlign/Y/kIZone", 0.0);
+    // public static final LoggedTunableNumber tYIRange = new LoggedTunableNumber("AutoAlign/Y/kIRange", 0.0);
     public static final LoggedTunableNumber tYMaxVMPS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPS", 3.4);
     public static final LoggedTunableNumber tYMaxAMPSS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPSS", 10.0);
 
@@ -50,9 +50,9 @@ public class HolonomicController {
     public static final LoggedTunableNumber tOmegaP = new LoggedTunableNumber("AutoAlign/Omega/kP", 2.5);
     public static final LoggedTunableNumber tOmegaD = new LoggedTunableNumber("AutoAlign/Omega/kD", 0.0);
 
-    public static final LoggedTunableNumber tOmegaI = new LoggedTunableNumber("AutoAlign/Omega/kI", 0.0);
-    public static final LoggedTunableNumber tOmegaIZone = new LoggedTunableNumber("AutoAlign/Omega/kIZone", 0.0);
-    public static final LoggedTunableNumber tOmegaIRange = new LoggedTunableNumber("AutoAlign/Omega/kIRange", 0.0);
+    // public static final LoggedTunableNumber tOmegaI = new LoggedTunableNumber("AutoAlign/Omega/kI", 0.0);
+    // public static final LoggedTunableNumber tOmegaIZone = new LoggedTunableNumber("AutoAlign/Omega/kIZone", 0.0);
+    // public static final LoggedTunableNumber tOmegaIRange = new LoggedTunableNumber("AutoAlign/Omega/kIRange", 0.0);
 
     public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPS", 200);
     public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPSS", 1000);
@@ -83,26 +83,26 @@ public class HolonomicController {
 
     public HolonomicController() {
         this.tXController = new ProfiledPIDController(
-            tXP.get(), tXI.get(), tXD.get(), new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
-        tXController.setIntegratorRange(-tXIRange.get(), tXIRange.get());
-        tXController.setIZone(tXIZone.get());
+            tXP.get(), 0.0, tXD.get(), new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
+        tXController.setIntegratorRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        tXController.setIZone(0.0);
         tXController.setConstraints(new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
         tXController.setTolerance(tXToleranceMeters.get());
         this.tXFeedforward = new SimpleMotorFeedforward(tXS.get(), tXV.get());
 
         this.tYController = new ProfiledPIDController(
-            tYP.get(), tYI.get(), tYD.get(), new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
-        tYController.setIntegratorRange(-tYIRange.get(), tYIRange.get());
-        tYController.setIZone(tYIZone.get());
+            tYP.get(), 0.0, tYD.get(), new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
+        tYController.setIntegratorRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        tYController.setIZone(0.0);
         tYController.setConstraints(new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
         tYController.setTolerance(tYToleranceMeters.get());
         this.tYFeedforward = new SimpleMotorFeedforward(tYS.get(), tYV.get());
 
         this.tOmegaController = new ProfiledPIDController(
-            tOmegaP.get(), tOmegaI.get(), tOmegaD.get(), new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
+            tOmegaP.get(), 0.0, tOmegaD.get(), new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
         tOmegaController.enableContinuousInput(-180.0, 180.0);
-        tOmegaController.setIntegratorRange(-tOmegaIRange.get(), tOmegaIRange.get());
-        tOmegaController.setIZone(tOmegaIZone.get());
+        tOmegaController.setIntegratorRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        tOmegaController.setIZone(0.0);
         tOmegaController.setConstraints(new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
         tOmegaController.setTolerance(tOmegaToleranceDegrees.get());
         this.tOmegaFeedforward = new SimpleMotorFeedforward(tOmegaS.get(), tOmegaV.get());
@@ -252,17 +252,12 @@ public class HolonomicController {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    tXController.setPID(tXP.get(), tXI.get(), tXD.get());
-                    tXController.setIntegratorRange(-tXIRange.get(), tXIRange.get());
-                    tXController.setIZone(tXIZone.get());
+                    tXController.setPID(tXP.get(), 0.0, tXD.get());
                     if (tType.equals(ConstraintType.LINEAR))
                         tXController.setConstraints(new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
                 },
                 tXP,
-                tXI,
                 tXD,
-                tXIRange,
-                tXIZone,
                 tXMaxVMPS,
                 tXMaxAMPSS);
 
@@ -277,17 +272,12 @@ public class HolonomicController {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    tYController.setPID(tYP.get(), tYI.get(), tYD.get());
-                    tYController.setIntegratorRange(-tYIRange.get(), tYIRange.get());
-                    tYController.setIZone(tYIZone.get());
+                    tYController.setPID(tYP.get(), 0.0, tYD.get());
                     if (tType.equals(ConstraintType.LINEAR))
                         tYController.setConstraints(new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
                 },
                 tYP,
-                tYI,
                 tYD,
-                tYIRange,
-                tYIZone,
                 tYMaxVMPS,
                 tYMaxAMPSS);
 
@@ -302,16 +292,11 @@ public class HolonomicController {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    tOmegaController.setPID(tOmegaP.get(), tOmegaI.get(), tOmegaD.get());
-                    tOmegaController.setIntegratorRange(-tOmegaIRange.get(), tOmegaIRange.get());
-                    tOmegaController.setIZone(tOmegaIZone.get());
+                    tOmegaController.setPID(tOmegaP.get(), 0.0, tOmegaD.get());
                     tOmegaController.setConstraints(new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
                 },
                 tOmegaP,
-                tOmegaI,
                 tOmegaD,
-                tOmegaIRange,
-                tOmegaIZone,
                 tOmegaMaxVDPS,
                 tOmegaMaxADPSS);
 

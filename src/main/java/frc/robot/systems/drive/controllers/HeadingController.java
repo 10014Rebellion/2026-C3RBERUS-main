@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 
 public class HeadingController {
     public static final LoggedTunableNumber mSnapP = new LoggedTunableNumber("SwerveHeadingController/Snap/kP", 2.5);
-    public static final LoggedTunableNumber mSnapI = new LoggedTunableNumber("SwerveHeadingController/Snap/kI", 0.0);
     public static final LoggedTunableNumber mSnapD = new LoggedTunableNumber("SwerveHeadingController/Snap/kD", 0.0);
     public static final LoggedTunableNumber mSnapMaxVDPS =
             new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxV", 600.0);
@@ -44,7 +43,7 @@ public class HeadingController {
     public HeadingController(TurnPointFeedforward pTurnPointFF) {
         mSnapController = new ProfiledPIDController(
                 mSnapP.get(),
-                mSnapI.get(),
+                0.0,
                 mSnapD.get(),
                 new TrapezoidProfile.Constraints(mSnapMaxVDPS.get(), mSnapMaxADPSS.get()));
 
@@ -110,11 +109,10 @@ public class HeadingController {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    mSnapController.setPID(mSnapP.get(), mSnapI.get(), mSnapD.get());
+                    mSnapController.setPID(mSnapP.get(), 0.0, mSnapD.get());
                     mSnapController.setConstraints(new Constraints(mSnapMaxVDPS.get(), mSnapMaxADPSS.get()));
                 },
                 mSnapP,
-                mSnapI,
                 mSnapD,
                 mSnapMaxVDPS,
                 mSnapMaxADPSS);

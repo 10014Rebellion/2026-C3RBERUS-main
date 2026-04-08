@@ -16,9 +16,9 @@ import frc.lib.tuning.LoggedTunableNumber;
 public class LineController {
     public static final LoggedTunableNumber tXP = new LoggedTunableNumber("LineAlign/X/kP", 3.0);
     public static final LoggedTunableNumber tXD = new LoggedTunableNumber("LineAlign/X/kD", 0.0);
-    public static final LoggedTunableNumber tXI = new LoggedTunableNumber("LineAlign/X/kI", 0.0);
-    public static final LoggedTunableNumber tXIZone = new LoggedTunableNumber("LineAlign/X/kIZone", 0.0);
-    public static final LoggedTunableNumber tXIRange = new LoggedTunableNumber("LineAlign/X/kIRange", 0.0);
+    // public static final LoggedTunableNumber tXI = new LoggedTunableNumber("LineAlign/X/kI", 0.0);
+    // public static final LoggedTunableNumber tXIZone = new LoggedTunableNumber("LineAlign/X/kIZone", 0.0);
+    // public static final LoggedTunableNumber tXIRange = new LoggedTunableNumber("LineAlign/X/kIRange", 0.0);
     public static final LoggedTunableNumber tXMaxVMPS = new LoggedTunableNumber("LineAlign/X/kMaxVMPS", 3.5);
     public static final LoggedTunableNumber tXMaxAMPSS = new LoggedTunableNumber("LineAlign/X/kMaxVMPSS", 7.0);
 
@@ -30,9 +30,9 @@ public class LineController {
     public static final LoggedTunableNumber tOmegaP = new LoggedTunableNumber("LineAlign/Omega/kP", 3.0);
     public static final LoggedTunableNumber tOmegaD = new LoggedTunableNumber("LineAlign/Omega/kD", 0.0);
 
-    public static final LoggedTunableNumber tOmegaI = new LoggedTunableNumber("LineAlign/Omega/kI", 0.0);
-    public static final LoggedTunableNumber tOmegaIZone = new LoggedTunableNumber("LineAlign/Omega/kIZone", 0.0);
-    public static final LoggedTunableNumber tOmegaIRange = new LoggedTunableNumber("LineAlign/Omega/kIRange", 0.0);
+    // public static final LoggedTunableNumber tOmegaI = new LoggedTunableNumber("LineAlign/Omega/kI", 0.0);
+    // public static final LoggedTunableNumber tOmegaIZone = new LoggedTunableNumber("LineAlign/Omega/kIZone", 0.0);
+    // public static final LoggedTunableNumber tOmegaIRange = new LoggedTunableNumber("LineAlign/Omega/kIRange", 0.0);
 
     public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPS", 720);
     public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPSS", 2500);
@@ -60,18 +60,18 @@ public class LineController {
         mInvertTeleop = pInvertTeleop;
 
         this.tXController = new ProfiledPIDController(
-        tXP.get(), tXI.get(), tXD.get(), new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
-        tXController.setIntegratorRange(-tXIRange.get(), tXIRange.get());
-        tXController.setIZone(tXIZone.get());
+        tXP.get(), 0.0, tXD.get(), new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
+        tXController.setIntegratorRange(0.0, 0.0);
+        tXController.setIZone(0.0);
         tXController.setConstraints(new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
         tXController.setTolerance(tXToleranceMeters.get());
         this.tXFeedforward = new SimpleMotorFeedforward(tXS.get(), tXV.get());
 
         this.tOmegaController = new ProfiledPIDController(
-            tOmegaP.get(), tOmegaI.get(), tOmegaD.get(), new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
+            tOmegaP.get(), 0.0, tOmegaD.get(), new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
         tOmegaController.enableContinuousInput(-180.0, 180.0);
-        tOmegaController.setIntegratorRange(-tOmegaIRange.get(), tOmegaIRange.get());
-        tOmegaController.setIZone(tOmegaIZone.get());
+        tOmegaController.setIntegratorRange(0.0, 0.0);
+        tOmegaController.setIZone(0.0);
         tOmegaController.setConstraints(new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
         tOmegaController.setTolerance(tOmegaToleranceDegrees.get());
         this.tOmegaFeedforward = new SimpleMotorFeedforward(tOmegaS.get(), tOmegaV.get());
@@ -173,16 +173,11 @@ public class LineController {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    tXController.setPID(tXP.get(), tXI.get(), tXD.get());
-                    tXController.setIntegratorRange(-tXIRange.get(), tXIRange.get());
-                    tXController.setIZone(tXIZone.get());
+                    tXController.setPID(tXP.get(), 0.0, tXD.get());
                     tXController.setConstraints(new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
                 },
                 tXP,
-                tXI,
                 tXD,
-                tXIRange,
-                tXIZone,
                 tXMaxVMPS,
                 tXMaxAMPSS);
 
@@ -197,16 +192,11 @@ public class LineController {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    tOmegaController.setPID(tOmegaP.get(), tOmegaI.get(), tOmegaD.get());
-                    tOmegaController.setIntegratorRange(-tOmegaIRange.get(), tOmegaIRange.get());
-                    tOmegaController.setIZone(tOmegaIZone.get());
+                    tOmegaController.setPID(tOmegaP.get(), 0.0, tOmegaD.get());
                     tOmegaController.setConstraints(new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
                 },
                 tOmegaP,
-                tOmegaI,
                 tOmegaD,
-                tOmegaIRange,
-                tOmegaIZone,
                 tOmegaMaxVDPS,
                 tOmegaMaxADPSS);
 
