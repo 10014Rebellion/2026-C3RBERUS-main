@@ -54,8 +54,6 @@ import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
 import frc.robot.systems.climb.ClimbIOSim;
 import frc.robot.systems.climb.ClimbIO;
-import frc.robot.systems.climb.AngularServoIO;
-import frc.robot.systems.climb.AngularServoIOPWM;
 import frc.robot.systems.climb.ClimbConstants;
 
 public class RobotContainer {
@@ -110,8 +108,7 @@ public class RobotContainer {
                 );
 
                 mClimbSS = new ClimbSS(
-                    new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants),
-                    new AngularServoIOPWM(ClimbConstants.kHookPort));
+                    new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants));
 
                 break;
             }
@@ -158,8 +155,7 @@ public class RobotContainer {
                     new ClimbIOSim(
                         ClimbConstants.kSimElevator, 
                         ClimbConstants.kClimbMotorConstants, 
-                        ClimbConstants.kSoftLimits),
-                    new AngularServoIO() {});
+                        ClimbConstants.kSoftLimits));
 
                 break;
             }
@@ -198,9 +194,7 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
-                mClimbSS = new ClimbSS(
-                    new ClimbIO() {},
-                    new AngularServoIO() {});
+                mClimbSS = new ClimbSS(new ClimbIO() {});
 
                 break;
             }

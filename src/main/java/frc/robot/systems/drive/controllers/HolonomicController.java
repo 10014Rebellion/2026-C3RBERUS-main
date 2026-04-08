@@ -210,12 +210,12 @@ public class HolonomicController {
                 Rotation2d.fromDegrees(tOmegaController.getSetpoint().position));
     }
 
-    @AutoLogOutput(key = "Drive/HolonomicController/AtPositionTimeout")
+    // @AutoLogOutput(key = "Drive/HolonomicController/AtPositionTimeout")
     public boolean atPositionTimeout() {
         return getPositionGoal().equals(getPositionSetpoint());
     }
 
-    @AutoLogOutput(key = "Drive/HolonomicController/VelocityGoal")
+    // @AutoLogOutput(key = "Drive/HolonomicController/VelocityGoal")
     public ChassisSpeeds getVelocityGoal() {
         return new ChassisSpeeds(
             tXController.getGoal().velocity,
@@ -231,7 +231,7 @@ public class HolonomicController {
                 Math.toRadians(tOmegaController.getSetpoint().velocity));
     }
 
-    @AutoLogOutput(key = "Drive/HolonomicController/PoseError")
+    // @AutoLogOutput(key = "Drive/HolonomicController/PoseError")
     public Pose2d getPoseError() {
         return new Pose2d(
                 tXController.getPositionError(),

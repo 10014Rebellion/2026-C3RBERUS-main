@@ -25,15 +25,12 @@ public class ClimbSS extends SubsystemBase {
     private final ClimbIO mClimbIO;
     private final ClimbInputsAutoLogged mClimbInputs = new ClimbInputsAutoLogged();
 
-    private final AngularServoIO mServo;
-
     private ClimbState mClimbState = ClimbState.IDLE;
     private int mDesiredDirection = 0;
     private boolean mLimitEnforced = false;
 
-    public ClimbSS(ClimbIO pClimbIO, AngularServoIO pServo) {
+    public ClimbSS(ClimbIO pClimbIO) {
         mClimbIO = pClimbIO;
-        mServo = pServo;
     }
 
     @Override
@@ -53,11 +50,9 @@ public class ClimbSS extends SubsystemBase {
         switch (mClimbState) {
             case UP, DOWN, STAY, STAY_ROBOT -> {
                 setClimbVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
-                mServo.setPosition(ClimbConstants.kHookOutPosition);
             }
             case IDLE -> {
                 setClimbVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
-                mServo.setPosition(ClimbConstants.kHookInPosition);
             } case INVALID -> {}
             default  -> {}
         }

@@ -78,10 +78,10 @@ public class ATagCameraIOPV implements ATagCameraIO {
                 PhotonTrackedTarget target = latestValidResult.getBestTarget();
                 pInputs.iSingleTagAprilTagID = target.getFiducialId();
                 pInputs.iPoseAmbiguity = target.getPoseAmbiguity();
-                pInputs.iYaw = target.getYaw();
-                pInputs.iPitch = target.getPitch();
-                pInputs.iArea = target.getArea();
-                pInputs.iLatencySeconds = latestValidResult.metadata.getLatencyMillis() / 1000.0;
+                // pInputs.iYaw = target.getYaw();
+                // pInputs.iPitch = target.getPitch();
+                // pInputs.iArea = target.getArea();
+                // pInputs.iLatencySeconds = latestValidResult.metadata.getLatencyMillis() / 1000.0;
                 pInputs.iLatestTimestamp = latestValidResult.getTimestampSeconds();
             }
 
@@ -152,10 +152,10 @@ public class ATagCameraIOPV implements ATagCameraIO {
         pInputs.iIsConnected = false;
         pInputs.iHasTarget = false;
         pInputs.iHasBeenUpdated = false;
-        pInputs.iYaw = 0.0;
-        pInputs.iPitch = 0.0;
-        pInputs.iArea = 0.0;
-        pInputs.iLatencySeconds = 0.0;
+        // pInputs.iYaw = 0.0;
+        // pInputs.iPitch = 0.0;
+        // pInputs.iArea = 0.0;
+        // pInputs.iLatencySeconds = 0.0;
         pInputs.iPoseAmbiguity = 0.0;
         pInputs.iSingleTagAprilTagID = 0;
         pInputs.iNumberOfTargets = 0;

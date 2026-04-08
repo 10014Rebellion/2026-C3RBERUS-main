@@ -9,6 +9,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.drive.DriveConstants;
 
 import java.util.function.Supplier;
 
@@ -87,11 +88,13 @@ public class HeadingController {
         Telemetry.log("Drive/HeadingController/setpointError", setpointError);
         Telemetry.log("Drive/HeadingController/goalError", goalError);
 
-        Telemetry.log("Drive/HeadingController/unAdjustedOutput", outputRadians);
-        Telemetry.log("Drive/HeadingController/adjustedOutput", adjustedOutputRadians);
-        Telemetry.log("Drive/HeadingController/pidOutput", pidOutput);
-        Telemetry.log("Drive/HeadingController/profileFFOutput", profileFFOutput);
-        Telemetry.log("Drive/HeadingController/turnPointFFOutput", turnPointFFOutput);
+        if(DriveConstants.kDoExtraLogging) {
+            Telemetry.log("Drive/HeadingController/unAdjustedOutput", outputRadians);
+            Telemetry.log("Drive/HeadingController/adjustedOutput", adjustedOutputRadians);
+            Telemetry.log("Drive/HeadingController/pidOutput", pidOutput);
+            Telemetry.log("Drive/HeadingController/profileFFOutput", profileFFOutput);
+            Telemetry.log("Drive/HeadingController/turnPointFFOutput", turnPointFFOutput);
+        }
 
         return adjustedOutputRadians;
     }

@@ -10,8 +10,6 @@ public interface ClimbIO {
     @AutoLog
     public static class ClimbInputs {
       public boolean iIsClimbConnected = false;
-      public double iClimbVelocityMPS = 0.0;
-      public double iClimbAccelerationMPSS = 0.0;
       public double iClimbMotorVolts = 0.0;
       public double iClimbSupplyCurrentAmps = 0.0;
       public double iClimbStatorCurrentAmps = 0.0;

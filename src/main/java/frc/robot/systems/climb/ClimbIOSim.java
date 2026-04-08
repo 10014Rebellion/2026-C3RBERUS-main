@@ -32,8 +32,6 @@ public class ClimbIOSim implements ClimbIO{
     public void updateInputs(ClimbInputs pInputs){
         mElevatorSim.update(0.02);
         pInputs.iIsClimbConnected = true;
-        pInputs.iClimbVelocityMPS = mElevatorSim.getVelocityMetersPerSecond();
-        pInputs.iClimbAccelerationMPSS = 0.0;
         pInputs.iClimbMotorVolts = mAppliedVolts;
         pInputs.iClimbSupplyCurrentAmps = 0.0;
         pInputs.iClimbStatorCurrentAmps = Math.abs(mElevatorSim.getCurrentDrawAmps());

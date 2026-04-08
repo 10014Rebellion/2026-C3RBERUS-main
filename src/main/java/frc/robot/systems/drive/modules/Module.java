@@ -29,8 +29,8 @@ public class Module {
     private final ModuleInputsAutoLogged mInputs = new ModuleInputsAutoLogged();
 
     private final String kModuleName;
-    private final String kFeedforwardTypeKeyName = (DriveConstants.kUseVoltageFeedforward) ? 
-        "/AmperageFeedforward" : "/VoltageFeedforward";
+    // private final String kFeedforwardTypeKeyName = (DriveConstants.kUseVoltageFeedforward) ? 
+    //     "/AmperageFeedforward" : "/VoltageFeedforward";
 
     private double mVelocitySetpointMPS = 0.0;
     private double mAccelFeedforward = 0.0;
@@ -143,7 +143,7 @@ public class Module {
 
         mIO.setDriveVelocity(mVelocitySetpointMPS, mFFDriveOutput);
 
-        Logger.recordOutput("Drive/" + kModuleName + kFeedforwardTypeKeyName, mAccelFeedforward);
+        // Logger.recordOutput("Drive/" + kModuleName + kFeedforwardTypeKeyName, mAccelFeedforward);
         Logger.recordOutput("Drive/" + kModuleName + "/ffDriveOutput", mFFDriveOutput);
     }
 

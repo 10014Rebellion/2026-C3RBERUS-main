@@ -108,8 +108,6 @@ public class ClimbIOKrakenx44 implements ClimbIO {
             mClimbTempCelsius,
             mClosedLoopReference
         );
-        pInputs.iClimbVelocityMPS = mClimbVelocityMPS.getValueAsDouble();
-        pInputs.iClimbAccelerationMPSS = mClimbAccelerationMPSS.getValueAsDouble();
         pInputs.iClimbMotorVolts = mClimbVoltage.getValueAsDouble();
         pInputs.iClimbSupplyCurrentAmps = mClimbSupplyCurrent.getValueAsDouble();
         pInputs.iClimbStatorCurrentAmps = mClimbStatorCurrent.getValueAsDouble();

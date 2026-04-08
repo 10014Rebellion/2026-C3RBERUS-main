@@ -13,7 +13,7 @@ public interface ModuleIO {
         public double iDriveVelocityMPS = 0.0;
         public double iDriveStatorCurrentAmps = 0.0;
         public double iDriveSupplyCurrentAmps = 0.0;
-        public double iDriveTorqueCurrentAmps = 0.0;
+        // public double iDriveTorqueCurrentAmps = 0.0;
         public double iDriveTemperatureCelsius = 0.0;
         public double iDriveMotorVolts = 0.0;
 
@@ -21,7 +21,7 @@ public interface ModuleIO {
         public Rotation2d iAzimuthPosition = new Rotation2d();
         public Rotation2d iAzimuthVelocity = new Rotation2d();
         public double iAzimuthStatorCurrentAmps = 0.0;
-        public double iAzimuthTorqueCurrentAmps = 0.0;
+        // public double iAzimuthTorqueCurrentAmps = 0.0;
         public double iAzimuthSupplyCurrentAmps = 0.0;
         public double iAzimuthTemperatureCelsius = 0.0;
         public double iAzimuthMotorVolts = 0.0;

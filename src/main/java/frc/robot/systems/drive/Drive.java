@@ -239,15 +239,17 @@ public class Drive extends SubsystemBase {
             }
         }
 
-        /* For logging purposes */
-        mOdometry.update(mRobotRotation, getModulePositionsHighF());
         mField.setRobotPose(getPoseEstimate());
         Logger.recordOutput("Drive/Odometry/SkidRatio", mSkidRatio);
-        Logger.recordOutput("Drive/Odometry/SkidFactor", mSkidFactor);
         Logger.recordOutput("Drive/Odometry/HasSkidded", mHasSkidded);
-        Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
-        Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
-        Logger.recordOutput("Drive/Odometry/VisionFactor", mVisionFactor);
+        if(DriveConstants.kDoExtraLogging) {
+            Logger.recordOutput("Drive/Odometry/SkidFactor", mSkidFactor);
+            Logger.recordOutput("Drive/Odometry/VisionFactor", mVisionFactor);
+            Logger.recordOutput("Drive/Odometry/GyroFactor", mGyroFactor);
+            Logger.recordOutput("Drive/Odometry/TiltFactor", mTiltFactor);
+            mOdometry.update(mRobotRotation, getModulePositionsHighF());
+            Logger.recordOutput("Drive/Odometry/OdometryPose", getOdometryPose());
+        }
     }
 
     ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
@@ -275,16 +277,14 @@ public class Drive extends SubsystemBase {
 
         // mUnOptimizedStates = new SwerveModuleState[4];
         mSetpointStates = kKinematics.toSwerveModuleStates(mDesiredSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(mSetpointStates, kMaxLinearSpeedMPS);
 
         // mOptimizedStates = new SwerveModuleState[4];
 
+        /* Saturates it for you */
         mPreviousSetpoint = mSetpointGenerator.generateSetpoint(
             mPreviousSetpoint, 
-            mDesiredSpeeds, 
-            (DriverStation.isTeleop()) 
-                ? mDriveConstraints 
-                : kAutoConstraints, 
+            mDesiredSpeeds,  
+            mDriveConstraints, 
             SwerveHelper.dt);
 
         /* Only for logging purposes */
@@ -295,10 +295,8 @@ public class Drive extends SubsystemBase {
         kUseGenerator = !mDriveManager.getDriveState().equals(DriveState.AUTON);
         Logger.recordOutput("Drive/Swerve/UseGenerator", kUseGenerator);
 
-        // Telemetry.log("Drive/Odometry/generatedFieldSpeeds",
-        // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
-        for (int i = 0; i < 4; i++) {
-            if (kUseGenerator) {
+        if (kUseGenerator) {
+            for (int i = 0; i < 4; i++) {
                 /* Logs the drive feedforward stuff */
                 // SwerveHelper.logDriveFeedforward(mDefaultFF, i);
 
@@ -330,7 +328,11 @@ public class Drive extends SubsystemBase {
                     (driveAmps * kMaxLinearSpeedMPS) 
                         / kDriveFOCAmpLimit, 
                     mOptimizedStates[i].angle);
-            } else {
+            } 
+        } else {
+            for (int i = 0; i < 4; i++) {
+                SwerveDriveKinematics.desaturateWheelSpeeds(mSetpointStates, kMaxLinearSpeedMPS);
+
                 mSetpointStates[i] = new SwerveModuleState(
                     mSetpointStates[i].speedMetersPerSecond,
                     SwerveHelper.removeAzimuthJitter(
@@ -365,11 +367,13 @@ public class Drive extends SubsystemBase {
             }
         }
 
-        if(kUseGenerator) Telemetry.log("Drive/Swerve/Setpoints", mUnOptimizedStates);
         Telemetry.log("Drive/Swerve/SetpointsOptimized", mOptimizedStates);
         Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(mOptimizedStates));
-        Telemetry.log("Drive/Odometry/FieldSetpointChassisSpeed", ChassisSpeeds.fromRobotRelativeSpeeds(
+        if(DriveConstants.kDoExtraLogging) {
+            Telemetry.log("Drive/Swerve/Setpoints", mUnOptimizedStates);
+            Telemetry.log("Drive/Odometry/FieldSetpointChassisSpeed", ChassisSpeeds.fromRobotRelativeSpeeds(
             kKinematics.toChassisSpeeds(mOptimizedStates), mRobotRotation));
+        }
         Telemetry.log("Drive/Swerve/ModuleTorqueFF", mModuleTorques);
     }
 
@@ -449,7 +453,7 @@ public class Drive extends SubsystemBase {
         return states;
     }
 
-    @AutoLogOutput(key = "Drive/Swerve/ModulePositions")
+    // @AutoLogOutput(key = "Drive/Swerve/ModulePositions")
     public SwerveModulePosition[] getModulePositionsHighF() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) positions[i] = mModules[i].getCurrentPosition();
@@ -461,7 +465,7 @@ public class Drive extends SubsystemBase {
         return mPoseEstimator.getEstimatedPosition();
     }
 
-    @AutoLogOutput(key = "Drive/Odometry/OdometryPose")
+    // @AutoLogOutput(key = "Drive/Odometry/OdometryPose")
     public Pose2d getOdometryPose() {
         return mOdometry.getPoseMeters();
     }
@@ -471,7 +475,7 @@ public class Drive extends SubsystemBase {
         return mRobotRotation;
     }
 
-    @AutoLogOutput(key = "Drive/Odometry/RobotRotation")
+    // @AutoLogOutput(key = "Drive/Odometry/RobotRotationVelocity")
     public Rotation2d getRobotRotationVelocity() {
         return mGyroInputs.iYawVelocityPS;
     }
@@ -480,11 +484,6 @@ public class Drive extends SubsystemBase {
     public ChassisSpeeds getRobotChassisSpeeds() {
         return kKinematics.toChassisSpeeds(getModuleStates());
     }
-
-    @AutoLogOutput(key = "Drive/Odometry/RobotChassisSpeeds")
-    public ChassisSpeeds getRobotRotationSpeed() {
-        return mRotationSpeed;
-    }    
 
     @AutoLogOutput(key = "Drive/Odometry/DesiredChassisSpeeds")
     public ChassisSpeeds getDesiredChassisSpeeds() {
