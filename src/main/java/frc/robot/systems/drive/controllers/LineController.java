@@ -42,7 +42,7 @@ public class LineController {
 
     public static final LoggedTunableNumber tOmegaToleranceDegrees = new LoggedTunableNumber("LineAlign/Omega/ToleranceDegrees", 1.5);
 
-    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 1.0);
+    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("LineAlign/ffRadius", 1.0);
 
     private ProfiledPIDController tXController;
     private SimpleMotorFeedforward tXFeedforward;
