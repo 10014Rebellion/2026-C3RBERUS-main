@@ -106,7 +106,7 @@ public class RobotContainer {
                 mFlywheelsSS = new FlywheelsSS(
                         new FlywheelIOKrakenX44(FlywheelConstants.kFlywheelLeaderConfig),
                         new FlywheelIOKrakenX44(FlywheelConstants.kFlywheelFollowerConfig),
-                        new EncoderIOCANCoder(FlywheelConstants.kCANCoderConfig)
+                        new EncoderIO(){}
                 );
 
                 mIntakeSS = new Intake(
@@ -170,6 +170,8 @@ public class RobotContainer {
                     new SensorIO() {},
                     new SensorIO() {});
 
+
+                mClimbSS = new ClimbSS(new ClimbIO() {});
                 break;
             }
 
@@ -221,7 +223,7 @@ public class RobotContainer {
 
         ShotMap.getInstance().setPoseSupplier(() -> mDriveSS.getPoseEstimate());
         
-        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS);
+        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS);
 
         initBindings();
         initBaseTriggers();

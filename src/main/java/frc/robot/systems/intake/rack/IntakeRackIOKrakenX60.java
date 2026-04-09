@@ -43,6 +43,7 @@ public class IntakeRackIOKrakenX60 implements IntakeRackIO{
         // Motor
         mIntakeRackMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
         var IntakeConfig = new TalonFXConfiguration();
+        mIntakeRackMotor.getConfigurator().apply(IntakeConfig);
 
         IntakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         IntakeConfig.CurrentLimits.SupplyCurrentLimit = pConfig.currentLimit().supplyCurrentLimit();
@@ -52,7 +53,7 @@ public class IntakeRackIOKrakenX60 implements IntakeRackIO{
         IntakeConfig.MotorOutput.NeutralMode = pConfig.neutralMode();
         IntakeConfig.MotorOutput.Inverted = pConfig.direction();
 
-        IntakeConfig.Feedback.RotorToSensorRatio = pConfig.rotorToMechanismRatio();
+        IntakeConfig.Feedback.SensorToMechanismRatio = pConfig.rotorToMechanismRatio();
 
         // Dont need a gravity type as work between F_G and elevator is 0//
         IntakeConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
@@ -99,7 +100,6 @@ public class IntakeRackIOKrakenX60 implements IntakeRackIO{
             CanivoreBus.OVERWORLD,
             mIntakeRackRotation,
             mIntakeRackVelocityRPS,
-            mIntakeRackAccelerationRPSS, 
             mIntakeRackVoltage,
             mIntakeRackSupplyCurrent,
             mIntakeRackStatorCurrent,
@@ -123,7 +123,6 @@ public class IntakeRackIOKrakenX60 implements IntakeRackIO{
         );
         pInputs.iIntakeRackPositionM = mIntakeRackRotation.getValueAsDouble();
         pInputs.iIntakeRackVelocityMS = mIntakeRackVelocityRPS.getValueAsDouble();
-        pInputs.iIntakeRackAccelerationRPSS = mIntakeRackAccelerationRPSS.getValueAsDouble();
         pInputs.iIntakeRackMotorVolts = mIntakeRackVoltage.getValueAsDouble();
         pInputs.iIntakeRackSupplyCurrentAmps = mIntakeRackSupplyCurrent.getValueAsDouble();
         pInputs.iIntakeRackStatorCurrentAmps = mIntakeRackStatorCurrent.getValueAsDouble();

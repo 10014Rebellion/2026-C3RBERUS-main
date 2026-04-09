@@ -46,7 +46,6 @@ public class IntakeRackIOSim implements IntakeRackIO{
         pInputs.iIsIntakeRackConnected = true;
         pInputs.iIntakeRackPositionM = mRackSim.getPositionMeters();
         pInputs.iIntakeRackVelocityMS = mRackSim.getVelocityMetersPerSecond();
-        pInputs.iIntakeRackAccelerationRPSS = 0.0;
         pInputs.iIntakeRackMotorVolts = mAppliedVolts;
         pInputs.iIntakeRackSupplyCurrentAmps = 0.0;
         pInputs.iIntakeRackStatorCurrentAmps = Math.abs(mRackSim.getCurrentDrawAmps());

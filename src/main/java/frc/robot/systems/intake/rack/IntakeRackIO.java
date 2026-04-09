@@ -10,7 +10,6 @@ public interface IntakeRackIO {
         public boolean iIsIntakeRackConnected = false;
         public double iIntakeRackPositionM = 0.0;
         public double iIntakeRackVelocityMS = 0.0;
-        public double iIntakeRackAccelerationRPSS = 0.0;
         public double iIntakeRackMotorVolts = 0.0;
         public double iIntakeRackSupplyCurrentAmps = 0.0;
         public double iIntakeRackStatorCurrentAmps = 0.0;

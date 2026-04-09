@@ -119,10 +119,10 @@ public class IntakeRackSS extends SubsystemBase {
                 setIntakePosition(IntakeConstants.RackConstants.kStateToSetpointMapIntake.get(mCurrentIntakeState).get());
             } case COMPACT -> {
                 setIntakePosition(mCompactPosition);
-                if(mCompactPosition < IntakeConstants.RackConstants.tStowSetpointMeters.get()) {
-                    mCompactPosition -= mCompactDecrementMPS * 0.02;
+                if(mCompactPosition < IntakeConstants.RackConstants.tSafeStowSetpointMeters.get()) {
+                    mCompactPosition += mCompactDecrementMPS * 0.02;
                 } else {
-                    mCompactPosition = IntakeConstants.RackConstants.tStowSetpointMeters.get();
+                    mCompactPosition = IntakeConstants.RackConstants.tSafeStowSetpointMeters.get();
                 }
             }case INCREMENTING -> {
                 setIntakePosition(mIntakeRackInputs.iIntakeRackPositionM + IntakeConstants.RackConstants.tIncrementSpeedMPS.get());

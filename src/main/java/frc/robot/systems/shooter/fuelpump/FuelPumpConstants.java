@@ -49,11 +49,13 @@ public class FuelPumpConstants {
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber("Shooter/FuelPump/TuneVoltage", 0.0);
     public static final LoggedTunableNumber tIntakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/IntakeVolts", 6);
     public static final LoggedTunableNumber tOuttakeVolts  = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/OuttakeVolts", -10.014);
+    public static final LoggedTunableNumber tSlightOuttakeVolts = new LoggedTunableNumber("Shooter/FuelPump/DesiredVolts/SlightOuttakeVolts", -2.0);
     public static final LoggedTunableNumber tIntakeVelocity = new LoggedTunableNumber("Shooter/FuelPump/DesiredVelocity/IntakeVelocity", 40.0);
 
     static {
         kStateToTuneableFuelPumpVolts.put(FuelPumpState.INTAKE_VOLT, tIntakeVolts);
         kStateToTuneableFuelPumpVolts.put(FuelPumpState.OUTTAKE_VOLT, tOuttakeVolts);
+        kStateToTuneableFuelPumpVolts.put(FuelPumpState.SLIGHT_OUTTAKE_VOLT, tSlightOuttakeVolts);
         kStateToTuneableFuelPumpVelocity.put(FuelPumpState.INTAKE_VELOCITY, () -> Rotation2d.fromRotations(tIntakeVelocity.get()));
     }
 }

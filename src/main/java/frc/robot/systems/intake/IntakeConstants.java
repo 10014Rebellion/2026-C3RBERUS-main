@@ -26,9 +26,9 @@ public class IntakeConstants {
         public static final BasicMotorHardware kRackMotorConfig = new BasicMotorHardware(
             44, // TODO: TUNE ME;
             RobotConstants.kSubsystemsCANBus,
-            (25.0/12.0) / (2 * Math.PI * Units.inchesToMeters(1.0)),
-            InvertedValue.Clockwise_Positive,
-            NeutralModeValue.Brake,
+            ((25.0 / 12.0) / (Math.PI * Units.inchesToMeters(1.54))) / 0.75,
+            InvertedValue.CounterClockwise_Positive,
+            NeutralModeValue.Coast,
             new CurrentLimits(60, 80)
         );
 
@@ -46,9 +46,9 @@ public class IntakeConstants {
         public static final MotionMagicFOCElevatorFF kRackController = (!RobotConstants.isSim()) ?
             new MotionMagicFOCElevatorFF(
                 0, 
-                new PDConstants(0.0, 0.0), 
-                new ElevatorFeedforward(0, 0, 0, 0),
-                new MotionMagicConstants(0, 0, 0)
+                new PDConstants(1000.0, 75.0), 
+                new ElevatorFeedforward(0.3, 2.0, 0, 0),
+                new MotionMagicConstants(30.0, 30.0, 0)
             )
                 :
             new MotionMagicFOCElevatorFF(
@@ -60,7 +60,7 @@ public class IntakeConstants {
 
         public static final PositionSoftLimits kRackLimitsMeters = new PositionSoftLimits(
             0.0, // Negative voltage limit
-            1.2 // Positive voltage limit
+            0.3 // Positive voltage limit
         );
 
         public static final double kArmLengthMeters = Units.inchesToMeters(12.0);
@@ -72,18 +72,18 @@ public class IntakeConstants {
 
         public static final LoggedTunableNumber tIncrementSpeedMPS = new LoggedTunableNumber("Intake/IncrementMPS", 0.04);
         
-        public static final LoggedTunableNumber tStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/StowSetpointMeters", 0);
+        public static final LoggedTunableNumber tStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/StowSetpointMeters", 0.3);
 
-        public static final LoggedTunableNumber tSafeStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/SafeStowSetpointMeters", 0);
+        public static final LoggedTunableNumber tSafeStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/SafeStowSetpointMeters", 0.22);
 
-        public static final LoggedTunableNumber tIntakeSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/IntakeSetpointMeters", 0);
+        public static final LoggedTunableNumber tIntakeSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/IntakeSetpointMeters", 0.0);
 
         public static final LoggedTunableNumber tTuningShotSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/TuningShotSetpointMeters", 0);
 
 
-        public static final LoggedTunableNumber tCompactHighSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactHighSetpointMeters", 0);
+        public static final LoggedTunableNumber tCompactHighSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactHighSetpointMeters", 0.1);
 
-        public static final LoggedTunableNumber tCompactLowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactLowSetpointMeters", 0);
+        public static final LoggedTunableNumber tCompactLowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactLowSetpointMeters", 0.2);
 
 
         public static final HashMap<IntakeRackState, LoggedTunableNumber> kStateToSetpointMapIntake = new HashMap<>();
