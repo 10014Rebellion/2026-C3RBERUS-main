@@ -24,7 +24,7 @@ public class IntakeConstants {
         public static double kRackToleranceMeters = Units.inchesToMeters(0.5);
 
         public static final BasicMotorHardware kRackMotorConfig = new BasicMotorHardware(
-            41, // TODO: TUNE ME;
+            44, // TODO: TUNE ME;
             RobotConstants.kSubsystemsCANBus,
             (25.0/12.0) / (2 * Math.PI * Units.inchesToMeters(1.0)),
             InvertedValue.Clockwise_Positive,

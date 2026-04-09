@@ -54,7 +54,6 @@ import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
 
-import org.littletonrobotics.junction.ConsoleSource.RoboRIO;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
@@ -107,7 +106,7 @@ public class RobotContainer {
                         new EncoderIOCANCoder(FlywheelConstants.kCANCoderConfig)
                 );
 
-                mIntake = new Intake(
+                mIntakeSS = new Intake(
                     new IntakeRackSS(new IntakeRackIOKrakenX60(
                         IntakeConstants.RackConstants.kRackMotorConfig)),
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
@@ -151,19 +150,20 @@ public class RobotContainer {
                     new EncoderIO() {}
                 );
 
-                mIntake = new Intake(
+                mIntakeSS = new Intake(
                     new IntakeRackSS(new IntakeRackIOSim(
                         IntakeConstants.RackConstants.kRackElevator,
                         IntakeConstants.RackConstants.kRackMotorConfig)),
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
-                // mClimbSS = new ClimbSS(
-                //     new ClimbIOSim(
-                //         ClimbConstants.kSimElevator, 
-                //         ClimbConstants.kClimbMotorConstants, 
-                //         ClimbConstants.kSoftLimits),
-                //     new AngularServoIO() {});
+                mClimbSS = new ClimbSS(
+                    new ClimbIOSim(
+                        ClimbConstants.kSimElevator, 
+                        ClimbConstants.kClimbMotorConstants, 
+                        ClimbConstants.kSoftLimits));
+
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOSim());
 
                 break;
             }
@@ -197,12 +197,14 @@ public class RobotContainer {
                     new EncoderIO() {}
                 );
 
-                mIntake = new Intake(
+                mIntakeSS = new Intake(
                     new IntakeRackSS(new IntakeRackIO() {}),
                     new IntakeRollerSS(new IntakeRollerIO() {})
                 );
 
                 mClimbSS = new ClimbSS(new ClimbIO() {});
+
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIO() {});
 
                 break;
             }
@@ -220,7 +222,7 @@ public class RobotContainer {
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDriveSS.getDriveManager().setDriveProfile(profile));
 
-        autos = new AutonCommands(mDrive, mIntake, mFuelPumpSS, mHoodSS, mFlywheelsSS, mClimbSS);
+        autos = new AutonCommands(mDriveSS, mIntakeSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mClimbSS);
     }
 
     public Drive getDrivetrain() {
