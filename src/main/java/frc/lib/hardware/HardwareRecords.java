@@ -34,6 +34,12 @@ public class HardwareRecords {
         double maxJerk
     ) {}
 
+    public static record CANRangeConfiguration(
+        int canRangeID,
+        double fuelDetectionCutoff,
+        double positionTolerance
+    ) {}
+
     public static record BasicMotorHardware(
         int motorID, 
         CANBus canBus, 

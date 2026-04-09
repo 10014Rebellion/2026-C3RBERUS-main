@@ -20,6 +20,9 @@ import frc.robot.systems.efi.FuelInjectorIO;
 import frc.robot.systems.efi.FuelInjectorIOKrakenX60;
 import frc.robot.systems.efi.FuelInjectorIOSim;
 import frc.robot.systems.efi.FuelInjectorSS;
+import frc.robot.systems.efi.SensorConstants;
+import frc.robot.systems.efi.SensorIO;
+import frc.robot.systems.efi.SensorIOCANRange;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.rack.IntakeRackIO;
@@ -115,7 +118,11 @@ public class RobotContainer {
                 mClimbSS = new ClimbSS(
                     new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants));
 
-                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig));
+                mFuelInjectorSS = new FuelInjectorSS(
+                    new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig),
+                    new SensorIOCANRange(SensorConstants.leftCANRangeConfiguration),
+                    new SensorIOCANRange(SensorConstants.midCANRangeConfiguration),
+                    new SensorIOCANRange(SensorConstants.rightCANRangeConfiguration));
                 break;
             }
             case SIM: {
@@ -157,13 +164,11 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
-                mClimbSS = new ClimbSS(
-                    new ClimbIOSim(
-                        ClimbConstants.kSimElevator, 
-                        ClimbConstants.kClimbMotorConstants, 
-                        ClimbConstants.kSoftLimits));
-
-                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOSim());
+                mFuelInjectorSS = new FuelInjectorSS(
+                    new FuelInjectorIOSim(),
+                    new SensorIO() {},
+                    new SensorIO() {},
+                    new SensorIO() {});
 
                 break;
             }
@@ -204,7 +209,11 @@ public class RobotContainer {
 
                 mClimbSS = new ClimbSS(new ClimbIO() {});
 
-                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIO() {});
+                mFuelInjectorSS = new FuelInjectorSS(
+                    new FuelInjectorIO() {},
+                    new SensorIO() {},
+                    new SensorIO() {},
+                    new SensorIO() {});
 
                 break;
             }
