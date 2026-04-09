@@ -21,17 +21,38 @@ public class FuelInjectorSS extends SubsystemBase{
     private final FuelInjectorIO mFuelInjectorIO;
     private final FuelInjectorInputsAutoLogged mFuelInjectorInputs = new FuelInjectorInputsAutoLogged();
 
+    private final SensorIO mRightFuelPumpSensorIO;
+    private final SensorInputsAutoLogged mRightFuelPumpInputs = new SensorInputsAutoLogged();
+
+    private final SensorIO mMidFuelPumpSensorIO;
+    private final SensorInputsAutoLogged mMidFuelPumpInputs = new SensorInputsAutoLogged();
+
+    private final SensorIO mLeftFuelPumpSensorIO;
+    private final SensorInputsAutoLogged mLeftFuelPumpInputs = new SensorInputsAutoLogged();
+
     @AutoLogOutput(key="FuelInjector/State")
     private FuelInjectorState mFuelInjectorState = FuelInjectorState.IDLE;
 
-    public FuelInjectorSS(FuelInjectorIO pFuelInjectorIO){
+    public FuelInjectorSS(FuelInjectorIO pFuelInjectorIO, SensorIO pRightSensorIO, SensorIO pMidSensorIO, SensorIO pLeftSensorIO){
         this.mFuelInjectorIO = pFuelInjectorIO;
+        this.mLeftFuelPumpSensorIO = pLeftSensorIO;
+        this.mMidFuelPumpSensorIO = pMidSensorIO;
+        this.mRightFuelPumpSensorIO = pRightSensorIO;
     }
 
     @Override
     public void periodic(){
         mFuelInjectorIO.updateInputs(mFuelInjectorInputs);
-        Logger.processInputs("FuelInjector", mFuelInjectorInputs);
+        Logger.processInputs("FuelInjector/Motor", mFuelInjectorInputs);
+
+        mLeftFuelPumpSensorIO.updateInputs(mLeftFuelPumpInputs);
+        Logger.processInputs("FuelInjector/CANRange/Left", mLeftFuelPumpInputs);
+
+        mRightFuelPumpSensorIO.updateInputs(mMidFuelPumpInputs);
+        Logger.processInputs("FuelInjector/CANRange/Mid", mMidFuelPumpInputs);
+
+        mMidFuelPumpSensorIO.updateInputs(mRightFuelPumpInputs);
+        Logger.processInputs("FuelInjector/CANRange/Right", mRightFuelPumpInputs);
 
         executeState();
     }

@@ -20,6 +20,9 @@ import frc.robot.systems.efi.FuelInjectorIO;
 import frc.robot.systems.efi.FuelInjectorIOKrakenX60;
 import frc.robot.systems.efi.FuelInjectorIOSim;
 import frc.robot.systems.efi.FuelInjectorSS;
+import frc.robot.systems.efi.SensorConstants;
+import frc.robot.systems.efi.SensorIO;
+import frc.robot.systems.efi.SensorIOCANRange;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.pivot.IntakePivotIO;
@@ -112,7 +115,11 @@ public class RobotContainer {
                 //     new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants),
                 //     new AngularServoIOPWM(ClimbConstants.kHookPort));
 
-                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig));
+                mFuelInjectorSS = new FuelInjectorSS(
+                    new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig),
+                    new SensorIOCANRange(SensorConstants.leftCANRangeConfiguration),
+                    new SensorIOCANRange(SensorConstants.midCANRangeConfiguration),
+                    new SensorIOCANRange(SensorConstants.rightCANRangeConfiguration));
                 break;
             }
             case SIM: {
@@ -155,7 +162,11 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
-                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOSim());
+                mFuelInjectorSS = new FuelInjectorSS(
+                    new FuelInjectorIOSim(),
+                    new SensorIO() {},
+                    new SensorIO() {},
+                    new SensorIO() {});
 
                 // mClimbSS = new ClimbSS(
                 //     new ClimbIOSim(
@@ -206,7 +217,11 @@ public class RobotContainer {
                 //     new ClimbIO() {},
                 //     new AngularServoIO() {});
 
-                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIO() {});
+                mFuelInjectorSS = new FuelInjectorSS(
+                    new FuelInjectorIO() {},
+                    new SensorIO() {},
+                    new SensorIO() {},
+                    new SensorIO() {});
 
                 break;
             }
