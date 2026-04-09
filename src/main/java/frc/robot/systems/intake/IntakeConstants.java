@@ -26,8 +26,8 @@ public class IntakeConstants {
         public static final BasicMotorHardware kRackMotorConfig = new BasicMotorHardware(
             41, // TODO: TUNE ME;
             RobotConstants.kSubsystemsCANBus,
-            2 + 1/12.0,
-            InvertedValue.CounterClockwise_Positive,
+            (25.0/12.0) / (2 * Math.PI * Units.inchesToMeters(1.0)),
+            InvertedValue.Clockwise_Positive,
             NeutralModeValue.Brake,
             new CurrentLimits(60, 80)
         );

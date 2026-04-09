@@ -78,6 +78,8 @@ public class IntakeRackIOKrakenX60 implements IntakeRackIO{
         mIntakeRackReferencePosition = mIntakeRackMotor.getClosedLoopReference();
         mIntakeRackReferencePositionSlope = mIntakeRackMotor.getClosedLoopReferenceSlope();
 
+        mIntakeRackMotor.setPosition(0.0);
+
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0, 
             mIntakeRackRotation,

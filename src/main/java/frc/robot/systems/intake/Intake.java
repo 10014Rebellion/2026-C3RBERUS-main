@@ -38,10 +38,10 @@ public class Intake {
     }
 
     public Command trashCompactRepeat() {
-        return new SequentialCommandGroup(
-            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_HIGH).withTimeout(0.2),
-            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_LOW).withTimeout(0.2)
-        );
+        return new RepeatCommand(new SequentialCommandGroup(
+            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_HIGH).withTimeout(tIntakeCompactTime),
+            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_LOW).withTimeout(tIntakeCompactTime)
+        ));
     }
 
     public Command trashCompact() {

@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.GameGoalPoseChooser;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;import frc.robot.commands.FollowPathCommand;
-
+import frc.robot.commands.FollowPathCommand;
+import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
@@ -92,25 +92,6 @@ public class DoubleSwipe extends Auton {
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
-        autoActivted
-            .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath.cmd()))
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
-            .onTrue(Commands.runOnce(() -> mWantToShoot = false));
-
-        firstSwipePath.atTime(firstSwipePathTime * autoAlignTakeOverParamerFirstSwipe)
-            .onTrue(Commands.runOnce(() -> mWantToShoot = true))
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> AllianceFlipUtil.apply(
-                    new Pose2d(
-                        lastPoseOfFirstSwipe.getX(),
-                        lastPoseOfFirstSwipe.getY(),
-                        GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(lastPoseOfFirstSwipe))
-                            .plus((AllianceFlipUtil.shouldFlip()) ? Rotation2d.k180deg : Rotation2d.kZero)
-                    )
-                ),
-                ConstraintType.LINEAR));
-
         SequentialEndingCommandGroup firstSwipeIntakeShot = 
             mAutos.timedIntakeShot(kShotTime1Seconds, kShotEndTimeSeconds);
 
@@ -137,7 +118,7 @@ public class DoubleSwipe extends Auton {
         autoActivted
             .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(Commands.runOnce(() -> mWantToShoot = false));
 
         firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime)
@@ -167,7 +148,7 @@ public class DoubleSwipe extends Auton {
 
         secondSwipePath.hasEnded().and(() -> mWantToShoot).and(hasSecondShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(secondSwipeIntakeShot)
-            .onTrue(secondSwipeIntakeShot)
+            .onTrue(secondSwipeIndexShot)
             .onTrue(mIntakeSS.trashCompact());
 
         secondSwipePath.hasEnded().and(hasSecondShotEnded)
