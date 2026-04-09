@@ -15,6 +15,11 @@ import frc.robot.systems.drive.modules.Module;
 import frc.robot.systems.drive.modules.ModuleIO;
 import frc.robot.systems.drive.modules.ModuleIOKraken;
 import frc.robot.systems.drive.modules.ModuleIOSim;
+import frc.robot.systems.efi.FuelInjectorConstants;
+import frc.robot.systems.efi.FuelInjectorIO;
+import frc.robot.systems.efi.FuelInjectorIOKrakenX60;
+import frc.robot.systems.efi.FuelInjectorIOSim;
+import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.rack.IntakeRackIO;
@@ -58,11 +63,12 @@ import frc.robot.systems.climb.ClimbIO;
 import frc.robot.systems.climb.ClimbConstants;
 
 public class RobotContainer {
-    private final Drive mDrive;
+    private final Drive mDriveSS;
     private final FuelPumpSS mFuelPumpSS;
     private final HoodSS mHoodSS;
     private final FlywheelsSS mFlywheelsSS;
-    private final Intake mIntake;
+    private final Intake mIntakeSS;
+    private final FuelInjectorSS mFuelInjectorSS;
     private final ClimbSS mClimbSS;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
@@ -72,7 +78,7 @@ public class RobotContainer {
     public RobotContainer() {
         switch (RobotConstants.kCurrentMode) {
             case REAL: {
-                mDrive = new Drive(
+                mDriveSS = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIOKraken(kFrontLeftHardware)),
                         new Module("FR", new ModuleIOKraken(kFrontRightHardware)),
@@ -110,10 +116,11 @@ public class RobotContainer {
                 mClimbSS = new ClimbSS(
                     new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants));
 
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig));
                 break;
             }
             case SIM: {
-                mDrive = new Drive(
+                mDriveSS = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIOSim()),
                         new Module("FR", new ModuleIOSim()),
@@ -151,17 +158,18 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
-                mClimbSS = new ClimbSS(
-                    new ClimbIOSim(
-                        ClimbConstants.kSimElevator, 
-                        ClimbConstants.kClimbMotorConstants, 
-                        ClimbConstants.kSoftLimits));
+                // mClimbSS = new ClimbSS(
+                //     new ClimbIOSim(
+                //         ClimbConstants.kSimElevator, 
+                //         ClimbConstants.kClimbMotorConstants, 
+                //         ClimbConstants.kSoftLimits),
+                //     new AngularServoIO() {});
 
                 break;
             }
 
             default: {
-                mDrive = new Drive(
+                mDriveSS = new Drive(
                     new Module[] {
                         new Module("FL", new ModuleIO() {}),
                         new Module("FR", new ModuleIO() {}),
@@ -200,23 +208,23 @@ public class RobotContainer {
             }
         }
 
-        ShotMap.getInstance().setPoseSupplier(() -> mDrive.getPoseEstimate());
+        ShotMap.getInstance().setPoseSupplier(() -> mDriveSS.getPoseEstimate());
         
-        mButtonBindings = new ButtonBindings(mDrive, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntake);
+        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS);
 
         initBindings();
         initBaseTriggers();
 
         mDriverProfileChooser.addDefaultOption(
-                BindingsConstants.kDefaultProfile.key(), mDrive.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
+                BindingsConstants.kDefaultProfile.key(), mDriveSS.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
         for (DriverProfiles profile : BindingsConstants.kProfiles)
-            mDriverProfileChooser.addOption(profile.key(), mDrive.getDriveManager().setDriveProfile(profile));
+            mDriverProfileChooser.addOption(profile.key(), mDriveSS.getDriveManager().setDriveProfile(profile));
 
         autos = new AutonCommands(mDrive, mIntake, mFuelPumpSS, mHoodSS, mFlywheelsSS, mClimbSS);
     }
 
     public Drive getDrivetrain() {
-        return mDrive;
+        return mDriveSS;
     }
 
     private void initBindings() {
