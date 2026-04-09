@@ -7,7 +7,7 @@ import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles
 
 public class BindingsConstants {
     public static final int kPilotControllerPort = 0;
-    public static final int kGunnerControllerPort = 1;
+    public static final int kGunnerControllerPort = 3;
 
 
     public static final DriverProfiles kDefaultProfile =

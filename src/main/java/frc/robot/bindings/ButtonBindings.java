@@ -13,9 +13,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
+import frc.lib.controllers.RebelButtonBoardRebuilt;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
-import frc.robot.bindings.BindingsConstants.ButtonBoardPorts;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.Drive;
@@ -44,10 +44,10 @@ public class ButtonBindings {
     // private final ClimbSS mClimbSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
+    private final RebelButtonBoardRebuilt mGunnerButtonboard = new RebelButtonBoardRebuilt(1, 2);
 
     private final LoggedNetworkBoolean kUsingPilotGunner = new LoggedNetworkBoolean("DriverOperator/UsePilotGunner", true);
 
-    private final CommandGenericHID mButtonBoard = new CommandGenericHID(2);
 
     HoodStates prevHoodState = HoodStates.STOPPED;
     DriveState prevDriveState = DriveState.TELEOP;
@@ -80,37 +80,32 @@ public class ButtonBindings {
     }
 
     public void initButtonBoardBindings(){
-        final GenericHID mButtonBoard1 = new GenericHID(1);
-        final GenericHID mButtonBoard2 = new GenericHID(2); 
 
-        Trigger wantToClimbUp = new Trigger(() -> mButtonBoard1.getRawButton(1));
-        Trigger wantToClimbDescend = new Trigger(() -> mButtonBoard1.getRawButton(2));
-        Trigger wantToTrashCompact = new Trigger(() -> mButtonBoard1.getRawButton(3));
+        Trigger wantToDeployClimb = mGunnerButtonboard.whiteUpwardTriangleLeft();
+        Trigger wantToClimbAscend = mGunnerButtonboard.whiteDownwardTriangleLeft();
+        Trigger wantToTrashCompact = mGunnerButtonboard.greenDiamondLeft();
 
-        Trigger wantToSlowIntake = new Trigger(() -> mButtonBoard2.getRawButton(6));
-        Trigger wantToIntakeOut = new Trigger(() -> mButtonBoard1.getRawButton(4));
+        Trigger wantToStowIntake = mGunnerButtonboard.yellowTriangleLeft();
+        Trigger wantToIntakeOut = mGunnerButtonboard.redTriangleLeft();
 
-        Trigger wantToOutakeRoller = new Trigger(() -> mButtonBoard2.getRawButton(5));
-        Trigger wantToIntakeRoller = new Trigger(() -> mButtonBoard2.getRawButton(4));
+        Trigger wantToOutakeRoller = mGunnerButtonboard.redCircleBottom();
+        Trigger wantToIntakeRoller = mGunnerButtonboard.blueCircleBottom();
 
-        Trigger wantToRevFlywheels = new Trigger(() -> mButtonBoard2.getRawAxis(0) < 0.5);
-        Trigger wantToStopFlywheels = new Trigger(() -> mButtonBoard2.getRawAxis(0) > 0.5);
+        Trigger wantToRevFlywheels = mGunnerButtonboard.yellowTriangleRight();
+        Trigger wantToStopFlywheels = mGunnerButtonboard.redTriangleRight();
 
+        Trigger wantToBumpShot = mGunnerButtonboard.redSquareCenter();
+        Trigger wantToClimbShot = mGunnerButtonboard.blueSquareCenter();
+        Trigger wantToTrenchShot = mGunnerButtonboard.greenSquareCenter();
+        Trigger wantToCornerShot = mGunnerButtonboard.yellowSquareCenter();
 
-        Trigger wantToBumpShot = new Trigger(() -> mButtonBoard1.getRawButton(5));
-        Trigger wantToClimbShot = new Trigger(() -> mButtonBoard1.getRawButton(6));
-        Trigger wantToTrenchShot = new Trigger(() -> mButtonBoard2.getRawButton(9));
-        Trigger wantToCornerShot = new Trigger(() -> mButtonBoard2.getRawAxis(1) > 0.5);
+        Trigger wantToHailstorm = mGunnerButtonboard.whiteSquareRight();
+        Trigger wantToSnowPlow = mGunnerButtonboard.yellowRectangleRight();
+        Trigger wantToShoot = mGunnerButtonboard.blueSquareRight();
 
-        Trigger wantToHailstorm = new Trigger(() -> mButtonBoard2.getRawButton(10));
-        Trigger wantToSnowPlow = new Trigger(() -> mButtonBoard2.getRawButton(7));
-        Trigger wantToShoot = new Trigger((() -> mButtonBoard2.getRawAxis(1) < 0.5));
-
-        Trigger wantToDisableCams = new Trigger(() -> mButtonBoard2.getRawButton(1));
-        Trigger wantToDisableCANRange = new Trigger(() -> mButtonBoard2.getRawButton(2));
-        Trigger wantToAfterBurn = new Trigger(() -> mButtonBoard2.getRawButton(3));
-
-
+        Trigger wantToDisableCams = mGunnerButtonboard.orangePilotTop();
+        Trigger wantToDisableCANRange = mGunnerButtonboard.purplePilotTop();
+        Trigger wantToAfterBurn = mGunnerButtonboard.bluePilotTop();
     }
 
     public void initCompBindings() {
@@ -125,18 +120,15 @@ public class ButtonBindings {
         Trigger wantsToHeadingXLock = mPilotController.x();
           
         // PILOT AND GUNNER CONTROLS
-        Trigger wantToIntake = 
-            mPilotController.rightBumper().or(
-            mGunnerController.rightBumper().or(
-                mButtonBoard.button(ButtonBoardPorts.kWhiteSquare))).and(kUsingPilotGunner);
+        Trigger wantToIntake = mPilotController.rightBumper().and(kUsingPilotGunner);
 
         // GUNNER CONTROLS
-        Trigger wantToDynamicShoot = mGunnerController.rightTrigger().or(mButtonBoard.button(ButtonBoardPorts.kGreenTriangle)).and(kUsingPilotGunner);
-        Trigger wantToOuttake = mGunnerController.leftTrigger().or(mButtonBoard.button(ButtonBoardPorts.kBlueSquare)).and(kUsingPilotGunner);
-        Trigger wantToOpponentFeed = mGunnerController.a().or(mButtonBoard.button(ButtonBoardPorts.kBlackRectangle)).and(kUsingPilotGunner);
+        Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
+        Trigger wantToOuttake = mGunnerController.leftTrigger().and(kUsingPilotGunner);
+        Trigger wantToOpponentFeed = mGunnerController.a().and(kUsingPilotGunner);
         Trigger wantToFeedWithNoCompact = mGunnerController.b().and(kUsingPilotGunner);
-        Trigger wantToFeed = mGunnerController.y().or(mButtonBoard.button(ButtonBoardPorts.kBlueRectangle)).and(kUsingPilotGunner);
-        Trigger wantToStow = mGunnerController.leftBumper().or(mButtonBoard.button(ButtonBoardPorts.kRedSquare)).and(kUsingPilotGunner);
+        Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
+        Trigger wantToStow = mGunnerController.leftBumper().and(kUsingPilotGunner);
 
         // OTHER CONDITIONAL TRIGGERS
         Trigger autonomousWorking = new Trigger(() -> true);
