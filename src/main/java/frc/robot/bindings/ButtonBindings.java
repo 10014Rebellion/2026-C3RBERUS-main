@@ -80,8 +80,8 @@ public class ButtonBindings {
     }
 
     public void initButtonBoardBindings(){
-        final GenericHID mButtonBoard1 = new GenericHID(0);
-        final GenericHID mButtonBoard2 = new GenericHID(1); 
+        final GenericHID mButtonBoard1 = new GenericHID(1);
+        final GenericHID mButtonBoard2 = new GenericHID(2); 
 
         Trigger wantToClimbUp = new Trigger(() -> mButtonBoard1.getRawButton(1));
         Trigger wantToClimbDescend = new Trigger(() -> mButtonBoard1.getRawButton(2));
