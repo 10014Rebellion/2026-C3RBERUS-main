@@ -7,7 +7,7 @@ import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles
 
 public class BindingsConstants {
     public static final int kPilotControllerPort = 0;
-    public static final int kGunnerControllerPort = 1;
+    public static final int kGunnerControllerPort = 3;
 
 
     public static final DriverProfiles kDefaultProfile =
@@ -60,22 +60,4 @@ public class BindingsConstants {
             new TahaBindings()
         ),
     };
-
-    public static class ButtonBoardPorts {
-        public static final int kGreenSquare = 4;
-        public static final int kWhiteSquare = 10;
-        public static final int kBlueSquare = 5;
-        public static final int kRedSquare = 2;
-
-        public static final int kWhiteTriangle = 3;
-        public static final int kBlueTriangle = 9;
-
-        public static final int kBlackRectangle = 6;
-        public static final int kBlueRectangle = 7;
-        public static final int kRedRectangle = 1;
-        public static final int kWhiteRectangle = 11;
-
-        public static final int kGreenTriangle = 12;
-
-    }
 }
