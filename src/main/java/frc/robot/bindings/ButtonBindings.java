@@ -6,11 +6,9 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.controllers.RebelButtonBoardRebuilt;
@@ -22,7 +20,7 @@ import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.intake.Intake;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
+import frc.robot.systems.intake.pivot.IntakePivotSS.IntakeRackStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
@@ -43,7 +41,6 @@ public class ButtonBindings {
     private final Intake mIntakeSS;
     // private final ClimbSS mClimbSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
-    private final FlydigiApex4 mGunnerController = new FlydigiApex4(BindingsConstants.kGunnerControllerPort);
     private final RebelButtonBoardRebuilt mGunnerButtonboard = new RebelButtonBoardRebuilt(1, 2);
 
     private final LoggedNetworkBoolean kUsingPilotGunner = new LoggedNetworkBoolean("DriverOperator/UsePilotGunner", true);
@@ -75,37 +72,13 @@ public class ButtonBindings {
             () -> -mPilotController.getRightX(),
             () -> mPilotController.getPOVAngle());
 
-        initCompBindings();
+        //initCompBindings();
         testBindings();
+        initButtonBoardBindings();
     }
 
     public void initButtonBoardBindings(){
-
-        Trigger wantToDeployClimb = mGunnerButtonboard.whiteUpwardTriangleLeft();
-        Trigger wantToClimbAscend = mGunnerButtonboard.whiteDownwardTriangleLeft();
-        Trigger wantToTrashCompact = mGunnerButtonboard.greenDiamondLeft();
-
-        Trigger wantToStowIntake = mGunnerButtonboard.yellowTriangleLeft();
-        Trigger wantToIntakeOut = mGunnerButtonboard.redTriangleLeft();
-
-        Trigger wantToOutakeRoller = mGunnerButtonboard.redCircleBottom();
-        Trigger wantToIntakeRoller = mGunnerButtonboard.blueCircleBottom();
-
-        Trigger wantToRevFlywheels = mGunnerButtonboard.yellowTriangleRight();
-        Trigger wantToStopFlywheels = mGunnerButtonboard.redTriangleRight();
-
-        Trigger wantToBumpShot = mGunnerButtonboard.redSquareCenter();
-        Trigger wantToClimbShot = mGunnerButtonboard.blueSquareCenter();
-        Trigger wantToTrenchShot = mGunnerButtonboard.greenSquareCenter();
-        Trigger wantToCornerShot = mGunnerButtonboard.yellowSquareCenter();
-
-        Trigger wantToHailstorm = mGunnerButtonboard.whiteSquareRight();
-        Trigger wantToSnowPlow = mGunnerButtonboard.yellowRectangleRight();
-        Trigger wantToShoot = mGunnerButtonboard.blueSquareRight();
-
-        Trigger wantToDisableCams = mGunnerButtonboard.orangePilotTop();
-        Trigger wantToDisableCANRange = mGunnerButtonboard.purplePilotTop();
-        Trigger wantToAfterBurn = mGunnerButtonboard.bluePilotTop();
+        
     }
 
     public void initCompBindings() {
@@ -118,17 +91,28 @@ public class ButtonBindings {
         Trigger wantToLineAlignToBump = mPilotController.b();
         Trigger wantToLineAlignToTrench = mPilotController.y();
         Trigger wantsToHeadingXLock = mPilotController.x();
-          
-        // PILOT AND GUNNER CONTROLS
         Trigger wantToIntake = mPilotController.rightBumper().and(kUsingPilotGunner);
 
         // GUNNER CONTROLS
-        Trigger wantToDynamicShoot = mGunnerController.rightTrigger().and(kUsingPilotGunner);
-        Trigger wantToOuttake = mGunnerController.leftTrigger().and(kUsingPilotGunner);
-        Trigger wantToOpponentFeed = mGunnerController.a().and(kUsingPilotGunner);
-        Trigger wantToFeedWithNoCompact = mGunnerController.b().and(kUsingPilotGunner);
-        Trigger wantToFeed = mGunnerController.y().and(kUsingPilotGunner);
-        Trigger wantToStow = mGunnerController.leftBumper().and(kUsingPilotGunner);
+        Trigger wantToDynamicShoot = mGunnerButtonboard.blueSquareRight().and(kUsingPilotGunner);
+        Trigger wantToDeployClimb = mGunnerButtonboard.whiteUpwardTriangleLeft().and(kUsingPilotGunner);
+        Trigger wantToClimbAscend = mGunnerButtonboard.whiteDownwardTriangleLeft().and(kUsingPilotGunner);
+        Trigger wantToTrashCompact = mGunnerButtonboard.greenDiamondLeft().and(kUsingPilotGunner);
+        Trigger wantToStowIntake = mGunnerButtonboard.yellowTriangleLeft().and(kUsingPilotGunner);
+        Trigger wantToIntakeOut = mGunnerButtonboard.redTriangleLeft().and(kUsingPilotGunner);
+        Trigger wantToOutakeRoller = mGunnerButtonboard.redCircleBottom().and(kUsingPilotGunner);
+        Trigger wantToIntakeRoller = mGunnerButtonboard.blueCircleBottom().and(kUsingPilotGunner);
+        Trigger wantToRevFlywheels = mGunnerButtonboard.yellowTriangleRight().and(kUsingPilotGunner);
+        Trigger wantToStopFlywheels = mGunnerButtonboard.redTriangleRight().and(kUsingPilotGunner);
+        Trigger wantToBumpShot = mGunnerButtonboard.redSquareCenter().and(kUsingPilotGunner);
+        Trigger wantToClimbShot = mGunnerButtonboard.blueSquareCenter().and(kUsingPilotGunner);
+        Trigger wantToTrenchShot = mGunnerButtonboard.greenSquareCenter().and(kUsingPilotGunner);
+        Trigger wantToCornerShot = mGunnerButtonboard.yellowSquareCenter().and(kUsingPilotGunner);
+        Trigger wantToHailstorm = mGunnerButtonboard.whiteSquareRight().and(kUsingPilotGunner);
+        Trigger wantToSnowPlow = mGunnerButtonboard.yellowRectangleRight().and(kUsingPilotGunner);
+        Trigger wantToDisableCams = mGunnerButtonboard.orangePilotTop().and(kUsingPilotGunner);
+        Trigger wantToDisableCANRange = mGunnerButtonboard.purplePilotTop().and(kUsingPilotGunner);
+        Trigger wantToAfterBurn = mGunnerButtonboard.bluePilotTop().and(kUsingPilotGunner);
 
         // OTHER CONDITIONAL TRIGGERS
         Trigger autonomousWorking = new Trigger(() -> true);
@@ -160,16 +144,41 @@ public class ButtonBindings {
 
         Trigger wantToShoot = new Trigger(() -> {
             return 
-                wantToFeed.getAsBoolean()
+                wantToSnowPlow.getAsBoolean()
                     ||
-                wantToFeedWithNoCompact.getAsBoolean()
-                    ||
-                wantToOpponentFeed.getAsBoolean()
+                wantToHailstorm.getAsBoolean()
                     ||
                 wantToDynamicShoot.getAsBoolean();
         });
 
         final double kShootingReadyDebounceSeconds = 0.25;
+
+        
+        wantToTrashCompact
+            .onTrue(mIntakeSS.trashCompactRackContinuous())
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackStates.INTAKE));
+
+        wantToStowIntake
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackStates.STOW))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackStates.STOPPED));
+
+        wantToIntakeOut
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackStates.INTAKE))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackStates.STOPPED));
+
+        wantToOutakeRoller
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        wantToIntakeRoller
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        wantToRevFlywheels
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE));
+        
+        wantToStopFlywheels
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
 
         mPilotController.startButton()
             .onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
@@ -260,42 +269,26 @@ public class ButtonBindings {
         wantToDynamicShoot
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackStates.INTAKE))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* Feeding Logic */
-        wantToFeed.or(wantToFeedWithNoCompact)
+        wantToSnowPlow
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
-        wantToOpponentFeed
+        wantToHailstorm
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.OPPONENT_FEED_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
-        wantToFeed.or(wantToOpponentFeed).or(wantToFeedWithNoCompact).and(autonomousWorking)
-            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> AllianceFlipUtil.apply(Rotation2d.k180deg), 
-                TurnPointFeedforward.zeroTurnPointFF()))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
-
-        wantToFeed.and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
-            .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
-
-        wantToFeedWithNoCompact.or(wantToOpponentFeed).and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
+        wantToSnowPlow.or(wantToHailstorm).and(shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
             .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
 
-        wantToFeed.or(wantToOpponentFeed).or(wantToFeedWithNoCompact).and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
-            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()), 
-                () -> GameGoalPoseChooser.getHub()));
-
-        wantToFeed.or(wantToOpponentFeed).or(wantToFeedWithNoCompact)
+        wantToHailstorm.or(wantToSnowPlow)
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackStates.INTAKE))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* Makes flywheel stand by */
@@ -311,22 +304,14 @@ public class ButtonBindings {
 
         /* INTAKE LOGIC */
         wantToIntake
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackStates.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             // .onTrue(mDriveSS.getDriveManager().setToTeleopSniper())
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
             // .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        wantToOuttake
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
-            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
-
         wantToSafeStow
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.SAFESTOW));
-
-        wantToStow
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackStates.SAFESTOW));
 
         wantToTraverse
             .onTrue(Commands.runOnce(() -> inCenterFlag = inCenter.getAsBoolean()));
@@ -369,12 +354,12 @@ public class ButtonBindings {
             .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
         
         mPilotController.x().and(isTesting())
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackStates.INTAKE))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackStates.STOW));
 
         mPilotController.y().and(isTesting())
             .onTrue(mIntakeSS.trashCompactPivotRepeat())
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.STOW));
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackStates.STOW));
 
         // mPilotController.y().and(isTesting())
         //     .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
@@ -392,7 +377,7 @@ public class ButtonBindings {
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         mPilotController.leftTrigger().and(isTesting())
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackStates.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
@@ -422,40 +407,38 @@ public class ButtonBindings {
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
-        mGunnerController.leftTrigger().and(isTesting())
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+        // mGunnerController.leftTrigger().and(isTesting())
+        //     .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE))
+        //     .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+        //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
-        mGunnerController.rightTrigger().and(isTesting())
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+        // mGunnerController.rightTrigger().and(isTesting())
+        //     .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+        //     .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
         
-        mGunnerController.rightTrigger().and(new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal() && mHoodSS.atGoal()).debounce(0.08)).and(isTesting())
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onTrue(mIntakeSS.trashCompactPivotRepeat());
+        // mGunnerController.rightTrigger().and(new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal() && mHoodSS.atGoal()).debounce(0.08)).and(isTesting())
+        //     .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
+        //     .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+        //     .onTrue(mIntakeSS.trashCompactPivotRepeat());
 
-        mGunnerController.rightTrigger().and(isTesting())
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED))
-            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
+        // mGunnerController.rightTrigger().and(isTesting())
+        //     .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
+        //     .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED))
+        //     .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+        //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+        //     .onFalse(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
 
-        mGunnerController.povUp().and(isTesting())
-            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> AllianceFlipUtil.apply(Rotation2d.kZero), 
-                () -> GameGoalPoseChooser.getHub()))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
+        // mGunnerController.povUp().and(isTesting())
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
+        //         () -> AllianceFlipUtil.apply(Rotation2d.kZero), 
+        //         () -> GameGoalPoseChooser.getHub()))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        mGunnerController.povDown().and(isTesting())
-            .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> AllianceFlipUtil.apply(Rotation2d.k180deg), 
-                TurnPointFeedforward.zeroTurnPointFF()))
-            .onFalse(mDriveSS.getDriveManager().setToTeleop());
-
-         
+        // mGunnerController.povDown().and(isTesting())
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
+        //         () -> AllianceFlipUtil.apply(Rotation2d.k180deg), 
+        //         TurnPointFeedforward.zeroTurnPointFF()))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
     }
 
     public void initTriggers() {
@@ -467,7 +450,7 @@ public class ButtonBindings {
         
         new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
-            .onTrue(mIntakeSS.setPivotStateCmd(IntakePivotStates.INTAKE));
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackStates.INTAKE));
 
         // Trigger climbButton = new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed);
         // climbButton.and(() -> DriverStation.isDisabled() && !DriverStation.isFMSAttached())

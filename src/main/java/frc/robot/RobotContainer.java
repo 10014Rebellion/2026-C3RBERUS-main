@@ -103,9 +103,7 @@ public class RobotContainer {
                 );
 
                 mIntake = new Intake(
-                    new IntakePivotSS(new IntakePivotIOKrakenX44(
-                        IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                        IntakeConstants.PivotConstants.kPivotEncoderConfig)),
+                    new IntakePivotSS(new IntakePivotIOKrakenX44(IntakeConstants.PivotConstants.kRackMotorConfig)),
                     new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
                 );
 
@@ -148,9 +146,7 @@ public class RobotContainer {
                 );
 
                 mIntake = new Intake(
-                    new IntakePivotSS(new IntakePivotIOSim(
-                        IntakeConstants.PivotConstants.kPivotMotorConfig, 
-                        IntakeConstants.PivotConstants.kPivotEncoderConfig)),
+                    new IntakePivotSS(new IntakePivotIOSim(IntakeConstants.PivotConstants.kRackMotorConfig)),
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
@@ -212,6 +208,7 @@ public class RobotContainer {
 
         initBindings();
         initBaseTriggers();
+        compBindings();
 
         mDriverProfileChooser.addDefaultOption(
                 BindingsConstants.kDefaultProfile.key(), mDrive.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
@@ -227,6 +224,10 @@ public class RobotContainer {
 
     private void initBindings() {
         mButtonBindings.initBindings();
+    }
+
+    private void compBindings(){
+        mButtonBindings.initCompBindings();
     }
 
     private void initBaseTriggers() {

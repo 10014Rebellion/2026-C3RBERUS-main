@@ -9,7 +9,7 @@ public class RebelButtonBoardRebuilt {
 
     public RebelButtonBoardRebuilt(int firstButtonBoardPort, int secondButtonBoardPort) {
         bbHalveOne = new GenericHID(firstButtonBoardPort);
-        bbHalveOne = new GenericHID(secondButtonBoardPort);
+        bbHalveTwo = new GenericHID(secondButtonBoardPort);
     }
 
     // TOP SIDE

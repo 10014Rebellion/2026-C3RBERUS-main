@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Radian;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -31,9 +30,6 @@ import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private final TalonFX mIntakePivotMotor;
 
-    private final CANdi mEncoder;
-    private final StatusSignal<Angle> mIntakeEncoderAbsolutePosition;
-
     private final VoltageOut mIntakePivotVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mIntakePivotAmpsControl = new TorqueCurrentFOC(0.0);
     private final MotionMagicVoltage mIntakePivotRotationControl = new MotionMagicVoltage(0.0);
@@ -49,16 +45,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
     private final StatusSignal<Double> mIntakePivotReferencePosition;
     private final StatusSignal<Double> mIntakePivotReferencePositionSlope;
     
-    public IntakePivotIOKrakenX44(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig) {
-        mEncoder = new CANdi(pEncoderConfig.canID(), RobotConstants.kSubsystemsCANBus);
-        CANdiConfiguration mEncoderConfiguration = new CANdiConfiguration();
-        mEncoderConfiguration.PWM1.AbsoluteSensorOffset = -pEncoderConfig.offset().getRotations();
-        mEncoder.getConfigurator().apply(mEncoderConfiguration);
-
-        mIntakeEncoderAbsolutePosition = mEncoder.getPWM1Position();
-
-        mEncoder.optimizeBusUtilization(0.0);
-
+    public IntakePivotIOKrakenX44(BasicMotorHardware pConfig) {
         // Motor
         mIntakePivotMotor = new TalonFX(pConfig.motorID(), pConfig.canBus());
         var IntakeConfig = new TalonFXConfiguration();
@@ -71,9 +58,6 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         IntakeConfig.MotorOutput.NeutralMode = pConfig.neutralMode();
         IntakeConfig.MotorOutput.Inverted = pConfig.direction();
 
-        IntakeConfig.Feedback.FeedbackSensorSource = pEncoderConfig.feedbackPort();
-        IntakeConfig.Feedback.FeedbackRemoteSensorID = pEncoderConfig.canID();
-        IntakeConfig.Feedback.SensorToMechanismRatio = pEncoderConfig.sensorToMechanismRatio();
         IntakeConfig.Feedback.RotorToSensorRatio = pConfig.rotorToMechanismRatio();
 
         IntakeConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
@@ -100,8 +84,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         mIntakePivotReferencePositionSlope = mIntakePivotMotor.getClosedLoopReferenceSlope();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-            50.0, 
-            mIntakeEncoderAbsolutePosition,
+            50.0,
             mIntakePivotRotation,
             mIntakePivotVelocityRPS,
             mIntakePivotAccelerationRPSS, 
@@ -116,8 +99,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
         mIntakePivotMotor.optimizeBusUtilization(0.0);
 
         PhoenixUtil.registerSignals(
-            CanivoreBus.OVERWORLD, 
-            mIntakeEncoderAbsolutePosition,
+            CanivoreBus.OVERWORLD,
             mIntakePivotRotation,
             mIntakePivotVelocityRPS,
             mIntakePivotAccelerationRPSS, 
@@ -131,9 +113,6 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
 
     @Override
     public void updateInputs(IntakePivotInputs pInputs) {
-        pInputs.iIsEncoderConnected = BaseStatusSignal.isAllGood(mIntakeEncoderAbsolutePosition);
-        pInputs.iEncoderPosition = Rotation2d.fromRadians(mIntakeEncoderAbsolutePosition.getValue().in(Radian));
-
         pInputs.iIsIntakePivotConnected = BaseStatusSignal.isAllGood(
             mIntakePivotRotation,
             mIntakePivotVelocityRPS,
@@ -145,7 +124,7 @@ public class IntakePivotIOKrakenX44 implements IntakePivotIO{
             mIntakePivotReferencePosition,
             mIntakePivotReferencePositionSlope
         );
-        pInputs.iIntakePivotRotation = 
+        pInputs.iIntakeRackRotation = 
             Rotation2d.fromRotations(mIntakePivotRotation.getValueAsDouble());
         pInputs.iIntakePivotVelocityRPS = Rotation2d.fromRotations(mIntakePivotVelocityRPS.getValueAsDouble());
         pInputs.iIntakePivotAccelerationRPSS = Rotation2d.fromRotations(mIntakePivotAccelerationRPSS.getValueAsDouble());

@@ -14,7 +14,7 @@ import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.intake.IntakeConstants;
 
 public class IntakePivotSS extends SubsystemBase {
-    public static enum IntakePivotStates {
+    public static enum IntakeRackStates {
         STOPPED, // At rest
         TUNING_VOLTAGE,
         TUNING_AMPS,
@@ -54,7 +54,7 @@ public class IntakePivotSS extends SubsystemBase {
         IntakeConstants.PivotConstants.kPivotMotorToleranceRotations.getDegrees());
   
     @AutoLogOutput(key = "IntakePivot/States/CurrentState")
-    private IntakePivotStates mCurrentIntakeState = IntakePivotStates.STOPPED;
+    private IntakeRackStates mCurrentIntakeState = IntakeRackStates.STOPPED;
 
     @AutoLogOutput(key = "IntakePivot/RotationGoal/CurrentGoal")
     private Rotation2d mGoalAngle = Rotation2d.kZero;
@@ -82,13 +82,13 @@ public class IntakePivotSS extends SubsystemBase {
      * Performs variable updates or parameter intializations when a state is set, SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
     @SuppressWarnings("incomplete-switch")
-    private void initializeState(IntakePivotStates pStateToInit) {
+    private void initializeState(IntakeRackStates pStateToInit) {
         mCurrentIntakeState = pStateToInit;
         switch (mCurrentIntakeState) {
             case STOPPED -> {
             } case TUNING_VOLTAGE -> {
             } case COMPACT_AMPS -> {
-                mIntakePivotIO.setMotorAmps(IntakeConstants.PivotConstants.tConstantCompactAmps.get() * mIntakeInputs.iIntakePivotRotation.getCos());
+                mIntakePivotIO.setMotorAmps(IntakeConstants.PivotConstants.tConstantCompactAmps.get() * mIntakeInputs.iIntakeRackRotation.getCos());
             } case STOW, SAFESTOW, COMPACT_HIGH, COMPACT_LOW, INTAKE, TUNING_SETPOINT -> {
                 mIntakePivotIO.resetPPID();
             } case INVALID -> {}
@@ -123,15 +123,15 @@ public class IntakePivotSS extends SubsystemBase {
      * Performs variable updates or parameter resets when a state ends, SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
     @SuppressWarnings("incomplete-switch")
-    private void endState(IntakePivotStates pStateToEnd) {
+    private void endState(IntakeRackStates pStateToEnd) {
         switch (pStateToEnd) {}
     }
 
-    public Command setStateCmd(IntakePivotStates pNewState) {
+    public Command setStateCmd(IntakeRackStates pNewState) {
         return setStateCmd(pNewState, true);
     }
 
-    public Command setStateCmd(IntakePivotStates pNewState, boolean holdRequirementContinuously) {
+    public Command setStateCmd(IntakeRackStates pNewState, boolean holdRequirementContinuously) {
         return new FunctionalCommand(
             () -> setState(pNewState), 
             () -> {}, (interrupted) ->  {}, 
@@ -141,7 +141,7 @@ public class IntakePivotSS extends SubsystemBase {
     }
 
     /* SETTERS */
-    private void setState(IntakePivotStates pNewState) {
+    private void setState(IntakeRackStates pNewState) {
         endState(mCurrentIntakeState);
         mCurrentIntakeState = pNewState;
         initializeState(pNewState);
@@ -157,7 +157,7 @@ public class IntakePivotSS extends SubsystemBase {
         mGoalAngle = pRot;
 
         double ffOutput = mIntakeFF.calculate(
-            mIntakeInputs.iIntakePivotRotation.getRadians(), 
+            mIntakeInputs.iIntakeRackRotation.getRadians(), 
             mIntakeInputs.iIntakeClosedLoopReferenceSlope.getRadians()
         );
 
@@ -189,13 +189,13 @@ public class IntakePivotSS extends SubsystemBase {
     }
 
     /* GETTERS */
-    public IntakePivotStates getIntakeState() {
+    public IntakeRackStates getIntakeState() {
         return mCurrentIntakeState;
     }
   
     @AutoLogOutput(key = "Intake/Feedback/ErrorRotation")
     public Rotation2d getErrorPosition() {
-        return Rotation2d.fromRotations(getCurrentGoal().getRotations() - mIntakeInputs.iIntakePivotRotation.getRotations());
+        return Rotation2d.fromRotations(getCurrentGoal().getRotations() - mIntakeInputs.iIntakeRackRotation.getRotations());
     }
 
     @AutoLogOutput(key = "Intake/Feedback/CurrentGoal")
@@ -241,10 +241,10 @@ public class IntakePivotSS extends SubsystemBase {
 
     public void enforceSoftLimits() {
         if(
-        (mIntakeInputs.iEncoderPosition.getRotations() > IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRotations()
+        (mIntakeInputs.iIntakeRackRotation.getRotations() > IntakeConstants.PivotConstants.kPivotLimits.forwardLimit().getRotations()
             && mDesiredDirection == 1 ) 
             || 
-        (mIntakeInputs.iEncoderPosition.getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() 
+        (mIntakeInputs.iIntakeRackRotation.getRotations() < IntakeConstants.PivotConstants.kPivotLimits.backwardLimit().getRotations() 
             && mDesiredDirection == -1)) {
                 mLimitEnforced = true;
                 mIntakePivotIO.stopMotor();

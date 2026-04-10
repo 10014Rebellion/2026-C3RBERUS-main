@@ -7,7 +7,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
-import frc.lib.hardware.HardwareRecords.CANdiEncoder;
 import frc.robot.systems.intake.IntakeConstants.PivotConstants;
 
 public class IntakePivotIOSim implements IntakePivotIO {
@@ -15,7 +14,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     private final ProfiledPIDController mIntakePivotController;
     private double mAppliedVolts = 0.0;
 
-    public IntakePivotIOSim(BasicMotorHardware pConfig, CANdiEncoder pEncoderConfig) {
+    public IntakePivotIOSim(BasicMotorHardware pConfig) {
         mArmSim = new SingleJointedArmSim(
             DCMotor.getKrakenX60(1), 
             pConfig.rotorToMechanismRatio(), 
@@ -40,7 +39,7 @@ public class IntakePivotIOSim implements IntakePivotIO {
     public void updateInputs(IntakePivotInputs pInputs) {
         mArmSim.update(0.02);
         pInputs.iIsIntakePivotConnected = true;
-        pInputs.iIntakePivotRotation = getPos();
+        pInputs.iIntakeRackRotation = getPos();
         pInputs.iIntakePivotVelocityRPS = Rotation2d.fromRotations(mArmSim.getVelocityRadPerSec() / (2 * Math.PI));
         pInputs.iIntakePivotAccelerationRPSS = Rotation2d.kZero;
         pInputs.iIntakePivotMotorVolts = mAppliedVolts;
@@ -49,9 +48,6 @@ public class IntakePivotIOSim implements IntakePivotIO {
         pInputs.iIntakePivotTempCelsius = 0.0;
         pInputs.iIntakeClosedLoopReference = Rotation2d.fromRotations(mIntakePivotController.getSetpoint().position);
         pInputs.iIntakeClosedLoopReferenceSlope = Rotation2d.fromRotations(mIntakePivotController.getSetpoint().velocity);
-
-        pInputs.iIsEncoderConnected = false;
-        pInputs.iEncoderPosition = Rotation2d.kZero;
     }
 
     @Override

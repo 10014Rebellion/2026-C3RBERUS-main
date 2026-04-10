@@ -10,7 +10,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.RobotConstants;
-import frc.robot.systems.intake.pivot.IntakePivotSS.IntakePivotStates;
+import frc.robot.systems.intake.pivot.IntakePivotSS.IntakeRackStates;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.lib.hardware.HardwareRecords.ArmControllerMotionMagic;
 import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
@@ -25,20 +25,13 @@ public class IntakeConstants {
     public static class PivotConstants {
         public static Rotation2d kPivotMotorToleranceRotations = Rotation2d.fromDegrees(2.0);
 
-        public static final BasicMotorHardware kPivotMotorConfig = new BasicMotorHardware(
+        public static final BasicMotorHardware kRackMotorConfig = new BasicMotorHardware(
             41, // TODO: TUNE ME;
             RobotConstants.kSubsystemsCANBus,
             15.0,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Brake,
             new CurrentLimits(60, 80)
-        );
-
-        public static final CANdiEncoder kPivotEncoderConfig = new CANdiEncoder(
-            40, 
-            FeedbackSensorSourceValue.FusedCANdiPWM1,
-            1.0,
-            Rotation2d.fromRotations(-0.241699 - 0.29 + 0.055555) // 0.055555 is to account for the fact that our CG is 20deg off the ground
         );
 
         // WITH POSITION VOLTAGE
@@ -94,15 +87,15 @@ public class IntakeConstants {
         public static final Supplier<Rotation2d> kTuningShotSetpointSup = () -> Rotation2d.fromDegrees(tTuningShotSetpointDeg.get());
 
 
-        public static final HashMap<IntakePivotStates, Supplier<Rotation2d>> kStateToSetpointMapIntake = new HashMap<IntakePivotStates, Supplier<Rotation2d>>();
+        public static final HashMap<IntakeRackStates, Supplier<Rotation2d>> kStateToSetpointMapIntake = new HashMap<IntakeRackStates, Supplier<Rotation2d>>();
 
         static {
-            kStateToSetpointMapIntake.put(IntakePivotStates.STOW, kStowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.SAFESTOW, kSafeStowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_HIGH, kCompactHighSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.COMPACT_LOW, kCompactLowSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.INTAKE, kIntakeSetpointSup);
-            kStateToSetpointMapIntake.put(IntakePivotStates.TUNING_SETPOINT, kTuningShotSetpointSup);
+            kStateToSetpointMapIntake.put(IntakeRackStates.STOW, kStowSetpointSup);
+            kStateToSetpointMapIntake.put(IntakeRackStates.SAFESTOW, kSafeStowSetpointSup);
+            kStateToSetpointMapIntake.put(IntakeRackStates.COMPACT_HIGH, kCompactHighSetpointSup);
+            kStateToSetpointMapIntake.put(IntakeRackStates.COMPACT_LOW, kCompactLowSetpointSup);
+            kStateToSetpointMapIntake.put(IntakeRackStates.INTAKE, kIntakeSetpointSup);
+            kStateToSetpointMapIntake.put(IntakeRackStates.TUNING_SETPOINT, kTuningShotSetpointSup);
         }
     }
 

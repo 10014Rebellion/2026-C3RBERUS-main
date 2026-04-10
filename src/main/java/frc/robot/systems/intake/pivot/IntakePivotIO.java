@@ -9,11 +9,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public interface IntakePivotIO {
     @AutoLog
     public static class IntakePivotInputs {
-        public boolean iIsEncoderConnected = false;
-        public Rotation2d iEncoderPosition = Rotation2d.kZero;
-
         public boolean iIsIntakePivotConnected = false;
-        public Rotation2d iIntakePivotRotation = Rotation2d.kZero;
+        public Rotation2d iIntakeRackRotation = Rotation2d.kZero;
         public Rotation2d iIntakePivotVelocityRPS = Rotation2d.kZero;
         public Rotation2d iIntakePivotAccelerationRPSS = Rotation2d.kZero;
         public double iIntakePivotMotorVolts = 0.0;
