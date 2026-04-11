@@ -80,6 +80,7 @@ public class IntakeRackSS extends SubsystemBase {
         executeState();
 
         Logger.processInputs("Intake/Rack", mIntakeRackInputs);
+        Logger.recordOutput("Intake/Rack/SafeToRunRollers", isSafeToRunintakeRollers());
     }
 
     /*
@@ -133,6 +134,10 @@ public class IntakeRackSS extends SubsystemBase {
                 Telemetry.reportIssue(null);
             }
         }
+    }
+
+    public boolean isSafeToRunintakeRollers() {
+        return mIntakeRackInputs.iIntakeRackPositionM < IntakeConstants.RackConstants.kRollerUsageCutoffMeters;
     }
     
     /*

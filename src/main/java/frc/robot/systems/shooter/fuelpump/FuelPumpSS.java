@@ -56,8 +56,14 @@ public class FuelPumpSS extends SubsystemBase {
     executeState();
     mFollowerFuelPumpIO.enforceFollower();
 
+    Telemetry.log("Shooter/FuelPump/IsFuelPumpAtGoal", atGoal());
     Logger.processInputs("Shooter/FuelPump/Leader", mLeaderFuelPumpInputs);
     Logger.processInputs("Shooter/FuelPump/Follower", mFollowerFuelPumpInputs);
+  }
+
+  public boolean atGoal() {
+    return (!FuelPumpConstants.kStateToTuneableFuelPumpVelocity.containsKey(mCurrentFuelPumpState)) ||
+      (Math.abs(getAvgFuelPumpRPS() - FuelPumpConstants.kStateToTuneableFuelPumpVelocity.get(mCurrentFuelPumpState).get().getRotations()) < FuelPumpConstants.kToleranceRPS);
   }
 
   private void executeState() {
@@ -83,7 +89,7 @@ public class FuelPumpSS extends SubsystemBase {
   private void setFuelPumpVelocity(Rotation2d pRPS) {
     mLeaderFuelPumpIO.setMotorVelocity(
       pRPS,
-      kFuelPumpControlConfig.feedforward().calculate(pRPS.getRotations())
+      mFuelPumpFeedforward.calculate(pRPS.getRotations())
     );
     mFollowerFuelPumpIO.enforceFollower();
   }
@@ -112,12 +118,11 @@ public class FuelPumpSS extends SubsystemBase {
     mCurrentFuelPumpState = pNewState;
   }
 
-  public Rotation2d getAvgFuelPumpRPS() {
-    return (mLeaderFuelPumpInputs.iFuelPumpVelocityRPS.plus(mFollowerFuelPumpInputs.iFuelPumpVelocityRPS)).div(2.0);
-  }
-
-  public boolean isReadyToShoot() {
-    return getAvgFuelPumpRPS().getRotations() >= FuelPumpConstants.kRPSForShooting.getRotations();
+  public double getAvgFuelPumpRPS() {
+    return (
+      mLeaderFuelPumpInputs.iFuelPumpVelocityRPS.getRotations() 
+        + 
+      mFollowerFuelPumpInputs.iFuelPumpVelocityRPS.getRotations()) / 2.0;
   }
 
   public void setBothPDConstants(double KP, double KD){

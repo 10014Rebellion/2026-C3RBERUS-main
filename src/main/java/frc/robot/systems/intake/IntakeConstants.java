@@ -22,6 +22,7 @@ import frc.lib.tuning.LoggedTunableNumber;
 public class IntakeConstants {
     public static class RackConstants {
         public static double kRackToleranceMeters = Units.inchesToMeters(0.5);
+        public static double kRollerUsageCutoffMeters = 0.072;
 
         public static final BasicMotorHardware kRackMotorConfig = new BasicMotorHardware(
             44, // TODO: TUNE ME;

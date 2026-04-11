@@ -5,6 +5,7 @@
 package frc.robot.systems.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.systems.intake.rack.IntakeRackSS;
@@ -46,5 +47,9 @@ public class Intake {
 
     public Command trashCompact() {
         return mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT);
+    }
+
+    public boolean safeToRunRollers() {
+        return mIntakeRackSS.isSafeToRunintakeRollers();
     }
 }
