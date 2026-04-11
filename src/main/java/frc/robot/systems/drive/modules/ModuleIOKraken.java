@@ -11,8 +11,10 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.configs.Slot2Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -53,9 +55,9 @@ public class ModuleIOKraken implements ModuleIO {
     private final StatusSignal<AngularAcceleration> mDriveAccelerationMPSS;
 
     private final TalonFX mAzimuthMotor;
-    private final PositionDutyCycle mAzimuthPositionControl = new PositionDutyCycle(0.0)
-        .withUpdateFreqHz(0.0);
-    // private final PositionTorqueCurrentFOC mAzimuthPositionControl = new PositionTorqueCurrentFOC(0.0);
+    // private final PositionDutyCycle mAzimuthPositionControl = new PositionDutyCycle(0.0)
+    //     .withUpdateFreqHz(0.0);
+    private final PositionTorqueCurrentFOC mAzimuthPositionControl = new PositionTorqueCurrentFOC(0.0);
     private final VoltageOut mAzimuthVoltageControl = new VoltageOut(0.0);
     private final TorqueCurrentFOC mAzimuthAmpControl = new TorqueCurrentFOC(0.0);
 
@@ -99,6 +101,11 @@ public class ModuleIOKraken implements ModuleIO {
         driveConfig.Slot0.kP = kModuleControllerConfigs.driveController().getP();
         driveConfig.Slot0.kI = kModuleControllerConfigs.driveController().getI();
         driveConfig.Slot0.kD = kModuleControllerConfigs.driveController().getD();
+
+        driveConfig.Slot1.kP = kDriveAggressiveP;
+        driveConfig.Slot1.kI = kModuleControllerConfigs.driveController().getI();
+        driveConfig.Slot1.kD = kModuleControllerConfigs.driveController().getD();
+
         mDrivePositionM = mDriveMotor.getPosition();
         mDriveVelocityMPS = mDriveMotor.getVelocity();
         mDriveVoltage = mDriveMotor.getMotorVoltage();
@@ -274,17 +281,49 @@ public class ModuleIOKraken implements ModuleIO {
     }
 
     @Override
-    public void setDriveVelocity(double pVelocityMPS, double pFeedforward) {
-        mDriveMotor.setControl(mDriveControl.withVelocity(pVelocityMPS).withFeedForward(pFeedforward));
+    public void setDriveVelocity(double pVelocityMPS, double pFeedforward, int slot) {
+        mDriveMotor.setControl(
+            mDriveControl
+                .withVelocity(pVelocityMPS)
+                .withFeedForward(pFeedforward)
+                .withSlot(slot));
     }
 
     @Override
-    public void setDrivePID(double pKP, double pKI, double pKD) {
-        var slotConfig = new Slot0Configs();
-        slotConfig.kP = pKP;
-        slotConfig.kI = pKI;
-        slotConfig.kD = pKD;
-        mDriveMotor.getConfigurator().apply(slotConfig);
+    public void setDrivePID(double pKP, double pKI, double pKD, int slot) {
+        switch (slot) {
+            case 0:
+                var slotConfig0 = new Slot0Configs();
+                slotConfig0.kP = pKP;
+                slotConfig0.kI = pKI;
+                slotConfig0.kD = pKD;
+                mDriveMotor.getConfigurator().apply(slotConfig0);
+
+                break;
+
+            case 1:
+                var slotConfig1 = new Slot1Configs();
+
+                slotConfig1.kP = pKP;
+                slotConfig1.kI = pKI;
+                slotConfig1.kD = pKD;
+                mDriveMotor.getConfigurator().apply(slotConfig1);
+
+                break;
+
+            case 2:
+                var slotConfig2 = new Slot2Configs();
+
+                slotConfig2.kP = pKP;
+                slotConfig2.kI = pKI;
+                slotConfig2.kD = pKD;
+                mDriveMotor.getConfigurator().apply(slotConfig2);
+
+                break;
+        
+            default:
+                return;
+        }
     }
 
     /////////// CANCODER METHODS \\\\\\\\\\\

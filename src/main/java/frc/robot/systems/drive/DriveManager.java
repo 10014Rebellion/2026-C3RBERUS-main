@@ -374,12 +374,12 @@ public class DriveManager {
             }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
     }
 
-    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pAngle, DoubleSupplier pTelScal, BooleanSupplier pTeleopInvert) {
+    public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pLineAngle, DoubleSupplier pTelScal, BooleanSupplier pTeleopInvert) {
         return new InstantCommand(() -> {
             mGoalPoseSup = pGoalPoseSup;
             mLineAlignController.setControllerGoalSettings(
                 pTelScal, 
-                () -> pAngle.get().getTan(), 
+                () -> pLineAngle.get().getTan(), 
                 pTeleopInvert);
             mLineAlignController.reset(
                 mDrive.getPoseEstimate(), 

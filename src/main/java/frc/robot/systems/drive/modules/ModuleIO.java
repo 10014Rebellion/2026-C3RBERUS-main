@@ -36,13 +36,13 @@ public interface ModuleIO {
 
     public default void updateInputs(ModuleInputs inputs) {}
 
-    public default void setDriveVelocity(double velocityMPS, double feedforward) {}
+    public default void setDriveVelocity(double velocityMPS, double feedforward, int slot) {}
 
     public default void setDriveVolts(double volts) {}
 
     public default void setDriveAmperage(double amps) {}
 
-    public default void setDrivePID(double kP, double kI, double kD) {}
+    public default void setDrivePID(double kP, double kI, double kD, int slot) {}
 
     public default void setAzimuthVolts(double volts) {}
 

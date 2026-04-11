@@ -4,7 +4,10 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -85,9 +88,9 @@ public class ButtonBindings {
         
         // PILOT CONTROLS
         Trigger wantToAutoAlignToHub = mPilotController.a().and(kUsingPilotGunner);
-        Trigger wantToTraverse = mPilotController.rightTrigger().and(kUsingPilotGunner);
         Trigger wantToSafeStow = mPilotController.leftBumper().and(kUsingPilotGunner);
         Trigger wantToLineAlignToBump = mPilotController.b().and(kUsingPilotGunner);
+        // Trigger wantToYawToBump = mPilotController.rightTrigger().and(kUsingPilotGunner);
         Trigger wantToLineAlignToTrench = mPilotController.y().and(kUsingPilotGunner);
         Trigger wantsToHeadingXLock = mPilotController.x().and(kUsingPilotGunner);
         Trigger wantToIntake = mPilotController.rightBumper().and(kUsingPilotGunner);
@@ -158,7 +161,7 @@ public class ButtonBindings {
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
         
         wantToTrashCompact
-            .onTrue(mIntakeSS.trashCompactRepeat())
+            .onTrue(mIntakeSS.trashCompact())
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
@@ -223,15 +226,36 @@ public class ButtonBindings {
         .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToLineAlignToBump.and(autonomousWorking)
-            .onTrue(
-                mDriveSS.getDriveManager().setToGenericLineAlign(
-                    () -> GameGoalPoseChooser.getClosestBump(mDriveSS.getPoseEstimate()), 
-                    () -> Rotation2d.k180deg, 
-                    () -> 1, 
-                    () -> false
+            .onTrue(Commands.runOnce(() -> inCenterFlag = inCenter.getAsBoolean()));
+
+        wantToLineAlignToBump
+            .onFalse(noneTraversalHeadingState().andThen(mDriveSS.getDriveManager().setToTeleop()));
+
+        /* TRAVERSAL Logic */
+        wantToLineAlignToBump.and(() -> inCenterFlag)
+            .onTrue(centerTraversalHeadingState()
+                .andThen(
+                    mDriveSS.getDriveManager().setToGenericLineAlign(
+                        () -> GameGoalPoseChooser.getClosestBump(mDriveSS.getPoseEstimate()), 
+                        () -> Rotation2d.k180deg, 
+                        () -> 1, 
+                        () -> true
+                    )
                 )
-            )
-        .onFalse(mDriveSS.getDriveManager().setToTeleop());
+            );
+
+        wantToLineAlignToBump.and(() -> !inCenterFlag)
+            .onTrue(allianceTraversalHeadingState().andThen(
+                    mDriveSS.getDriveManager().setToGenericLineAlign(
+                        () -> GameGoalPoseChooser.getClosestBump(mDriveSS.getPoseEstimate())
+                            .transformBy(new Transform2d(new Translation2d(), Rotation2d.k180deg)), 
+                        () -> Rotation2d.k180deg, 
+                        () -> 1, 
+                        () -> false
+                    )
+                )
+            );
+
 
         // wantToCloseShoot.and(autonomousWorking).and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
         //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
@@ -293,6 +317,10 @@ public class ButtonBindings {
             .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
 
+        wantToSnowPlow.debounce(0.75, DebounceType.kRising).or(wantToHailstorm.debounce(0.75, DebounceType.kRising)).and(((shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))).negate())
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
+
         wantToHailstorm.or(wantToSnowPlow)
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
@@ -322,25 +350,7 @@ public class ButtonBindings {
         wantToSafeStow
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.SAFESTOW));
 
-        wantToTraverse
-            .onTrue(Commands.runOnce(() -> inCenterFlag = inCenter.getAsBoolean()));
-
-        /* TRAVERSAL Logic */
-        wantToTraverse.and(() -> inCenterFlag)
-            .onTrue(centerTraversalHeadingState().andThen(
-                mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                    () -> AllianceFlipUtil.apply(Rotation2d.kZero), 
-                    TurnPointFeedforward.zeroTurnPointFF())));
-
-        wantToTraverse.and(() -> !inCenterFlag)
-            .onTrue(allianceTraversalHeadingState().andThen(
-                mDriveSS.getDriveManager().setToGenericHeadingAlign(
-                () -> AllianceFlipUtil.apply(Rotation2d.k180deg), 
-                TurnPointFeedforward.zeroTurnPointFF())));
-
-        wantToTraverse
-            .onFalse(noneTraversalHeadingState().andThen(mDriveSS.getDriveManager().setToTeleop()));
-
+   
         // wantToInitiateClimb
         //     .onTrue(mClimbSS.goUpTillClimbHeightThenStay())
         //     .onFalse(mClimbSS.setStateCmd(ClimbState.STAY));

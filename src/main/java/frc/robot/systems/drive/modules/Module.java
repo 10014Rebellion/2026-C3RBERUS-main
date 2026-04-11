@@ -2,6 +2,7 @@
 
 package frc.robot.systems.drive.modules;
 
+import static frc.robot.systems.drive.DriveConstants.kDriveAggressiveP;
 import static frc.robot.systems.drive.DriveConstants.kModuleControllerConfigs;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -15,6 +16,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Module {
     public static final LoggedTunableNumber tDriveP = new LoggedTunableNumber("Module/Drive/kP", kModuleControllerConfigs.driveController().getP());
+    public static final LoggedTunableNumber tDrivePAggressive = new LoggedTunableNumber("Module/Drive/kPAggressive", kDriveAggressiveP);
     public static final LoggedTunableNumber tDriveD = new LoggedTunableNumber("Module/Drive/kD", kModuleControllerConfigs.driveController().getD());
     public static final LoggedTunableNumber tDriveS = new LoggedTunableNumber("Module/Drive/kS", kModuleControllerConfigs.driveFF().getKs());
     public static final LoggedTunableNumber tDriveV = new LoggedTunableNumber("Module/Drive/kV", kModuleControllerConfigs.driveFF().getKv());
@@ -62,8 +64,14 @@ public class Module {
         LoggedTunableNumber.ifChanged(
             hashCode(),
             () -> {
-                mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get());
+                mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get(), 0);
             }, tDriveP, tDriveD);
+
+        // LoggedTunableNumber.ifChanged(
+        //     hashCode(),
+        //     () -> {
+        //         mIO.setDrivePID(tDrivePAggressive.get(), 0.0, tDriveD.get(), 1);
+        //     }, tDrivePAggressive, tDriveD);
 
         LoggedTunableNumber.ifChanged(
             hashCode(),
@@ -141,7 +149,13 @@ public class Module {
             + mDriveFF.getKv() * mVelocitySetpointMPS
             + mDriveFF.getKa() * mAccelFeedforward;
 
-        mIO.setDriveVelocity(mVelocitySetpointMPS, mFFDriveOutput);
+        mIO.setDriveVelocity(
+            mVelocitySetpointMPS, 
+            mFFDriveOutput,
+            0);
+            // (Math.abs(mVelocitySetpointMPS - getCurrentState().speedMetersPerSecond) > 0.5)
+            //     ? 1
+            //     : 0);
 
         // Logger.recordOutput("Drive/" + kModuleName + kFeedforwardTypeKeyName, mAccelFeedforward);
         Logger.recordOutput("Drive/" + kModuleName + "/ffDriveOutput", mFFDriveOutput);

@@ -422,6 +422,22 @@ public class Drive extends SubsystemBase {
             : Rotation2d.fromDegrees(0.0);
 
         mGyro.resetGyro(mRobotRotation);
+
+        mPoseEstimator.resetPosition(
+            getRobotRotation(), 
+            getModulePositionsHighF(), 
+            new Pose2d(
+                getPoseEstimate().getTranslation(),
+                getRobotRotation()
+        ));
+
+        mOdometry.resetPosition(
+            getRobotRotation(), 
+            getModulePositionsHighF(), 
+            new Pose2d(
+                getOdometryPose().getTranslation(),
+                getRobotRotation()
+        ));
     }
 
     public void setPose(Pose2d pose) {

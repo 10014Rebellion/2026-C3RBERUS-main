@@ -73,12 +73,12 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    public void setDriveVelocity(double pVelocityMPS, double pFeedforward) {
+    public void setDriveVelocity(double pVelocityMPS, double pFeedforward, int slot) {
         setDriveVolts(mDrivePID.calculate(mDriveMotor.getAngularVelocityRPM() * kWheelCircumferenceMeters / 60.0, pVelocityMPS) + pFeedforward);
     }
 
     @Override
-    public void setDrivePID(double pKP, double pKI, double pKD) {
+    public void setDrivePID(double pKP, double pKI, double pKD, int slot) {
         mDrivePID.setPID(pKP, pKI, pKD);
     }
 

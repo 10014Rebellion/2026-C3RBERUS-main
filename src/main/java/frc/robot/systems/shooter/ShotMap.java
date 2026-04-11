@@ -20,7 +20,7 @@ public class ShotMap {
 
     private Supplier<Pose2d> robotPose = () -> new Pose2d();
     public double offsetM = 0.0;
-    public double velocityRPSOffset = 0.475;
+    public double velocityRPSOffset = -5.0;
 
     public record ShotMapSetpoint(double distance, Rotation2d pHoodSetpoint, Rotation2d flywheelSpeedPS) {}
 

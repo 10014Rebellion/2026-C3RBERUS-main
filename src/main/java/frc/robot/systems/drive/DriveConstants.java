@@ -39,7 +39,7 @@ public class DriveConstants {
     public static final double kMaxLinearAccelerationMPSS = 15.5; // TODO: TUNE ME
 
     public static final double kMaxRotationSpeedRadiansPS = kMaxLinearSpeedMPS / kDrivebaseRadiusMeters; // TODO: TUNE ME
-    public static final double kMaxRotationAccelRadiansPS = Math.toRadians(4800); // TODO: TUNE ME
+    public static final double kMaxRotationAccelRadiansPS = Math.toRadians(5800); // TODO: TUNE ME
  
     public static final double kMaxAzimuthAngularRadiansPS = 8.5 * 2 * Math.PI; // TODO: TUNE ME
 
@@ -98,11 +98,14 @@ public class DriveConstants {
     public static final ModuleControlConfig kModuleControllerConfigs = !RobotConstants.isSim()
         // kV is generally 0 for FOC control, so double check in ModuleIOKraken to see whether kV should be applied
         ? new ModuleControlConfig(
-            new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(2.0, 0.0, 1.0), // DRIVE // TODO: TUNE ME
-            new PIDController(20.0, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
+            new PIDController(250.0, 0.0, 0.0), new SimpleMotorFeedforward(2.0, 0.0, 1.0), // DRIVE // TODO: TUNE ME
+            /* TORQUE FOC NUMBERS FROM 6328 */
+            new PIDController(4000.0, 0.0, 50.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH // TODO: TUNE ME
         : new ModuleControlConfig(
             new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 3.0, 0.005),
             new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.5));
+
+    public static final double kDriveAggressiveP = !RobotConstants.isSim() ? 400.0 : 0.1;
 
     /* MODULE SPECIFIC CONSTANTS */
     public static final int kPigeonCANID = 5; // TODO: TUNE ME
