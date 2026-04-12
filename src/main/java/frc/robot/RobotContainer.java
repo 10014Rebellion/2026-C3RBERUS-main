@@ -15,14 +15,14 @@ import frc.robot.systems.drive.modules.Module;
 import frc.robot.systems.drive.modules.ModuleIO;
 import frc.robot.systems.drive.modules.ModuleIOKraken;
 import frc.robot.systems.drive.modules.ModuleIOSim;
-import frc.robot.systems.efi.FuelInjectorConstants;
-import frc.robot.systems.efi.FuelInjectorIO;
-import frc.robot.systems.efi.FuelInjectorIOKrakenX60;
-import frc.robot.systems.efi.FuelInjectorIOSim;
 import frc.robot.systems.efi.FuelInjectorSS;
-import frc.robot.systems.efi.SensorConstants;
-import frc.robot.systems.efi.SensorIO;
-import frc.robot.systems.efi.SensorIOCANRange;
+import frc.robot.systems.efi.injector.FuelInjectorConstants;
+import frc.robot.systems.efi.injector.FuelInjectorIO;
+import frc.robot.systems.efi.injector.FuelInjectorIOKrakenX60;
+import frc.robot.systems.efi.injector.FuelInjectorIOSim;
+import frc.robot.systems.efi.sensors.SensorConstants;
+import frc.robot.systems.efi.sensors.SensorIO;
+import frc.robot.systems.efi.sensors.SensorIOCANRange;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.IntakeConstants;
 import frc.robot.systems.intake.rack.IntakeRackIO;
@@ -223,7 +223,7 @@ public class RobotContainer {
 
         ShotMap.getInstance().setPoseSupplier(() -> mDriveSS.getPoseEstimate());
         
-        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS);
+        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS, mClimbSS);
 
         initBindings();
         initBaseTriggers();

@@ -1,4 +1,4 @@
-package frc.robot.systems.efi;
+package frc.robot.systems.efi.injector;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;

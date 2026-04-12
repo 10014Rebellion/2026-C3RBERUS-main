@@ -1,5 +1,5 @@
 
-package frc.robot.systems.efi;
+package frc.robot.systems.efi.sensors;
 
 import org.littletonrobotics.junction.AutoLog;
 
@@ -9,7 +9,8 @@ public interface SensorIO {
   public static class SensorInputs {
     public double distanceFromSensor = 0.0;
     public double distanceFromSensorStdDev = 0.0;
-    public boolean isCANRangeDetected = false;
+    public boolean hasObject = false;
+    public boolean isSensorConnected = false;
     public double ambience = 0.0;
     public double signalStrength = 0.0;
     public boolean isMeasurementHealthGood = false;

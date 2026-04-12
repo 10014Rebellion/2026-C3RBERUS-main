@@ -1,4 +1,4 @@
-package frc.robot.systems.efi;
+package frc.robot.systems.efi.sensors;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -29,8 +29,8 @@ public class SensorIOCANRange implements SensorIO{
         kCANRange = new CANrange(configuration.canRangeID(), RobotConstants.kSubsystemsCANBus);
 
         canRangeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 3000;
-        canRangeConfig.ProximityParams.ProximityHysteresis = 0.01;
-        canRangeConfig.ProximityParams.ProximityThreshold = 0.5;
+        canRangeConfig.ProximityParams.ProximityHysteresis = configuration.positionTolerance();
+        canRangeConfig.ProximityParams.ProximityThreshold = configuration.fuelDetectionCutoff();
 
         kCANRange.getConfigurator().apply(canRangeConfig);
 
@@ -49,13 +49,13 @@ public class SensorIOCANRange implements SensorIO{
     public void updateInputs(SensorInputs inputs){
         inputs.distanceFromSensor = distanceFromFuel.getValueAsDouble();
         inputs.distanceFromSensorStdDev = distanceFromFuelStdev.getValueAsDouble();
-        inputs.isCANRangeDetected = isDetected.getValue();
+        inputs.hasObject = isDetected.getValue();
         inputs.ambience = ambience.getValueAsDouble();
         inputs.signalStrength = signalStrength.getValueAsDouble();
         inputs.isMeasurementHealthGood = measurementHealth.equals(MeasurementHealthValue.Good);
         inputs.measurementTime = measurementTime.getValueAsDouble();
         
-        inputs.isCANRangeDetected = BaseStatusSignal.refreshAll(
+        inputs.isSensorConnected = BaseStatusSignal.refreshAll(
             distanceFromFuel,
             distanceFromFuelStdev,
             isDetected,

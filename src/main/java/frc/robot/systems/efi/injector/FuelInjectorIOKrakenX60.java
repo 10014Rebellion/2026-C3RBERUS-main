@@ -1,4 +1,4 @@
-package frc.robot.systems.efi;
+package frc.robot.systems.efi.injector;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;

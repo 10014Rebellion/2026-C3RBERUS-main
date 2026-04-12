@@ -17,6 +17,7 @@ import frc.lib.controllers.RebelButtonBoardRebuilt;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
@@ -43,7 +44,7 @@ public class ButtonBindings {
     private final FlywheelsSS mFlywheelsSS;
     private final Intake mIntakeSS;
     private final FuelInjectorSS mFuelInjectorSS;
-    // private final ClimbSS mClimbSS;
+    private final ClimbSS mClimbSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final RebelButtonBoardRebuilt mGunnerButtonboard = new RebelButtonBoardRebuilt(1, 2);
 
@@ -56,14 +57,14 @@ public class ButtonBindings {
 
     private boolean inCenterFlag = false; 
 
-    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, FuelInjectorSS pInjectorSS) {
+    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, FuelInjectorSS pInjectorSS, ClimbSS pClimbSS) {
         this.mDriveSS = pDriveSS;
         this.mFuelPumpSS = pFuelPumpSS;
         this.mHoodSS = pHoodSS;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mIntakeSS = pIntake;
         this.mFuelInjectorSS = pInjectorSS;
-        // this.mClimbSS = pClimbSS;
+        this.mClimbSS = pClimbSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.getDriveManager().setToTeleop());
     }
 
@@ -100,7 +101,7 @@ public class ButtonBindings {
         Trigger wantToTrashCompact = mGunnerButtonboard.greenDiamondLeft().and(kUsingPilotGunner);
         Trigger wantToStowIntake = mGunnerButtonboard.yellowTriangleLeft().and(kUsingPilotGunner);
         Trigger wantToIntakeOut = mGunnerButtonboard.redTriangleLeft().and(kUsingPilotGunner);
-        Trigger wantToOutakeRoller = mGunnerButtonboard.redCircleBottom().and(kUsingPilotGunner);
+        Trigger wantToOuttake = mGunnerButtonboard.redCircleBottom().and(kUsingPilotGunner);
         Trigger wantToIntakeRoller = mGunnerButtonboard.blueCircleBottom().and(kUsingPilotGunner);
         Trigger wantToRevFlywheels = mGunnerButtonboard.yellowTriangleRight().and(kUsingPilotGunner);
         Trigger wantToStopFlywheels = mGunnerButtonboard.redTriangleRight().and(kUsingPilotGunner);
@@ -172,9 +173,11 @@ public class ButtonBindings {
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOPPED));
 
-        wantToOutakeRoller
+        wantToOuttake
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
-            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.OUTTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE));
 
         wantToIntakeRoller
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
@@ -191,6 +194,12 @@ public class ButtonBindings {
 
         wantsToHeadingXLock
             .onTrue(mDriveSS.getDriveManager().setToHeadingXLock());
+
+        wantToDeployClimb
+            .onTrue(mClimbSS.goUpTillClimbHeightThenStay());
+        
+        wantToClimbAscend
+            .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed());
 
         // wantsToHeadingXLock
         //     .onFalse(new ConditionalCommand(

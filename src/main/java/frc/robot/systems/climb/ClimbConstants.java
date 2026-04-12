@@ -43,7 +43,7 @@ public class ClimbConstants {
         60, // Motor ID // TODO: TUNE ME!
         RobotConstants.kSubsystemsCANBus, 
         16.0, // Rotor to Mechanism Ratio // TODO: TUNE ME!
-        InvertedValue.CounterClockwise_Positive,
+        InvertedValue.Clockwise_Positive,
         NeutralModeValue.Brake,
         new CurrentLimits(30, 40)
     );

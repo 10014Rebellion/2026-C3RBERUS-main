@@ -1,4 +1,4 @@
-package frc.robot.systems.efi;
+package frc.robot.systems.efi.injector;
 
 import java.util.HashMap;
 
@@ -9,6 +9,7 @@ import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.RobotConstants;
+import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 
 

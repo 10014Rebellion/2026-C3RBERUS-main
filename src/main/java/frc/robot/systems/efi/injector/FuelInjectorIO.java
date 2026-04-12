@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.robot.systems.efi;
+package frc.robot.systems.efi.injector;
 
 import org.littletonrobotics.junction.AutoLog;
 
