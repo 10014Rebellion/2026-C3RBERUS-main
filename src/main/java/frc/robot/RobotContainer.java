@@ -51,6 +51,7 @@ import frc.robot.systems.shooter.hood.HoodConstants;
 import frc.robot.systems.shooter.hood.HoodIO;
 import frc.robot.systems.shooter.hood.HoodIOKrakenX44;
 import frc.robot.systems.shooter.hood.HoodIOSim;
+import frc.robot.systems.LEDs.ledSS;
 import frc.robot.systems.apriltag.ATagCameraIO;
 import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
@@ -58,6 +59,9 @@ import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.ctre.phoenix6.configs.LEDConfigs;
+
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
 import frc.robot.systems.climb.ClimbIOSim;
@@ -72,6 +76,7 @@ public class RobotContainer {
     private final Intake mIntakeSS;
     private final FuelInjectorSS mFuelInjectorSS;
     private final ClimbSS mClimbSS;
+    private final ledSS mLedSS;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
@@ -123,6 +128,8 @@ public class RobotContainer {
                     new SensorIOCANRange(SensorConstants.leftCANRangeConfiguration),
                     new SensorIOCANRange(SensorConstants.midCANRangeConfiguration),
                     new SensorIOCANRange(SensorConstants.rightCANRangeConfiguration));
+
+                mLedSS = new ledSS();
                 break;
             }
             case SIM: {
@@ -172,6 +179,8 @@ public class RobotContainer {
 
 
                 mClimbSS = new ClimbSS(new ClimbIO() {});
+
+                mLedSS = new ledSS();
                 break;
             }
 
@@ -216,17 +225,17 @@ public class RobotContainer {
                     new SensorIO() {},
                     new SensorIO() {},
                     new SensorIO() {});
-
+                
+                mLedSS = new ledSS();
                 break;
             }
         }
 
         ShotMap.getInstance().setPoseSupplier(() -> mDriveSS.getPoseEstimate());
         
-        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS);
+        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS, mLedSS);
 
         initBindings();
-        initBaseTriggers();
 
         mDriverProfileChooser.addDefaultOption(
                 BindingsConstants.kDefaultProfile.key(), mDriveSS.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
@@ -242,10 +251,6 @@ public class RobotContainer {
 
     private void initBindings() {
         mButtonBindings.initBindings();
-    }
-
-    private void initBaseTriggers() {
-        
     }
 
     public Supplier<Command> getAutonomousCommand() {

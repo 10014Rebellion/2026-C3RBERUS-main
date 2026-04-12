@@ -476,8 +476,10 @@ public class ButtonBindings {
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE));
 
-        initLEDTriggers();
-
+        Optional<Alliance> ally = DriverStation.getAlliance();
+        new Trigger(() -> ally.get().equals(Alliance.Red))
+            .onTrue(mLEDSS.setStripColor((RGBLEDColor.RED.getRGBLEDArray())[0], (RGBLEDColor.RED.getRGBLEDArray())[1], (RGBLEDColor.RED.getRGBLEDArray())[2]))
+            .onFalse(mLEDSS.setStripColor((RGBLEDColor.BLUE.getRGBLEDArray())[0], (RGBLEDColor.BLUE.getRGBLEDArray())[1], (RGBLEDColor.BLUE.getRGBLEDArray())[2]));
         // Trigger climbButton = new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed);
         // climbButton.and(() -> DriverStation.isDisabled() && !DriverStation.isFMSAttached())
         //     .onFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
@@ -485,10 +487,7 @@ public class ButtonBindings {
     }
 
     public void initLEDTriggers() {
-        Optional<Alliance> ally = DriverStation.getAlliance();
-        new Trigger(() -> ally.get() == Alliance.Red)
-            .onTrue(mLEDSS.setStripColor((RGBLEDColor.RED.getRGBLEDArray())[0], (RGBLEDColor.RED.getRGBLEDArray())[1], (RGBLEDColor.RED.getRGBLEDArray())[2]))
-            .onFalse(mLEDSS.setStripColor((RGBLEDColor.BLUE.getRGBLEDArray())[0], (RGBLEDColor.BLUE.getRGBLEDArray())[1], (RGBLEDColor.BLUE.getRGBLEDArray())[2]));
+        
     }
 
     public Command rumbleDriverController(){

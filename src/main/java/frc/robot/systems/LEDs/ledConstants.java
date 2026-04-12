@@ -1,5 +1,7 @@
 package frc.robot.systems.LEDs;
 
+import edu.wpi.first.wpilibj.util.Color;
+
 public class ledConstants {
     
     public static final class HSVLEDColor {
@@ -25,4 +27,5 @@ public class ledConstants {
             return arr;
         } 
     }
-}
+
+   }
