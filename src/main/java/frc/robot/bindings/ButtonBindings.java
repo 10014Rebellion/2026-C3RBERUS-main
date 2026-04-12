@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.controllers.RebelButtonBoardRebuilt;
@@ -24,6 +25,7 @@ import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.LEDs.ledConstants.LEDColor;
 import frc.robot.systems.LEDs.ledConstants.RGBLEDColor;
 import frc.robot.systems.LEDs.ledSS;
 import frc.robot.systems.drive.Drive;
@@ -285,7 +287,9 @@ public class ButtonBindings {
         /* SHOOTS FROM ANYWHERE IN OUR FLYWHEEL RANGE */
         wantToDynamicShoot
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
+            .onTrue(new InstantCommand(() -> mLEDSS.setSolidStripColor(LEDColor.CYAN.getLEDColor())));
+;
 
         wantToDynamicShoot.and(autonomousWorking)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
@@ -309,18 +313,22 @@ public class ButtonBindings {
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onFalse(new InstantCommand(() -> mLEDSS.setSolidStripColorToAllianceColor()));
 
         /* Feeding Logic */
         wantToSnowPlow
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
             .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MAX))
+            .onTrue(new InstantCommand(() -> mLEDSS.setSolidStripColor(LEDColor.YELLOW.getLEDColor())));
 
         wantToHailstorm
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.OPPONENT_FEED_VELOCITY))
             .onTrue(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MAX))
+            .onTrue(new InstantCommand(() -> mLEDSS.setSolidStripColor(LEDColor.WHITE.getLEDColor())));
+
 
         wantToSnowPlow.or(wantToHailstorm).and(fuelPumpAtGoal).and((shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth)))
             .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
@@ -335,12 +343,14 @@ public class ButtonBindings {
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onFalse(new InstantCommand(() -> mLEDSS.setSolidStripColorToAllianceColor()));
+;
 
         /* Makes flywheel stand by */
         wantToShoot.negate()
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN));
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
 
         /* HOOD PROTECTION LOGIC */
         inSuperNoHoodZone.or(inNoHoodZone.and(isRobotMoving))
@@ -367,12 +377,28 @@ public class ButtonBindings {
         // wantToEndClimb
         //     .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed())
         //     .onFalse(mClimbSS.setStateCmd(ClimbState.STAY));
+
+        /* LEDs DURING ALIGNMENT LOGIC */ 
+            /* ALIGNMENT TO HUB LOGIC */
+                if(atHeadingGoal.getAsBoolean() && wantToAutoAlignToHub.getAsBoolean()) {
+                    new InstantCommand(() -> mLEDSS.setSolidStripColor(LEDColor.GREEN));
+                }
+                else if(!atHeadingGoal.getAsBoolean() && wantToAutoAlignToHub.getAsBoolean()) {
+                    new InstantCommand(() -> smLEDSS.setBreatheStripColor(LEDColor.RED));
+                }
+                else {
+                    new InstantCommand(() -> mLEDSS.setSolidStripColorToAllianceColor());
+                }
+            /* ALIGNMENT TO CLIMB LOGIC */
+                //waiting for captains to commit code for climb auto align in main.
+
+
+
     }
 
     public void testBindings() {
         mPilotController.startButton().and(isTesting())
             .onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
-
         mPilotController.a().and(isTesting())
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));

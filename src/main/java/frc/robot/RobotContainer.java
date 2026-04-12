@@ -248,7 +248,7 @@ public class RobotContainer {
     }
 
     public void startLEDs() {
-        mLedSS.setStripColorToAllianceColor();
+        mLedSS.setSolidStripColorToAllianceColor();
     }
 
     public Drive getDrivetrain() {

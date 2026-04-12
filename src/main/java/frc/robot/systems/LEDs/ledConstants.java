@@ -17,8 +17,15 @@ public class ledConstants {
     }
 
     public enum LEDColor {
-        RED(Color.kGreen), //LEDs are GRB ;_;
-        BLUE(Color.kBlue);
+        RED(Color.kGreen), //The LEDs are GRB ;_;
+        GREEN(Color.kRed), 
+        BLUE(Color.kBlue),
+        ORANGE(Color.kOrange),
+        PINK(Color.kPink),
+        GRAY(Color.kGray),
+        YELLOW(Color.kYellow),
+        CYAN(Color.kCyan),
+        WHITE(Color.kWhite);
 
         Color color;
         private LEDColor(Color pColor) {
@@ -28,6 +35,14 @@ public class ledConstants {
         public Color getLEDColor() {
             return color;
         } 
+
+        public static Color[] getLEDColorRandomArr() {
+            return new Color[] {
+                ORANGE.getLEDColor(),
+                PINK.getLEDColor(),
+                GRAY.getLEDColor(),
+            };
+        }
     }
 
    }
