@@ -10,10 +10,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.controllers.RebelButtonBoardRebuilt;
@@ -478,8 +481,8 @@ public class ButtonBindings {
 
         Optional<Alliance> ally = DriverStation.getAlliance();
         new Trigger(() -> ally.get().equals(Alliance.Red))
-            .onTrue(mLEDSS.setStripColor((RGBLEDColor.RED.getRGBLEDArray())[0], (RGBLEDColor.RED.getRGBLEDArray())[1], (RGBLEDColor.RED.getRGBLEDArray())[2]))
-            .onFalse(mLEDSS.setStripColor((RGBLEDColor.BLUE.getRGBLEDArray())[0], (RGBLEDColor.BLUE.getRGBLEDArray())[1], (RGBLEDColor.BLUE.getRGBLEDArray())[2]));
+            .onTrue(new InstantCommand(() -> mLEDSS.setStripColor((Color.kGreen))))
+            .onFalse(new InstantCommand(() -> mLEDSS.setStripColor((Color.kBlue))));
         // Trigger climbButton = new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed);
         // climbButton.and(() -> DriverStation.isDisabled() && !DriverStation.isFMSAttached())
         //     .onFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))

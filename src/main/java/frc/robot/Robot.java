@@ -5,6 +5,7 @@ package frc.robot;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,7 +32,18 @@ public class Robot extends LoggedRobot {
     private RobotContainer mRobotContainer;
     private TransitionTracker mTracker;
 
+    public static boolean mAllianceBlue;
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    Optional<Alliance> newAlly;
+
+    private static void updateAlliance() {
+        mAllianceBlue = DriverStation.getAlliance().isPresent()
+            ? DriverStation.getAlliance().get().equals(Alliance.Blue)
+            : true;
+    }
+
     public Robot() {
+        updateAlliance();
         beginAKLogger();
         
         startWebServers();
