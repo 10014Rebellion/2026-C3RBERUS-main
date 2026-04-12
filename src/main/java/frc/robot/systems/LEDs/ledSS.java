@@ -1,13 +1,14 @@
 package frc.robot.systems.LEDs;
 
 
+import java.util.Optional;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.Robot;
@@ -16,6 +17,9 @@ public class ledSS extends SubsystemBase{
     
     private final AddressableLED mLED;
     private final AddressableLEDBuffer mLEDBuffer;
+
+    @SuppressWarnings("rawtypes")
+    private Optional<Alliance> mCurrentAlliance = Optional.of(Alliance.Red);
 
     public ledSS() {
         mLED = new AddressableLED(1);
@@ -44,7 +48,10 @@ public class ledSS extends SubsystemBase{
 
     @Override
     public void periodic(){
-        setStripColorToAllianceColor();
+        if(!mCurrentAlliance.equals(DriverStation.getAlliance())){
+            mCurrentAlliance = DriverStation.getAlliance();
+            setStripColorToAllianceColor();
+        }
     }
 
 }
