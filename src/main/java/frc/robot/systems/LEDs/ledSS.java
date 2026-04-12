@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.Robot;
+import frc.robot.systems.LEDs.ledConstants.LEDColor;
 
 public class ledSS extends SubsystemBase{
     
@@ -22,8 +23,8 @@ public class ledSS extends SubsystemBase{
     private Optional<Alliance> mCurrentAlliance = Optional.of(Alliance.Red);
 
     public ledSS() {
-        mLED = new AddressableLED(1);
-        mLEDBuffer = new AddressableLEDBuffer(13); // Update this with the correct lenth later
+        mLED = new AddressableLED(ledConstants.ledID);
+        mLEDBuffer = new AddressableLEDBuffer(ledConstants.ledBuffer); // Update this with the correct lenth later
 
         mLED.setLength(mLEDBuffer.getLength());
     }
@@ -35,15 +36,8 @@ public class ledSS extends SubsystemBase{
         mLED.start();
     }
 
-    // public Command setStripColorToAllianceColor(){
-    //     return new InstantCommand(
-    //         () -> setStripColor(AllianceFlipUtil.shouldFlip() ? Color.kGreen : Color.kBlue), 
-    //         this
-    //     );
-    // }
-
     public void setStripColorToAllianceColor(){
-        setStripColor(AllianceFlipUtil.shouldFlip() ? Color.kGreen : Color.kBlue);
+        setStripColor(AllianceFlipUtil.shouldFlip() ? LEDColor.RED.getLEDColor() : LEDColor.BLUE.getLEDColor());
     }
 
     @Override

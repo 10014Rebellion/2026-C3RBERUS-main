@@ -3,7 +3,9 @@ package frc.robot.systems.LEDs;
 import edu.wpi.first.wpilibj.util.Color;
 
 public class ledConstants {
-    
+    public static final int ledID = 1;
+    public static final int ledBuffer = 13;
+
     public static final class HSVLEDColor {
         public static final int red = 90;
         public static final int orange = 100;
@@ -14,17 +16,17 @@ public class ledConstants {
         public static final int purple = 140;
     }
 
-    public enum RGBLEDColor {
-        RED(new int[] {240,0,0}),
-        BLUE(new int[] {25,25,150});
+    public enum LEDColor {
+        RED(Color.kGreen), //LEDs are GRB ;_;
+        BLUE(Color.kBlue);
 
-        int[] arr;
-        private RGBLEDColor(int[] pArr) {
-            this.arr = pArr;
+        Color color;
+        private LEDColor(Color pColor) {
+            this.color = pColor;
         }
 
-        public int[] getRGBLEDArray() {
-            return arr;
+        public Color getLEDColor() {
+            return color;
         } 
     }
 
