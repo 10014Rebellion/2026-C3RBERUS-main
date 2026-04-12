@@ -1,4 +1,5 @@
 package frc.robot.bindings;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -9,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -19,6 +21,8 @@ import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.LEDs.ledConstants.RGBLEDColor;
+import frc.robot.systems.LEDs.ledSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
@@ -45,6 +49,7 @@ public class ButtonBindings {
     private final FlywheelsSS mFlywheelsSS;
     private final Intake mIntakeSS;
     private final FuelInjectorSS mFuelInjectorSS;
+    private final ledSS mLEDSS;
     // private final ClimbSS mClimbSS;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final RebelButtonBoardRebuilt mGunnerButtonboard = new RebelButtonBoardRebuilt(1, 2);
@@ -58,13 +63,14 @@ public class ButtonBindings {
 
     private boolean inCenterFlag = false; 
 
-    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, FuelInjectorSS pInjectorSS) {
+    public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, Intake pIntake, FuelInjectorSS pInjectorSS, ledSS pLEDSS) {
         this.mDriveSS = pDriveSS;
         this.mFuelPumpSS = pFuelPumpSS;
         this.mHoodSS = pHoodSS;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mIntakeSS = pIntake;
         this.mFuelInjectorSS = pInjectorSS;
+        this.mLEDSS = pLEDSS;
         // this.mClimbSS = pClimbSS;
         this.mDriveSS.setDefaultCommand(mDriveSS.getDriveManager().setToTeleop());
     }
@@ -470,10 +476,19 @@ public class ButtonBindings {
             .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE));
 
+        initLEDTriggers();
+
         // Trigger climbButton = new Trigger(() -> mHBSS.getClimbButtonUpdateInputs().iPressed);
         // climbButton.and(() -> DriverStation.isDisabled() && !DriverStation.isFMSAttached())
         //     .onFalse(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Coast)).ignoringDisable(true))
             // .onTrue(new InstantCommand(() -> mClimbSS.changeClimbNeutralMode(NeutralModeValue.Brake)).ignoringDisable(true));
+    }
+
+    public void initLEDTriggers() {
+        Optional<Alliance> ally = DriverStation.getAlliance();
+        new Trigger(() -> ally.get() == Alliance.Red)
+            .onTrue(mLEDSS.setStripColor((RGBLEDColor.RED.getRGBLEDArray())[0], (RGBLEDColor.RED.getRGBLEDArray())[1], (RGBLEDColor.RED.getRGBLEDArray())[2]))
+            .onFalse(mLEDSS.setStripColor((RGBLEDColor.BLUE.getRGBLEDArray())[0], (RGBLEDColor.BLUE.getRGBLEDArray())[1], (RGBLEDColor.BLUE.getRGBLEDArray())[2]));
     }
 
     public Command rumbleDriverController(){
