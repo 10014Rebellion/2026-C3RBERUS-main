@@ -4,6 +4,8 @@ import static frc.robot.systems.drive.DriveConstants.*;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.bindings.BindingsConstants;
 import frc.robot.bindings.ButtonBindings;
@@ -243,6 +245,10 @@ public class RobotContainer {
             mDriverProfileChooser.addOption(profile.key(), mDriveSS.getDriveManager().setDriveProfile(profile));
 
         autos = new AutonCommands(mDriveSS, mIntakeSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mClimbSS);
+    }
+
+    public void startLEDs() {
+        mLedSS.setStripColorToAllianceColor();
     }
 
     public Drive getDrivetrain() {

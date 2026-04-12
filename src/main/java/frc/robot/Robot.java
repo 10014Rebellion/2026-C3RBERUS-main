@@ -32,24 +32,14 @@ public class Robot extends LoggedRobot {
     private RobotContainer mRobotContainer;
     private TransitionTracker mTracker;
 
-    public static boolean mAllianceBlue;
-    Optional<Alliance> ally = DriverStation.getAlliance();
-    Optional<Alliance> newAlly;
-
-    private static void updateAlliance() {
-        mAllianceBlue = DriverStation.getAlliance().isPresent()
-            ? DriverStation.getAlliance().get().equals(Alliance.Blue)
-            : true;
-    }
-
     public Robot() {
-        updateAlliance();
         beginAKLogger();
         
         startWebServers();
         
         mTracker = new TransitionTracker();
         mRobotContainer = new RobotContainer();
+        mRobotContainer.startLEDs();
 
         FollowPathCommand.warmupCommand().schedule();
     }
