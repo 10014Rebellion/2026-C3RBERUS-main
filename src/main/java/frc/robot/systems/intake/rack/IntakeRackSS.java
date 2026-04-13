@@ -65,7 +65,7 @@ public class IntakeRackSS extends SubsystemBase {
     private boolean mLimitEnforced = false;
 
     private double mCompactPosition = IntakeConstants.RackConstants.tIntakeSetpointMeters.get();
-    private double mCompactDecrementMPS = 0.1;
+    private double mCompactDecrementMPS = 0.2;
   
     public IntakeRackSS(IntakeRackIO pIntakeRackIO) {
         this.mIntakeRackIO = pIntakeRackIO;
@@ -181,6 +181,10 @@ public class IntakeRackSS extends SubsystemBase {
             mIntakeRackInputs.iIntakeRackPositionM, 
             mIntakeRackInputs.iIntakeClosedLoopReferenceSlope
         );
+
+        if(mCurrentIntakeState.equals(IntakeRackState.COMPACT)) {
+            ffOutput += 20 * mCompactDecrementMPS;
+        }
 
         Telemetry.log("Intake/Rack/ffOutput", ffOutput);
 

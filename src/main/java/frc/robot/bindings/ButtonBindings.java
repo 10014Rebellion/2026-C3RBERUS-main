@@ -83,7 +83,7 @@ public class ButtonBindings {
     }
 
     public void initCompBindings() {
-        boolean closedLoopFuelPump = true;
+        boolean closedLoopFuelPump = false;
         
         // PILOT CONTROLS
         Trigger wantToAutoAlignToHub = mPilotController.a().and(kUsingPilotGunner);
@@ -154,6 +154,8 @@ public class ButtonBindings {
         });
 
         final double kShootingReadyDebounceSeconds = 0.25;
+
+        Trigger dynamicShootReady = shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
 
 
         new Trigger(() -> mIntakeSS.safeToRunRollers())
@@ -283,7 +285,8 @@ public class ButtonBindings {
         /* SHOOTS FROM ANYWHERE IN OUR FLYWHEEL RANGE */
         wantToDynamicShoot
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT));
 
         wantToDynamicShoot.and(autonomousWorking)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
@@ -297,8 +300,12 @@ public class ButtonBindings {
                 () -> GameGoalPoseChooser.getHub()));
 
         // If at goal, shoot it in
-        wantToDynamicShoot.and(fuelPumpAtGoal).and(shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY))
+        wantToDynamicShoot.and(dynamicShootReady)
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
+
+        /* Debounce if not at goal */
+        wantToDynamicShoot.debounce(0.75, DebounceType.kRising).and(dynamicShootReady.negate())
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
