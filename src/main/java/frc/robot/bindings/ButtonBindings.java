@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
 import frc.lib.controllers.RebelButtonBoardRebuilt;
@@ -144,6 +145,7 @@ public class ButtonBindings {
         Trigger atPositionGoal = new Trigger(mDriveSS.getDriveManager().waitUntilAutoAlignFinishes());
         Trigger atHeadingGoal = (headingAlignAtGoal.or(driveIsHeadingXLocked));
 
+        Trigger anyCANRangesTriggered = new Trigger(() -> mFuelInjectorSS.anyCANRangesTripped());
 
         Trigger wantToShoot = new Trigger(() -> {
             return 
@@ -155,9 +157,13 @@ public class ButtonBindings {
         });
 
         final double kShootingReadyDebounceSeconds = 0.25;
+        final double kKickbackTime = 0.5;
 
         Trigger dynamicShootReady = shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
 
+        anyCANRangesTriggered.and(wantToShoot.negate())
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.KICKBACK))
+            .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE));
 
         new Trigger(() -> mIntakeSS.safeToRunRollers())
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
@@ -289,9 +295,12 @@ public class ButtonBindings {
 
         /* SHOOTS FROM ANYWHERE IN OUR FLYWHEEL RANGE */
         wantToDynamicShoot
+            .onTrue(
+                mFuelInjectorSS.setStateCmd(FuelInjectorState.KICKBACK).until(anyCANRangesTriggered)
+                .andThen(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE)))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT));
+            .onTrue(new WaitCommand(kKickbackTime).andThen(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT)));
 
         wantToDynamicShoot.and(autonomousWorking)
             .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
@@ -315,10 +324,14 @@ public class ButtonBindings {
             .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
         wantToDynamicShoot
-            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
-            .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
+            .onFalse(
+                mFuelPumpSS.setStateCmd(FuelPumpState.KICKBACK_VOLT).withTimeout(kKickbackTime)
+                .andThen(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED)))
+            .onFalse(
+                mFuelInjectorSS.setStateCmd(FuelInjectorState.KICKBACK).withTimeout(kKickbackTime)
+                .andThen(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE)))
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* Feeding Logic */

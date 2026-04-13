@@ -21,6 +21,7 @@ public class FuelPumpSS extends SubsystemBase {
     INTAKE_VOLT,
     INTAKE_VELOCITY,
     OUTTAKE_VOLT,
+    KICKBACK_VOLT,
     SLIGHT_OUTTAKE_VOLT
   }
 

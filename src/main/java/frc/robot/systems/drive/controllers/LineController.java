@@ -27,18 +27,18 @@ public class LineController {
 
     public static final LoggedTunableNumber tXToleranceMeters = new LoggedTunableNumber("LineAlign/X/ToleranceMeters", 0.03);
 
-    public static final LoggedTunableNumber tOmegaP = new LoggedTunableNumber("LineAlign/Omega/kP", 3.0);
+    public static final LoggedTunableNumber tOmegaP = new LoggedTunableNumber("LineAlign/Omega/kP", 2.5);
     public static final LoggedTunableNumber tOmegaD = new LoggedTunableNumber("LineAlign/Omega/kD", 0.0);
 
     // public static final LoggedTunableNumber tOmegaI = new LoggedTunableNumber("LineAlign/Omega/kI", 0.0);
     // public static final LoggedTunableNumber tOmegaIZone = new LoggedTunableNumber("LineAlign/Omega/kIZone", 0.0);
     // public static final LoggedTunableNumber tOmegaIRange = new LoggedTunableNumber("LineAlign/Omega/kIRange", 0.0);
 
-    public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPS", 720);
-    public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPSS", 2500);
+    public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPS", 600);
+    public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPSS", 12000);
 
     public static final LoggedTunableNumber tOmegaS = new LoggedTunableNumber("LineAlign/Omega/kS", 0.0);
-    public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("LineAlign/Omega/kV", 1.0);
+    public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("LineAlign/Omega/kV", 0.25);
 
     public static final LoggedTunableNumber tOmegaToleranceDegrees = new LoggedTunableNumber("LineAlign/Omega/ToleranceDegrees", 1.5);
 

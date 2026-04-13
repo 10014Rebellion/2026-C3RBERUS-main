@@ -19,6 +19,7 @@ public class FuelInjectorSS extends SubsystemBase{
         IDLE,
         INTAKE,
         OUTTAKE,
+        KICKBACK,
         TUNING,
         INVALID
     }
@@ -48,23 +49,29 @@ public class FuelInjectorSS extends SubsystemBase{
     @Override
     public void periodic(){
         mFuelInjectorIO.updateInputs(mFuelInjectorInputs);
-        Logger.processInputs("FuelInjector/Motor", mFuelInjectorInputs);
-
         mLeftFuelPumpSensorIO.updateInputs(mLeftFuelPumpInputs);
-        Logger.processInputs("FuelInjector/CANRange/Left", mLeftFuelPumpInputs);
-
         mRightFuelPumpSensorIO.updateInputs(mMidFuelPumpInputs);
-        Logger.processInputs("FuelInjector/CANRange/Mid", mMidFuelPumpInputs);
-
         mMidFuelPumpSensorIO.updateInputs(mRightFuelPumpInputs);
+
+        Logger.processInputs("FuelInjector/Motor", mFuelInjectorInputs);
+        Logger.processInputs("FuelInjector/CANRange/Left", mLeftFuelPumpInputs);
+        Logger.processInputs("FuelInjector/CANRange/Mid", mMidFuelPumpInputs);
         Logger.processInputs("FuelInjector/CANRange/Right", mRightFuelPumpInputs);
 
         executeState();
     }
 
+    public boolean allCANRangesTripped(){
+        return mLeftFuelPumpInputs.hasObject && mMidFuelPumpInputs.hasObject && mRightFuelPumpInputs.hasObject;
+    }
+
+    public boolean anyCANRangesTripped(){
+        return mLeftFuelPumpInputs.hasObject || mMidFuelPumpInputs.hasObject || mRightFuelPumpInputs.hasObject;
+    }
+
     public void executeState() {
         switch (mFuelInjectorState) {
-            case IDLE, INTAKE, OUTTAKE, TUNING -> {
+            case IDLE, INTAKE, OUTTAKE, KICKBACK, TUNING -> {
                 mFuelInjectorIO.setMotorVolts(
                     FuelInjectorConstants.kStateToInjectorVoltage.get(mFuelInjectorState).get());
             } 
