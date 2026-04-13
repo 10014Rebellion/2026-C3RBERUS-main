@@ -67,6 +67,8 @@ public class IntakeRackSS extends SubsystemBase {
     private double mCompactPosition = IntakeConstants.RackConstants.tIntakeSetpointMeters.get();
     private double mCompactDecrementMPS = 0.2;
   
+    public static final LoggedTunableNumber kCompactKV = new LoggedTunableNumber("Intake/Control/CompactKV", 40);
+
     public IntakeRackSS(IntakeRackIO pIntakeRackIO) {
         this.mIntakeRackIO = pIntakeRackIO;
         this.mIntakeFF = IntakeConstants.RackConstants.kRackController.feedforward();
@@ -183,7 +185,7 @@ public class IntakeRackSS extends SubsystemBase {
         );
 
         if(mCurrentIntakeState.equals(IntakeRackState.COMPACT)) {
-            ffOutput += 20 * mCompactDecrementMPS;
+            ffOutput += kCompactKV.get() * mCompactDecrementMPS;
         }
 
         Telemetry.log("Intake/Rack/ffOutput", ffOutput);

@@ -30,7 +30,7 @@ public class IntakeConstants {
             ((25.0 / 12.0) / (Math.PI * Units.inchesToMeters(1.54))) / 0.75,
             InvertedValue.CounterClockwise_Positive,
             NeutralModeValue.Coast,
-            new CurrentLimits(60, 80)
+            new CurrentLimits(60, 90)
         );
 
         public static final SimulatedElevator kRackElevator = new SimulatedElevator(
