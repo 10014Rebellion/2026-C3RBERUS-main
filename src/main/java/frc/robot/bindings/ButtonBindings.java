@@ -141,6 +141,7 @@ public class ButtonBindings {
         Trigger headingAlignAtGoal = new Trigger(mDriveSS.getDriveManager().waitUntilHeadingAlignFinishes());
         Trigger shooterAtGoal = hoodAtGoal.and(flywheelAtGoal);
         Trigger fuelPumpAtGoal = new Trigger(() -> mFuelPumpSS.atGoal());
+        Trigger atPositionGoal = new Trigger(mDriveSS.getDriveManager().waitUntilAutoAlignFinishes());
         Trigger atHeadingGoal = (headingAlignAtGoal.or(driveIsHeadingXLocked));
 
 
@@ -196,7 +197,11 @@ public class ButtonBindings {
             .onTrue(mDriveSS.getDriveManager().setToHeadingXLock());
 
         wantToDeployClimb
-            .onTrue(mClimbSS.goUpTillClimbHeightThenStay());
+            .onTrue(mClimbSS.goUpTillClimbHeightThenStay())
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), 
+                ConstraintType.LINEAR))
+            .onFalse(mDriveSS.getDriveManager().setToTeleop());
         
         wantToClimbAscend
             .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed());

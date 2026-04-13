@@ -29,6 +29,19 @@ public class GameGoalPoseChooser {
         return AllianceFlipUtil.apply(new Pose2d());
     }
 
+    public static boolean onLeftY(Pose2d robotPose) {
+
+        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue) && robotPose.getY() > FieldConstants.kFieldYM / 2.0){
+            return true;
+        }
+
+        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red) && robotPose.getY() < FieldConstants.kFieldYM / 2.0){
+            return true;
+        }
+
+        return false;
+    }
+
     /* Accoumts for rotation from reef, and offsets for red-side logic */
     public static Rotation2d turnFromHub(Pose2d robotPose) {
         Pose2d hubCenter = getHub();
@@ -49,12 +62,26 @@ public class GameGoalPoseChooser {
         return trenchPose; 
     }
 
+    public static Pose2d getClosestClimbPose(Pose2d robotPose){
+        Pose2d bumpPose = onLeftY(robotPose) ? getCL() : getCR();
+        Logger.recordOutput("GamePoses/ClosestClimb", bumpPose);
+        return bumpPose; 
+    }
+
     public static Pose2d getTL() {
         return AllianceFlipUtil.apply(FieldConstants.kTrenchPoseLeft);
     }
 
     public static Pose2d getTR() {
         return AllianceFlipUtil.apply(FieldConstants.kTrenchPoseRight);
+    }
+
+    public static Pose2d getCL() {
+        return AllianceFlipUtil.apply(FieldConstants.kClimbLeftPose);
+    }
+
+    public static Pose2d getCR(){
+        return AllianceFlipUtil.apply(FieldConstants.kClimbRightPose);
     }
 
     /* Nonstatic bump */
