@@ -36,8 +36,8 @@ public class ClimbConstants {
         kStateToVoltage.put(ClimbState.IDLE, kClimbIdle);
     }
 
-    public static final double kClimbHeight = 2.4;//changes values to fix encoder readings: Arya
-    public static final double kClimbedHeight = 1.14; //changed values to fix encoder readings: Arya
+    public static final double kClimbHeight = 3.0;//changes values to fix encoder readings: Arya
+    public static final double kClimbedHeight = 0.13; //changed values to fix encoder readings: Arya
     
     public static final BasicMotorHardware kClimbMotorConstants = new BasicMotorHardware(
         60, // Motor ID // TODO: TUNE ME!

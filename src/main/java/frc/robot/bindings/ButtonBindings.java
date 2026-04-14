@@ -1,4 +1,6 @@
 package frc.robot.bindings;
+import static frc.robot.systems.shooter.fuelpump.FuelPumpConstants.tIntakeVelocity;
+
 import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -168,11 +170,16 @@ public class ButtonBindings {
         new Trigger(() -> mIntakeSS.safeToRunRollers())
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
         
+        // wantToTrashCompact.and(isRackMoving)
         wantToTrashCompact
             .onTrue(mIntakeSS.trashCompact())
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        // wantToTrashCompact.and(isRackMoving.negate())
+        //     .onTrue(new WaitCommand(kKickbackTime).andThen(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT)));
+        //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         wantToStowIntake
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.STOW))
@@ -206,9 +213,14 @@ public class ButtonBindings {
 
         wantToDeployClimb
             .onTrue(mClimbSS.goUpTillClimbHeightThenStay())
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), 
-                ConstraintType.LINEAR))
+            .onTrue(
+                mDriveSS.getDriveManager().setToGenericLineAlign(
+                    () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), 
+                    () -> Rotation2d.kZero, 
+                    () -> 0.4, 
+                    () -> true
+                )
+            )
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
         
         wantToClimbAscend

@@ -51,7 +51,7 @@ public class Robot extends LoggedRobot {
         Logger.recordOutput("GameStates/TELEOPERATED TIME", mTracker.getTeleopTimeLeft());
         Logger.recordOutput("GameStates/PHASE TIME", mTracker.getTimeLeftInPhase());
         Logger.recordOutput("GameStates/AUTONOMOUS TIME", mTracker.getAutonTimeLeft());
-        Logger.recordOutput("IS ACTIVE", mTracker.isHubActive());
+        Logger.recordOutput("GameStates/IS ACTIVE", mTracker.isHubActive());
     }
 
     @Override

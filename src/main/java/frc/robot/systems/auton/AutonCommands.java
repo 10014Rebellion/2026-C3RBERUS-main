@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
+import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
@@ -43,6 +44,7 @@ public class AutonCommands extends SubsystemBase {
     private final FuelPumpSS mFuelPumpSS;
     private final FlywheelsSS mFlywheelsSS;
     private final ClimbSS mClimbSS;
+    private final FuelInjectorSS mFuelInjectorSS;
 
     private final SendableChooser<Supplier<Command>> mAutoChooser;
     private final LoggedDashboardChooser<Supplier<Command>> mAutoChooserLogged;
@@ -58,13 +60,14 @@ public class AutonCommands extends SubsystemBase {
         "R_ST_IB_ST_BUMP"
     };
 
-    public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, ClimbSS pClimbSS) {
+    public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, ClimbSS pClimbSS, FuelInjectorSS pInjectorSS) {
         this.mRobotDrive = pRobotDrive;
         this.mIntake = pIntake;
         this.mHoodSS = pHoodSS;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mFuelPumpSS = pFuelPumpSS;
         this.mClimbSS = pClimbSS;
+        this.mFuelInjectorSS = pInjectorSS;
 
         mAutoFactory = new AutoFactory(
             mRobotDrive::getPoseEstimate, 
@@ -88,14 +91,14 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftSingleSwipe", 
                 "L_IT_IC_ST", 
-                4.19);
+                4.93);
 
         SingleSwipeClimb mLeftSingleSwipeClimbAuto =
             new SingleSwipeClimb(
                 this, 
                 "LeftSingleSwipeClimb", 
                 "L_IT_IC_ST", 
-                4.19, 
+                4.93, 
                 FieldConstants.kClimbLeftPose);
 
         DoubleSwipe mLeftDoubleSwipeBumpAuto =
@@ -103,7 +106,7 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftDoubleSwipeBump", 
                 "L_IT_IC_ST", 
-                4.19,
+                4.93,
                 "L_ST_IB_ST_BUMP",
                 4.52);
 
@@ -112,7 +115,7 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftDoubleSwipeBumpClimb", 
                 "L_IT_IC_ST", 
-                4.19,
+                4.93,
                 "L_ST_IB_ST_BUMP",
                 4.52,
                 FieldConstants.kClimbLeftPose);
@@ -316,6 +319,10 @@ public class AutonCommands extends SubsystemBase {
 
     public ClimbSS getClimbSubsystem() {
         return mClimbSS;
+    }
+
+    public FuelInjectorSS getFuelInjector() {
+        return mFuelInjectorSS;
     }
 
     public AutoFactory getAutoFactory() {

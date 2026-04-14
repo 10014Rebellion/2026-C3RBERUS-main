@@ -24,6 +24,7 @@ public class IntakeRackSS extends SubsystemBase {
         INTAKE,
         TUNING_SETPOINT,
         COMPACT,
+        JITTER_COMPACT,
         COMPACT_LOW,
         COMPACT_HIGH,
         INVALID
@@ -33,26 +34,16 @@ public class IntakeRackSS extends SubsystemBase {
     private final ElevatorFeedforward mIntakeFF;
     private final IntakeRackInputsAutoLogged mIntakeRackInputs = new IntakeRackInputsAutoLogged();
 
-    private final LoggedTunableNumber tIntakeKP = new LoggedTunableNumber("Intake/Control/PID/kP", 
-        IntakeConstants.RackConstants.kRackController.pdController().kP());
-    private final LoggedTunableNumber tIntakeKD = new LoggedTunableNumber("Intake/Control/PID/kD", 
-        IntakeConstants.RackConstants.kRackController.pdController().kD());
-    private final LoggedTunableNumber tIntakeKS = new LoggedTunableNumber("Intake/Control/FF/kS", 
-        IntakeConstants.RackConstants.kRackController.feedforward().getKs());
-    private final LoggedTunableNumber tIntakeKG = new LoggedTunableNumber("Intake/Control/FF/kG", 
-        IntakeConstants.RackConstants.kRackController.feedforward().getKg());
-    private final LoggedTunableNumber tIntakeKV = new LoggedTunableNumber("Intake/Control/FF/kV", 
-        IntakeConstants.RackConstants.kRackController.feedforward().getKv());
-    private final LoggedTunableNumber tIntakeKA = new LoggedTunableNumber("Intake/Control/FF/kA", 
-        IntakeConstants.RackConstants.kRackController.feedforward().getKa());
-    private final LoggedTunableNumber tIntakeCruiseVelMPS = new LoggedTunableNumber("Intake/Control/Profile/CruiseVelMPS", 
-        IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxVelocity());
-    private final LoggedTunableNumber tIntakeMaxAccelMPSS = new LoggedTunableNumber("Intake/Control/Profile/MaxAccelerationMPSS", 
-        IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxAcceleration());
-    private final LoggedTunableNumber tIntakeMaxJerkMPSSS = new LoggedTunableNumber("Intake/Control/Profile/MaxJerkMPSSS", 
-        IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxJerk());
-    private final LoggedTunableNumber tIntakeToleranceDegrees = new LoggedTunableNumber("Intake/Control/ToleranceMeters", 
-        IntakeConstants.RackConstants.kRackToleranceMeters);
+    private final LoggedTunableNumber tIntakeKP = new LoggedTunableNumber("Intake/Control/PID/kP", IntakeConstants.RackConstants.kRackController.pdController().kP());
+    private final LoggedTunableNumber tIntakeKD = new LoggedTunableNumber("Intake/Control/PID/kD", IntakeConstants.RackConstants.kRackController.pdController().kD());
+    private final LoggedTunableNumber tIntakeKS = new LoggedTunableNumber("Intake/Control/FF/kS", IntakeConstants.RackConstants.kRackController.feedforward().getKs());
+    private final LoggedTunableNumber tIntakeKG = new LoggedTunableNumber("Intake/Control/FF/kG", IntakeConstants.RackConstants.kRackController.feedforward().getKg());
+    private final LoggedTunableNumber tIntakeKV = new LoggedTunableNumber("Intake/Control/FF/kV", IntakeConstants.RackConstants.kRackController.feedforward().getKv());
+    private final LoggedTunableNumber tIntakeKA = new LoggedTunableNumber("Intake/Control/FF/kA", IntakeConstants.RackConstants.kRackController.feedforward().getKa());
+    private final LoggedTunableNumber tIntakeCruiseVelMPS = new LoggedTunableNumber("Intake/Control/Profile/CruiseVelMPS", IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxVelocity());
+    private final LoggedTunableNumber tIntakeMaxAccelMPSS = new LoggedTunableNumber("Intake/Control/Profile/MaxAccelerationMPSS", IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxAcceleration());
+    private final LoggedTunableNumber tIntakeMaxJerkMPSSS = new LoggedTunableNumber("Intake/Control/Profile/MaxJerkMPSSS", IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxJerk());
+    private final LoggedTunableNumber tIntakeToleranceDegrees = new LoggedTunableNumber("Intake/Control/ToleranceMeters", IntakeConstants.RackConstants.kRackToleranceMeters);
   
     @AutoLogOutput(key = "IntakeRack/States/CurrentState")
     private IntakeRackState mCurrentIntakeState = IntakeRackState.STOPPED;
@@ -64,14 +55,23 @@ public class IntakeRackSS extends SubsystemBase {
     @AutoLogOutput(key = "Intake/LimitsEnforced")
     private boolean mLimitEnforced = false;
 
-    private double mCompactPosition = IntakeConstants.RackConstants.tIntakeSetpointMeters.get();
+    private double mSetpointCompactPosition = IntakeConstants.RackConstants.tIntakingSetpointMeters.get();
     private double mCompactDecrementMPS = 0.2;
+    private boolean mCompactStowing = true; // For jitter compact.
   
     public static final LoggedTunableNumber kCompactKV = new LoggedTunableNumber("Intake/Control/CompactKV", 40);
 
     public IntakeRackSS(IntakeRackIO pIntakeRackIO) {
         this.mIntakeRackIO = pIntakeRackIO;
         this.mIntakeFF = IntakeConstants.RackConstants.kRackController.feedforward();
+    }
+
+    private double anshulCompactFunc(double pTime) {
+        double amplitude = 0.2;
+        double netStepVelocity = 0.2;
+        double peaks = 1;
+
+        return (pTime);
     }
 
     @Override
@@ -97,9 +97,9 @@ public class IntakeRackSS extends SubsystemBase {
                 mIntakeRackIO.setMotorVolts(IntakeConstants.RackConstants.tRackTuningVoltage.get());
             } case STOW, SAFESTOW, INTAKE, TUNING_SETPOINT, COMPACT_HIGH, COMPACT_LOW -> {
                 mIntakeRackIO.resetPPID();
-            } case COMPACT -> {
+            } case COMPACT, JITTER_COMPACT -> {
                 mIntakeRackIO.resetPPID();
-                mCompactPosition = IntakeConstants.RackConstants.tIntakeSetpointMeters.get();
+                mSetpointCompactPosition = IntakeConstants.RackConstants.tIntakingSetpointMeters.get();
             } case INVALID -> {}
             default -> {
                 Telemetry.reportIssue(null);
@@ -121,13 +121,19 @@ public class IntakeRackSS extends SubsystemBase {
             } case STOW, SAFESTOW, INTAKE, TUNING_SETPOINT, COMPACT_LOW, COMPACT_HIGH -> {
                 setIntakePosition(IntakeConstants.RackConstants.kStateToSetpointMapIntake.get(mCurrentIntakeState).get());
             } case COMPACT -> {
-                setIntakePosition(mCompactPosition);
-                if(mCompactPosition < IntakeConstants.RackConstants.tSafeStowSetpointMeters.get()) {
-                    mCompactPosition += mCompactDecrementMPS * 0.02;
+                setIntakePosition(mSetpointCompactPosition);
+                if(mSetpointCompactPosition < IntakeConstants.RackConstants.tSafeStowSetpointMeters.get()) {
+                    mSetpointCompactPosition += mCompactDecrementMPS * 0.02;
                 } else {
-                    mCompactPosition = IntakeConstants.RackConstants.tSafeStowSetpointMeters.get();
+                    mSetpointCompactPosition = IntakeConstants.RackConstants.tSafeStowSetpointMeters.get();
                 }
-            }case INCREMENTING -> {
+            }
+            case JITTER_COMPACT -> {
+                if(mCompactStowing) {
+
+                }
+            }
+            case INCREMENTING -> {
                 setIntakePosition(mIntakeRackInputs.iIntakeRackPositionM + IntakeConstants.RackConstants.tIncrementSpeedMPS.get());
             } case DECREMENTING -> {
                 setIntakePosition(mIntakeRackInputs.iIntakeRackPositionM - IntakeConstants.RackConstants.tIncrementSpeedMPS.get());
@@ -233,6 +239,10 @@ public class IntakeRackSS extends SubsystemBase {
     @AutoLogOutput(key = "Intake/Feedback/AtGoal")
     public boolean atGoal() {
         return Math.abs(getErrorPosition()) < tIntakeToleranceDegrees.get();
+    }
+
+    public boolean isRackingMoving() {
+        return mIntakeRackInputs.iIntakeRackVelocityMS > 0.05;
     }
 
     /* LOGICCC */
