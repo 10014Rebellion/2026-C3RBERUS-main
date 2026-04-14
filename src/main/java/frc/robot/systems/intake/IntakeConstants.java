@@ -77,7 +77,7 @@ public class IntakeConstants {
 
         public static final LoggedTunableNumber tSafeStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/SafeStowSetpointMeters", 0.22);
 
-        public static final LoggedTunableNumber tIntakeSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/IntakeSetpointMeters", 0.03);
+        public static final LoggedTunableNumber tIntakeSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/IntakeSetpointMeters", 0.015);
 
         public static final LoggedTunableNumber tTuningShotSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/TuningShotSetpointMeters", 0);
 

@@ -6,6 +6,7 @@ import frc.robot.commands.FollowPathCommand;
 import frc.robot.commands.AutoEvent;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
+import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
@@ -19,6 +20,7 @@ public class Auton {
     protected final FuelPumpSS mFuelPumpSS;
     protected final Intake mIntakeSS;
     protected final ClimbSS mClimbSS;
+    protected final FuelInjectorSS mInjectorSS;
 
     public Auton(AutonCommands pAutos) {
         mAutos = pAutos;
@@ -29,6 +31,7 @@ public class Auton {
         this.mFuelPumpSS = pAutos.getFuelPumpSubsystem();
         this.mIntakeSS = pAutos.getIntakeSubsystem();
         this.mClimbSS = pAutos.getClimbSubsystem();
+        this.mInjectorSS = pAutos.getFuelInjector();
     }
 
     protected FollowPathCommand followChoreoPath(

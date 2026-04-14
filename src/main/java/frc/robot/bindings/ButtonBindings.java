@@ -206,9 +206,14 @@ public class ButtonBindings {
 
         wantToDeployClimb
             .onTrue(mClimbSS.goUpTillClimbHeightThenStay())
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
-                () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), 
-                ConstraintType.LINEAR))
+            .onTrue(
+                mDriveSS.getDriveManager().setToGenericLineAlign(
+                    () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), 
+                    () -> Rotation2d.kZero, 
+                    () -> 0.4, 
+                    () -> true
+                )
+            )
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
         
         wantToClimbAscend

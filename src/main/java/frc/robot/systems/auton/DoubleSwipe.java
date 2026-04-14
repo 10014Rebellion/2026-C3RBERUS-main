@@ -14,6 +14,7 @@ import frc.robot.commands.FollowPathCommand;
 import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
+import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
@@ -116,10 +117,13 @@ public class DoubleSwipe extends Auton {
 
         //////////////////// FIRST SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
         autoActivted
-            .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
+            .onTrue(firstSwipePath)
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(Commands.runOnce(() -> mWantToShoot = false));
+
+        // firstSwipePath.hasEnded().negate().and(firstSwipePath.isRunning().negate()).and(new Trigger(() -> mIntakeSS.getRackState().equals(IntakeRackState.INTAKE) && mIntakeSS.getRackAtGoal()))
+        //     .onTrue(firstSwipePath);
 
         firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
@@ -130,6 +134,7 @@ public class DoubleSwipe extends Auton {
         firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(firstSwipeIntakeShot)
             .onTrue(firstSwipeIndexShot)
+            .onTrue(mInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
             .onTrue(mIntakeSS.trashCompact());
 
         firstSwipePath.hasEnded().and(hasFirstShotEnded)
@@ -137,6 +142,7 @@ public class DoubleSwipe extends Auton {
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(mInjectorSS.setStateCmd(FuelInjectorState.IDLE))
             .onTrue(secondSwipePath);
 
         //////////////////// SECOND SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -149,12 +155,14 @@ public class DoubleSwipe extends Auton {
         secondSwipePath.hasEnded().and(() -> mWantToShoot).and(hasSecondShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(secondSwipeIntakeShot)
             .onTrue(secondSwipeIndexShot)
+            .onTrue(mInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
             .onTrue(mIntakeSS.trashCompact());
 
         secondSwipePath.hasEnded().and(hasSecondShotEnded)
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
+            .onTrue(mInjectorSS.setStateCmd(FuelInjectorState.IDLE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
             .onTrue(mAutos.endAuto(auto));
 
