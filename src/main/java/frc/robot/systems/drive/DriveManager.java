@@ -373,6 +373,26 @@ public class DriveManager {
             }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
     }
 
+    /*
+     * Reference GameDriveManager to use game-specific implementation of mDrive command
+     * Resets
+     * @param Goal strategy, based on where you're aligning
+     * @param Constraint type, linear or on an axis
+     */
+    public Command setToGenericAutoAlignWithGeneratorReset(Supplier<Pose2d> pGoalPoseSup, ConstraintType pConstraintType) {
+        return new InstantCommand(() -> {
+            mGoalPoseSup = pGoalPoseSup;
+            mAutoAlignController.setConstraintType(pConstraintType);
+            mAutoAlignController.reset(
+                mDrive.getPoseEstimate(), 
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                    mDrive.getRobotChassisSpeeds(), 
+                    mDrive.getPoseEstimate().getRotation()),
+                mGoalPoseSup.get());
+            mDrive.resetSetpointGenerator();
+            }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
+    }
+
     public Command setToGenericLineAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<Rotation2d> pLineAngle, DoubleSupplier pTelScal, BooleanSupplier pTeleopInvert) {
         return new InstantCommand(() -> {
             mGoalPoseSup = pGoalPoseSup;

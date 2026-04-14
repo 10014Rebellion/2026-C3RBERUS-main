@@ -94,7 +94,7 @@ public class SingleSwipe extends Auton {
 
         firstSwipePath.atTime(mFirstSwipeAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
                 () -> getSwipeEndPose(lastPoseOfFirstSwipe),
                 ConstraintType.LINEAR));
 

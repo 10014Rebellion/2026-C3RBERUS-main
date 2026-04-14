@@ -100,6 +100,7 @@ public class Drive extends SubsystemBase {
     private SwerveModulePosition[] moduleDeltasHighF = SwerveHelper.zeroPositions();
 
     private boolean kUseGenerator = true;
+    private boolean resetFromModuleStates = false;
     private final SpeedErrorController mSpeedErrorController = new SpeedErrorController();
 
     private DriveManager mDriveManager;
@@ -261,6 +262,11 @@ public class Drive extends SubsystemBase {
         if(DriverStation.isDisabled()) {
             mDesiredSpeeds = new ChassisSpeeds();
             mPreviousSetpoint = SwerveHelper.emptySwerveSetpoint(mModules);
+        }
+
+        if(resetFromModuleStates) {
+            mPreviousSetpoint = SwerveHelper.resetGeneratoFromModuleStates(mModules, getRobotChassisSpeeds());
+            resetFromModuleStates = false;
         }
 
         /* Logs all the possible drive states, great for debugging */
@@ -548,5 +554,9 @@ public class Drive extends SubsystemBase {
         return GeomUtil.hypot(
             mGyroInputs.iAccXG, 
             mGyroInputs.iAccYG);
+    }
+
+    public void resetSetpointGenerator() {
+        resetFromModuleStates = true;
     }
 }

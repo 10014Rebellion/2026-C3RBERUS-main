@@ -127,7 +127,7 @@ public class DoubleSwipe extends Auton {
 
         firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
                 () -> getSwipeEndPose(lastPoseOfFirstSwipe),
                 ConstraintType.LINEAR));
 
@@ -148,7 +148,7 @@ public class DoubleSwipe extends Auton {
         //////////////////// SECOND SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
         secondSwipePath.atTime(mSecondSwipeSwitchToAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
                 () -> getSwipeEndPose(lastPoseOfSecondSwipe),
                 ConstraintType.LINEAR));
 

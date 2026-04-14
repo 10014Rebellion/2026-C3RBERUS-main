@@ -306,6 +306,23 @@ public class SwerveHelper {
                 0.0}));
     }
 
+    public static SwerveSetpoint resetGeneratoFromModuleStates(Module[] quadModules, ChassisSpeeds currentSpeeds) {
+        return new SwerveSetpoint(
+            currentSpeeds, 
+            new SwerveModuleState[] {
+                quadModules[0].getCurrentState(),
+                quadModules[1].getCurrentState(),
+                quadModules[2].getCurrentState(),
+                quadModules[3].getCurrentState()
+            }, 
+            DriveFeedforwards.zeros(4), 
+            new AzimuthFeedForward(new double[] {
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0}));
+    }
+
     public static void runXLock(double pTrackWidthXMeters, double pTrackWidthYMeters, Module[] pModules) {
         pModules[0].setDesiredState(
             new SwerveModuleState(
