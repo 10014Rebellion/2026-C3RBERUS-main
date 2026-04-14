@@ -67,6 +67,9 @@ public class IntakeConstants {
         public static final double kArmLengthMeters = Units.inchesToMeters(12.0);
         public static final double kArmMassKg = 5.0;
 
+        public static final LoggedTunableNumber tCompactTuningStowStepM = new LoggedTunableNumber("Intake/Compact/StowStepMeters");
+        public static final LoggedTunableNumber tCompactTuningOutStepM = new LoggedTunableNumber("Intake/Compact/OutStepMeters");
+
         public static final LoggedTunableNumber tRackTuningVoltage = new LoggedTunableNumber("Intake/Tuning/TuneVoltage", 0.0);
         public static final LoggedTunableNumber tRackTuningAmp = new LoggedTunableNumber("Intake/Tuning/TuneAmperage", 0.0);
         public static final LoggedTunableNumber tConstantCompactAmps = new LoggedTunableNumber("Intake/Setpoint/CompactConstantAmps", 0.0); 
@@ -77,7 +80,9 @@ public class IntakeConstants {
 
         public static final LoggedTunableNumber tSafeStowSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/SafeStowSetpointMeters", 0.22);
 
-        public static final LoggedTunableNumber tIntakeSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/IntakeSetpointMeters", 0.03);
+        public static final LoggedTunableNumber tCompactStartPositionMeters  = new LoggedTunableNumber("Intake/Setpoint/CompactStartPositionMeters", 0.12);
+
+        public static final LoggedTunableNumber tIntakingSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/IntakeSetpointMeters", 0.03);
 
         public static final LoggedTunableNumber tTuningShotSetpointMeters  = new LoggedTunableNumber("Intake/Setpoint/TuningShotSetpointMeters", 0);
 
@@ -91,7 +96,7 @@ public class IntakeConstants {
         static {
             kStateToSetpointMapIntake.put(IntakeRackState.STOW, tStowSetpointMeters);
             kStateToSetpointMapIntake.put(IntakeRackState.SAFESTOW, tSafeStowSetpointMeters);
-            kStateToSetpointMapIntake.put(IntakeRackState.INTAKE, tIntakeSetpointMeters);
+            kStateToSetpointMapIntake.put(IntakeRackState.INTAKE, tIntakingSetpointMeters);
             kStateToSetpointMapIntake.put(IntakeRackState.TUNING_SETPOINT, tTuningShotSetpointMeters);
             kStateToSetpointMapIntake.put(IntakeRackState.COMPACT_HIGH, tCompactHighSetpointMeters);
             kStateToSetpointMapIntake.put(IntakeRackState.COMPACT_LOW, tCompactLowSetpointMeters);
