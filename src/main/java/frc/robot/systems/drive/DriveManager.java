@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
-import frc.lib.math.GeomUtil;
 import frc.lib.telemetry.Telemetry;
 import frc.robot.systems.drive.controllers.HeadingController;
 import frc.robot.systems.drive.controllers.HolonomicController;
@@ -459,10 +458,7 @@ public class DriveManager {
     @AutoLogOutput(key = "Drive/Tolerance/HeadingController")
     public boolean inHeadingTolerance() {
         /* Accounts for angle wrapping issues with rotation 2D error */
-        return mHeadingController.inTolerance() || Math.abs(GeomUtil.getSmallestChangeInRotation(
-            mDrive.getPoseEstimate().getRotation(), 
-            mGoalRotationSup.get()).getDegrees())
-            < HeadingController.mToleranceDegrees.get();
+        return mHeadingController.inTolerance(mDrive.getRobotRotation(), Rotation2d.fromDegrees(5.0));
     }
 
     public boolean validHeadingState(DriveState state) {
