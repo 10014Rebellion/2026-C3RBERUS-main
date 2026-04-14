@@ -27,10 +27,12 @@ public class FuelInjectorConstants {
     public static final LoggedTunableNumber tOuttakeTuningVoltage = new LoggedTunableNumber("FuelInjector/Voltage/OUTTAKE", -10);
     public static final LoggedTunableNumber tIntakeTuningVoltage = new LoggedTunableNumber("FuelInjector/Voltage/INTAKE", 10);
     public static final LoggedTunableNumber tFuelInjectorTuningVoltage = new LoggedTunableNumber("FuelInjector/Voltage/TUNING", 0.0);
+    public static final LoggedTunableNumber tFuelInjectorKickbackVoltage = new LoggedTunableNumber("FuelInjector/Voltage/KICKBACK", -2.0);
     public static final HashMap<FuelInjectorState, LoggedTunableNumber> kStateToInjectorVoltage = new HashMap<>();
 
         static {
             kStateToInjectorVoltage.put(FuelInjectorState.IDLE, tIdleTuningVoltage);
+            kStateToInjectorVoltage.put(FuelInjectorState.KICKBACK, tFuelInjectorKickbackVoltage);
             kStateToInjectorVoltage.put(FuelInjectorState.INTAKE, tIntakeTuningVoltage);
             kStateToInjectorVoltage.put(FuelInjectorState.OUTTAKE, tOuttakeTuningVoltage);
             kStateToInjectorVoltage.put(FuelInjectorState.TUNING, tFuelInjectorTuningVoltage);

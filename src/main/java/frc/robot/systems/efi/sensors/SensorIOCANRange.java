@@ -8,12 +8,14 @@ import com.ctre.phoenix6.signals.MeasurementHealthValue;
 
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
+import frc.lib.PhoenixUtil;
+import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.lib.hardware.HardwareRecords.CANRangeConfiguration;
 import frc.robot.RobotConstants;
 
 public class SensorIOCANRange implements SensorIO{
 
-    private final CANrange kCANRange;
+    private final CANrange mCANRange;
 
     private final StatusSignal<Distance> distanceFromFuel;
     private final StatusSignal<Boolean> isDetected;
@@ -26,22 +28,34 @@ public class SensorIOCANRange implements SensorIO{
     private CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
 
     public SensorIOCANRange(CANRangeConfiguration configuration){
-        kCANRange = new CANrange(configuration.canRangeID(), RobotConstants.kSubsystemsCANBus);
+        mCANRange = new CANrange(configuration.canRangeID(), RobotConstants.kSubsystemsCANBus);
 
         canRangeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 3000;
         canRangeConfig.ProximityParams.ProximityHysteresis = configuration.positionTolerance();
         canRangeConfig.ProximityParams.ProximityThreshold = configuration.fuelDetectionCutoff();
 
-        kCANRange.getConfigurator().apply(canRangeConfig);
+        mCANRange.getConfigurator().apply(canRangeConfig);
 
         // Intialize Status Signals
-        distanceFromFuel = kCANRange.getDistance();
-        isDetected = kCANRange.getIsDetected();
-        distanceFromFuelStdev = kCANRange.getDistanceStdDev();
-        ambience = kCANRange.getAmbientSignal();
-        signalStrength = kCANRange.getSignalStrength();
-        measurementHealth = kCANRange.getMeasurementHealth();
-        measurementTime = kCANRange.getMeasurementTime();
+        distanceFromFuel = mCANRange.getDistance();
+        isDetected = mCANRange.getIsDetected();
+        distanceFromFuelStdev = mCANRange.getDistanceStdDev();
+        ambience = mCANRange.getAmbientSignal();
+        signalStrength = mCANRange.getSignalStrength();
+        measurementHealth = mCANRange.getMeasurementHealth();
+        measurementTime = mCANRange.getMeasurementTime();
+
+        mCANRange.optimizeBusUtilization(0.0);
+
+        PhoenixUtil.registerSignals(
+            CanivoreBus.OVERWORLD, 
+            distanceFromFuel,
+            isDetected, 
+            distanceFromFuelStdev,
+            ambience,
+            signalStrength,
+            measurementHealth,
+            measurementTime);
     }
 
     @SuppressWarnings("unlikely-arg-type")
