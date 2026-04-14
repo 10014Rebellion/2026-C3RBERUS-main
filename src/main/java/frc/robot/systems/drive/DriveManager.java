@@ -346,6 +346,12 @@ public class DriveManager {
         }).andThen( setDriveStateCommandContinued( DriveState.LINE_ALIGN ) );
     }
 
+    public Command resetLineAlign(){
+        return new InstantCommand(() -> {
+            mLineAlignController.resetControllers();
+        });
+    }
+
     /*
      * Reference GameDriveManager to use game-specific implementation of mDrive command
      * @param The desired rotation

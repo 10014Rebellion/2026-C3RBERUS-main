@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
@@ -28,7 +29,7 @@ import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
-import frc.robot.systems.shooter.hood.HoodSS.HoodStates;;
+import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 
 public class ButtonBindings {
     public static enum HeadingTraversalState {
@@ -85,8 +86,6 @@ public class ButtonBindings {
 
     public void initCompBindings() {
         Trigger wantToClimb = mPilotController.povUp().and(kUsingPilotGunner);
-        Trigger isLineAligned = new Trigger(() -> mDriveSS.getDriveManager().getLineAlignController().atPositionTimeout());
-        Trigger isPoseAligned = new Trigger(() -> mDriveSS.getDriveManager().getAutoAlignController().atGoal());
 
         boolean closedLoopFuelPump = true;
         boolean isEli = false;
@@ -144,6 +143,7 @@ public class ButtonBindings {
         Trigger shooterAtGoal = hoodAtGoal.and(flywheelAtGoal);
         Trigger atPositionalGoal = autonomousWorking.negate().or(autoAlignAtGoal);
         Trigger atHeadingGoal = (headingAlignAtGoal.or(driveIsHeadingXLocked));
+        Trigger atLineAlignGoal = new Trigger(() -> mDriveSS.getDriveManager().getLineAlignController().atGoal());
 
         Trigger wantsToHeadingXLock = mPilotController.x();
 
@@ -208,28 +208,31 @@ public class ButtonBindings {
             )
         .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
-        wantToClimb.and(autonomousWorking).and(isLineAligned.negate())
+        wantToClimb.and(autonomousWorking).and(atLineAlignGoal.negate())
             .onTrue(
                 mDriveSS.getDriveManager().setToGenericLineAlign(
                     () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), 
-                    () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()).getRotation(), 
+                    () -> Rotation2d.kZero, 
                     () -> 1, 
-                    () -> false))
-                    .onFalse(mDriveSS.getDriveManager().setToTeleop());
-
-        wantToClimb.and(autonomousWorking).and(isLineAligned)
-            .onTrue(
-                mDriveSS.getDriveManager().setToGenericAutoAlign(() -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), ConstraintType.LINEAR))
-            .onTrue(
-                mClimbSS.goUpTillClimbHeightThenStay()
+                    () -> false
+                )
             )
-            .onFalse(
-                mDriveSS.getDriveManager().setToTeleop()
-            );
+        .onFalse(mDriveSS.getDriveManager().setToTeleop())
+        .onFalse(mDriveSS.getDriveManager().resetLineAlign());
 
-        wantToClimb.and(autonomousWorking).and(isPoseAligned)
-            .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed())
-            .onFalse(mClimbSS.idle());
+        // wantToClimb.and(autonomousWorking).and(atLineAlignGoal)
+        //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(
+        //         () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()), 
+        //         ConstraintType.LINEAR))
+        //     .onFalse(mDriveSS.getDriveManager().setToTeleop());
+
+        // wantToClimb.and(autonomousWorking)
+        //     .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed());
+                
+
+        // wantToClimb.and(autonomousWorking).and(isPoseAligned)
+        //     .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed())
+        //     .onFalse(mClimbSS.idle());
 
         // wantToCloseShoot.and(autonomousWorking)s.and(wantsToHeadingXLock.negate()).and(driveIsHeadingXLocked)
         //     .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlign(

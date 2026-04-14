@@ -88,8 +88,9 @@ public class LineController {
         return tXController.atGoal() && tOmegaController.atGoal();
     }
 
-    public boolean atPositionTimeout(){
-        return (getPositionGoal().getX() == getPositionSetpoint().getX()) && (getPositionGoal().getRotation() == getPositionSetpoint().getRotation());
+    public void resetControllers(){
+        tXController.setGoal(-1000);
+        tOmegaController.setGoal(-1000);
     }
 
     public Pose2d getPositionSetpoint() {
@@ -101,8 +102,7 @@ public class LineController {
     public Pose2d getPositionGoal(){
         return mGoalPose;
     }
-
-
+    
     public ChassisSpeeds calculate(ChassisSpeeds teleopSpeeds, Pose2d goalPose, Pose2d robotPose) {
         mGoalPose = goalPose;
 
