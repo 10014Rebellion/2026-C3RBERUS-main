@@ -284,4 +284,18 @@ public class IntakeRackSS extends SubsystemBase {
         if(val < 0) return -1;
         else return 0;
     }
+
+    public double agitationFunction(int jitters, double totalTime, double xInitial, double xFinal, double amplitude1, double amplitude2, double timeSample) {
+        double v1 = xFinal - 2 * amplitude1 - xInitial;
+        double v2 = v1 + xInitial / totalTime;
+        double k = (0.5 * jitters + 1.0) / totalTime;
+
+        if(timeSample < totalTime) {
+            return amplitude1 - amplitude1 * Math.cos(2 * Math.PI * k * timeSample) + v1 * timeSample + xInitial;
+        } else if(amplitude2 > amplitude1) {
+            return amplitude1 - amplitude2 * Math.cos(2 * Math.PI * k * timeSample) + v2 * timeSample - Math.abs(amplitude1 - amplitude2);
+        } else {
+                        return amplitude1 - amplitude2 * Math.cos(2 * Math.PI * k * timeSample) + v2 * timeSample + Math.abs(amplitude1 - amplitude2);
+        }
+    }
 }
