@@ -48,15 +48,11 @@ public class Intake {
         return mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT);
     }
 
+    public Command anshulCompact() {
+        return mIntakeRackSS.setStateCmd(IntakeRackState.JITTER_COMPACT);
+    }
+
     public boolean safeToRunRollers() {
         return mIntakeRackSS.isSafeToRunintakeRollers();
-    }
-
-    public IntakeRackState getRackState() {
-        return mIntakeRackSS.getIntakeState();
-    }
-
-    public boolean getRackAtGoal() {
-        return mIntakeRackSS.atGoal();
     }
 }

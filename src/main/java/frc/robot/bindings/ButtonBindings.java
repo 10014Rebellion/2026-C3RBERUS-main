@@ -1,4 +1,6 @@
 package frc.robot.bindings;
+import static frc.robot.systems.shooter.fuelpump.FuelPumpConstants.tIntakeVelocity;
+
 import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -147,6 +149,8 @@ public class ButtonBindings {
 
         Trigger anyCANRangesTriggered = new Trigger(() -> mFuelInjectorSS.anyCANRangesTripped());
 
+        Trigger isRackMoving = new Trigger(() -> mIntakeSS.isRackingMoving());
+
         Trigger wantToShoot = new Trigger(() -> {
             return 
                 wantToSnowPlow.getAsBoolean()
@@ -168,11 +172,16 @@ public class ButtonBindings {
         new Trigger(() -> mIntakeSS.safeToRunRollers())
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
         
+        // wantToTrashCompact.and(isRackMoving)
         wantToTrashCompact
             .onTrue(mIntakeSS.trashCompact())
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        // wantToTrashCompact.and(isRackMoving.negate())
+        //     .onTrue(new WaitCommand(kKickbackTime).andThen(mFuelPumpSS.setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT)));
+        //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         wantToStowIntake
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.STOW))
