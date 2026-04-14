@@ -13,46 +13,45 @@ import frc.robot.systems.intake.roller.IntakeRollerSS;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 
 public class Intake {
-    public static final double tIntakeCompactTime = 0.3;
+  public static final double tIntakeCompactTime = 0.3;
 
-    private final IntakeRackSS mIntakeRackSS;
-    private final IntakeRollerSS mIntakeRollerSS;
+  private final IntakeRackSS mIntakeRackSS;
+  private final IntakeRollerSS mIntakeRollerSS;
 
-    public Intake(IntakeRackSS mIntakeRackSS, IntakeRollerSS pIntakeRollerSS) {
-        this.mIntakeRackSS = mIntakeRackSS;
-        this.mIntakeRollerSS = pIntakeRollerSS;
-    }
+  public Intake(IntakeRackSS mIntakeRackSS, IntakeRollerSS pIntakeRollerSS) {
+    this.mIntakeRackSS = mIntakeRackSS;
+    this.mIntakeRollerSS = pIntakeRollerSS;
+  }
 
-    // ROLLER COMMANDS //
-    public Command setRollerStateCmd(IntakeRollerState rollerState) {
-        return mIntakeRollerSS.setStateCmd(rollerState);
-    }
-  
-    public Command stopRollerCmd() {
-        return mIntakeRollerSS.setStateCmd(IntakeRollerState.IDLE);
-    }
+  // ROLLER COMMANDS //
+  public Command setRollerStateCmd(IntakeRollerState rollerState) {
+    return mIntakeRollerSS.setStateCmd(rollerState);
+  }
 
-    // PIVOT COMMANDS //
-    public Command setRackStateCmd(IntakeRackState intake) {
-        return mIntakeRackSS.setStateCmd(intake);
-    }
+  public Command stopRollerCmd() {
+    return mIntakeRollerSS.setStateCmd(IntakeRollerState.IDLE);
+  }
 
-    public Command trashCompactRepeat() {
-        return new RepeatCommand(new SequentialCommandGroup(
-            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_HIGH).withTimeout(tIntakeCompactTime),
-            mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_LOW).withTimeout(tIntakeCompactTime)
-        ));
-    }
+  // PIVOT COMMANDS //
+  public Command setRackStateCmd(IntakeRackState intake) {
+    return mIntakeRackSS.setStateCmd(intake);
+  }
 
-    public Command trashCompact() {
-        return mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT);
-    }
+  public Command trashCompactRepeat() {
+    return new RepeatCommand(new SequentialCommandGroup(
+        mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_HIGH).withTimeout(tIntakeCompactTime),
+        mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT_LOW).withTimeout(tIntakeCompactTime)));
+  }
 
-    public Command anshulCompact() {
-        return mIntakeRackSS.setStateCmd(IntakeRackState.JITTER_COMPACT);
-    }
+  public Command trashCompact() {
+    return mIntakeRackSS.setStateCmd(IntakeRackState.COMPACT);
+  }
 
-    public boolean safeToRunRollers() {
-        return mIntakeRackSS.isSafeToRunintakeRollers();
-    }
+  public Command anshulCompact() {
+    return mIntakeRackSS.setStateCmd(IntakeRackState.ANSHUL_COMPACT);
+  }
+
+  public boolean safeToRunRollers() {
+    return mIntakeRackSS.isSafeToRunintakeRollers();
+  }
 }

@@ -8,9 +8,11 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.intake.IntakeConstants;
+import static frc.robot.systems.intake.IntakeConstants.RackConstants.IntakeMotionConfig.kIntakeFunc;
 
 public class IntakeRackSS extends SubsystemBase {
     public static enum IntakeRackState {
@@ -24,7 +26,7 @@ public class IntakeRackSS extends SubsystemBase {
         INTAKE,
         TUNING_SETPOINT,
         COMPACT,
-        JITTER_COMPACT,
+        ANSHUL_COMPACT,
         COMPACT_LOW,
         COMPACT_HIGH,
         INVALID
@@ -34,17 +36,30 @@ public class IntakeRackSS extends SubsystemBase {
     private final ElevatorFeedforward mIntakeFF;
     private final IntakeRackInputsAutoLogged mIntakeRackInputs = new IntakeRackInputsAutoLogged();
 
-    private final LoggedTunableNumber tIntakeKP = new LoggedTunableNumber("Intake/Control/PID/kP", IntakeConstants.RackConstants.kRackController.pdController().kP());
-    private final LoggedTunableNumber tIntakeKD = new LoggedTunableNumber("Intake/Control/PID/kD", IntakeConstants.RackConstants.kRackController.pdController().kD());
-    private final LoggedTunableNumber tIntakeKS = new LoggedTunableNumber("Intake/Control/FF/kS", IntakeConstants.RackConstants.kRackController.feedforward().getKs());
-    private final LoggedTunableNumber tIntakeKG = new LoggedTunableNumber("Intake/Control/FF/kG", IntakeConstants.RackConstants.kRackController.feedforward().getKg());
-    private final LoggedTunableNumber tIntakeKV = new LoggedTunableNumber("Intake/Control/FF/kV", IntakeConstants.RackConstants.kRackController.feedforward().getKv());
-    private final LoggedTunableNumber tIntakeKA = new LoggedTunableNumber("Intake/Control/FF/kA", IntakeConstants.RackConstants.kRackController.feedforward().getKa());
-    private final LoggedTunableNumber tIntakeCruiseVelMPS = new LoggedTunableNumber("Intake/Control/Profile/CruiseVelMPS", IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxVelocity());
-    private final LoggedTunableNumber tIntakeMaxAccelMPSS = new LoggedTunableNumber("Intake/Control/Profile/MaxAccelerationMPSS", IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxAcceleration());
-    private final LoggedTunableNumber tIntakeMaxJerkMPSSS = new LoggedTunableNumber("Intake/Control/Profile/MaxJerkMPSSS", IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxJerk());
-    private final LoggedTunableNumber tIntakeToleranceDegrees = new LoggedTunableNumber("Intake/Control/ToleranceMeters", IntakeConstants.RackConstants.kRackToleranceMeters);
-  
+    private final LoggedTunableNumber tIntakeKP = new LoggedTunableNumber("Intake/Control/PID/kP",
+            IntakeConstants.RackConstants.kRackController.pdController().kP());
+    private final LoggedTunableNumber tIntakeKD = new LoggedTunableNumber("Intake/Control/PID/kD",
+            IntakeConstants.RackConstants.kRackController.pdController().kD());
+    private final LoggedTunableNumber tIntakeKS = new LoggedTunableNumber("Intake/Control/FF/kS",
+            IntakeConstants.RackConstants.kRackController.feedforward().getKs());
+    private final LoggedTunableNumber tIntakeKG = new LoggedTunableNumber("Intake/Control/FF/kG",
+            IntakeConstants.RackConstants.kRackController.feedforward().getKg());
+    private final LoggedTunableNumber tIntakeKV = new LoggedTunableNumber("Intake/Control/FF/kV",
+            IntakeConstants.RackConstants.kRackController.feedforward().getKv());
+    private final LoggedTunableNumber tIntakeKA = new LoggedTunableNumber("Intake/Control/FF/kA",
+            IntakeConstants.RackConstants.kRackController.feedforward().getKa());
+    private final LoggedTunableNumber tIntakeCruiseVelMPS = new LoggedTunableNumber(
+            "Intake/Control/Profile/CruiseVelMPS",
+            IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxVelocity());
+    private final LoggedTunableNumber tIntakeMaxAccelMPSS = new LoggedTunableNumber(
+            "Intake/Control/Profile/MaxAccelerationMPSS",
+            IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxAcceleration());
+    private final LoggedTunableNumber tIntakeMaxJerkMPSSS = new LoggedTunableNumber(
+            "Intake/Control/Profile/MaxJerkMPSSS",
+            IntakeConstants.RackConstants.kRackController.motionMagicConstants().maxJerk());
+    private final LoggedTunableNumber tIntakeToleranceDegrees = new LoggedTunableNumber(
+            "Intake/Control/ToleranceMeters", IntakeConstants.RackConstants.kRackToleranceMeters);
+
     @AutoLogOutput(key = "IntakeRack/States/CurrentState")
     private IntakeRackState mCurrentIntakeState = IntakeRackState.STOPPED;
 
@@ -57,8 +72,8 @@ public class IntakeRackSS extends SubsystemBase {
 
     private double mSetpointCompactPosition = IntakeConstants.RackConstants.tIntakingSetpointMeters.get();
     private double mCompactDecrementMPS = 0.2;
-    private boolean mCompactStowing = true; // For jitter compact.
-  
+    private double mAnshulCompactStartTime = -1;
+
     public static final LoggedTunableNumber kCompactKV = new LoggedTunableNumber("Intake/Control/CompactKV", 40);
 
     public IntakeRackSS(IntakeRackIO pIntakeRackIO) {
@@ -66,12 +81,22 @@ public class IntakeRackSS extends SubsystemBase {
         this.mIntakeFF = IntakeConstants.RackConstants.kRackController.feedforward();
     }
 
-    private double anshulCompactFunc(double pTime) {
-        double amplitude = 0.2;
-        double netStepVelocity = 0.2;
-        double peaks = 1;
+    // https://www.desmos.com/calculator/pucs7xckwl
+    private double anshulCompactFunc(double pTimeSec) {
+        double timeNorm = Math.max(0, Math.min(pTimeSec, kIntakeFunc.kMaxTimeSec())) / kIntakeFunc.kMaxTimeSec();
+        double motionRange = kIntakeFunc.kClosestExtensionM() - kIntakeFunc.kFarthestExtensionM();
 
-        return (pTime);
+        if (pTimeSec >= kIntakeFunc.kMaxTimeSec()) { // Hold phase: steady sinusoid peaking at closestExtensionM
+            return kIntakeFunc.kClosestExtensionM()
+                    - ((kIntakeFunc.kClosestExtensionM() - kIntakeFunc.kHoldMinimum()) / 2.0)
+                    + ((kIntakeFunc.kClosestExtensionM() - kIntakeFunc.kHoldMinimum()) / 2.0)
+                            * Math.cos(
+                                    2.0 * Math.PI * kIntakeFunc.kHoldFreq() * (pTimeSec - kIntakeFunc.kMaxTimeSec()));
+        } else { // Approach phase: rising jostling profile
+            return kIntakeFunc.kFarthestExtensionM() + motionRange * timeNorm
+                    * ((1 + kIntakeFunc.kDropRatio()) / 2.0 + (1 - kIntakeFunc.kDropRatio())
+                            * Math.cos(2 * Math.PI * kIntakeFunc.kMainPeaks() * timeNorm) / 2.0);
+        }
     }
 
     @Override
@@ -86,21 +111,32 @@ public class IntakeRackSS extends SubsystemBase {
     }
 
     /*
-     * Performs variable updates or parameter intializations when a state is set, SHOULD NOT CHANGE THE STATE THROUGH HERE.
+     * Performs variable updates or parameter intializations when a state is set,
+     * SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
     @SuppressWarnings("incomplete-switch")
     private void initializeState(IntakeRackState pStateToInit) {
         mCurrentIntakeState = pStateToInit;
         switch (mCurrentIntakeState) {
             case STOPPED, INCREMENTING, DECREMENTING -> {
-            } case TUNING_VOLTAGE -> {
+            }
+            case TUNING_VOLTAGE -> {
                 mIntakeRackIO.setMotorVolts(IntakeConstants.RackConstants.tRackTuningVoltage.get());
-            } case STOW, SAFESTOW, INTAKE, TUNING_SETPOINT, COMPACT_HIGH, COMPACT_LOW -> {
+            }
+            case STOW, SAFESTOW, INTAKE, TUNING_SETPOINT, COMPACT_HIGH, COMPACT_LOW -> {
                 mIntakeRackIO.resetPPID();
-            } case COMPACT, JITTER_COMPACT -> {
+            }
+            case COMPACT -> {
                 mIntakeRackIO.resetPPID();
                 mSetpointCompactPosition = IntakeConstants.RackConstants.tIntakingSetpointMeters.get();
-            } case INVALID -> {}
+            }
+            case ANSHUL_COMPACT -> {
+                mIntakeRackIO.resetPPID();
+                mSetpointCompactPosition = IntakeConstants.RackConstants.tIntakingSetpointMeters.get();
+                mAnshulCompactStartTime = Timer.getFPGATimestamp();
+            }
+            case INVALID -> {
+            }
             default -> {
                 Telemetry.reportIssue(null);
             }
@@ -108,36 +144,45 @@ public class IntakeRackSS extends SubsystemBase {
     }
 
     /*
-     * Runs actions periodically to execute state, SHOULD NOT CHANGE THE STATE THROUGH HERE.
+     * Runs actions periodically to execute state, SHOULD NOT CHANGE THE STATE
+     * THROUGH HERE.
      */
     private void executeState() {
         switch (mCurrentIntakeState) {
             case STOPPED -> {
                 mIntakeRackIO.stopMotor();
-            } case TUNING_VOLTAGE -> {
+            }
+            case TUNING_VOLTAGE -> {
                 setIntakeVoltage(IntakeConstants.RackConstants.tRackTuningVoltage.get());
-            } case TUNING_AMPS -> {
+            }
+            case TUNING_AMPS -> {
                 setIntakeAmps(IntakeConstants.RackConstants.tRackTuningAmp.get());
-            } case STOW, SAFESTOW, INTAKE, TUNING_SETPOINT, COMPACT_LOW, COMPACT_HIGH -> {
-                setIntakePosition(IntakeConstants.RackConstants.kStateToSetpointMapIntake.get(mCurrentIntakeState).get());
-            } case COMPACT -> {
+            }
+            case STOW, SAFESTOW, INTAKE, TUNING_SETPOINT, COMPACT_LOW, COMPACT_HIGH -> {
+                setIntakePosition(
+                        IntakeConstants.RackConstants.kStateToSetpointMapIntake.get(mCurrentIntakeState).get());
+            }
+            case COMPACT -> {
                 setIntakePosition(mSetpointCompactPosition);
-                if(mSetpointCompactPosition < IntakeConstants.RackConstants.tSafeStowSetpointMeters.get()) {
+                if (mSetpointCompactPosition < IntakeConstants.RackConstants.tSafeStowSetpointMeters.get()) {
                     mSetpointCompactPosition += mCompactDecrementMPS * 0.02;
                 } else {
                     mSetpointCompactPosition = IntakeConstants.RackConstants.tSafeStowSetpointMeters.get();
                 }
             }
-            case JITTER_COMPACT -> {
-                if(mCompactStowing) {
-
-                }
+            case ANSHUL_COMPACT -> {
+                setIntakePosition(anshulCompactFunc(Timer.getFPGATimestamp() - mAnshulCompactStartTime));
             }
             case INCREMENTING -> {
-                setIntakePosition(mIntakeRackInputs.iIntakeRackPositionM + IntakeConstants.RackConstants.tIncrementSpeedMPS.get());
-            } case DECREMENTING -> {
-                setIntakePosition(mIntakeRackInputs.iIntakeRackPositionM - IntakeConstants.RackConstants.tIncrementSpeedMPS.get());
-            } case INVALID -> {}
+                setIntakePosition(mIntakeRackInputs.iIntakeRackPositionM
+                        + IntakeConstants.RackConstants.tIncrementSpeedMPS.get());
+            }
+            case DECREMENTING -> {
+                setIntakePosition(mIntakeRackInputs.iIntakeRackPositionM
+                        - IntakeConstants.RackConstants.tIncrementSpeedMPS.get());
+            }
+            case INVALID -> {
+            }
             default -> {
                 Telemetry.reportIssue(null);
             }
@@ -147,13 +192,15 @@ public class IntakeRackSS extends SubsystemBase {
     public boolean isSafeToRunintakeRollers() {
         return mIntakeRackInputs.iIntakeRackPositionM < IntakeConstants.RackConstants.kRollerUsageCutoffMeters;
     }
-    
+
     /*
-     * Performs variable updates or parameter resets when a state ends, SHOULD NOT CHANGE THE STATE THROUGH HERE.
+     * Performs variable updates or parameter resets when a state ends, SHOULD NOT
+     * CHANGE THE STATE THROUGH HERE.
      */
     @SuppressWarnings("incomplete-switch")
     private void endState(IntakeRackState pStateToEnd) {
-        switch (pStateToEnd) {}
+        switch (pStateToEnd) {
+        }
     }
 
     public Command setStateCmd(IntakeRackState pNewState) {
@@ -162,11 +209,12 @@ public class IntakeRackSS extends SubsystemBase {
 
     public Command setStateCmd(IntakeRackState pNewState, boolean holdRequirementContinuously) {
         return new FunctionalCommand(
-            () -> setState(pNewState), 
-            () -> {}, (interrupted) ->  {}, 
-            () -> !holdRequirementContinuously, 
-            this
-        );
+                () -> setState(pNewState),
+                () -> {
+                }, (interrupted) -> {
+                },
+                () -> !holdRequirementContinuously,
+                this);
     }
 
     /* SETTERS */
@@ -186,11 +234,10 @@ public class IntakeRackSS extends SubsystemBase {
         mGoalMeters = pPositionM;
 
         double ffOutput = mIntakeFF.calculate(
-            mIntakeRackInputs.iIntakeRackPositionM, 
-            mIntakeRackInputs.iIntakeClosedLoopReferenceSlope
-        );
+                mIntakeRackInputs.iIntakeRackPositionM,
+                mIntakeRackInputs.iIntakeClosedLoopReferenceSlope);
 
-        if(mCurrentIntakeState.equals(IntakeRackState.COMPACT)) {
+        if (mCurrentIntakeState.equals(IntakeRackState.COMPACT)) {
             ffOutput += kCompactKV.get() * mCompactDecrementMPS;
         }
 
@@ -225,7 +272,7 @@ public class IntakeRackSS extends SubsystemBase {
     public IntakeRackState getIntakeState() {
         return mCurrentIntakeState;
     }
-  
+
     @AutoLogOutput(key = "Intake/Feedback/ErrorRotation")
     public double getErrorPosition() {
         return (getCurrentGoal() - mIntakeRackInputs.iIntakeRackPositionM);
@@ -233,7 +280,7 @@ public class IntakeRackSS extends SubsystemBase {
 
     @AutoLogOutput(key = "Intake/Feedback/CurrentGoal")
     public double getCurrentGoal() {
-        return mGoalMeters;    
+        return mGoalMeters;
     }
 
     @AutoLogOutput(key = "Intake/Feedback/AtGoal")
@@ -247,65 +294,66 @@ public class IntakeRackSS extends SubsystemBase {
 
     /* LOGICCC */
     private double clampPositionToSoftLimits(double pPositionToClampM) {
-        return    
-        MathUtil.clamp(
+        return MathUtil.clamp(
                 pPositionToClampM,
                 IntakeConstants.RackConstants.kRackLimitsMeters.backwardLimitM(),
-                IntakeConstants.RackConstants.kRackLimitsMeters.forwardLimitM()
-            );
+                IntakeConstants.RackConstants.kRackLimitsMeters.forwardLimitM());
     }
 
     private void refreshTuneables() {
-        LoggedTunableNumber.ifChanged( hashCode(), 
-            () -> mIntakeRackIO.setPDConstants(tIntakeKP.get(), tIntakeKD.get()), 
-            tIntakeKP, tIntakeKD
-        );
+        LoggedTunableNumber.ifChanged(hashCode(),
+                () -> mIntakeRackIO.setPDConstants(tIntakeKP.get(), tIntakeKD.get()),
+                tIntakeKP, tIntakeKD);
 
-        LoggedTunableNumber.ifChanged( hashCode(), 
-            () -> setFF(tIntakeKS.get(), tIntakeKG.get(), tIntakeKV.get(), tIntakeKA.get()), 
-            tIntakeKS, tIntakeKG, tIntakeKV, tIntakeKA
-        );
-  
-        LoggedTunableNumber.ifChanged( hashCode(), 
-            () -> mIntakeRackIO.setMotionMagicConstants(
-                tIntakeCruiseVelMPS.get(), 
-                tIntakeMaxAccelMPSS.get(), 
-                tIntakeMaxJerkMPSSS.get()), 
-            tIntakeCruiseVelMPS, tIntakeMaxAccelMPSS, tIntakeMaxJerkMPSSS
-        );
+        LoggedTunableNumber.ifChanged(hashCode(),
+                () -> setFF(tIntakeKS.get(), tIntakeKG.get(), tIntakeKV.get(), tIntakeKA.get()),
+                tIntakeKS, tIntakeKG, tIntakeKV, tIntakeKA);
+
+        LoggedTunableNumber.ifChanged(hashCode(),
+                () -> mIntakeRackIO.setMotionMagicConstants(
+                        tIntakeCruiseVelMPS.get(),
+                        tIntakeMaxAccelMPSS.get(),
+                        tIntakeMaxJerkMPSSS.get()),
+                tIntakeCruiseVelMPS, tIntakeMaxAccelMPSS, tIntakeMaxJerkMPSSS);
     }
 
     public void enforceSoftLimits() {
-        if(
-        (mIntakeRackInputs.iIntakeRackPositionM > IntakeConstants.RackConstants.kRackLimitsMeters.forwardLimitM()
-            && mDesiredDirection == 1 ) 
-            || 
-        (mIntakeRackInputs.iIntakeRackPositionM < IntakeConstants.RackConstants.kRackLimitsMeters.backwardLimitM() 
-            && mDesiredDirection == -1)) {
-                mLimitEnforced = true;
-                mIntakeRackIO.stopMotor();
+        if ((mIntakeRackInputs.iIntakeRackPositionM > IntakeConstants.RackConstants.kRackLimitsMeters.forwardLimitM()
+                && mDesiredDirection == 1)
+                ||
+                (mIntakeRackInputs.iIntakeRackPositionM < IntakeConstants.RackConstants.kRackLimitsMeters
+                        .backwardLimitM()
+                        && mDesiredDirection == -1)) {
+            mLimitEnforced = true;
+            mIntakeRackIO.stopMotor();
         } else {
             mLimitEnforced = false;
         }
     }
 
     public int toDirection(double val) {
-        if(val > 0) return 1;
-        if(val < 0) return -1;
-        else return 0;
+        if (val > 0)
+            return 1;
+        if (val < 0)
+            return -1;
+        else
+            return 0;
     }
 
-    public double agitationFunction(int jitters, double totalTime, double xInitial, double xFinal, double amplitude1, double amplitude2, double timeSample) {
+    public double agitationFunction(int jitters, double totalTime, double xInitial, double xFinal, double amplitude1,
+            double amplitude2, double timeSample) {
         double v1 = xFinal - 2 * amplitude1 - xInitial;
         double v2 = v1 + xInitial / totalTime;
         double k = (0.5 * jitters + 1.0) / totalTime;
 
-        if(timeSample < totalTime) {
+        if (timeSample < totalTime) {
             return amplitude1 - amplitude1 * Math.cos(2 * Math.PI * k * timeSample) + v1 * timeSample + xInitial;
-        } else if(amplitude2 > amplitude1) {
-            return amplitude1 - amplitude2 * Math.cos(2 * Math.PI * k * timeSample) + v2 * timeSample - Math.abs(amplitude1 - amplitude2);
+        } else if (amplitude2 > amplitude1) {
+            return amplitude1 - amplitude2 * Math.cos(2 * Math.PI * k * timeSample) + v2 * timeSample
+                    - Math.abs(amplitude1 - amplitude2);
         } else {
-                        return amplitude1 - amplitude2 * Math.cos(2 * Math.PI * k * timeSample) + v2 * timeSample + Math.abs(amplitude1 - amplitude2);
+            return amplitude1 - amplitude2 * Math.cos(2 * Math.PI * k * timeSample) + v2 * timeSample
+                    + Math.abs(amplitude1 - amplitude2);
         }
     }
 }
