@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.lib.controls.TurnPointFeedforward;
+import frc.lib.math.GeomUtil;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.drive.DriveConstants;
@@ -126,7 +127,7 @@ public class HeadingController {
         mTurnPointFF = pTurnPointFF;
     }
 
-    public boolean inTolerance() {
-        return mSnapController.atGoal();
+    public boolean inTolerance(Rotation2d robotRotation, Rotation2d tolerance) {
+        return GeomUtil.withinTolerance(Rotation2d.fromDegrees(mSnapController.getGoal().position), robotRotation, tolerance);
     }
 }
