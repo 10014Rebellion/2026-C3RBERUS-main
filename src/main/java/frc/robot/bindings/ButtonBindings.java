@@ -149,8 +149,6 @@ public class ButtonBindings {
 
         Trigger anyCANRangesTriggered = new Trigger(() -> mFuelInjectorSS.anyCANRangesTripped());
 
-        Trigger isRackMoving = new Trigger(() -> mIntakeSS.isRackingMoving());
-
         Trigger wantToShoot = new Trigger(() -> {
             return 
                 wantToSnowPlow.getAsBoolean()
