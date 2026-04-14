@@ -146,6 +146,7 @@ public class ButtonBindings {
         Trigger fuelPumpAtGoal = new Trigger(() -> mFuelPumpSS.atGoal());
         Trigger atPositionGoal = new Trigger(mDriveSS.getDriveManager().waitUntilAutoAlignFinishes());
         Trigger atHeadingGoal = (headingAlignAtGoal.or(driveIsHeadingXLocked));
+        Trigger atLineGoal = new Trigger(() -> mDriveSS.getDriveManager().getLineAlignController().atGoal());
 
         Trigger anyCANRangesTriggered = new Trigger(() -> mFuelInjectorSS.anyCANRangesTripped());
 
@@ -219,7 +220,12 @@ public class ButtonBindings {
                     () -> Rotation2d.kZero, 
                     () -> 0.4, 
                     () -> true
-                )
+                ).onlyWhile(atLineGoal.negate())
+
+                    .andThen(mDriveSS.getDriveManager()
+                    .setToGenericAutoAlign(
+                        () -> GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate()),
+                        ConstraintType.LINEAR))
             )
             .onFalse(mDriveSS.getDriveManager().setToTeleop());
         
