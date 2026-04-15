@@ -3,6 +3,8 @@ package frc.robot.systems.drive.controllers;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -161,6 +163,16 @@ public class LineController {
         tXController.reset(new State(getDistanceFromLine(mSlope.getAsDouble(), goalPose.getX(), goalPose.getY(), pRobotPose), 0.0));
 
         tOmegaController.reset(new State(pRobotPose.getRotation().getDegrees(), 0.0));
+    }
+
+    @AutoLogOutput(key="Drive/LineController/atGoal")
+    public boolean atGoal(){
+        return tOmegaController.atGoal() && tXController.atGoal();
+    }
+
+    public void resetController(){
+        tOmegaController.setGoal(-100);
+        tXController.setGoal(-100);
     }
 
     public void setControllerGoalSettings(DoubleSupplier pTeleopScalar, DoubleSupplier pSlope, BooleanSupplier pInvertTeleop) {
