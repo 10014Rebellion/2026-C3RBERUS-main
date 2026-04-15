@@ -30,30 +30,40 @@ public class HoodSS extends SubsystemBase {
         MAX,
         MID,
         MIN,
-        CLOSE_SHOT,
-        TOWER_SHOT,
-        BUMP_SHOT,
+        TOWER_ANGLE,
+        TRENCH_ANGLE,
+        BUMP_ANGLE,
+        CORNER_ANGLE
     }
 
     private final HoodIO mHoodIO;
     private final ArmFeedforward mHoodFF;
     private final HoodInputsAutoLogged mHoodInputs = new HoodInputsAutoLogged();
-  
-    private final LoggedTunableNumber tHoodKP = new LoggedTunableNumber("Shooter/Hood/Control/PID/kP", HoodConstants.kHoodControlConfig.pdController().kP());
-    private final LoggedTunableNumber tHoodKD = new LoggedTunableNumber("Shooter/Hood/Control/PID/kD", HoodConstants.kHoodControlConfig.pdController().kD());
-    private final LoggedTunableNumber tHoodKS = new LoggedTunableNumber("Shooter/Hood/Control/FF/kS", HoodConstants.kHoodControlConfig.feedforward().getKs());
-    private final LoggedTunableNumber tHoodKG = new LoggedTunableNumber("Shooter/Hood/Control/FF/kG", HoodConstants.kHoodControlConfig.feedforward().getKg());
-    private final LoggedTunableNumber tHoodKV = new LoggedTunableNumber("Shooter/Hood/Control/FF/kV", HoodConstants.kHoodControlConfig.feedforward().getKv());
-    private final LoggedTunableNumber tHoodKA = new LoggedTunableNumber("Shooter/Hood/Control/FF/kA", HoodConstants.kHoodControlConfig.feedforward().getKa());
-    private final LoggedTunableNumber tHoodCruiseVelDegS = 
-        new LoggedTunableNumber("Shooter/Hood/Control/Profile/CruiseVelDegS", HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity() * 360);
-    private final LoggedTunableNumber tHoodMaxAccelDegS2 = 
-        new LoggedTunableNumber("Shooter/Hood/Control/Profile/MaxAccelerationDegs2", HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration() * 360);
-    private final LoggedTunableNumber tHoodMaxJerkDegS3 = 
-        new LoggedTunableNumber("Shooter/Hood/Control/Profile/MaxJerks3", HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk() * 360);
-    private final LoggedTunableNumber tHoodTolerance = 
-        new LoggedTunableNumber("Shooter/Hood/Control/Tolerance", HoodConstants.kTolerance.getDegrees());
-  
+
+    private final LoggedTunableNumber tHoodKP = new LoggedTunableNumber("Shooter/Hood/Control/PID/kP",
+            HoodConstants.kHoodControlConfig.pdController().kP());
+    private final LoggedTunableNumber tHoodKD = new LoggedTunableNumber("Shooter/Hood/Control/PID/kD",
+            HoodConstants.kHoodControlConfig.pdController().kD());
+    private final LoggedTunableNumber tHoodKS = new LoggedTunableNumber("Shooter/Hood/Control/FF/kS",
+            HoodConstants.kHoodControlConfig.feedforward().getKs());
+    private final LoggedTunableNumber tHoodKG = new LoggedTunableNumber("Shooter/Hood/Control/FF/kG",
+            HoodConstants.kHoodControlConfig.feedforward().getKg());
+    private final LoggedTunableNumber tHoodKV = new LoggedTunableNumber("Shooter/Hood/Control/FF/kV",
+            HoodConstants.kHoodControlConfig.feedforward().getKv());
+    private final LoggedTunableNumber tHoodKA = new LoggedTunableNumber("Shooter/Hood/Control/FF/kA",
+            HoodConstants.kHoodControlConfig.feedforward().getKa());
+    private final LoggedTunableNumber tHoodCruiseVelDegS = new LoggedTunableNumber(
+            "Shooter/Hood/Control/Profile/CruiseVelDegS",
+            HoodConstants.kHoodControlConfig.motionMagicConstants().maxVelocity() * 360);
+    private final LoggedTunableNumber tHoodMaxAccelDegS2 = new LoggedTunableNumber(
+            "Shooter/Hood/Control/Profile/MaxAccelerationDegs2",
+            HoodConstants.kHoodControlConfig.motionMagicConstants().maxAcceleration() * 360);
+    private final LoggedTunableNumber tHoodMaxJerkDegS3 = new LoggedTunableNumber(
+            "Shooter/Hood/Control/Profile/MaxJerks3",
+            HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk() * 360);
+    private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Shooter/Hood/Control/Tolerance",
+            HoodConstants.kTolerance.getDegrees());
+
     @AutoLogOutput(key = "Shooter/Hood/States/CurrentState")
     private HoodStates mCurrentHoodState = HoodStates.STOPPED;
 
@@ -63,7 +73,7 @@ public class HoodSS extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/Hood/LimitsEnforced")
     private boolean mLimitEnforced = false;
-  
+
     public HoodSS(HoodIO pHoodIO) {
         this.mHoodIO = pHoodIO;
         this.mHoodFF = HoodConstants.kHoodControlConfig.feedforward();
@@ -80,43 +90,53 @@ public class HoodSS extends SubsystemBase {
     }
 
     /*
-     * Performs variable updates or parameter intializations when a state is set, SHOULD NOT CHANGE THE STATE THROUGH HERE.
+     * Performs variable updates or parameter intializations when a state is set,
+     * SHOULD NOT CHANGE THE STATE THROUGH HERE.
      */
     @SuppressWarnings("incomplete-switch")
     private void initializeState(HoodStates pStateToInit) {
         switch (pStateToInit) {
             case HOLD_POSITION -> {
                 setHoodPosition(mHoodInputs.iHoodAngle);
-            } case STEP_INCREMENT -> {
+            }
+            case STEP_INCREMENT -> {
                 setHoodPosition(mHoodInputs.iHoodAngle.plus(HoodConstants.kAdjustStepAmount));
-            } case STEP_DECREMENT -> {
+            }
+            case STEP_DECREMENT -> {
                 setHoodPosition(mHoodInputs.iHoodAngle.minus(HoodConstants.kAdjustStepAmount));
             }
         }
     }
 
     /*
-     * Runs actions periodically to execute state, SHOULD NOT CHANGE THE STATE THROUGH HERE.
+     * Runs actions periodically to execute state, SHOULD NOT CHANGE THE STATE
+     * THROUGH HERE.
      */
     @SuppressWarnings("incomplete-switch")
     private void executeState() {
-        if(HoodConstants.kStateToSetpointMapHood.containsKey(mCurrentHoodState)) {
+        if (HoodConstants.kStateToSetpointMapHood.containsKey(mCurrentHoodState)) {
             setHoodPosition(HoodConstants.kStateToSetpointMapHood.get(mCurrentHoodState).get());
         } else {
             switch (mCurrentHoodState) {
                 case STOPPED -> {
                     mHoodIO.stopMotor();
-                } case TUNING_VOLTAGE -> {
+                }
+                case TUNING_VOLTAGE -> {
                     setHoodVoltage(HoodConstants.tTuningVoltage.get());
-                } case TUNING_AMPS -> {
+                }
+                case TUNING_AMPS -> {
                     setHoodAmps(HoodConstants.tTuningAmp.get());
-                } case INCREMENTING -> {
+                }
+                case INCREMENTING -> {
                     setHoodPosition(mHoodInputs.iHoodAngle.plus(Rotation2d.fromDegrees(1)));
-                } case DECREMENTING -> {
+                }
+                case DECREMENTING -> {
                     setHoodPosition(mHoodInputs.iHoodAngle.minus(Rotation2d.fromDegrees(1)));
-                } case HOLD_POSITION -> {
+                }
+                case HOLD_POSITION -> {
                     setHoodPosition(mLatestClosedLoopGoalRot);
-                } case SHOTMAP_POSITION -> {
+                }
+                case SHOTMAP_POSITION -> {
                     setHoodPosition(ShotMap.getInstance().getHoodAngle());
                 }
             }
@@ -129,11 +149,12 @@ public class HoodSS extends SubsystemBase {
 
     public Command setStateCmd(HoodStates pNewState, boolean holdRequirementContinuously) {
         return new FunctionalCommand(
-            () -> setState(pNewState), 
-            () -> {}, (interrupted) ->  {}, 
-            () -> !holdRequirementContinuously, 
-            this
-        );
+                () -> setState(pNewState),
+                () -> {
+                }, (interrupted) -> {
+                },
+                () -> !holdRequirementContinuously,
+                this);
     }
 
     private void setState(HoodStates pNewState) {
@@ -151,9 +172,8 @@ public class HoodSS extends SubsystemBase {
         mLatestClosedLoopGoalRot = pRot;
 
         double ffOutput = mHoodFF.calculate(
-            mHoodInputs.iHoodAngle.getRadians(), 
-            mHoodInputs.iHoodReferenceValueSlope.getRadians()
-        );
+                mHoodInputs.iHoodAngle.getRadians(),
+                mHoodInputs.iHoodReferenceValueSlope.getRadians());
 
         double cos = mHoodInputs.iHoodReferenceValue.getCos();
 
@@ -179,23 +199,25 @@ public class HoodSS extends SubsystemBase {
     }
 
     private void enforceSoftLimits() {
-        if(
-        (mHoodInputs.iHoodAngle.getRotations() > HoodConstants.kHoodLimits.forwardLimit().getRotations()
-            && mDesiredDirection == 1 ) 
-            || 
-        (mHoodInputs.iHoodAngle.getRotations() < HoodConstants.kHoodLimits.backwardLimit().getRotations() 
-            && mDesiredDirection == -1)) {
-                mLimitEnforced = true;
-                mHoodIO.stopMotor();
+        if ((mHoodInputs.iHoodAngle.getRotations() > HoodConstants.kHoodLimits.forwardLimit().getRotations()
+                && mDesiredDirection == 1)
+                ||
+                (mHoodInputs.iHoodAngle.getRotations() < HoodConstants.kHoodLimits.backwardLimit().getRotations()
+                        && mDesiredDirection == -1)) {
+            mLimitEnforced = true;
+            mHoodIO.stopMotor();
         } else {
             mLimitEnforced = false;
         }
     }
 
     public int toDirection(double val) {
-        if(val > 0) return 1;
-        if(val < 0) return -1;
-        else return 0;
+        if (val > 0)
+            return 1;
+        if (val < 0)
+            return -1;
+        else
+            return 0;
     }
 
     private void setFF(double kS, double kG, double kV, double kA) {
@@ -208,7 +230,7 @@ public class HoodSS extends SubsystemBase {
     public HoodStates getHoodState() {
         return mCurrentHoodState;
     }
-  
+
     @AutoLogOutput(key = "Shooter/Hood/Feedback/ErrorRotation")
     public double getErrorRot() {
         return getCurrentGoal().getRotations() - mHoodInputs.iHoodAngle.getRotations();
@@ -216,7 +238,7 @@ public class HoodSS extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/Hood/Feedback/CurrentGoal")
     public Rotation2d getCurrentGoal() {
-        return mLatestClosedLoopGoalRot;    
+        return mLatestClosedLoopGoalRot;
     }
 
     @AutoLogOutput(key = "Shooter/Hood/Feedback/AtGoal")
@@ -226,33 +248,28 @@ public class HoodSS extends SubsystemBase {
 
     private Rotation2d clampRotToSoftLimits(Rotation2d pRotToClamp) {
         return Rotation2d.fromRotations(
-            MathUtil.clamp(
-                pRotToClamp.getRotations(),
-                HoodConstants.kHoodLimits.backwardLimit().getRotations(),
-                HoodConstants.kHoodLimits.forwardLimit().getRotations()
-            )
-        );
+                MathUtil.clamp(
+                        pRotToClamp.getRotations(),
+                        HoodConstants.kHoodLimits.backwardLimit().getRotations(),
+                        HoodConstants.kHoodLimits.forwardLimit().getRotations()));
     }
 
     private void refreshTuneables() {
-        LoggedTunableNumber.ifChanged( hashCode(), 
-            () -> mHoodIO.setPDConstants(tHoodKP.get(), tHoodKD.get()), 
-            tHoodKP, tHoodKD
-        );
+        LoggedTunableNumber.ifChanged(hashCode(),
+                () -> mHoodIO.setPDConstants(tHoodKP.get(), tHoodKD.get()),
+                tHoodKP, tHoodKD);
 
-        LoggedTunableNumber.ifChanged( hashCode(), 
-            () -> setFF(tHoodKS.get(), tHoodKG.get(), tHoodKV.get(), tHoodKA.get()), 
-            tHoodKS, tHoodKG, tHoodKV, tHoodKA
-        );
-  
+        LoggedTunableNumber.ifChanged(hashCode(),
+                () -> setFF(tHoodKS.get(), tHoodKG.get(), tHoodKV.get(), tHoodKA.get()),
+                tHoodKS, tHoodKG, tHoodKV, tHoodKA);
 
-        // Default unit is rotations but the actual values are in degrees. This is to preserve units //
-        LoggedTunableNumber.ifChanged( hashCode(), 
-            () -> mHoodIO.setMotionMagicConstants(
-                tHoodCruiseVelDegS.get() / 360.0, 
-                tHoodMaxAccelDegS2.get() / 360.0, 
-                tHoodMaxJerkDegS3.get() / 360.0), 
-            tHoodCruiseVelDegS, tHoodMaxAccelDegS2, tHoodMaxJerkDegS3
-        );
+        // Default unit is rotations but the actual values are in degrees. This is to
+        // preserve units //
+        LoggedTunableNumber.ifChanged(hashCode(),
+                () -> mHoodIO.setMotionMagicConstants(
+                        tHoodCruiseVelDegS.get() / 360.0,
+                        tHoodMaxAccelDegS2.get() / 360.0,
+                        tHoodMaxJerkDegS3.get() / 360.0),
+                tHoodCruiseVelDegS, tHoodMaxAccelDegS2, tHoodMaxJerkDegS3);
     }
 }
