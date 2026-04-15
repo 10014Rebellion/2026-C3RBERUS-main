@@ -18,6 +18,8 @@ import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -55,6 +57,8 @@ public class AutonCommands extends SubsystemBase {
 
     private String[] usedPathNames = new String[] {
         "L_IT_IC_ST",
+        "L_ST_IB_ST_Snake",
+        "L_ST_IB_ST_Snake2",
         "L_ST_IB_ST",
         "L_ST_IB_ST_BUMP",
         "R_IT_IC_ST",
@@ -171,6 +175,30 @@ public class AutonCommands extends SubsystemBase {
                 "R_ST_IB_ST_BUMP",
                 4.9,
                 FieldConstants.kClimbRightPose);
+
+        SnakeSwipe mLeftSnakeSwipe = new SnakeSwipe(
+            this, 
+            "LeftSnakeSwipe", 
+            "L_IT_IC_ST_Snake", 
+            7.17);
+
+        DoubleSnakeSwipe mLeftDoubleSnakeSwipe = new DoubleSnakeSwipe(
+            this, 
+            "LeftDoubleSnakeSwipe", 
+            "L_IT_IC_ST_Snake", 
+            7.17,
+            "L_IT_IC_ST_Snake2", 
+            3.2);
+
+        tryToAddPathToChooser(
+            "LeftDoubleSnakeSwipe", 
+            () -> mLeftDoubleSnakeSwipe.getAuton()
+        );
+
+        tryToAddPathToChooser(
+            "LeftSnakeSwipe", 
+            () -> mLeftSnakeSwipe.getAuton()
+        );
 
         tryToAddPathToChooser("LeftSingleSwipe", 
             () -> mLeftSingleSwipeAuto.getAuton()

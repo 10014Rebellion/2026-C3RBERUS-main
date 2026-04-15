@@ -23,24 +23,20 @@ import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 
-public class SingleSwipe extends Auton {
+public class SnakeSwipe extends Auton {
     private boolean mWantToShoot = false;
     private final String mAutoName;
     private final String mFirstSwipePathName;
     private final double mFirstSwipeAlignTime;
-    private final Supplier<Pose2d> mTrenchApproachPose;
-    private final Supplier<Pose2d> mTrenchExitPose;
 
     private final double kShotTimeSeconds = 6.5;
     private final double kShotEndTimeSeconds = 0.02; 
 
-    public SingleSwipe(AutonCommands pAutos, String pAutoName, String pFirstSwipePathName, double pFirstSwipeAlignTime, Supplier<Pose2d> pTrenchApproachPose, Supplier<Pose2d> pTrenchExitPose) {
+    public SnakeSwipe(AutonCommands pAutos, String pAutoName, String pFirstSwipePathName, double pFirstSwipeAlignTime) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeAlignTime = pFirstSwipeAlignTime;
-        mTrenchApproachPose = pTrenchApproachPose;
-        mTrenchExitPose = pTrenchExitPose;
     }
 
     @Override
@@ -105,9 +101,8 @@ public class SingleSwipe extends Auton {
 
         firstSwipePath.atTime(mFirstSwipeAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
+            .onTrue(firstSwipeInjectorShot)
             .onTrue(new SequentialEndingCommandGroup(
-                    transitionPose(mTrenchApproachPose),
-                    transitionPose(mTrenchExitPose),
                     mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
                         () -> getSwipeEndPose(lastPoseOfFirstSwipe),
                         ConstraintType.LINEAR)));

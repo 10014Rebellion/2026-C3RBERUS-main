@@ -37,7 +37,7 @@ public class ATagVisionConstants {
         new Translation3d(
             Units.inchesToMeters(-4.4), // X: inches back // >>> TODO: TUNE ME
             Units.inchesToMeters(12.6), // Y: inches left // >>> TODO: TUNE ME
-            Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(19.5) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
@@ -53,7 +53,7 @@ public class ATagVisionConstants {
         new Translation3d(
             Units.inchesToMeters(-4.3), // X: inches back // >>> TODO: TUNE ME
             Units.inchesToMeters(-12.6), // Y: inches right // >>> TODO: TUNE ME
-            Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(19.5) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
@@ -69,7 +69,7 @@ public class ATagVisionConstants {
         new Translation3d(
             Units.inchesToMeters(-9.1), // X: inches back // >>> TODO: TUNE ME
             Units.inchesToMeters(14.1), // Y: inches left // >>> TODO: TUNE ME
-            Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(19.5) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
@@ -85,7 +85,7 @@ public class ATagVisionConstants {
         new Translation3d(
             Units.inchesToMeters(-9.4), // Y: inches right // >>> TODO: TUNE ME
             Units.inchesToMeters(-14.1), // Y: inches right // >>> TODO: TUNE ME
-            Units.inchesToMeters(18.625) // Z: inches above ground // >>> TODO: TUNE ME
+            Units.inchesToMeters(19.5) // Z: inches above ground // >>> TODO: TUNE ME
         ),
         new Rotation3d(
             Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME

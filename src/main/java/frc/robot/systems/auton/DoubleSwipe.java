@@ -131,7 +131,7 @@ public class DoubleSwipe extends Auton {
 
         //////////////////// FIRST SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
         autoActivted
-            .onTrue(firstSwipePath)
+            .onTrue(Commands.waitSeconds(0.1).andThen(firstSwipePath))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(Commands.runOnce(() -> mWantToShoot = false));
