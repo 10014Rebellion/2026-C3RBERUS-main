@@ -86,12 +86,12 @@ public class SingleSwipeClimb extends Auton {
         SequentialEndingCommandGroup firstSwipeIntakeShot = 
             mAutos.timedIntakeShot(kShotTimeSeconds, kShotEndTimeSeconds);
 
-        SequentialEndingCommandGroup firstSwipeIndexShot = 
-            mAutos.timedIndexShot(kShotTimeSeconds, kShotEndTimeSeconds);
+        SequentialEndingCommandGroup firstSwipeInjectorShot = 
+            mAutos.timedInjectorShot(kShotTimeSeconds, kShotEndTimeSeconds);
 
         Trigger hasFirstShotEnded = auto.loggedCondition(
             mFirstSwipePathName+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
+            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeInjectorShot.hasEnded()),
             true);
 
         SequentialEndingCommandGroup goToPreClimbPose = new SequentialEndingCommandGroup(
@@ -144,8 +144,10 @@ public class SingleSwipeClimb extends Auton {
         shootingRange
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
         /* FIRST PATHHH */
         autoActivted
@@ -165,7 +167,7 @@ public class SingleSwipeClimb extends Auton {
 
         firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot)
+            .onTrue(firstSwipeInjectorShot)
             .onTrue(mIntakeSS.trashCompact());
 
         firstSwipePath.hasEnded().and(hasFirstShotEnded)

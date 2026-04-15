@@ -102,29 +102,31 @@ public class DoubleSwipe extends Auton {
         shootingRange
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
         SequentialEndingCommandGroup firstSwipeIntakeShot = 
             mAutos.timedIntakeShot(kShotTime1Seconds, kShotEndTimeSeconds);
 
-        SequentialEndingCommandGroup firstSwipeIndexShot = 
-            mAutos.timedIndexShot(kShotTime1Seconds, kShotEndTimeSeconds);
+        SequentialEndingCommandGroup firstSwipeInjectorShot = 
+            mAutos.timedInjectorShot(kShotTime1Seconds, kShotEndTimeSeconds);
 
         Trigger hasFirstShotEnded = auto.loggedCondition(
             mFirstSwipePathName+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
+            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeInjectorShot.hasEnded()),
             true);
 
         SequentialEndingCommandGroup secondSwipeIntakeShot = 
             mAutos.timedIntakeShot(kShotTime2Seconds, kShotEndTimeSeconds);
 
-        SequentialEndingCommandGroup secondSwipeIndexShot = 
-            mAutos.timedIndexShot(kShotTime2Seconds, kShotEndTimeSeconds);
+        SequentialEndingCommandGroup secondSwipeInjectorShot = 
+            mAutos.timedInjectorShot(kShotTime2Seconds, kShotEndTimeSeconds);
 
         Trigger hasSecondShotEnded = auto.loggedCondition(
             mSecondSwipePathName+"/SecondShotEnded", 
-            () -> (secondSwipeIntakeShot.hasEnded() && secondSwipeIndexShot.hasEnded()),
+            () -> (secondSwipeIntakeShot.hasEnded() && secondSwipeInjectorShot.hasEnded()),
             true);
 
         //////////////////// FIRST SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -146,8 +148,7 @@ public class DoubleSwipe extends Auton {
 
         firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot)
-            .onTrue(mInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+            .onTrue(firstSwipeInjectorShot)
             .onTrue(mIntakeSS.trashCompact());
 
         firstSwipePath.hasEnded().and(hasFirstShotEnded)
@@ -167,8 +168,7 @@ public class DoubleSwipe extends Auton {
 
         secondSwipePath.hasEnded().and(() -> mWantToShoot).and(hasSecondShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(secondSwipeIntakeShot)
-            .onTrue(secondSwipeIndexShot)
-            .onTrue(mInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+            .onTrue(secondSwipeInjectorShot)
             .onTrue(mIntakeSS.trashCompact());
 
         secondSwipePath.hasEnded().and(hasSecondShotEnded)

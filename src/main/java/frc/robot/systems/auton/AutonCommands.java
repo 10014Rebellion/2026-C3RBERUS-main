@@ -30,6 +30,7 @@ import frc.robot.commands.AutoEvent;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.efi.FuelInjectorSS;
+import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
@@ -115,7 +116,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                4.82);
+                4.09);
 
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
@@ -126,7 +127,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                4.82,
+                4.09,
                 FieldConstants.kClimbLeftPose);
 
         SingleSwipe mRightSingleSwipeAuto = 
@@ -134,7 +135,7 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "RightSingleSwipe", 
                 "R_IT_IC_ST", 
-                4.13, 
+                4.83, 
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose());
 
@@ -143,7 +144,7 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "RightSingleSwipeClimb", 
                 "R_IT_IC_ST", 
-                4.13, 
+                4.83, 
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 FieldConstants.kClimbRightPose);
@@ -153,22 +154,22 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "RightDoubleSwipeBump", 
                 "R_IT_IC_ST", 
-                4.13,
+                4.83,
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
-                4.33);
+                4.9);
 
         DoubleSwipeClimb mRightDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
                 this, 
                 "RightDoubleSwipeBumpClimb", 
                 "R_IT_IC_ST", 
-                4.13,
+                4.83,
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
-                4.33,
+                4.9,
                 FieldConstants.kClimbRightPose);
 
         tryToAddPathToChooser("LeftSingleSwipe", 
@@ -252,6 +253,12 @@ public class AutonCommands extends SubsystemBase {
         return new SequentialEndingCommandGroup(
             mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(timeout),
             mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(endTimeout));
+    }
+
+    public SequentialEndingCommandGroup timedInjectorShot(double timeout, double endTimeout) {
+        return new SequentialEndingCommandGroup(
+            mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE).withTimeout(timeout),
+            mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE).withTimeout(endTimeout));
     }
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\

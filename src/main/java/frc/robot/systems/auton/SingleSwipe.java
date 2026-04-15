@@ -76,12 +76,12 @@ public class SingleSwipe extends Auton {
         SequentialEndingCommandGroup firstSwipeIntakeShot = 
             mAutos.timedIntakeShot(kShotTimeSeconds, kShotEndTimeSeconds);
 
-        SequentialEndingCommandGroup firstSwipeIndexShot = 
-            mAutos.timedIndexShot(kShotTimeSeconds, kShotEndTimeSeconds);
+        SequentialEndingCommandGroup firstSwipeInjectorShot = 
+            mAutos.timedInjectorShot(kShotTimeSeconds, kShotEndTimeSeconds);
 
         Trigger hasFirstShotEnded = auto.loggedCondition(
             mFirstSwipePathName+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeIndexShot.hasEnded()),
+            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeInjectorShot.hasEnded()),
             true);
 
         intakingRange
@@ -92,8 +92,10 @@ public class SingleSwipe extends Auton {
         shootingRange
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
         autoActivted
             .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
@@ -103,6 +105,7 @@ public class SingleSwipe extends Auton {
 
         firstSwipePath.atTime(mFirstSwipeAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
+            .onTrue(firstSwipeInjectorShot)
             .onTrue(new SequentialEndingCommandGroup(
                     transitionPose(mTrenchApproachPose),
                     transitionPose(mTrenchExitPose),
@@ -112,10 +115,10 @@ public class SingleSwipe extends Auton {
 
         firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(firstSwipeIntakeShot)
-            .onTrue(firstSwipeIndexShot)
+            .onTrue(firstSwipeInjectorShot)
             .onTrue(mIntakeSS.trashCompact());
 
-        firstSwipePath.hasEnded().and(() -> firstSwipeIndexShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
+        firstSwipePath.hasEnded().and(() -> firstSwipeInjectorShot.hasEnded() && firstSwipeIntakeShot.hasEnded())
             .onTrue(Commands.runOnce(() -> mWantToShoot = false))
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
