@@ -7,11 +7,13 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import frc.lib.math.GeomUtil;
 import frc.lib.tuning.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -196,6 +198,18 @@ public class HolonomicController {
         return tXController.atGoal() && tYController.atGoal() && tOmegaController.atGoal();
     }
 
+    public boolean inTolerance(Transform2d transform, Pose2d robotPose) {
+        return 
+            (Math.abs(tXController.getGoal().position - robotPose.getX()) < transform.getX())
+              && 
+            (Math.abs(tYController.getGoal().position - robotPose.getY()) < transform.getY())
+              &&
+            GeomUtil.withinTolerance(
+                robotPose.getRotation(), 
+                Rotation2d.fromDegrees(tOmegaController.getGoal().position), 
+                transform.getRotation());
+    }
+
     @AutoLogOutput(key = "Drive/HolonomicController/PositionGoal")
     public Pose2d getPositionGoal() {
         return new Pose2d(
@@ -245,6 +259,36 @@ public class HolonomicController {
             yValueFilter.calculate(pose.getY()),
             pose.getRotation()
         );
+    }
+
+    public double getLongestTime(Pose2d currentPose, ChassisSpeeds currentSpeed) {
+        TrapezoidProfile xProfile = new TrapezoidProfile(tXController.getConstraints());
+        TrapezoidProfile yProfile = new TrapezoidProfile(tYController.getConstraints());
+        TrapezoidProfile thetaProfile = new TrapezoidProfile(tOmegaController.getConstraints());
+
+        xProfile.calculate(
+            0, 
+            new TrapezoidProfile.State(
+                currentPose.getX(), 
+                currentSpeed.vxMetersPerSecond), 
+                tXController.getGoal());
+
+        yProfile.calculate(
+            0, 
+            new TrapezoidProfile.State(
+                currentPose.getY(), 
+                currentSpeed.vyMetersPerSecond), 
+                tYController.getGoal());
+
+        thetaProfile.calculate(
+            0, 
+            new TrapezoidProfile.State(
+                currentPose.getRotation().getDegrees(), 
+                Math.toDegrees(currentSpeed.omegaRadiansPerSecond)), 
+                tOmegaController.getGoal());
+
+        return Math.max(
+            Math.max(xProfile.totalTime(), yProfile.totalTime()), thetaProfile.totalTime());
     }
 
     ////////////////////////// SETTERS \\\\\\\\\\\\\\\\\\\\\\\\\\\\

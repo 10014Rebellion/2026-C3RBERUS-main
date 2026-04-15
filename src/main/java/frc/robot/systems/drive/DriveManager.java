@@ -5,6 +5,8 @@ import static frc.robot.systems.drive.DriveConstants.kPPTranslationPID;
 import static frc.robot.systems.drive.DriveConstants.kTrackWidthXMeters;
 import static frc.robot.systems.drive.DriveConstants.kTrackWidthYMeters;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -18,17 +20,21 @@ import frc.robot.commands.FollowPathCommand;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.lib.controls.TurnPointFeedforward;
 import frc.lib.math.AllianceFlipUtil;
+import frc.lib.math.EqualsUtil;
 import frc.lib.telemetry.Telemetry;
 import frc.robot.systems.drive.controllers.HeadingController;
 import frc.robot.systems.drive.controllers.HolonomicController;
@@ -37,6 +43,7 @@ import frc.robot.systems.drive.controllers.LineController;
 import frc.robot.systems.drive.controllers.ManualTeleopController;
 import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 import frc.robot.game.GameDriveManager;
+import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.logging.DriveErrors;
 
@@ -80,6 +87,7 @@ public class DriveManager {
 
     // @AutoLogOutput(key="Drive/GoalPoseSup")
     private Supplier<Pose2d> mGoalPoseSup = () -> new Pose2d();
+    private Supplier<ChassisSpeeds> mChassisSpeedSup = () -> new ChassisSpeeds();
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
 
     private ChassisSpeeds mPPDesiredSpeeds = new ChassisSpeeds();
@@ -132,6 +140,7 @@ public class DriveManager {
             case AUTO_ALIGN:
                 desiredSpeeds = of(mAutoAlignController.calculate(
                     mGoalPoseSup.get(), 
+                    mChassisSpeedSup.get(),
                     mDrive.getPoseEstimate()));
                 break;
             case LINE_ALIGN:
@@ -382,6 +391,22 @@ public class DriveManager {
     public Command setToGenericAutoAlignWithGeneratorReset(Supplier<Pose2d> pGoalPoseSup, ConstraintType pConstraintType) {
         return new InstantCommand(() -> {
             mGoalPoseSup = pGoalPoseSup;
+            mChassisSpeedSup = () -> new ChassisSpeeds();
+            mAutoAlignController.setConstraintType(pConstraintType);
+            mAutoAlignController.reset(
+                mDrive.getPoseEstimate(), 
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                    mDrive.getRobotChassisSpeeds(), 
+                    mDrive.getPoseEstimate().getRotation()),
+                mGoalPoseSup.get());
+            mDrive.resetSetpointGenerator();
+            }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
+    }
+
+    public Command setToGenericAutoAlignWithGeneratorReset(Supplier<Pose2d> pGoalPoseSup, Supplier<ChassisSpeeds> speedSup, ConstraintType pConstraintType) {
+        return new InstantCommand(() -> {
+            mGoalPoseSup = pGoalPoseSup;
+            mChassisSpeedSup = speedSup;
             mAutoAlignController.setConstraintType(pConstraintType);
             mAutoAlignController.reset(
                 mDrive.getPoseEstimate(), 
@@ -513,4 +538,122 @@ public class DriveManager {
     public DriveState getDriveState() {
         return mDriveState;
     }
+
+    /**
+     * Generates a command to pathfind around the bump obstacle,
+     * inserting corner waypoints wherever the straight-line path
+     * would intersect the bounding box.
+     *
+     * @param goalPose The target pose to navigate to.
+     * @return A SequentialCommandGroup driving through safe waypoints.
+     */
+    public Command pathFindAroundBump(Pose2d goalPose) {
+        // --- Obstacle bounding box (alliance-flipped) ---
+        double boxX1 = AllianceFlipUtil.applyX(3.481);
+        double boxX2 = AllianceFlipUtil.applyX(5.679);
+        double boxY1 = AllianceFlipUtil.applyY(0.659);
+        double boxY2 = AllianceFlipUtil.applyY(7.451);
+
+        double boxMinX = Math.min(boxX1, boxX2);
+        double boxMaxX = Math.max(boxX1, boxX2);
+        double boxMinY = Math.min(boxY1, boxY2);
+        double boxMaxY = Math.max(boxY1, boxY2);
+
+        Pose2d robotPose = mDrive.getPoseEstimate();
+        double robotX    = robotPose.getX();
+        double robotY    = robotPose.getY();
+        double goalX     = goalPose.getX();
+        double goalY     = goalPose.getY();
+
+        double dx = goalX - robotX;
+        double dy = goalY - robotY;
+
+        // --- Determine traversal direction for per-leg speed selection ---
+        TraversalDirection direction = TraversalDirection.from(dx);
+
+        // --- Compute where the direct path crosses each vertical box edge ---
+        List<Pair<Pose2d, ChassisSpeeds>> cornerWaypoints = new ArrayList<>();
+
+        for (double edgeX : getOrderedEdges(robotX, boxMinX, boxMaxX)) {
+            if (Math.abs(dx) < 1e-9) break; // Vertical path — no X-edge crossings
+
+            double t = (edgeX - robotX) / dx;
+            if (t <= 0.0 || t >= 1.0) continue; // Crossing behind robot or past goal
+
+            double yAtEdge = robotY + t * dy;
+            if (EqualsUtil.inBetween(yAtEdge, boxMinY, boxMaxY)) {
+                double cornerY = EqualsUtil.getClosest(robotY, boxMinY, boxMaxY);
+                Pose2d corner  = new Pose2d(edgeX, cornerY, Rotation2d.k180deg);
+
+                // Speed is based on which edge we're crossing
+                ChassisSpeeds speeds = direction.speedsForEdge(edgeX, boxMinX, boxMaxX);
+                cornerWaypoints.add(Pair.of(corner, speeds));
+            }
+        }
+
+        // --- Build sequential command ---
+        SequentialCommandGroup command = new SequentialCommandGroup();
+        Transform2d tolerance = new Transform2d(0.1, 0.1, Rotation2d.fromDegrees(5.0));
+
+        for (Pair<Pose2d, ChassisSpeeds> waypoint : cornerWaypoints) {
+            command.addCommands(
+                setToGenericAutoAlignWithGeneratorReset(
+                    () -> waypoint.getFirst(),
+                    () -> waypoint.getSecond(),
+                    ConstraintType.LINEAR
+                ).onlyWhile(() -> !mAutoAlignController.inTolerance(tolerance, mDrive.getPoseEstimate()))
+            );
+        }
+
+        command.addCommands(setToGenericAutoAlign(() -> goalPose, ConstraintType.LINEAR));
+        return command;
+    }
+
+    /**
+     * Represents the direction the robot is traversing the bounding box,
+     * and owns the speed profiles for each edge crossing in that direction.
+     *
+     * APPROACHING : robot is moving in the +X direction (toward higher X)
+     *   - Entry edge (minX): accelerate into the box corner
+     *   - Exit edge  (maxX): decelerate out of the box corner
+     *
+     * RETREATING  : robot is moving in the -X direction (toward lower X)
+     *   - Entry edge (maxX): accelerate into the box corner
+     *   - Exit edge  (minX): decelerate out of the box corner
+     */
+    private enum TraversalDirection {
+        APPROACHING {
+            @Override
+            public ChassisSpeeds speedsForEdge(double edgeX, double boxMinX, double boxMaxX) {
+                return (edgeX == boxMinX)
+                    ? new ChassisSpeeds( 2.0, 0.0, 0.0)   // Entry — accelerate
+                    : new ChassisSpeeds( 1.0, 0.0, 0.0);  // Exit  — slow down
+            }
+        },
+        RETREATING {
+            @Override
+            public ChassisSpeeds speedsForEdge(double edgeX, double boxMinX, double boxMaxX) {
+                return (edgeX == boxMaxX)
+                    ? new ChassisSpeeds(-2.0, 0.0, 0.0)   // Entry — accelerate (negative X)
+                    : new ChassisSpeeds(-1.0, 0.0, 0.0);  // Exit  — slow down  (negative X)
+            }
+        };
+
+        public abstract ChassisSpeeds speedsForEdge(double edgeX, double boxMinX, double boxMaxX);
+
+        public static TraversalDirection from(double dx) {
+            return (dx >= 0) ? APPROACHING : RETREATING;
+        }
+    }
+
+    /**
+     * Returns the box's vertical edges ordered by proximity to the robot
+     * so waypoints are inserted in traversal order.
+     */
+    private double[] getOrderedEdges(double robotX, double boxMinX, double boxMaxX) {
+        if (robotX <= boxMinX) return new double[]{ boxMinX, boxMaxX };
+        if (robotX >= boxMaxX) return new double[]{ boxMaxX, boxMinX };
+        return new double[]{ boxMinX, boxMaxX }; // Robot is inside — check both
+    }
+    
 }

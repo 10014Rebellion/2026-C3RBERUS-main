@@ -14,6 +14,16 @@ public class EqualsUtil {
         return epsilonEquals(a, b, 1e-9);
     }
 
+    public static boolean inBetween(double value, double min, double max) {
+        return value > min && value < max;
+    }
+
+    public static double getClosest(double value, double value1, double value2) {
+        if(Math.abs(value1 - value) > Math.abs(value2 - value)) {
+            return value2;
+        } else return value1;
+    }
+
     /** Extension methods for wpi geometry objects */
     public static class GeomExtensions {
         public static boolean epsilonEquals(Twist2d twist, Twist2d other) {
