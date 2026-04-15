@@ -1,14 +1,19 @@
 package frc.robot.systems.auton;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.GameGoalPoseChooser;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.FollowPathCommand;
 import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
@@ -23,15 +28,19 @@ public class SingleSwipe extends Auton {
     private final String mAutoName;
     private final String mFirstSwipePathName;
     private final double mFirstSwipeAlignTime;
+    private final Supplier<Pose2d> mTrenchApproachPose;
+    private final Supplier<Pose2d> mTrenchExitPose;
 
     private final double kShotTimeSeconds = 6.5;
     private final double kShotEndTimeSeconds = 0.02; 
 
-    public SingleSwipe(AutonCommands pAutos, String pAutoName, String pFirstSwipePathName, double pFirstSwipeAlignTime) {
+    public SingleSwipe(AutonCommands pAutos, String pAutoName, String pFirstSwipePathName, double pFirstSwipeAlignTime, Supplier<Pose2d> pTrenchApproachPose, Supplier<Pose2d> pTrenchExitPose) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeAlignTime = pFirstSwipeAlignTime;
+        mTrenchApproachPose = pTrenchApproachPose;
+        mTrenchExitPose = pTrenchExitPose;
     }
 
     @Override
@@ -94,9 +103,12 @@ public class SingleSwipe extends Auton {
 
         firstSwipePath.atTime(mFirstSwipeAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
-                () -> getSwipeEndPose(lastPoseOfFirstSwipe),
-                ConstraintType.LINEAR));
+            .onTrue(new SequentialEndingCommandGroup(
+                    transitionPose(mTrenchApproachPose),
+                    transitionPose(mTrenchExitPose),
+                    mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
+                        () -> getSwipeEndPose(lastPoseOfFirstSwipe),
+                        ConstraintType.LINEAR)));
 
         firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(firstSwipeIntakeShot)
@@ -122,5 +134,24 @@ public class SingleSwipe extends Auton {
                         ? Rotation2d.k180deg 
                         : Rotation2d.kZero)
         ));
+    }
+
+    public Command transitionPose(Supplier<Pose2d> poseSup) {
+        return mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
+            poseSup,
+            () -> new ChassisSpeeds(AllianceFlipUtil.shouldFlip() ? -0.5 : 0.5, 0.0, 0.0),
+            ConstraintType.LINEAR)
+                .onlyIf(
+                    () -> (
+                        !AllianceFlipUtil.shouldFlip()
+                            &&
+                        poseSup.get().getX() < mDriveSS.getPoseEstimate().getX()
+                    ) || (
+                        AllianceFlipUtil.shouldFlip()
+                            &&
+                        poseSup.get().getX() > mDriveSS.getPoseEstimate().getX()
+                    )
+                )
+                .onlyWhile(() -> (mDriveSS.getDriveManager().getAutoAlignController().inTolerance(new Transform2d(0.1, 0.1, Rotation2d.fromDegrees(5.0)), mDriveSS.getPoseEstimate())));
     }
 }

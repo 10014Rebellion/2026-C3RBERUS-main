@@ -171,4 +171,44 @@ public class GameGoalPoseChooser {
     public static boolean inBetween(double value, double min, double max) {
         return (value > min) && (value < max);
     }
+
+    public static Pose2d leftTrenchApproachPose() {
+        return AllianceFlipUtil.apply(
+            new Pose2d(
+                5.679,
+                7.451,
+                Rotation2d.k180deg
+            )
+        );
+    }
+
+    public static Pose2d leftTrenchExitPose() {
+        return AllianceFlipUtil.apply(
+            new Pose2d(
+                4.0,
+                7.451,
+                Rotation2d.k180deg
+            )
+        );
+    }
+
+    public static Pose2d rightTrenchApproachPose() {
+        return AllianceFlipUtil.apply(
+            new Pose2d(
+                5.679,
+                0.659,
+                Rotation2d.k180deg
+            )
+        );
+    }
+
+    public static Pose2d rightTrenchExitPose() {
+        return AllianceFlipUtil.apply(
+            new Pose2d(
+                4.0,
+                0.659,
+                Rotation2d.k180deg
+            )
+        );
+    }
 }

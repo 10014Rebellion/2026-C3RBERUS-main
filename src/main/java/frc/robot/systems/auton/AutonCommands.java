@@ -10,6 +10,7 @@ import frc.lib.telemetry.Telemetry;
 import frc.robot.commands.FollowPathCommand;
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.FieldConstants;
+import frc.robot.game.GameGoalPoseChooser;
 
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -91,14 +92,18 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftSingleSwipe", 
                 "L_IT_IC_ST", 
-                4.93);
+                4.94,
+                () -> GameGoalPoseChooser.leftTrenchApproachPose(),
+                () -> GameGoalPoseChooser.leftTrenchExitPose());
 
         SingleSwipeClimb mLeftSingleSwipeClimbAuto =
             new SingleSwipeClimb(
                 this, 
                 "LeftSingleSwipeClimb", 
                 "L_IT_IC_ST", 
-                4.93, 
+                4.94, 
+                () -> GameGoalPoseChooser.leftTrenchApproachPose(),
+                () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 FieldConstants.kClimbLeftPose);
 
         DoubleSwipe mLeftDoubleSwipeBumpAuto =
@@ -106,9 +111,11 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftDoubleSwipeBump", 
                 "L_IT_IC_ST", 
-                4.93,
+                4.94,
+                () -> GameGoalPoseChooser.leftTrenchApproachPose(),
+                () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                4.52);
+                4.82);
 
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
@@ -116,8 +123,10 @@ public class AutonCommands extends SubsystemBase {
                 "LeftDoubleSwipeBumpClimb", 
                 "L_IT_IC_ST", 
                 4.93,
+                () -> GameGoalPoseChooser.leftTrenchApproachPose(),
+                () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                4.52,
+                4.82,
                 FieldConstants.kClimbLeftPose);
 
         SingleSwipe mRightSingleSwipeAuto = 
@@ -125,7 +134,9 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "RightSingleSwipe", 
                 "R_IT_IC_ST", 
-                4.13);
+                4.13, 
+                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
+                () -> GameGoalPoseChooser.rightTrenchExitPose());
 
         SingleSwipeClimb mRightSingleSwipeClimbAuto =
             new SingleSwipeClimb(
@@ -133,6 +144,8 @@ public class AutonCommands extends SubsystemBase {
                 "RightSingleSwipeClimb", 
                 "R_IT_IC_ST", 
                 4.13, 
+                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
+                () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 FieldConstants.kClimbRightPose);
 
         DoubleSwipe mRightDoubleSwipeBumpAuto =
@@ -141,6 +154,8 @@ public class AutonCommands extends SubsystemBase {
                 "RightDoubleSwipeBump", 
                 "R_IT_IC_ST", 
                 4.13,
+                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
+                () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
                 4.33);
 
@@ -150,6 +165,8 @@ public class AutonCommands extends SubsystemBase {
                 "RightDoubleSwipeBumpClimb", 
                 "R_IT_IC_ST", 
                 4.13,
+                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
+                () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
                 4.33,
                 FieldConstants.kClimbRightPose);
