@@ -99,7 +99,7 @@ public class FuelPumpSS extends SubsystemBase {
     mLeaderFuelPumpIO.setMotorVelocity(
       pRPS,
       mFuelPumpFeedforward.calculate(pRPS.getRotations())
-    );
+  );
     mFollowerFuelPumpIO.enforceFollower();
   }
 

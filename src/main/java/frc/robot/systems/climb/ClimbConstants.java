@@ -23,8 +23,8 @@ public class ClimbConstants {
 
     public static final LoggedTunableNumber kClimbUp = new LoggedTunableNumber("Climb/UpVoltage", 5.0);
     public static final LoggedTunableNumber kClimbDown = new LoggedTunableNumber("Climb/DownVoltage", -5.0);
-    public static final LoggedTunableNumber kClimbStay = new LoggedTunableNumber("Climb/StayVoltage", 0.0);
-        public static final LoggedTunableNumber kClimbStayRobot = new LoggedTunableNumber("Climb/StayRobotVoltage", 0.0);
+    public static final LoggedTunableNumber kClimbStay = new LoggedTunableNumber("Climb/StayVoltage", 0.5);
+    public static final LoggedTunableNumber kClimbStayRobot = new LoggedTunableNumber("Climb/StayRobotVoltage", 0.0);
     public static final LoggedTunableNumber kClimbIdle = new LoggedTunableNumber("Climb/IdleVoltage", 0.0);
 
     public static final HashMap<ClimbState, LoggedTunableNumber> kStateToVoltage = new HashMap<>();
@@ -50,7 +50,7 @@ public class ClimbConstants {
     
     public static final PositionSoftLimits kSoftLimits = new PositionSoftLimits(
         0.00, 
-        2.7
+        3.0
     );
 
     public static final SimulatedElevator kSimElevator = new SimulatedElevator(
