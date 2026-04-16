@@ -71,7 +71,7 @@ public class FuelPumpSS extends SubsystemBase {
     }
 
     else{
-      return Math.abs(getAvgFuelPumpRPS() - FuelPumpConstants.kRPSForShooting.getRotations()) < FuelPumpConstants.kToleranceRPS;
+        return getAvgFuelPumpRPS() >= FuelPumpConstants.kRPSForShooting.getRotations();
     }
   }
 

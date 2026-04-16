@@ -34,12 +34,12 @@ public class IntakeConstants {
                 ) {
 
                         public static final IntakeMotionConfig kIntakeFunc = new IntakeMotionConfig(
-                                        2.0, // kMaxTimeSec
+                                        3.4, // kMaxTimeSec
                                         tIntakingSetpointMeters.get(), // kFarthestExtensionM
-                                        tStowSetpointMeters.get(), // kClosestExtensionM
+                                        0.21, // kClosestExtensionM
                                         5, // kMainPeaks
-                                        10, // kHoldFreq
-                                        0.2, // kHoldMinimum
+                                        2, // kHoldFreq
+                                        0.136, // kHoldMinimum
                                         0.5 // kDropRatio
                         );
                 }
@@ -66,12 +66,12 @@ public class IntakeConstants {
 
                 // WITH POSITION VOLTAGE
                 public static final MotionMagicFOCElevatorFF kRackController = (!RobotConstants.isSim())
-                                ? new MotionMagicFOCElevatorFF(
+                                ? new MotionMagicFOCElevatorFF( // REAL
                                                 0,
                                                 new PDConstants(1000.0, 75.0),
                                                 new ElevatorFeedforward(0.3, 2.0, 0, 0),
                                                 new MotionMagicConstants(30.0, 30.0, 0))
-                                : new MotionMagicFOCElevatorFF(
+                                : new MotionMagicFOCElevatorFF( // SIM
                                                 0,
                                                 new PDConstants(40, 6.0),
                                                 new ElevatorFeedforward(0.0, 0.0, 0.1, 0),

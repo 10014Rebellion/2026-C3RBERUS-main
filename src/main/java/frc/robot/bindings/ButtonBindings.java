@@ -97,7 +97,7 @@ public class ButtonBindings {
     }
 
     public void initCompBindings() {
-        boolean useAnshulCompact = false;
+        boolean useAnshulCompact = true;
 
         // PILOT CONTROLS
         // Trigger wantToAutoAlignToHubBtn = mPilotController.a().and(kUsingPilotGunner);

@@ -20,7 +20,7 @@ import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 
 public class FuelPumpConstants {
     public static final double kToleranceRPS = 12.0;
-    public static final Rotation2d kRPSForShooting = Rotation2d.fromRotations(80);
+    public static final Rotation2d kRPSForShooting = Rotation2d.fromRotations(50);
 
     public static final BasicMotorHardware kFuelPumpLeaderConfig = new BasicMotorHardware(
         53,
