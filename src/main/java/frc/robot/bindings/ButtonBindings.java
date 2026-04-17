@@ -20,6 +20,7 @@ import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.climb.ClimbSS;
+import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
@@ -161,6 +162,7 @@ public class ButtonBindings {
         Trigger atLineGoal = new Trigger(() -> mDriveSS.getDriveManager().getLineAlignController().atGoal());
 
         Trigger anyCANRangesTriggered = new Trigger(() -> mFuelInjectorSS.anyCANRangesTripped());
+        Trigger allCANRangesTriggered = new Trigger(() -> mFuelInjectorSS.allCANRangesTripped());
 
         Trigger wantToShoot = new Trigger(() -> {
             return wantToSnowPlowBtn.getAsBoolean()
@@ -255,7 +257,8 @@ public class ButtonBindings {
                 .onTrue(mClimbSS.goUpTillClimbHeightThenStay());
 
         wantToClimbAscendBtn
-                .onTrue(mClimbSS.goDownTillClimbedThenStayClimbed());
+                .onTrue(mClimbSS.setStateCmd(ClimbState.DOWN))
+                .onFalse(mClimbSS.setStateCmd(ClimbState.STAY_ROBOT));
 
         // wantsToHeadingXLock
         // .onFalse(new ConditionalCommand(
