@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.efi.sensors.CANRangeSS;
 import frc.robot.systems.shooter.ShotMap;
 
 public class HoodSS extends SubsystemBase {
@@ -73,9 +74,12 @@ public class HoodSS extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/Hood/LimitsEnforced")
     private boolean mLimitEnforced = false;
+    private boolean mShouldUseCanRanges = false;
+    private final CANRangeSS mCANRanges;
 
-    public HoodSS(HoodIO pHoodIO) {
+    public HoodSS(HoodIO pHoodIO, CANRangeSS pCANRange) {
         this.mHoodIO = pHoodIO;
+        this.mCANRanges = pCANRange;
         this.mHoodFF = HoodConstants.kHoodControlConfig.feedforward();
     }
 
@@ -87,6 +91,10 @@ public class HoodSS extends SubsystemBase {
         executeState();
 
         Logger.processInputs("Hood", mHoodInputs);
+    }
+
+    public void setCANRangeUsage(boolean pShouldUseCANRange) {
+        mShouldUseCanRanges = pShouldUseCANRange;
     }
 
     /*
@@ -137,7 +145,10 @@ public class HoodSS extends SubsystemBase {
                     setHoodPosition(mLatestClosedLoopGoalRot);
                 }
                 case SHOTMAP_POSITION -> {
-                    setHoodPosition(ShotMap.getInstance().getHoodAngle());
+                    setHoodPosition(Rotation2d.fromDegrees(
+                        ShotMap.getInstance().getHoodAngle().getDegrees() * 
+                        (mShouldUseCanRanges && mCANRanges.allHasFuel() ? 1.0 : 1.0)
+                    ));
                 }
             }
         }

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
@@ -217,6 +218,10 @@ public class ButtonBindings {
                 .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
                 .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
+        wantToDisableCANRangeBtn
+                .onTrue(new InstantCommand(()->mFlywheelsSS.setCANRangeUsage(false)))
+                .onFalse(new InstantCommand(()->mFlywheelsSS.setCANRangeUsage(true)));
+
         // wantToTrashCompact.and(isRackMoving.negate())
         // .onTrue(new
         // WaitCommand(kKickbackTime).andThen(mFuelPumpSS.setStateCmd(closedLoopFuelPump
@@ -254,7 +259,9 @@ public class ButtonBindings {
                 .onTrue(mDriveSS.getDriveManager().setToHeadingXLock());
 
         wantToDeployClimbBtn
-                .onTrue(mClimbSS.goUpTillClimbHeightThenStay());
+                .onTrue(mClimbSS.setStateCmd(ClimbState.UP))
+                .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
+                .onFalse(mClimbSS.setStateCmd(ClimbState.STOP));
 
         wantToClimbAscendBtn
                 .onTrue(mClimbSS.setStateCmd(ClimbState.DOWN))

@@ -43,7 +43,6 @@ import frc.robot.systems.drive.controllers.LineController;
 import frc.robot.systems.drive.controllers.ManualTeleopController;
 import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 import frc.robot.game.GameDriveManager;
-import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.logging.DriveErrors;
 

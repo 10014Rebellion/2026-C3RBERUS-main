@@ -21,4 +21,5 @@ public interface SensorIO {
 
   public default boolean getCANRangeValue() { return false;};
 
+  public default void setSensorConfigs(double pTolerance, double pCutoff) {}
 }

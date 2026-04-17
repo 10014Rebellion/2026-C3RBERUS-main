@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.logging.InvalidValueErrors.UnaccountedEnum;
+import frc.robot.systems.efi.sensors.CANRangeSS;
 import frc.robot.systems.shooter.ShotMap;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderInputsAutoLogged;
@@ -65,10 +66,14 @@ public class FlywheelsSS extends SubsystemBase {
 
   @AutoLogOutput(key = "Shooter/Flywheel/States/CurrentState")
   private FlywheelStates mCurrentFlywheelState = FlywheelStates.STOPPED;
+  private CANRangeSS mCanRangeSS;
+  private boolean mShouldUseCanRanges = false;
+  private final LoggedTunableNumber tInitialBoostFactor = new LoggedTunableNumber("Shooter/Flywheel/Boost", 1.0);
 
-  public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, EncoderIO pFlywheelEncoder) {
+  public FlywheelsSS(FlywheelIO pLeaderFlywheelIO, FlywheelIO pFollowerFlywheelIO, CANRangeSS pCANRanges, EncoderIO pFlywheelEncoder) {
     this.mLeaderFlywheelIO = pLeaderFlywheelIO;
     this.mFollowerFlywheelIO = pFollowerFlywheelIO;
+    this.mCanRangeSS = pCANRanges;
     this.mFlywheelEncoder = pFlywheelEncoder;
   }
 
@@ -86,6 +91,10 @@ public class FlywheelsSS extends SubsystemBase {
     Logger.processInputs("Shooter/Flywheel/Encoder", mEncoderInputs);
   }
 
+  public void setCANRangeUsage(boolean pShouldUseCANRange) {
+    mShouldUseCanRanges = pShouldUseCANRange;
+  }
+
   private void executeState() {
     if (FlywheelConstants.kFlywheelSetpointToVelocity.containsKey(mCurrentFlywheelState)) {
       setFlywheelVelocity(FlywheelConstants.kFlywheelSetpointToVelocity.get(mCurrentFlywheelState).get());
@@ -97,7 +106,9 @@ public class FlywheelsSS extends SubsystemBase {
           stopFlywheels();
         }
         case SHOTMAP_VELOCITY -> {
-          setFlywheelVelocity(ShotMap.getInstance().getFlywheelVel());
+          setFlywheelVelocity(Rotation2d.fromRotations(
+            ShotMap.getInstance().getFlywheelVel().getRotations() * (mShouldUseCanRanges && mCanRangeSS.allHasFuel() ? tInitialBoostFactor.get() : 1.0))
+          );
         }
         default -> {
           Telemetry.reportIssue(new UnaccountedEnum(mCurrentFlywheelState.toString()));

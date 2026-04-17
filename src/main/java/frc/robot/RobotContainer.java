@@ -20,6 +20,7 @@ import frc.robot.systems.efi.injector.FuelInjectorConstants;
 import frc.robot.systems.efi.injector.FuelInjectorIO;
 import frc.robot.systems.efi.injector.FuelInjectorIOKrakenX60;
 import frc.robot.systems.efi.injector.FuelInjectorIOSim;
+import frc.robot.systems.efi.sensors.CANRangeSS;
 import frc.robot.systems.efi.sensors.SensorConstants;
 import frc.robot.systems.efi.sensors.SensorIO;
 import frc.robot.systems.efi.sensors.SensorIOCANRange;
@@ -72,12 +73,14 @@ public class RobotContainer {
     private final Intake mIntakeSS;
     private final FuelInjectorSS mFuelInjectorSS;
     private final ClimbSS mClimbSS;
+    private final CANRangeSS mCANRangesSS;
 
     private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
     private final ButtonBindings mButtonBindings;
     private final AutonCommands autos;
 
     public RobotContainer() {
+
         switch (RobotConstants.kCurrentMode) {
             case REAL: {
                 mDriveSS = new Drive(
@@ -100,12 +103,19 @@ public class RobotContainer {
                         new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpLeaderConfig), 
                         new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpFollowerConfig)
                 );
+
+                mCANRangesSS = new CANRangeSS(
+                    new SensorIOCANRange(SensorConstants.leftCANRangeConfiguration), 
+                    new SensorIOCANRange(SensorConstants.centerCANRangeConfiguration), 
+                    new SensorIOCANRange(SensorConstants.rightCANRangeConfiguration)
+                );
                 
-                mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig));
+                mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig), mCANRangesSS);
 
                 mFlywheelsSS = new FlywheelsSS(
                         new FlywheelIOKrakenX44(FlywheelConstants.kFlywheelLeaderConfig),
                         new FlywheelIOKrakenX44(FlywheelConstants.kFlywheelFollowerConfig),
+                        mCANRangesSS,
                         new EncoderIO(){}
                 );
 
@@ -118,11 +128,7 @@ public class RobotContainer {
                 mClimbSS = new ClimbSS(
                     new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants));
 
-                mFuelInjectorSS = new FuelInjectorSS(
-                    new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig),
-                    new SensorIOCANRange(SensorConstants.leftCANRangeConfiguration),
-                    new SensorIOCANRange(SensorConstants.midCANRangeConfiguration),
-                    new SensorIOCANRange(SensorConstants.rightCANRangeConfiguration));
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig));
                 break;
             }
             case SIM: {
@@ -149,11 +155,18 @@ public class RobotContainer {
                     new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig)
                 );
 
-                mHoodSS = new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig));
+                mCANRangesSS = new CANRangeSS(
+                    new SensorIO(){}, 
+                    new SensorIO(){}, 
+                    new SensorIO(){}
+                );
+
+                mHoodSS = new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig), mCANRangesSS);
 
                 mFlywheelsSS = new FlywheelsSS(
                     leaderSim,
                     followerSim,
+                    mCANRangesSS,
                     new EncoderIO() {}
                 );
 
@@ -164,12 +177,7 @@ public class RobotContainer {
                     new IntakeRollerSS(new IntakeRollerIOSim())
                 );
 
-                mFuelInjectorSS = new FuelInjectorSS(
-                    new FuelInjectorIOSim(),
-                    new SensorIO() {},
-                    new SensorIO() {},
-                    new SensorIO() {});
-
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOSim());
 
                 mClimbSS = new ClimbSS(new ClimbIO() {});
                 break;
@@ -195,12 +203,19 @@ public class RobotContainer {
                     new FuelPumpIO() {}, 
                     new FuelPumpIO() {}
                 );
+
+                mCANRangesSS = new CANRangeSS(
+                    new SensorIO(){}, 
+                    new SensorIO(){}, 
+                    new SensorIO(){}
+                );
                 
-                mHoodSS = new HoodSS(new HoodIO() {});
+                mHoodSS = new HoodSS(new HoodIO() {}, mCANRangesSS);
                 
                 mFlywheelsSS = new FlywheelsSS(
                     new FlywheelIO() {},
                     new FlywheelIO() {},
+                    mCANRangesSS,
                     new EncoderIO() {}
                 );
 
@@ -211,11 +226,7 @@ public class RobotContainer {
 
                 mClimbSS = new ClimbSS(new ClimbIO() {});
 
-                mFuelInjectorSS = new FuelInjectorSS(
-                    new FuelInjectorIO() {},
-                    new SensorIO() {},
-                    new SensorIO() {},
-                    new SensorIO() {});
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIO() {});
 
                 break;
             }

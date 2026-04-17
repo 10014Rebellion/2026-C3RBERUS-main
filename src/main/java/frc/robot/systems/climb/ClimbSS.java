@@ -19,6 +19,7 @@ public class ClimbSS extends SubsystemBase {
         STAY,
         STAY_ROBOT,
         IDLE,
+        STOP,
         INVALID;
     }
   
@@ -48,6 +49,9 @@ public class ClimbSS extends SubsystemBase {
 
     public void executeState() {
         switch (mClimbState) {
+            case STOP -> {
+                mClimbIO.stopMotor();
+            }
             case UP, DOWN, STAY, STAY_ROBOT -> {
                 setClimbVolts(ClimbConstants.kStateToVoltage.get(mClimbState).get());
             }

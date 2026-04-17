@@ -80,6 +80,15 @@ public class SensorIOCANRange implements SensorIO{
     }
 
     @Override
+    public void setSensorConfigs(double pTolerance, double pCutoff) {
+        CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
+        canRangeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 3000;
+        canRangeConfig.ProximityParams.ProximityHysteresis = pTolerance;
+        canRangeConfig.ProximityParams.ProximityThreshold = pCutoff;
+        mCANRange.getConfigurator().apply(canRangeConfig);
+    }
+
+    @Override
     public boolean getCANRangeValue(){
         return isDetected.getValue();
     }
