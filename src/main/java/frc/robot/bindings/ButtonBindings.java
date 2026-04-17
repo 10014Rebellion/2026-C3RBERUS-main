@@ -27,6 +27,7 @@ import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
+import frc.robot.systems.efi.sensors.CANRangeSS;
 import frc.robot.systems.intake.Intake;
 import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
@@ -50,6 +51,7 @@ public class ButtonBindings {
     private final Intake mIntakeSS;
     private final FuelInjectorSS mFuelInjectorSS;
     private final ClimbSS mClimbSS;
+    private final CANRangeSS mCANRanges;
     private final FlydigiApex4 mPilotController = new FlydigiApex4(BindingsConstants.kPilotControllerPort);
     private final RebelButtonBoardRebuilt mGunnerButtonboard = new RebelButtonBoardRebuilt(1, 2);
 
@@ -63,10 +65,11 @@ public class ButtonBindings {
     private boolean inCenterFlag = false;
 
     public ButtonBindings(Drive pDriveSS, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS,
-            Intake pIntake, FuelInjectorSS pInjectorSS, ClimbSS pClimbSS) {
+            Intake pIntake, FuelInjectorSS pInjectorSS, ClimbSS pClimbSS, CANRangeSS pCANRanges) {
         this.mDriveSS = pDriveSS;
         this.mFuelPumpSS = pFuelPumpSS;
         this.mHoodSS = pHoodSS;
+        this.mCANRanges = pCANRanges;
         this.mFlywheelsSS = pFlywheelsSS;
         this.mIntakeSS = pIntake;
         this.mFuelInjectorSS = pInjectorSS;
@@ -131,7 +134,7 @@ public class ButtonBindings {
         Trigger wantToSnowPlowBtn = mGunnerButtonboard.yellowRectangleRight().and(kUsingPilotGunner);
         Trigger wantToDisableCamsBtn = mGunnerButtonboard.orangePilotTop().and(kUsingPilotGunner);
         Trigger wantToDisableCANRangeBtn = mGunnerButtonboard.purplePilotTop().and(kUsingPilotGunner);
-        Trigger wantToAfterBurnBtn = mGunnerButtonboard.bluePilotTop().and(kUsingPilotGunner);
+        Trigger wantToDisableSoftLimits = mGunnerButtonboard.bluePilotTop().and(kUsingPilotGunner);
 
         // OTHER CONDITIONAL TRIGGERS
         Trigger autonomousWorking = new Trigger(() -> true);
@@ -162,8 +165,8 @@ public class ButtonBindings {
         Trigger atHeadingGoal = (headingAlignAtGoal.or(driveIsHeadingXLocked));
         Trigger atLineGoal = new Trigger(() -> mDriveSS.getDriveManager().getLineAlignController().atGoal());
 
-        Trigger anyCANRangesTriggered = new Trigger(() -> mFuelInjectorSS.anyCANRangesTripped());
-        Trigger allCANRangesTriggered = new Trigger(() -> mFuelInjectorSS.allCANRangesTripped());
+        Trigger anyCANRangesTriggered = new Trigger(() -> mCANRanges.anyHasFuel());
+        Trigger allCANRangesTriggered = new Trigger(() -> mCANRanges.allHasFuel());
 
         Trigger wantToShoot = new Trigger(() -> {
             return wantToSnowPlowBtn.getAsBoolean()
@@ -228,12 +231,24 @@ public class ButtonBindings {
         // ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT)));
         // .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
-        wantToStowIntakeBtn
+        wantToDisableSoftLimits
+                .onTrue(new InstantCommand(()->mIntakeSS.disableRackSoftLimits()))
+                .onFalse(new InstantCommand(()->mIntakeSS.enableRackSoftLimits()));
+
+        wantToStowIntakeBtn.and(wantToDisableSoftLimits.negate())
                 .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.STOW))
                 .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOPPED));
 
-        wantToIntakeOutBtn
+        wantToStowIntakeBtn.and(wantToDisableSoftLimits)
+                .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.MANUAL_IN))
+                .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOPPED));
+
+        wantToIntakeOutBtn.and(wantToDisableSoftLimits.negate())
                 .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
+                .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOPPED));
+
+        wantToIntakeOutBtn.and(wantToDisableSoftLimits)
+                .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.MANUAL_OUT))
                 .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOPPED));
 
         wantToOuttakeBtn

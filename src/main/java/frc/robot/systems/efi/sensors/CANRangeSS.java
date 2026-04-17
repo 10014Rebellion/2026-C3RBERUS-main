@@ -33,6 +33,10 @@ public class CANRangeSS extends SubsystemBase {
         return leftHasFuel() && centerHasFuel() && rightHasFuel();
     }
 
+    public boolean anyHasFuel() {
+        return leftHasFuel() || centerHasFuel() || rightHasFuel();
+    }
+
     public boolean leftHasFuel(){
         return hasFuel(mLeftCANRangeInputs);
     }

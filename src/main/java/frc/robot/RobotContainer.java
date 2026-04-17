@@ -234,7 +234,7 @@ public class RobotContainer {
 
         ShotMap.getInstance().setPoseSupplier(() -> mDriveSS.getPoseEstimate());
         
-        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS, mClimbSS);
+        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS, mClimbSS, mCANRangesSS);
 
         initBindings();
         initBaseTriggers();

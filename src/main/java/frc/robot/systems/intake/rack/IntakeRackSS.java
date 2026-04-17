@@ -23,6 +23,8 @@ public class IntakeRackSS extends SubsystemBase {
         SAFESTOW,
         INCREMENTING,
         DECREMENTING,
+        MANUAL_OUT,
+        MANUAL_IN,
         INTAKE,
         TUNING_SETPOINT,
         COMPACT,
@@ -35,6 +37,7 @@ public class IntakeRackSS extends SubsystemBase {
     private final IntakeRackIO mIntakeRackIO;
     private final ElevatorFeedforward mIntakeFF;
     private final IntakeRackInputsAutoLogged mIntakeRackInputs = new IntakeRackInputsAutoLogged();
+    private boolean mShouldDisableSoftLimits = false;
 
     private final LoggedTunableNumber tIntakeKP = new LoggedTunableNumber("Intake/Control/PID/kP",
             IntakeConstants.RackConstants.kRackController.pdController().kP());
@@ -110,6 +113,11 @@ public class IntakeRackSS extends SubsystemBase {
         Logger.recordOutput("Intake/Rack/SafeToRunRollers", isSafeToRunintakeRollers());
     }
 
+    public void shouldDisableSoftLimits(boolean pShouldDisableSoftlimits) {
+        if(!pShouldDisableSoftlimits) mLimitEnforced = false;
+        mShouldDisableSoftLimits = pShouldDisableSoftlimits;
+    }
+
     /*
      * Performs variable updates or parameter intializations when a state is set,
      * SHOULD NOT CHANGE THE STATE THROUGH HERE.
@@ -136,9 +144,6 @@ public class IntakeRackSS extends SubsystemBase {
                 mAnshulCompactStartTime = Timer.getFPGATimestamp();
             }
             case INVALID -> {
-            }
-            default -> {
-                Telemetry.reportIssue(null);
             }
         }
     }
@@ -169,6 +174,10 @@ public class IntakeRackSS extends SubsystemBase {
                 } else {
                     mSetpointCompactPosition = IntakeConstants.RackConstants.tSafeStowSetpointMeters.get();
                 }
+            } case MANUAL_OUT -> {
+                setIntakeVoltage(-4);
+            } case MANUAL_IN -> {
+                setIntakeVoltage(4);
             }
             case ANSHUL_COMPACT -> {
                 setIntakePosition(anshulCompactFunc(Timer.getFPGATimestamp() - mAnshulCompactStartTime));
@@ -318,6 +327,7 @@ public class IntakeRackSS extends SubsystemBase {
     }
 
     public void enforceSoftLimits() {
+        if(mShouldDisableSoftLimits) return;
         if ((mIntakeRackInputs.iIntakeRackPositionM > IntakeConstants.RackConstants.kRackLimitsMeters.forwardLimitM()
                 && mDesiredDirection == 1)
                 ||

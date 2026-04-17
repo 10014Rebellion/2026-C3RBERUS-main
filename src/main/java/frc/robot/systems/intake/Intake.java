@@ -36,6 +36,14 @@ public class Intake {
     return mIntakeRollerSS.setStateCmd(IntakeRollerState.IDLE);
   }
 
+  public void disableRackSoftLimits() {
+    mIntakeRackSS.shouldDisableSoftLimits(true);
+  }
+
+  public void enableRackSoftLimits() {
+    mIntakeRackSS.shouldDisableSoftLimits(false);
+  }
+
   // PIVOT COMMANDS //
   public Command setRackStateCmd(IntakeRackState intake) {
     return mIntakeRackSS.setStateCmd(intake);
