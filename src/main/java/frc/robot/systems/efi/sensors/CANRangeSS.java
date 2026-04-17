@@ -14,14 +14,14 @@ public class CANRangeSS extends SubsystemBase {
     private final SensorInputsAutoLogged mCenterCANRangeInputs = new SensorInputsAutoLogged();
     private final SensorInputsAutoLogged mRightCANRangeInputs = new SensorInputsAutoLogged();
 
-    private final LoggedTunableNumber tRightPositionTolerance = new LoggedTunableNumber("CANRange/Right/Tolerance", 0.0);
-    private final LoggedTunableNumber tRightPositionCutoff = new LoggedTunableNumber("CANRange/Right/Cutoff", 0.0);
+    private final LoggedTunableNumber tRightPositionTolerance = new LoggedTunableNumber("GeneralSensors/CANRange/Right/Tolerance", 0.0);
+    private final LoggedTunableNumber tRightPositionCutoff = new LoggedTunableNumber("GeneralSensors/CANRange/Right/Cutoff", 0.0);
 
-    private final LoggedTunableNumber tCenterPositionTolerance = new LoggedTunableNumber("CANRange/Center/Tolerance", 0.0);
-    private final LoggedTunableNumber tCenterPositionCutoff = new LoggedTunableNumber("CANRange/Center/Tolerance", 0.0);
+    private final LoggedTunableNumber tCenterPositionTolerance = new LoggedTunableNumber("GeneralSensors/CANRange/Center/Tolerance", 0.0);
+    private final LoggedTunableNumber tCenterPositionCutoff = new LoggedTunableNumber("GeneralSensors/CANRange/Center/Tolerance", 0.0);
 
-    private final LoggedTunableNumber tLeftPositionTolerance = new LoggedTunableNumber("CANRange/Left/Tolerance", 0.0);
-    private final LoggedTunableNumber tLeftPositionCutoff = new LoggedTunableNumber("CANRange/Left/Tolerance", 0.0);
+    private final LoggedTunableNumber tLeftPositionTolerance = new LoggedTunableNumber("GeneralSensors/CANRange/Left/Tolerance", 0.0);
+    private final LoggedTunableNumber tLeftPositionCutoff = new LoggedTunableNumber("GeneralSensors/CANRange/Left/Tolerance", 0.0);
 
     public CANRangeSS(SensorIO pLeftCANRange, SensorIO pCenterCANRange, SensorIO pRightCANRange) {
         this.mLeftCANRange = pLeftCANRange;

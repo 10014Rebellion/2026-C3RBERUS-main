@@ -154,7 +154,9 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 FieldConstants.kClimbLeftPose);
-
+        
+        // LEFT
+        double kLeftSecondShootTimestamp = 3.55; // L_ST_IB_ST_BUMP
         DoubleSwipe mLeftDoubleSwipeBumpAuto =
             new DoubleSwipe(
                 this, 
@@ -164,8 +166,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                3.8);
-
+                kLeftSecondShootTimestamp);
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
                 this, 
@@ -175,9 +176,10 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                3.8,
+                kLeftSecondShootTimestamp,
                 FieldConstants.kClimbLeftPose);
 
+        // RIGHT
         SingleSwipe mRightSingleSwipeAuto = 
             new SingleSwipe(
                 this, 
@@ -206,7 +208,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
-                4.0);
+                4.45);
 
         DoubleSwipeClimb mRightDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
@@ -217,7 +219,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
-                4.0,
+                4.45,
                 FieldConstants.kClimbRightPose);
 
         SnakeSwipe mLeftSnakeSwipe = new SnakeSwipe(

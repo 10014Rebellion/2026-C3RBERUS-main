@@ -6,6 +6,7 @@ public class SensorConstants {
     public static final int leftCANRangeID = 49;
     public static final int centerCANRangeID = 48;
     public static final int rightCANRangeID = 47;
+    
     public static final double kPositionTolerance = 0.002;
     public static final double kFuelCutoff = 0.04;
 

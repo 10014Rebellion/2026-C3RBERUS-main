@@ -414,13 +414,13 @@ public class ButtonBindings {
         wantToSnowPlowBtn
                 .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
                 .onTrue(mFuelPumpSS
-                        .setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
+                        .setStateCmd(FuelPumpState.INTAKE_VOLT))
                 .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
         wantToHailstormBtn
                 .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.OPPONENT_FEED_VELOCITY))
                 .onTrue(mFuelPumpSS
-                        .setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT))
+                        .setStateCmd(FuelPumpState.INTAKE_VOLT))
                 .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
         wantToSnowPlowBtn.or(wantToHailstormBtn).and(fuelPumpAtGoal)
@@ -448,10 +448,10 @@ public class ButtonBindings {
                 .onTrue(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* HOOD PROTECTION LOGIC */
-        inSuperNoHoodZone.or(inNoHoodZone.and(isRobotMoving))
-                .onTrue(Commands.runOnce(() -> prevHoodState = mHoodSS.getHoodState())
-                        .andThen(mHoodSS.setStateCmd(HoodStates.MIN)))
-                .onFalse(mHoodSS.setStateCmd(prevHoodState));
+        // inSuperNoHoodZone.or(inNoHoodZone.and(isRobotMoving))
+        //         .onTrue(Commands.runOnce(() -> prevHoodState = mHoodSS.getHoodState())
+        //                 .andThen(mHoodSS.setStateCmd(HoodStates.MIN)))
+        //         .onFalse(mHoodSS.setStateCmd(prevHoodState));
 
         /* INTAKE LOGIC */
         wantToIntakeBtn
