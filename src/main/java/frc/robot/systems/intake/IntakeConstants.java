@@ -34,10 +34,10 @@ public class IntakeConstants {
                 ) {
 
                         public static final IntakeMotionConfig kIntakeFunc = new IntakeMotionConfig(
-                                        3.4, // kMaxTimeSec
+                                        1.8, // kMaxTimeSec
                                         tIntakingSetpointMeters.get(), // kFarthestExtensionM
                                         0.21, // kClosestExtensionM
-                                        5, // kMainPeaks
+                                        3, // kMainPeaks
                                         2, // kHoldFreq
                                         0.136, // kHoldMinimum
                                         0.5 // kDropRatio
@@ -68,9 +68,9 @@ public class IntakeConstants {
                 public static final MotionMagicFOCElevatorFF kRackController = (!RobotConstants.isSim())
                                 ? new MotionMagicFOCElevatorFF( // REAL
                                                 0,
-                                                new PDConstants(1000.0, 75.0),
+                                                new PDConstants(1500.0, 75.0),
                                                 new ElevatorFeedforward(0.3, 2.0, 0, 0),
-                                                new MotionMagicConstants(30.0, 30.0, 0))
+                                                new MotionMagicConstants(60.0, 120.0, 0))
                                 : new MotionMagicFOCElevatorFF( // SIM
                                                 0,
                                                 new PDConstants(40, 6.0),
@@ -78,7 +78,7 @@ public class IntakeConstants {
                                                 new MotionMagicConstants(300.0, 300.0, 0));
 
                 public static final PositionSoftLimits kRackLimitsMeters = new PositionSoftLimits(
-                                0.0, // Negative voltage limit
+                                -0.01, // Negative voltage limit
                                 0.3 // Positive voltage limit
                 );
 
@@ -112,7 +112,7 @@ public class IntakeConstants {
                                 "Intake/Setpoint/CompactStartPositionMeters", 0.12);
 
                 public static final LoggedTunableNumber tIntakingSetpointMeters = new LoggedTunableNumber(
-                                "Intake/Setpoint/IntakeSetpointMeters", 0.015);
+                                "Intake/Setpoint/IntakeSetpointMeters", 0.0);
 
                 public static final LoggedTunableNumber tTuningShotSetpointMeters = new LoggedTunableNumber(
                                 "Intake/Setpoint/TuningShotSetpointMeters", 0);

@@ -39,7 +39,7 @@ public class FuelPumpConstants {
 
     public static final SimpleController kFuelPumpControlConfig = new SimpleController(
         0, 
-        new PDConstants(0.2, 0), 
+        new PDConstants(0.22, 0), 
         new SimpleMotorFeedforward(0, 0.11)
     );
 

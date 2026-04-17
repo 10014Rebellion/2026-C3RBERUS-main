@@ -40,7 +40,7 @@ public class ButtonBindings {
         ALLIANCE, CENTER, NONE
     }
 
-    private final boolean closedLoopFuelPump = false;
+    private final boolean closedLoopFuelPump = true;
     private final Drive mDriveSS;
     private final FuelPumpSS mFuelPumpSS;
     private final HoodSS mHoodSS;
@@ -175,10 +175,10 @@ public class ButtonBindings {
 
         Trigger dynamicShootReady = shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal))
                 .debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
-        double dynamicShootTimeout = 0.75;
+        double dynamicShootTimeout = 0.8;
 
         Trigger staticShootReady = shooterAtGoal.debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
-        double staticShootTimeout = 0.75;
+        double staticShootTimeout = 0.8;
 
         anyCANRangesTriggered.and(wantToShoot.negate())
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.KICKBACK))

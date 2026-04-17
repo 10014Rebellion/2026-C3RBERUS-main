@@ -28,6 +28,10 @@ public class Intake {
     return mIntakeRollerSS.setStateCmd(rollerState);
   }
 
+  public Command setRollerStateCmd(IntakeRollerState rollerState, boolean holdReqs) {
+    return mIntakeRollerSS.setStateCmd(rollerState, holdReqs);
+  }
+
   public Command stopRollerCmd() {
     return mIntakeRollerSS.setStateCmd(IntakeRollerState.IDLE);
   }
@@ -35,6 +39,10 @@ public class Intake {
   // PIVOT COMMANDS //
   public Command setRackStateCmd(IntakeRackState intake) {
     return mIntakeRackSS.setStateCmd(intake);
+  }
+
+  public Command setRackStateCmd(IntakeRackState intake, boolean holdReqs) {
+    return mIntakeRackSS.setStateCmd(intake, holdReqs);
   }
 
   public Command trashCompactRepeat() {

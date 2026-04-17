@@ -50,13 +50,17 @@ public class IntakeRollerSS extends SubsystemBase {
             default -> {}
         }
     }
-  
+
     public Command setStateCmd(IntakeRollerState pIntakeRollerState) {
+        return setStateCmd(pIntakeRollerState, true);
+    }
+  
+    public Command setStateCmd(IntakeRollerState pIntakeRollerState, boolean holdReqs) {
         return new FunctionalCommand(
             () -> mIntakeRollerState = pIntakeRollerState, 
             () -> {}, 
             (interrupted) -> {}, 
-            () -> false, 
+            () -> !holdReqs, 
             this);
     }
 }

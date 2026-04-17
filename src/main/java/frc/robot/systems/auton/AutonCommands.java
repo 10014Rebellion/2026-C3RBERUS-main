@@ -12,6 +12,9 @@ import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.FieldConstants;
 import frc.robot.game.GameGoalPoseChooser;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
@@ -26,19 +29,26 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
+import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.intake.Intake;
+import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
+import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
+import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.lib.math.AllianceFlipUtil;
 
 public class AutonCommands extends SubsystemBase {
@@ -89,8 +99,42 @@ public class AutonCommands extends SubsystemBase {
         loadCacheForAllPaths();
 
         mAutoChooser = new SendableChooser<>();
+        
+        Command mDeployAndIntake = new ParallelCommandGroup(
+            mIntake.setRackStateCmd(IntakeRackState.INTAKE, false),
+            mIntake.setRollerStateCmd(IntakeRollerState.INTAKE, false)
+            ).andThen(new WaitCommand(0.2));
+            
+        Command mGoToRecovery = mRobotDrive.getDriveManager().setToGenericAutoAlign(
+            () -> new Pose2d(6.586979389190674, 5.464938640594482, Rotation2d.kZero),
+            ConstraintType.LINEAR);
 
-        mAutoChooser.setDefaultOption("Stationary", () -> backUpAuton());
+        Command mRevUp = new ParallelCommandGroup(
+            mFlywheelsSS.setStateCmd(FlywheelStates.BUMP_VELOCITY, false),
+            mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT, false)
+        );
+                
+        Command mAlignandShoot = new ParallelCommandGroup(
+            mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY, false),
+            mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION, false),
+            mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT, false),
+
+            mRobotDrive.getDriveManager().setToGenericHeadingAlign(
+                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()),
+                () -> GameGoalPoseChooser.getHub()
+            ).until(mRobotDrive.getDriveManager().waitUntilHeadingAlignFinishes()).andThen(
+                mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE).alongWith(
+                    mIntake.anshulCompact()
+                )
+            )
+        );      
+                
+        NamedCommands.registerCommand("DeployAndIntake", mDeployAndIntake);            
+        NamedCommands.registerCommand("GoToRecovery", mGoToRecovery);
+        NamedCommands.registerCommand("RevUp", mRevUp);
+        NamedCommands.registerCommand("AlignAndShoot", mAlignandShoot);
+
+        mAutoChooser.addOption("TL-SINGLE-BUMP", () -> AutoBuilder.buildAuto("TL-SINGLE-BUMP"));
 
         SingleSwipe mLeftSingleSwipeAuto = 
             new SingleSwipe(
@@ -120,7 +164,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                4.09);
+                3.8);
 
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
@@ -131,7 +175,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                4.09,
+                3.8,
                 FieldConstants.kClimbLeftPose);
 
         SingleSwipe mRightSingleSwipeAuto = 
@@ -162,7 +206,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
-                4.9);
+                4.0);
 
         DoubleSwipeClimb mRightDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
@@ -173,21 +217,35 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
-                4.9,
+                4.0,
                 FieldConstants.kClimbRightPose);
 
         SnakeSwipe mLeftSnakeSwipe = new SnakeSwipe(
             this, 
             "LeftSnakeSwipe", 
             "L_IT_IC_ST_Snake", 
-            7.17);
+            4.1);
 
         DoubleSnakeSwipe mLeftDoubleSnakeSwipe = new DoubleSnakeSwipe(
             this, 
             "LeftDoubleSnakeSwipe", 
             "L_IT_IC_ST_Snake", 
-            7.17,
+            4.1,
             "L_IT_IC_ST_Snake2", 
+            3.2);
+
+        SnakeSwipe mRightSnakeSwipe = new SnakeSwipe(
+            this, 
+            "RightSnakeSwipe", 
+            "R_IT_IC_ST_Snake", 
+            6.6);
+    
+        DoubleSnakeSwipe mRightDoubleSnakeSwipe = new DoubleSnakeSwipe(
+            this, 
+            "RightDoubleSnakeSwipe", 
+            "R_IT_IC_ST_Snake", 
+            6.6,
+            "R_IT_IC_ST_Snake2",                 
             3.2);
 
         tryToAddPathToChooser(
@@ -198,6 +256,16 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser(
             "LeftSnakeSwipe", 
             () -> mLeftSnakeSwipe.getAuton()
+        );
+
+        tryToAddPathToChooser(
+            "RightDoubleSnakeSwipe", 
+            () -> mRightDoubleSnakeSwipe.getAuton()
+        );
+
+        tryToAddPathToChooser(
+            "RightSnakeSwipe", 
+            () -> mRightSnakeSwipe.getAuton()
         );
 
         tryToAddPathToChooser("LeftSingleSwipe", 
