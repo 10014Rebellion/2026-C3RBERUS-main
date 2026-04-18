@@ -394,7 +394,7 @@ public class ButtonBindings {
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
                 .onTrue(
                         mFlywheelsSS.setStateCmd(FlywheelStates.BOOST_SHOTMAP_VELOCITY)
-                                .withTimeout(0.3).andThen(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+                                .withTimeout(0.5).andThen(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
                 )
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
@@ -403,7 +403,7 @@ public class ButtonBindings {
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
                 .onTrue(
                         mFlywheelsSS.setStateCmd(FlywheelStates.BOOST_SHOTMAP_VELOCITY)
-                                .withTimeout(0.3).andThen(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+                                .withTimeout(0.5).andThen(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
                 )
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
