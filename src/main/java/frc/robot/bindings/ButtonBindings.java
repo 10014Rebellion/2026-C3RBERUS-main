@@ -308,7 +308,7 @@ public class ButtonBindings {
                                 () -> GameGoalPoseChooser.getClosestTrench(mDriveSS.getPoseEstimate()),
                                 () -> Rotation2d.kZero,
                                 () -> 1,
-                                () -> true))
+                                () -> AllianceFlipUtil.shouldFlip()))
                 .onFalse(mDriveSS.getDriveManager().setToTeleop());
 
         wantToLineAlignToBumpBtn.and(autonomousWorking)

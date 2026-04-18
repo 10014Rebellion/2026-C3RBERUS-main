@@ -61,7 +61,7 @@ public class FlywheelsSS extends SubsystemBase {
       "Shooter/Flywheel/Control/Profile/MaxJerk", kFlywheelControlConfig.motionMagicConstants().maxJerk());
   private final LoggedTunableNumber tFlywheelTolerance = new LoggedTunableNumber("Shooter/Flywheel/Control/Tolerance",
       FlywheelConstants.kToleranceRPS);
-  private final LoggedTunableNumber tBoostFactor = new LoggedTunableNumber("Shooter/Flywheel/BoostFactor", 1.045);
+  private final LoggedTunableNumber tBoostFactor = new LoggedTunableNumber("Shooter/Flywheel/BoostFactor", 1.055);
 
   private Rotation2d mLastestClosedLoopGoalRPS = Rotation2d.kZero;
 

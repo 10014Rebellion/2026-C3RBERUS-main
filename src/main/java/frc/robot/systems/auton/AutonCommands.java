@@ -156,7 +156,7 @@ public class AutonCommands extends SubsystemBase {
                 FieldConstants.kClimbLeftPose);
         
         // LEFT
-        double kLeftSecondShootTimestamp = 3.55; // L_ST_IB_ST_BUMP
+        double kLeftSecondShootTimestamp = 3.9; // L_ST_IB_ST_BUMP
         DoubleSwipe mLeftDoubleSwipeBumpAuto =
             new DoubleSwipe(
                 this, 
@@ -208,7 +208,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
-                4.45);
+                4.8);
 
         DoubleSwipeClimb mRightDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
@@ -219,7 +219,7 @@ public class AutonCommands extends SubsystemBase {
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
-                4.45,
+                4.8,
                 FieldConstants.kClimbRightPose);
 
         SnakeSwipe mLeftSnakeSwipe = new SnakeSwipe(
