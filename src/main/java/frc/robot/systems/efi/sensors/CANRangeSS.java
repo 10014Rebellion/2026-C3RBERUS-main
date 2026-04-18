@@ -18,10 +18,10 @@ public class CANRangeSS extends SubsystemBase {
     private final LoggedTunableNumber tRightPositionCutoff = new LoggedTunableNumber("GeneralSensors/CANRange/Right/Cutoff", 0.0);
 
     private final LoggedTunableNumber tCenterPositionTolerance = new LoggedTunableNumber("GeneralSensors/CANRange/Center/Tolerance", 0.0);
-    private final LoggedTunableNumber tCenterPositionCutoff = new LoggedTunableNumber("GeneralSensors/CANRange/Center/Tolerance", 0.0);
+    private final LoggedTunableNumber tCenterPositionCutoff = new LoggedTunableNumber("GeneralSensors/CANRange/Center/Cutoff", 0.0);
 
     private final LoggedTunableNumber tLeftPositionTolerance = new LoggedTunableNumber("GeneralSensors/CANRange/Left/Tolerance", 0.0);
-    private final LoggedTunableNumber tLeftPositionCutoff = new LoggedTunableNumber("GeneralSensors/CANRange/Left/Tolerance", 0.0);
+    private final LoggedTunableNumber tLeftPositionCutoff = new LoggedTunableNumber("GeneralSensors/CANRange/Left/Cutoff", 0.0);
 
     public CANRangeSS(SensorIO pLeftCANRange, SensorIO pCenterCANRange, SensorIO pRightCANRange) {
         this.mLeftCANRange = pLeftCANRange;

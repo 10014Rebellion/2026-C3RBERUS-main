@@ -28,7 +28,7 @@ public class FlywheelsSS extends SubsystemBase {
     MAX_VELOCITY,
     SHOTMAP_VELOCITY,
     STANDBY_VELOCITY,
-
+    BOOST_SHOTMAP_VELOCITY,
     TOWER_VELOCITY,
     BUMP_VELOCITY,
     CORNER_VELOCITY,
@@ -109,6 +109,9 @@ public class FlywheelsSS extends SubsystemBase {
           setFlywheelVelocity(Rotation2d.fromRotations(
             ShotMap.getInstance().getFlywheelVel().getRotations() * (mShouldUseCanRanges && mCanRangeSS.allHasFuel() ? tInitialBoostFactor.get() : 1.0))
           );
+        }
+        case BOOST_SHOTMAP_VELOCITY -> {
+          setFlywheelVelocity(Rotation2d.fromRotations(ShotMap.getInstance().getFlywheelVel().getRotations() * 1.10));
         }
         default -> {
           Telemetry.reportIssue(new UnaccountedEnum(mCurrentFlywheelState.toString()));

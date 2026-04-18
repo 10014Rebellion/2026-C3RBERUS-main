@@ -25,12 +25,12 @@ public class SensorIOCANRange implements SensorIO{
     private final StatusSignal<MeasurementHealthValue> measurementHealth;
     private final StatusSignal<Time> measurementTime;
 
-    private CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
-
     public SensorIOCANRange(CANRangeConfiguration configuration){
         mCANRange = new CANrange(configuration.canRangeID(), RobotConstants.kSubsystemsCANBus);
 
-        canRangeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 3000;
+        CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
+
+        canRangeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 5500;
         canRangeConfig.ProximityParams.ProximityHysteresis = configuration.positionTolerance();
         canRangeConfig.ProximityParams.ProximityThreshold = configuration.fuelDetectionCutoff();
 
@@ -58,7 +58,6 @@ public class SensorIOCANRange implements SensorIO{
             measurementTime);
     }
 
-    @SuppressWarnings("unlikely-arg-type")
     @Override
     public void updateInputs(SensorInputs inputs){
         inputs.distanceFromSensor = distanceFromFuel.getValueAsDouble();

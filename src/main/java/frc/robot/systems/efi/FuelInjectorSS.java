@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.systems.efi.injector.FuelInjectorConstants;
 import frc.robot.systems.efi.injector.FuelInjectorIO;
 import frc.robot.systems.efi.injector.FuelInjectorInputsAutoLogged;
-import frc.robot.systems.efi.sensors.SensorIO;
-import frc.robot.systems.efi.sensors.SensorInputsAutoLogged;
 
 public class FuelInjectorSS extends SubsystemBase{
     public static enum FuelInjectorState {

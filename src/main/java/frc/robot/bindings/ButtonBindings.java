@@ -373,7 +373,7 @@ public class ButtonBindings {
                 .onTrue(
                         mFuelInjectorSS.setStateCmd(FuelInjectorState.KICKBACK).until(anyCANRangesTriggered)
                                 .andThen(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE)))
-                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.BOOST_SHOTMAP_VELOCITY))
                 .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
                 .onTrue(new WaitCommand(kKickbackTime).andThen(mFuelPumpSS
                         .setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT)));
@@ -392,11 +392,19 @@ public class ButtonBindings {
         // If at goal, shoot it in
         wantToDynamicShootBtn.and(dynamicShootReady)
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+                .onTrue(
+                        mFlywheelsSS.setStateCmd(FlywheelStates.BOOST_SHOTMAP_VELOCITY)
+                                .withTimeout(0.3).andThen(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+                )
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
         /* Debounce if not at goal */
         wantToDynamicShootBtn.debounce(dynamicShootTimeout, DebounceType.kRising).and(dynamicShootReady.negate())
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+                .onTrue(
+                        mFlywheelsSS.setStateCmd(FlywheelStates.BOOST_SHOTMAP_VELOCITY)
+                                .withTimeout(0.3).andThen(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+                )
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
         wantToDynamicShootBtn
