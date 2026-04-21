@@ -26,7 +26,6 @@ import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.LEDs.ledConstants.LEDColor;
-import frc.robot.systems.LEDs.ledConstants.RGBLEDColor;
 import frc.robot.systems.LEDs.ledSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
@@ -350,7 +349,7 @@ public class ButtonBindings {
         /* Makes flywheel stand by */
         wantToShoot.negate()
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* HOOD PROTECTION LOGIC */
         inSuperNoHoodZone.or(inNoHoodZone.and(isRobotMoving))
@@ -381,10 +380,10 @@ public class ButtonBindings {
         /* LEDs DURING ALIGNMENT LOGIC */ 
             /* ALIGNMENT TO HUB LOGIC */
                 if(atHeadingGoal.getAsBoolean() && wantToAutoAlignToHub.getAsBoolean()) {
-                    new InstantCommand(() -> mLEDSS.setSolidStripColor(LEDColor.GREEN));
+                    new InstantCommand(() -> mLEDSS.setSolidStripColor(LEDColor.GREEN.getLEDColor()));
                 }
                 else if(!atHeadingGoal.getAsBoolean() && wantToAutoAlignToHub.getAsBoolean()) {
-                    new InstantCommand(() -> smLEDSS.setBreatheStripColor(LEDColor.RED));
+                    new InstantCommand(() -> mLEDSS.setBreatheStripColor(LEDColor.RED.getLEDColor()));
                 }
                 else {
                     new InstantCommand(() -> mLEDSS.setSolidStripColorToAllianceColor());

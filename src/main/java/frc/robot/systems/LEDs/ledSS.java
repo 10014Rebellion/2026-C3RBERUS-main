@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.systems.LEDs.ledConstants.LEDColor;
 
-public class ledSS extends SubsystemBase{
+public class ledSS extends SubsystemBase {
     
     private final AddressableLED mLED;
     private final AddressableLEDBuffer mLEDBuffer;
@@ -58,7 +58,7 @@ public class ledSS extends SubsystemBase{
     }
 
     @Override
-    public void periodic(){
+    public void periodic() {
         if(!mCurrentAlliance.equals(DriverStation.getAlliance())){
             mCurrentAlliance = DriverStation.getAlliance();
             setSolidStripColorToAllianceColor();
