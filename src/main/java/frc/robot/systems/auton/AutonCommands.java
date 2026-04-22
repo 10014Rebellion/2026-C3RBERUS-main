@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.lib.telemetry.Telemetry;
-
+import frc.lib.triggers.ParallelTrigger;
 import frc.robot.commands.FollowPathCommand;
 import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.FieldConstants;
@@ -25,6 +25,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -416,6 +417,24 @@ public class AutonCommands extends SubsystemBase {
             mAutoChooser.addOption("Failed: "+pPathName, () -> backUpAuton());
             Telemetry.reportException(e);
         }
+    }
+
+    public Trigger prepareShooter(EventLoop pAutoLoop, Trigger prepareShooter) {
+        return ParallelTrigger
+            .onTrue(
+                pAutoLoop, 
+                prepareShooter, 
+                mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY),
+                mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION),
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY));
+    }
+
+    public Trigger setShooterToStandby(EventLoop pAutoLoop, Trigger readyShooter) {
+        return ParallelTrigger.onFalse(
+            pAutoLoop, readyShooter, 
+            mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE),
+            mHoodSS.setStateCmd(HoodStates.MIN),
+            mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));       
     }
 
     /* Subsystem Getters */

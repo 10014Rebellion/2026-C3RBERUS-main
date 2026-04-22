@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.math.AllianceFlipUtil;
+import frc.lib.triggers.ParallelTrigger;
 import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -84,13 +85,11 @@ public class DoubleSwipe extends Auton {
 
         FollowPathCommand firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true, auto);
-
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
         FollowPathCommand secondSwipePath = 
             followChoreoPath(mSecondSwipePathName, false, auto);
-
         Pose2d lastPoseOfSecondSwipe = mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().size() - 1);
 
@@ -99,13 +98,8 @@ public class DoubleSwipe extends Auton {
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
-        shootingRange
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
-            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.MIN))
-            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
+        mAutos.prepareShooter(auto.getLoop(), shootingRange);
+        mAutos.setShooterToStandby(auto.getLoop(), shootingRange);
 
         SequentialEndingCommandGroup firstSwipeIntakeShot = 
             mAutos.timedIntakeShot(kShotTime1Seconds, kShotEndTimeSeconds);
