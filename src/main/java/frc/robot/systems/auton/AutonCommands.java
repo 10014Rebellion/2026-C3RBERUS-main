@@ -12,34 +12,25 @@ import frc.robot.commands.SequentialEndingCommandGroup;
 import frc.robot.game.FieldConstants;
 import frc.robot.game.GameGoalPoseChooser;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 import choreo.auto.AutoFactory;
-import choreo.auto.AutoRoutine;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
-import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.intake.Intake;
@@ -52,9 +43,13 @@ import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.lib.math.AllianceFlipUtil;
-import frc.lib.math.GeomUtil;
 
 public class AutonCommands extends SubsystemBase {
+    public static final Pose2d kTopLeftBump = new Pose2d();
+    public static final Pose2d kTopRightBump = new Pose2d();
+    public static final Pose2d kBottomLeftBump = new Pose2d();
+    public static final Pose2d kBottomRightBump = new Pose2d();
+
     private final Drive mRobotDrive;
     private final Intake mIntake;
     private final HoodSS mHoodSS;
@@ -102,42 +97,6 @@ public class AutonCommands extends SubsystemBase {
         loadCacheForAllPaths();
 
         mAutoChooser = new SendableChooser<>();
-        
-        Command mDeployAndIntake = new ParallelCommandGroup(
-            mIntake.setRackStateCmd(IntakeRackState.INTAKE, false),
-            mIntake.setRollerStateCmd(IntakeRollerState.INTAKE, false)
-            ).andThen(new WaitCommand(0.2));
-            
-        Command mGoToRecovery = mRobotDrive.getDriveManager().setToGenericAutoAlign(
-            () -> new Pose2d(6.586979389190674, 5.464938640594482, Rotation2d.kZero),
-            ConstraintType.LINEAR);
-
-        Command mRevUp = new ParallelCommandGroup(
-            mFlywheelsSS.setStateCmd(FlywheelStates.BUMP_VELOCITY, false),
-            mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT, false)
-        );
-                
-        Command mAlignandShoot = new ParallelCommandGroup(
-            mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY, false),
-            mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION, false),
-            mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT, false),
-
-            mRobotDrive.getDriveManager().setToGenericHeadingAlign(
-                () -> GameGoalPoseChooser.turnFromHub(mRobotDrive.getPoseEstimate()),
-                () -> GameGoalPoseChooser.getHub()
-            ).until(mRobotDrive.getDriveManager().waitUntilHeadingAlignFinishes()).andThen(
-                mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE).alongWith(
-                    mIntake.anshulCompact()
-                )
-            )
-        );      
-                
-        NamedCommands.registerCommand("DeployAndIntake", mDeployAndIntake);            
-        NamedCommands.registerCommand("GoToRecovery", mGoToRecovery);
-        NamedCommands.registerCommand("RevUp", mRevUp);
-        NamedCommands.registerCommand("AlignAndShoot", mAlignandShoot);
-
-        mAutoChooser.addOption("TL-SINGLE-BUMP", () -> AutoBuilder.buildAuto("TL-SINGLE-BUMP"));
 
         SingleSwipe mLeftSingleSwipeAuto = 
             new SingleSwipe(
@@ -166,8 +125,6 @@ public class AutonCommands extends SubsystemBase {
                 "LeftDoubleSwipeBump", 
                 "L_IT_IC_ST", 
                 4.94,
-                () -> GameGoalPoseChooser.leftTrenchApproachPose(),
-                () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
                 kLeftSecondShootTimestamp);
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
@@ -208,8 +165,6 @@ public class AutonCommands extends SubsystemBase {
                 "RightDoubleSwipeBump", 
                 "R_IT_IC_ST", 
                 4.83,
-                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
-                () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
                 4.8);
 
@@ -343,25 +298,8 @@ public class AutonCommands extends SubsystemBase {
             true);
     }
 
-    /* Shoot Commands */
-    public SequentialEndingCommandGroup timedIndexShot(double timeout, double endTimeout) {
-        return new SequentialEndingCommandGroup(
-                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(timeout),
-                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(endTimeout));
-    }
 
-    public SequentialEndingCommandGroup timedIntakeShot(double timeout, double endTimeout) {
-        return new SequentialEndingCommandGroup(
-            mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(timeout),
-            mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(endTimeout));
-    }
-
-    public SequentialEndingCommandGroup timedInjectorShot(double timeout, double endTimeout) {
-        return new SequentialEndingCommandGroup(
-            mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE).withTimeout(timeout),
-            mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE).withTimeout(endTimeout));
-    }
-
+    /* ACTION TRIGGERS */
     public Trigger traversePathWithIntakeOutOnly(double delaySeconds, Command pathCommand, Trigger condition, String pathName, AutoEvent routine) {
         SequentialEndingCommandGroup pathCommandEnding = new SequentialEndingCommandGroup(pathCommand);
 
@@ -378,6 +316,30 @@ public class AutonCommands extends SubsystemBase {
             pathName+"/HasEnded", 
             () -> pathCommandEnding.hasEnded(), 
             true);
+    }
+
+    public Trigger traversePathWithIntakeOutOnly(Command pathCommand, Trigger condition, String pathName, AutoEvent routine) {
+        return traversePathWithIntakeOutOnly(0.0, pathCommand, condition, pathName, routine);
+    }
+
+    public Trigger traversePathWithIntakeOutOnly(double delaySeconds, FollowPathCommand pathCommand, Trigger condition, String pathName, AutoEvent routine) {
+        condition
+            .onTrue(Commands.waitSeconds(delaySeconds).andThen(pathCommand))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mIntake.setRackStateCmd(IntakeRackState.INTAKE))
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE));
+
+        return routine.loggedCondition(
+            pathName+"/HasEnded", 
+            pathCommand.hasEnded(), 
+            true);
+    }
+
+    public Trigger traversePathWithIntakeOutOnly(FollowPathCommand pathCommand, Trigger condition, String pathName, AutoEvent routine) {
+        return traversePathWithIntakeOutOnly(0.0, pathCommand, condition, pathName, routine);
     }
 
     public Trigger transitionFromPathTraversingToAutoAlignHubShoot(Command autoAlignCommand, Trigger condition, String pathName, AutoEvent routine) {
@@ -415,7 +377,8 @@ public class AutonCommands extends SubsystemBase {
 
         condition
             .onTrue(injectorShot)
-            .onTrue(intakeShot);
+            .onTrue(intakeShot)
+            .onTrue(mIntake.anshulCompact());
 
         return routine.loggedCondition(
             pathName+"/FuelToHubHasEnded", 
@@ -434,6 +397,25 @@ public class AutonCommands extends SubsystemBase {
             pathName + "/IntakingHasEnded", 
             () -> intakeRollerCommandEnding.hasEnded(), 
             true);
+    }
+
+    /* Shoot Commands */
+    public SequentialEndingCommandGroup timedIndexShot(double timeout, double endTimeout) {
+        return new SequentialEndingCommandGroup(
+                mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(timeout),
+                mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED).withTimeout(endTimeout));
+    }
+
+    public SequentialEndingCommandGroup timedIntakeShot(double timeout, double endTimeout) {
+        return new SequentialEndingCommandGroup(
+            mIntake.setRollerStateCmd(IntakeRollerState.INTAKE).withTimeout(timeout),
+            mIntake.setRollerStateCmd(IntakeRollerState.IDLE).withTimeout(endTimeout));
+    }
+
+    public SequentialEndingCommandGroup timedInjectorShot(double timeout, double endTimeout) {
+        return new SequentialEndingCommandGroup(
+            mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE).withTimeout(timeout),
+            mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE).withTimeout(endTimeout));
     }
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\

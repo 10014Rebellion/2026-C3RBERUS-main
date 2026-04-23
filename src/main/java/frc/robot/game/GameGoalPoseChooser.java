@@ -16,6 +16,30 @@ public class GameGoalPoseChooser {
         kTest
     }
 
+    public static final Pose2d kTopLeftBumpPose = new Pose2d(
+            5.679,
+            7.451,
+            Rotation2d.k180deg);
+
+    public static final Pose2d kTopRightBumpPose = new Pose2d(
+            4.0,
+            7.451,
+            Rotation2d.k180deg
+        );
+
+    public static final Pose2d kBottomLeftBumpPose =new Pose2d(
+            5.679,
+            0.659,
+            Rotation2d.k180deg
+        );
+
+    public static final Pose2d kBottomRightBumpPose = new Pose2d(
+            4.0,
+            0.659,
+            Rotation2d.k180deg
+        );
+    
+
     /* Static positions */
     public static Pose2d getSafeScoringPosition() {
         return AllianceFlipUtil.apply(new Pose2d());
