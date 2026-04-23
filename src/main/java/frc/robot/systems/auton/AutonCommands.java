@@ -20,6 +20,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.drive.Drive;
+import frc.robot.systems.drive.DriveManager.DriveState;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
@@ -50,6 +52,7 @@ import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 import frc.robot.systems.shooter.hood.HoodSS;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.lib.math.AllianceFlipUtil;
+import frc.lib.math.GeomUtil;
 
 public class AutonCommands extends SubsystemBase {
     private final Drive mRobotDrive;
@@ -357,6 +360,80 @@ public class AutonCommands extends SubsystemBase {
         return new SequentialEndingCommandGroup(
             mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE).withTimeout(timeout),
             mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE).withTimeout(endTimeout));
+    }
+
+    public Trigger traversePathWithIntakeOutOnly(double delaySeconds, Command pathCommand, Trigger condition, String pathName, AutoEvent routine) {
+        SequentialEndingCommandGroup pathCommandEnding = new SequentialEndingCommandGroup(pathCommand);
+
+        condition
+            .onTrue(Commands.waitSeconds(delaySeconds).andThen(pathCommandEnding))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mIntake.setRackStateCmd(IntakeRackState.INTAKE))
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE));
+
+        return routine.loggedCondition(
+            pathName+"/HasEnded", 
+            () -> pathCommandEnding.hasEnded(), 
+            true);
+    }
+
+    public Trigger transitionFromPathTraversingToAutoAlignHubShoot(Command autoAlignCommand, Trigger condition, String pathName, AutoEvent routine) {
+        SequentialEndingCommandGroup autoAlignEndingCommand = new SequentialEndingCommandGroup(autoAlignCommand);
+
+        condition
+            .onTrue(autoAlignEndingCommand)
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+
+        return routine.loggedCondition(
+            pathName+"/InShootingTolerance", 
+            () -> 
+                mRobotDrive.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean()
+                    &&
+                mHoodSS.atGoal()
+                    &&
+                mFlywheelsSS.atLatestClosedLoopGoal()
+                    &&
+                !GameGoalPoseChooser.inCenter(mRobotDrive.getPoseEstimate())
+                    &&
+                mHoodSS.getHoodState().equals(HoodStates.SHOTMAP_POSITION)
+                    &&
+                mFlywheelsSS.getFlywheelState().equals(FlywheelStates.SHOTMAP_VELOCITY)
+                    &&
+                mRobotDrive.getDriveManager().getDriveState().equals(DriveState.AUTO_ALIGN)
+                    &&
+                !autoAlignEndingCommand.hasEnded(),
+            true);
+    }
+
+    public Trigger shootFuelToHub(double shotTime, Trigger condition, String pathName, AutoEvent routine) {
+        SequentialEndingCommandGroup injectorShot = timedInjectorShot(shotTime, 0.02);
+        SequentialEndingCommandGroup intakeShot = timedIntakeShot(shotTime, 0.02);
+
+        condition
+            .onTrue(injectorShot)
+            .onTrue(intakeShot);
+
+        return routine.loggedCondition(
+            pathName+"/FuelToHubHasEnded", 
+            () -> injectorShot.hasEnded() && intakeShot.hasEnded(), 
+            true);
+    }
+
+    public Trigger runIntake(Trigger condition, String pathName, AutoEvent routine) {
+        SequentialEndingCommandGroup intakeRollerCommandEnding = new SequentialEndingCommandGroup(mIntake.setRollerStateCmd(IntakeRollerState.INTAKE));
+
+        condition
+            .onTrue(intakeRollerCommandEnding)
+            .onFalse(mIntake.setRollerStateCmd(IntakeRollerState.IDLE));
+
+        return routine.loggedCondition(
+            pathName + "/IntakingHasEnded", 
+            () -> intakeRollerCommandEnding.hasEnded(), 
+            true);
     }
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\
