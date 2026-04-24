@@ -9,7 +9,6 @@ import frc.lib.hardware.HardwareRecords.BasicMotorHardware;
 import frc.lib.hardware.HardwareRecords.CurrentLimits;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.RobotConstants;
-import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 
 

@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.bindings.BindingsConstants;
 import frc.robot.bindings.ButtonBindings;
 import frc.robot.systems.drive.Drive;
-import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 import frc.robot.systems.drive.gyro.GyroIO;
 import frc.robot.systems.drive.gyro.GyroIOPigeon2;
 import frc.robot.systems.drive.modules.Module;
@@ -41,7 +40,6 @@ import frc.robot.systems.shooter.flywheels.FlywheelIOKrakenX44;
 import frc.robot.systems.shooter.flywheels.FlywheelIOSim;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
-import frc.robot.systems.shooter.flywheels.encoder.EncoderIOCANCoder;
 import frc.robot.systems.shooter.fuelpump.FuelPumpConstants;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIO;
 import frc.robot.systems.shooter.fuelpump.FuelPumpIOKrakenX44;
@@ -57,11 +55,9 @@ import frc.robot.systems.apriltag.ATagCameraIOPV;
 import frc.robot.systems.apriltag.ATagVision;
 import frc.robot.systems.apriltag.ATagVisionConstants;
 import frc.robot.systems.auton.AutonCommands;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbIOKrakenx44;
-import frc.robot.systems.climb.ClimbIOSim;
 import frc.robot.systems.climb.ClimbIO;
 import frc.robot.systems.climb.ClimbConstants;
 
@@ -241,8 +237,6 @@ public class RobotContainer {
 
         mDriverProfileChooser.addDefaultOption(
                 BindingsConstants.kDefaultProfile.key(), mDriveSS.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
-        for (DriverProfiles profile : BindingsConstants.kProfiles)
-            mDriverProfileChooser.addOption(profile.key(), mDriveSS.getDriveManager().setDriveProfile(profile));
 
         autos = new AutonCommands(mDriveSS, mIntakeSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mClimbSS, mFuelInjectorSS);
     }

@@ -24,7 +24,6 @@ import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
-import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.efi.sensors.CANRangeSS;
@@ -132,28 +131,28 @@ public class ButtonBindings {
         Trigger wantToCornerShotBtn = mGunnerButtonboard.yellowSquareCenter().and(kUsingPilotGunner);
         Trigger wantToHailstormBtn = mGunnerButtonboard.whiteSquareRight().and(kUsingPilotGunner);
         Trigger wantToSnowPlowBtn = mGunnerButtonboard.yellowRectangleRight().and(kUsingPilotGunner);
-        Trigger wantToDisableCamsBtn = mGunnerButtonboard.orangePilotTop().and(kUsingPilotGunner);
+        // Trigger wantToDisableCamsBtn = mGunnerButtonboard.orangePilotTop().and(kUsingPilotGunner);
         Trigger wantToDisableCANRangeBtn = mGunnerButtonboard.purplePilotTop().and(kUsingPilotGunner);
         Trigger wantToDisableSoftLimits = mGunnerButtonboard.bluePilotTop().and(kUsingPilotGunner);
 
         // OTHER CONDITIONAL TRIGGERS
         Trigger autonomousWorking = new Trigger(() -> true);
         Trigger inCenter = new Trigger(() -> GameGoalPoseChooser.inCenter(mDriveSS.getPoseEstimate()));
-        Trigger isRobotMoving = new Trigger(() -> !mDriveSS.isRobotStationary());
+        // Trigger isRobotMoving = new Trigger(() -> !mDriveSS.isRobotStation/ary());
         Trigger driveIsHeadingXLocked = new Trigger(
                 () -> mDriveSS.getDriveManager().getDriveState().equals(DriveState.HEADING_X_LOCK));
 
-        Trigger inNoHoodZone = new Trigger(() -> (GameGoalPoseChooser.inLeftTrenchYRange(mDriveSS.getPoseEstimate()) ||
-                GameGoalPoseChooser.inEitherTrenchXRange(mDriveSS.getPoseEstimate()))
-                ||
-                (GameGoalPoseChooser.inRightTrenchYRange(mDriveSS.getPoseEstimate()) ||
-                        GameGoalPoseChooser.inEitherTrenchXRange(mDriveSS.getPoseEstimate())));
-        Trigger inSuperNoHoodZone = new Trigger(
-                () -> (GameGoalPoseChooser.inLeftTrenchYRange(mDriveSS.getPoseEstimate()) ||
-                        GameGoalPoseChooser.inEitherSuperTrenchXRange(mDriveSS.getPoseEstimate()))
-                        ||
-                        (GameGoalPoseChooser.inRightTrenchYRange(mDriveSS.getPoseEstimate()) ||
-                                GameGoalPoseChooser.inEitherSuperTrenchXRange(mDriveSS.getPoseEstimate())));
+        // Trigger inNoHoodZone = new Trigger(() -> (GameGoalPoseChooser.inLeftTrenchYRange(mDriveSS.getPoseEstimate()) ||
+        //         GameGoalPoseChooser.inEitherTrenchXRange(mDriveSS.getPoseEstimate()))
+        //         ||
+        //         (GameGoalPoseChooser.inRightTrenchYRange(mDriveSS.getPoseEstimate()) ||
+        //                 GameGoalPoseChooser.inEitherTrenchXRange(mDriveSS.getPoseEstimate())));
+        // Trigger inSuperNoHoodZone = new Trigger(
+        //         () -> (GameGoalPoseChooser.inLeftTrenchYRange(mDriveSS.getPoseEstimate()) ||
+        //                 GameGoalPoseChooser.inEitherSuperTrenchXRange(mDriveSS.getPoseEstimate()))
+        //                 ||
+        //                 (GameGoalPoseChooser.inRightTrenchYRange(mDriveSS.getPoseEstimate()) ||
+        //                         GameGoalPoseChooser.inEitherSuperTrenchXRange(mDriveSS.getPoseEstimate())));
         prevHoodState = mHoodSS.getHoodState();
         Trigger flywheelAtGoal = new Trigger(() -> mFlywheelsSS.atLatestClosedLoopGoal());
         Trigger hoodAtGoal = new Trigger(() -> mHoodSS.atGoal());
@@ -166,7 +165,7 @@ public class ButtonBindings {
         Trigger atLineGoal = new Trigger(() -> mDriveSS.getDriveManager().getLineAlignController().atGoal());
 
         Trigger anyCANRangesTriggered = new Trigger(() -> mCANRanges.anyHasFuel());
-        Trigger allCANRangesTriggered = new Trigger(() -> mCANRanges.allHasFuel());
+        // Trigger allCANRangesTriggered = new Trigger(() -> mCANRanges.allHasFuel());
 
         Trigger wantToShoot = new Trigger(() -> {
             return wantToSnowPlowBtn.getAsBoolean()
