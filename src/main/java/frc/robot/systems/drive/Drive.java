@@ -537,7 +537,7 @@ public class Drive extends SubsystemBase {
     public boolean isRobotStationary() {
         return (getRobotChassisSpeeds().vxMetersPerSecond < 0.05) &&
                 (getRobotChassisSpeeds().vyMetersPerSecond < 0.05) &&
-                (Math.toDegrees(getRobotChassisSpeeds().omegaRadiansPerSecond) < 1.0);
+                (Math.toDegrees(getRobotChassisSpeeds().omegaRadiansPerSecond) < 5.0);
     }
 
     public void setDriveFeedforwardsFromChoreo(SwerveSample sample) {

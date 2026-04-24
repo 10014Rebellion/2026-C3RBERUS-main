@@ -97,6 +97,7 @@ public class AutonCommands extends SubsystemBase {
         loadCacheForAllPaths();
 
         mAutoChooser = new SendableChooser<>();
+        mAutoChooser.setDefaultOption("StationaryDefault", () -> backUpAuton());
 
         SingleSwipe mLeftSingleSwipeAuto = 
             new SingleSwipe(
@@ -126,7 +127,7 @@ public class AutonCommands extends SubsystemBase {
                 "L_IT_IC_ST", 
                 4.94,
                 "L_ST_IB_ST_BUMP",
-                kLeftSecondShootTimestamp);
+                3.98);
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
                 this, 
