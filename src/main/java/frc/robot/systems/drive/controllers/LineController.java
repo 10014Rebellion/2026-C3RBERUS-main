@@ -160,7 +160,26 @@ public class LineController {
 
     /* Call after setting goal */
     public void reset(Pose2d pRobotPose, Pose2d goalPose) {
-        tXController.reset(new State(getDistanceFromLine(mSlope.getAsDouble(), goalPose.getX(), goalPose.getY(), pRobotPose), 0.0));
+        reset(pRobotPose, goalPose, new ChassisSpeeds());
+    }
+
+    public void reset(Pose2d pRobotPose, Pose2d goalPose, ChassisSpeeds robotSpeeds) {
+        double chassisVelMagnitudeMPS = Math.hypot(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond);
+        double perpendicularSlope = - 1.0 / mSlope.getAsDouble();
+        Rotation2d perpendicularLineDirection;
+        if(Double.isNaN(perpendicularSlope)) {
+            perpendicularLineDirection = Rotation2d.kCCW_Pi_2;
+        } else {
+            perpendicularLineDirection = new Rotation2d(1.0, mSlope.getAsDouble());
+        }
+
+        tXController.reset(new State(
+            getDistanceFromLine(
+                mSlope.getAsDouble(),  
+                goalPose.getX(), 
+                goalPose.getY(), 
+                pRobotPose), 
+                perpendicularLineDirection.getCos() * chassisVelMagnitudeMPS));
 
         tOmegaController.reset(new State(pRobotPose.getRotation().getDegrees(), 0.0));
     }
@@ -170,7 +189,7 @@ public class LineController {
         return tOmegaController.atGoal() && tXController.atGoal();
     }
 
-    public void resetController(){
+    public void resetController() {
         tOmegaController.setGoal(-100);
         tXController.setGoal(-100);
     }

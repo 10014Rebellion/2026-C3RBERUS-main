@@ -424,7 +424,8 @@ public class DriveManager {
                 pTeleopInvert);
             mLineAlignController.reset(
                 mDrive.getPoseEstimate(), 
-                mGoalPoseSup.get());
+                mGoalPoseSup.get(),
+                mDrive.getRobotChassisSpeeds());
         }).andThen( setDriveStateCommandContinued( DriveState.LINE_ALIGN ) );
     }
 
