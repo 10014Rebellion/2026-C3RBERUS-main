@@ -76,7 +76,8 @@ public class SwerveSetpointGenerator {
 
 
     private static final double kEpsilon = 1E-6;
-    public static final LoggedTunableNumber tAzimuthSkidControlFactor = new LoggedTunableNumber("Drive/AzimuthSkidControlFacator", 6);
+    public static final LoggedTunableNumber tAzimuthSkidControlFactor = new LoggedTunableNumber("Drive/AzimuthSkidControlFacator", 6.0);
+    public static final LoggedTunableNumber tRotationCutOffDegrees = new LoggedTunableNumber("Drive/RotationCutoffDegrees", 360.0);
 
     private final RobotConfig config;
     private final double maxSteerVelocityRadsPerSec;
@@ -282,6 +283,11 @@ public class SwerveSetpointGenerator {
             double maxHeadingChange = (dt * config.wheelFrictionForce)
                     / ((config.massKG / config.numModules)
                             * Math.abs(prevSetpoint.moduleStates()[m].speedMetersPerSecond));
+
+            if(Math.toDegrees(desiredStateRobotRelative.omegaRadiansPerSecond) > tRotationCutOffDegrees.get()) {
+                maxHeadingChange = max_theta_step;
+            }
+
             max_theta_step = Math.min(max_theta_step, tAzimuthSkidControlFactor.get() * maxHeadingChange);
 
             double s = findSteeringMaxS(

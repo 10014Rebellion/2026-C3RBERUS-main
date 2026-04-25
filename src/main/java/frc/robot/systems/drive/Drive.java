@@ -295,7 +295,7 @@ public class Drive extends SubsystemBase {
 
         mDefaultFF = mPreviousSetpoint.feedforwards();
         
-        kUseGenerator = !mDriveManager.getDriveState().equals(DriveState.AUTON);
+        kUseGenerator = true; // !mDriveManager.getDriveState().equals(DriveState.AUTON);
         Logger.recordOutput("Drive/Swerve/UseGenerator", kUseGenerator);
 
         if (kUseGenerator) {
