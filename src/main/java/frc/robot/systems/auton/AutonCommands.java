@@ -18,7 +18,6 @@ import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -103,12 +102,10 @@ public class AutonCommands extends SubsystemBase {
 
         SingleSwipe mLeftSingleSwipeAuto = 
             new SingleSwipe(
-                this, 
+                this,  
                 "LeftSingleSwipe", 
                 "L_IT_IC_ST", 
-                4.94,
-                () -> GameGoalPoseChooser.leftTrenchApproachPose(),
-                () -> GameGoalPoseChooser.leftTrenchExitPose());
+                4.94);
 
         SingleSwipeClimb mLeftSingleSwipeClimbAuto =
             new SingleSwipeClimb(
@@ -148,9 +145,7 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "RightSingleSwipe", 
                 "R_IT_IC_ST", 
-                4.83, 
-                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
-                () -> GameGoalPoseChooser.rightTrenchExitPose());
+                4.83);
 
         SingleSwipeClimb mRightSingleSwipeClimbAuto =
             new SingleSwipeClimb(
@@ -325,6 +320,15 @@ public class AutonCommands extends SubsystemBase {
         return traversePathWithIntakeOutOnly(0.0, pathCommand, condition, pathName, routine);
     }
 
+    /**
+     * Want to run with intake out ONLY, sepereate method to actually run the intake 
+     * @param delaySeconds
+     * @param pathCommand
+     * @param condition
+     * @param pathName
+     * @param routine
+     * @return
+     */
     public Trigger traversePathWithIntakeOutOnly(double delaySeconds, FollowPathCommand pathCommand, Trigger condition, String pathName, AutoEvent routine) {
         condition
             .onTrue(Commands.waitSeconds(delaySeconds).andThen(pathCommand))
@@ -404,7 +408,6 @@ public class AutonCommands extends SubsystemBase {
             true);
     }
 
-    /* Shoot Commands */
     public SequentialEndingCommandGroup timedIndexShot(double timeout, double endTimeout) {
         return new SequentialEndingCommandGroup(
                 mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(timeout),
