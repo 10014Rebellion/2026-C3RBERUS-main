@@ -275,4 +275,8 @@ public class Module {
     private void setDesiredAzimuthVelocity(Rotation2d pAzimuthSetpointAngularVelocity) {
         mAzimuthSetpointAngularVelocity = pAzimuthSetpointAngularVelocity;
     }
+
+    public void playMusic() {
+        mIO.playMusic();
+    }
 }

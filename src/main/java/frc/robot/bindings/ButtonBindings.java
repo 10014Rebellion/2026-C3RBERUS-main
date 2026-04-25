@@ -625,4 +625,9 @@ public class ButtonBindings {
     public Command noneTraversalHeadingState() {
         return Commands.runOnce(() -> mHeadingTraversalState = HeadingTraversalState.ALLIANCE);
     }
+
+    public void initTestTriggers() {
+        mPilotController.a()
+        .onTrue(new InstantCommand(() -> mDriveSS.playModuleMusic()));
+    }
 }

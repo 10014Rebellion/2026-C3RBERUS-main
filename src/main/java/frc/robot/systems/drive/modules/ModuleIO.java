@@ -53,4 +53,6 @@ public interface ModuleIO {
     public default void resetAzimuthEncoder() {}
 
     public default void setAzimuthPID(double kP, double kI, double kD) {}
+
+    public default void playMusic() {}
 }

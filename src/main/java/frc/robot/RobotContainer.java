@@ -232,8 +232,8 @@ public class RobotContainer {
         
         mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS, mClimbSS, mCANRangesSS);
 
-        initBindings();
-        initBaseTriggers();
+        // initBindings();
+        initTestTriggers();
 
         mDriverProfileChooser.addDefaultOption(
                 BindingsConstants.kDefaultProfile.key(), mDriveSS.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
@@ -249,8 +249,8 @@ public class RobotContainer {
         mButtonBindings.initBindings();
     }
 
-    private void initBaseTriggers() {
-        
+    private void initTestTriggers() {
+        mButtonBindings.initTestTriggers();
     }
 
     public Supplier<Command> getAutonomousCommand() {
