@@ -88,7 +88,7 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key = "Drive/Feedforward/Choreo")
     private boolean mUseChoreoFeedForward = false;
     @AutoLogOutput(key = "Drive/Feedforward/Filter")
-    private boolean mFilterFeedForward = false;
+    private boolean mUseFeedForward = false;
     private final PathConstraints mDriveConstraints = DriveConstants.kAutoConstraints;
 
     private SwerveModulePosition[] mPrevPositions = SwerveHelper.zeroPositions();
@@ -394,27 +394,21 @@ public class Drive extends SubsystemBase {
                     unoptimizedSetpointStates[i],
                     i);
 
-        if(mFilterFeedForward) {
-            driveAmps = SwerveHelper.lowPassFilter(
-                mPrevDriveAmps[i], 
-                driveAmps, 
-                tDriveFFAggressiveness.get());
+        if(mUseFeedForward) {
+            driveAmps = 0.0; 
+            // SwerveHelper.lowPassFilter(
+            //     mPrevDriveAmps[i], 
+            //     driveAmps, 
+            //     tDriveFFAggressiveness.get());
         }
-
-        if(!(
-            mDriveManager.getDriveState().equals(DriveManager.DriveState.AUTON)
-                ||
-            mDriveManager.getDriveState().equals(DriveManager.DriveState.AUTO_ALIGN))) {
-                driveAmps *= 0.0;
-            }
 
         mPrevDriveAmps[i] = driveAmps;
         return driveAmps;
     }
 
-    public void setFFModel(boolean pUseChoreoFeedForward, boolean pFilterFeedForward) {
+    public void setFFModel(boolean pUseChoreoFeedForward, boolean pUseFeedForward) {
         mUseChoreoFeedForward = pUseChoreoFeedForward;
-        mFilterFeedForward = pFilterFeedForward;
+        mUseFeedForward = pUseFeedForward;
     }
 
     public void setDriveFeedforwards(DriveFeedforwards ffs) {

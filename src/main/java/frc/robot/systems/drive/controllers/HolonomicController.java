@@ -68,7 +68,7 @@ public class HolonomicController {
 
     public static final LoggedTunableNumber tDistanceToleranceMeters = new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.05);
 
-    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 0.25);
+    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 0.75);
 
     private ProfiledPIDController tXController;
     private ProfiledPIDController tYController;
