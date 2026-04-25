@@ -105,7 +105,8 @@ public class AutonCommands extends SubsystemBase {
                 this,  
                 "LeftSingleSwipe", 
                 "L_IT_IC_ST", 
-                4.94);
+                AutonConstants.leftSingleSwipeFirstAlignTime,
+                AutonConstants.leftSignleSwipeBeginningTimeout);
 
         SingleSwipeClimb mLeftSingleSwipeClimbAuto =
             new SingleSwipeClimb(
@@ -118,25 +119,26 @@ public class AutonCommands extends SubsystemBase {
                 FieldConstants.kClimbLeftPose);
         
         // LEFT
-        double kLeftSecondShootTimestamp = 3.9; // L_ST_IB_ST_BUMP
         DoubleSwipe mLeftDoubleSwipeBumpAuto =
             new DoubleSwipe(
                 this, 
                 "LeftDoubleSwipeBump", 
                 "L_IT_IC_ST", 
-                4.94,
+                AutonConstants.leftDoubleSwipeFirstAlignTime,
                 "L_ST_IB_ST_BUMP",
-                3.98);
+                AutonConstants.leftDoubleSwipeSecondAlignTime,
+                AutonConstants.leftDoubleSwipeBeginningTimeout);
+
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
                 this, 
                 "LeftDoubleSwipeBumpClimb", 
                 "L_IT_IC_ST", 
-                4.93,
+                AutonConstants.leftDoubleSwipeFirstAlignTime,
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 "L_ST_IB_ST_BUMP",
-                kLeftSecondShootTimestamp,
+                AutonConstants.leftDoubleSwipeSecondAlignTime,
                 FieldConstants.kClimbLeftPose);
 
         // RIGHT
@@ -145,14 +147,15 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "RightSingleSwipe", 
                 "R_IT_IC_ST", 
-                4.83);
+                AutonConstants.rightSingleSwipeFirstAlignTime,
+                AutonConstants.rightSingleSwipeBeginningTimeout);
 
         SingleSwipeClimb mRightSingleSwipeClimbAuto =
             new SingleSwipeClimb(
                 this, 
                 "RightSingleSwipeClimb", 
                 "R_IT_IC_ST", 
-                4.83, 
+                AutonConstants.rightSingleSwipeFirstAlignTime, 
                 () -> GameGoalPoseChooser.rightTrenchApproachPose(),
                 () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 FieldConstants.kClimbRightPose);
@@ -162,9 +165,10 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "RightDoubleSwipeBump", 
                 "R_IT_IC_ST", 
-                4.83,
+                AutonConstants.rightDoubleSwipeFirstAlignTime,
                 "R_ST_IB_ST_BUMP",
-                4.8);
+                AutonConstants.rightDoubleSwipeSecondAlignTime,
+                AutonConstants.rightDoubleSwipeBeginningTimeout);
 
         DoubleSwipeClimb mRightDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
@@ -182,29 +186,29 @@ public class AutonCommands extends SubsystemBase {
             this, 
             "LeftSnakeSwipe", 
             "L_IT_IC_ST_Snake", 
-            4.1);
+            AutonConstants.leftSingleSnakeSwipeFirstAlignTime);
 
         DoubleSnakeSwipe mLeftDoubleSnakeSwipe = new DoubleSnakeSwipe(
             this, 
             "LeftDoubleSnakeSwipe", 
             "L_IT_IC_ST_Snake", 
-            4.1,
+            AutonConstants.leftDoubleSnakeSwipeFirstAlignTime,
             "L_IT_IC_ST_Snake2", 
-            3.2);
+            AutonConstants.leftDoubleSnakeSwipeSecondAlignTime);
 
         SnakeSwipe mRightSnakeSwipe = new SnakeSwipe(
             this, 
             "RightSnakeSwipe", 
             "R_IT_IC_ST_Snake", 
-            6.6);
+            AutonConstants.rightSingleSnakeSwipeFirstAlignTime);
     
         DoubleSnakeSwipe mRightDoubleSnakeSwipe = new DoubleSnakeSwipe(
             this, 
             "RightDoubleSnakeSwipe", 
             "R_IT_IC_ST_Snake", 
-            6.6,
+            AutonConstants.rightDoubleSnakeSwipeFirstAlignTime,
             "R_IT_IC_ST_Snake2",                 
-            3.2);
+            AutonConstants.rightDoubleSnakeSwipeSecondAlignTime);
 
         tryToAddPathToChooser(
             "LeftDoubleSnakeSwipe", 

@@ -13,6 +13,7 @@ public class SingleSwipe extends Auton {
     private final String mAutoName;
     private final String mFirstSwipePathName;
     private final double mFirstSwipeSwitchToAlignTime;
+    private final double mFirstBeginningTimeout;
 
     private final double kShotTimeSeconds = 6.5;
 
@@ -20,11 +21,13 @@ public class SingleSwipe extends Auton {
         AutonCommands pAutos, 
         String pAutoName, 
         String pFirstSwipePathName, 
-        double pFirstSwipeAlignTime) {
+        double pFirstSwipeAlignTime,
+        double pFirstBeginningTimeout) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeAlignTime;
+        mFirstBeginningTimeout = pFirstBeginningTimeout;
     }
 
     @Override
@@ -47,7 +50,7 @@ public class SingleSwipe extends Auton {
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
         Trigger firstPathEnded = mAutos.traversePathWithIntakeOutOnly(
-            0.1,
+            0.1 + mFirstBeginningTimeout,
             firstSwipePath, 
             autoActivted, 
             mFirstSwipePathName, 

@@ -15,6 +15,7 @@ public class DoubleSwipe extends Auton {
     private final double mFirstSwipeSwitchToAlignTime;
     private final String mSecondSwipePathName;
     private final double mSecondSwipeSwitchToAlignTime;
+    private final double mFirstBeginningTimeout;
 
     private final double kShotTime1Seconds = 3.0;
     private final double kShotTime2Seconds = 6.5;
@@ -25,13 +26,15 @@ public class DoubleSwipe extends Auton {
         String pFirstSwipePathName,
         double pFirstSwipeSwitchToAlignTime,
         String pSecondSwipePathName, 
-        double pSecondSwipeSwitchToAlignTime) {
+        double pSecondSwipeSwitchToAlignTime,
+        double pFirstBeginningTimeout) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
         mSecondSwipePathName = pSecondSwipePathName;
         mSecondSwipeSwitchToAlignTime = pSecondSwipeSwitchToAlignTime;
+        mFirstBeginningTimeout = pFirstBeginningTimeout;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class DoubleSwipe extends Auton {
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
         Trigger firstPathEnded = mAutos.traversePathWithIntakeOutOnly(
-            0.1, 
+            0.1 + mFirstBeginningTimeout, 
             firstSwipePath, 
             autoActivated, 
             mFirstSwipePathName, 
