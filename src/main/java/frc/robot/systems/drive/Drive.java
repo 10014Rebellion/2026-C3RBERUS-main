@@ -559,4 +559,11 @@ public class Drive extends SubsystemBase {
     public void resetSetpointGenerator() {
         resetFromModuleStates = true;
     }
+
+    public void playModuleMusic() {
+        Module[] arr = getModules();
+        for(int i = 0; i<arr.length; i++) {
+            arr[i].playMusic();
+        }
+    }
 }

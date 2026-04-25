@@ -33,6 +33,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.systems.drive.DriveConstants.ModuleHardwareConfig;
+import frc.robot.systems.music.MusicIODevice;
 import frc.lib.PhoenixUtil;
 import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.robot.systems.drive.PhoenixOdometryThread;
@@ -360,5 +361,12 @@ public class ModuleIOKraken implements ModuleIO {
         slotConfig.kI = pKI;
         slotConfig.kD = pKD;
         mAzimuthMotor.getConfigurator().apply(slotConfig);
+    }
+
+    @Override
+    public void playMusic() {
+        MusicIODevice mDevice = new MusicIODevice();
+        mDevice.addInstruments(mDriveMotor, mAzimuthMotor);
+        mDevice.playOrchestra();
     }
 }
