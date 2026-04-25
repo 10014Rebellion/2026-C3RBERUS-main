@@ -85,7 +85,7 @@ public class DoubleSwipe extends Auton {
 
         /* Takes over mid path */
         Trigger autoAlignShotReadySwipe2 = mAutos.transitionFromPathTraversingToAutoAlignHubShoot(
-            mDriveSS.getDriveManager().runAutoAlignThroughTrench(lastPoseOfSecondSwipe), 
+            mDriveSS.getDriveManager().runAutoAlignThroughTrench(getSwipeEndPose(lastPoseOfSecondSwipe)), 
             secondSwipePath.atTime(mSecondSwipeSwitchToAlignTime), 
             mSecondSwipePathName, 
             auto);

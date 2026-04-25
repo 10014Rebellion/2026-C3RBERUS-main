@@ -18,6 +18,8 @@ import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -368,8 +370,10 @@ public class AutonCommands extends SubsystemBase {
                     &&
                 mRobotDrive.getDriveManager().getDriveState().equals(DriveState.AUTO_ALIGN)
                     &&
-                !autoAlignEndingCommand.hasEnded(),
-            true);
+                autoAlignEndingCommand.isRunning(),
+            true)
+                .debounce(0.25, DebounceType.kRising)
+                .debounce(5.0, DebounceType.kFalling);
     }
 
     public Trigger shootFuelToHub(double shotTime, Trigger condition, String pathName, AutoEvent routine) {
