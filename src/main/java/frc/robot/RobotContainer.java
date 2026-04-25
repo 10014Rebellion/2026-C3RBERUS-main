@@ -225,7 +225,7 @@ public class RobotContainer {
         
         mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS, mClimbSS);
 
-        initBindings();
+        // initBindings();
         initTestTriggers();
 
         mDriverProfileChooser.addDefaultOption(
