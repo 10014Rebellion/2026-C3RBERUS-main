@@ -562,6 +562,8 @@ public class Drive extends SubsystemBase {
 
     public void playModuleMusic() {
         Module[] arr = getModules();
-        arr[0].playMusic();
+        for(int i = 0; i<arr.length; i++) {
+            arr[i].playMusic();
+        }
     }
 }
