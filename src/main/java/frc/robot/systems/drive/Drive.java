@@ -287,14 +287,15 @@ public class Drive extends SubsystemBase {
             mPreviousSetpoint, 
             mDesiredSpeeds,  
             mDriveConstraints, 
-            SwerveHelper.dt);
+            SwerveHelper.dt,
+            kInputVoltage);
 
         /* Only for logging purposes */
         mModuleTorques = SwerveHelper.zeroStates();
 
         mDefaultFF = mPreviousSetpoint.feedforwards();
         
-        kUseGenerator = !mDriveManager.getDriveState().equals(DriveState.AUTON);
+        kUseGenerator = true; // !mDriveManager.getDriveState().equals(DriveState.AUTON);
         Logger.recordOutput("Drive/Swerve/UseGenerator", kUseGenerator);
 
         if (kUseGenerator) {
@@ -424,8 +425,8 @@ public class Drive extends SubsystemBase {
     public void resetGyro() {
         /* Robot is usually facing the other way(relative to field) when doing cycles on red side, so gyro is reset to 180 */
         mRobotRotation = AllianceFlipUtil.shouldFlip() 
-            ? Rotation2d.fromDegrees(180.0) 
-            : Rotation2d.fromDegrees(0.0);
+            ? Rotation2d.k180deg 
+            : Rotation2d.kZero;
 
         mGyro.resetGyro(mRobotRotation);
 
