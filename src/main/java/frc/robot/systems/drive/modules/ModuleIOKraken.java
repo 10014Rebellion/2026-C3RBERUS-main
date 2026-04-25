@@ -8,6 +8,7 @@ import static frc.robot.systems.drive.DriveConstants.*;
 import java.util.Queue;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -76,6 +77,8 @@ public class ModuleIOKraken implements ModuleIO {
     private final Queue<Double> timestampQueue;
     private final Queue<Double> drivePositionQueue;
     private final Queue<Double> turnPositionQueue;
+
+    private final MusicIODevice mOrchestraDevice;
 
     public ModuleIOKraken(ModuleHardwareConfig pConfig) {
         mDriveMotor = new TalonFX(pConfig.driveID(), kCANBus);
@@ -214,6 +217,8 @@ public class ModuleIOKraken implements ModuleIO {
             mAzimuthVoltage,
             mAzimuthTemp,
             mAbsolutePositionSignal);
+
+        mOrchestraDevice = new MusicIODevice();
     }
 
     @Override
@@ -365,8 +370,7 @@ public class ModuleIOKraken implements ModuleIO {
 
     @Override
     public void playMusic() {
-        MusicIODevice mDevice = new MusicIODevice();
-        mDevice.addInstruments(mDriveMotor, mAzimuthMotor);
-        mDevice.playOrchestra();
+        mOrchestraDevice.addInstruments(mDriveMotor, mAzimuthMotor);
+        mOrchestraDevice.playOrchestra();
     }
 }
