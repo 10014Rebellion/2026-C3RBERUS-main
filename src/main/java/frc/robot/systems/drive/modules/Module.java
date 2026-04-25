@@ -277,6 +277,6 @@ public class Module {
     }
 
     public void playMusic() {
-        playMusic();
+        mIO.playMusic();
     }
 }

@@ -27,6 +27,7 @@ public class MusicIODevice implements MusicIO {
 
     @Override
     public void playOrchestra() {
+        mOrchestra.loadMusic(MusicConstants.music.CANTINA.getMusicName());
         mOrchestra.play();
     }
 }

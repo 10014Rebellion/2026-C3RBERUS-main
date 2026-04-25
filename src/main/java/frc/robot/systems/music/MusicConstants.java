@@ -15,6 +15,5 @@ public class MusicConstants {
         }
 
     }
-    public static final String musicName = "cantina_band.chrp";
 
 }
