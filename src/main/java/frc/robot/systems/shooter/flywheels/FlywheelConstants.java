@@ -46,9 +46,9 @@ public class FlywheelConstants {
 
     public static final MotionMagicFOCControllerFF kFlywheelControlConfig = new MotionMagicFOCControllerFF(
             0,
-            new PDConstants(10.0, 0), // Tuned for C3RBERUS!
-            new SimpleMotorFeedforward(4.0, 0.2, 2), // Tuned for C3RBERUS!
-            new MotionMagicConstants(0.0, 40.0, 0.0));
+            new PDConstants(7.5, 0), // Tuned for C3RBERUS!
+            new SimpleMotorFeedforward(2.5, 0.22, 1.8), // Tuned for C3RBERUS!
+            new MotionMagicConstants(0.0, 60.0, 0.0));
 
     public static final HashMap<FlywheelStates, LoggedTunableNumber> kFlywheelSetpointToVoltageTuneable = new HashMap<FlywheelStates, LoggedTunableNumber>();
     public static final HashMap<FlywheelStates, Supplier<Rotation2d>> kFlywheelSetpointToVelocity = new HashMap<FlywheelStates, Supplier<Rotation2d>>();

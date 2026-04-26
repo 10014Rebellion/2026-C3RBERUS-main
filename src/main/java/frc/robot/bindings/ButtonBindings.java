@@ -484,37 +484,45 @@ public class ButtonBindings {
         mPilotController.startButton().and(isTesting())
             .onTrue(Commands.runOnce(() -> mDriveSS.resetGyro()));
 
-        // mPilotController.a().and(isTesting())
-        //     .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_AMPERAGE))
-        //     .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
+        mPilotController.a().and(isTesting())
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_AMPERAGE))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
+
+        mPilotController.b().and(isTesting())
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
+
+        mPilotController.x().and(isTesting())
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.TUNING_VOLTAGE))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOPPED));
+
+        mPilotController.y().and(isTesting())
+            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.TUNING_SETPOINT))
+            .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOPPED));
         
         // mPilotController.b().and(isTesting())
         //     .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_VOLTAGE))
         //     .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
 
-        // mPilotController.x().and(isTesting())
-        //     .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
-        //     .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
-
         // mPilotController.y().and(isTesting())
         //     .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT))
         //     .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
 
-        mPilotController.a()
-            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
-            .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE));
+        // mPilotController.a()
+        //     .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+        //     .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE));
 
         // mPilotController.b().and(isTesting())
         //     .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.TUNING_VOLT))
         //     .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
-        mPilotController.b().and(isTesting())
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY))
-            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
+        // mPilotController.b().and(isTesting())
+        //     .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY))
+        //     .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
-        mPilotController.x().and(isTesting())
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
+        // mPilotController.x().and(isTesting())
+        //     .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+        //     .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
     }
 
     public void initTriggers() {

@@ -129,7 +129,8 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
             mFlywheelSupplyCurrent,
             mFlywheelStatorCurrent,
             mFlywheelTempCelsius,
-            mFlywheelClosedLoopReference
+            mFlywheelClosedLoopReference,
+            mFlywheelClosedLoopReferenceSlope
         ).isOK();
         pInputs.iIsLeader = isLeader();
         pInputs.iFlywheelControlMode = mFlywheelControlMode.getValue().toString();
@@ -140,6 +141,7 @@ public class FlywheelIOKrakenX44 implements FlywheelIO{
         pInputs.iFlywheelStatorCurrentAmps = mFlywheelStatorCurrent.getValueAsDouble();
         pInputs.iFlywheelTempCelsius = mFlywheelTempCelsius.getValueAsDouble();
         pInputs.iFlywheelClosedLoopReference = Rotation2d.fromRotations(mFlywheelClosedLoopReference.getValueAsDouble());
+        pInputs.iFlywheelClosedLoopReferenceSlope = Rotation2d.fromRotations(mFlywheelClosedLoopReferenceSlope.getValueAsDouble());
     }
 
     public boolean isLeader() {
