@@ -81,6 +81,9 @@ public class FlywheelConstants {
     public static final LoggedTunableNumber tTrenchVelocity = new LoggedTunableNumber(
             "Shooter/Flywheel/SetpointRPS/TrenchVelocity", 80);
 
+    public static final LoggedTunableNumber tTuningAmperage 
+        = new LoggedTunableNumber("Shooter/Flywheel/TuningAmperage", 0.0);
+
     static {
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.STANDBY_VOLTAGE, tStandbyVoltage);
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.TUNING_VOLTAGE, tTuningVoltage);
