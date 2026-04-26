@@ -24,7 +24,6 @@ import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
-import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.efi.sensors.CANRangeSS;

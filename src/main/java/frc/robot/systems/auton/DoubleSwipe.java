@@ -49,6 +49,7 @@ public class DoubleSwipe extends Auton {
 
         FollowPathCommand firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true, auto);
+            
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
