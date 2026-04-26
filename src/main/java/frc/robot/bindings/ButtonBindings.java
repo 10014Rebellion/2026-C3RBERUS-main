@@ -504,13 +504,17 @@ public class ButtonBindings {
             .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
             .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE));
 
+        // mPilotController.b().and(isTesting())
+        //     .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.TUNING_VOLT))
+        //     .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
+
         mPilotController.b().and(isTesting())
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.TUNING_VOLT))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY))
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
         mPilotController.x().and(isTesting())
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY))
-            .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
+            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
+            .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
     }
 
     public void initTriggers() {
