@@ -177,9 +177,9 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "RightDoubleSwipeBumpClimb", 
                 "R_IT_IC_ST", 
-                4.83,
+                AutonConstants.rightDoubleSwipeFirstAlignTime,
                 "R_ST_IB_ST_BUMP",
-                4.8,
+                AutonConstants.rightDoubleSwipeSecondAlignTime,
                 FieldConstants.kClimbRightPose);
 
         SnakeSwipe mLeftSnakeSwipe = new SnakeSwipe(
