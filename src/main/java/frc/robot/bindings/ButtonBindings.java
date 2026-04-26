@@ -86,7 +86,7 @@ public class ButtonBindings {
                 () -> mPilotController.getPOVAngle());
 
         initCompBindings();
-        // testBindings();
+        testBindings();
     }
 
     private Trigger constructPreshotPos(Trigger pBtn, FlywheelStates pFlywheelState, HoodStates pHoodState) {
@@ -491,6 +491,10 @@ public class ButtonBindings {
         mPilotController.b().and(isTesting())
             .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_VOLTAGE))
             .onFalse(mHoodSS.setStateCmd(HoodStates.TUNING_VOLTAGE));
+
+        mPilotController.x().and(isTesting())
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
+            .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
     }
 
     public void initTriggers() {

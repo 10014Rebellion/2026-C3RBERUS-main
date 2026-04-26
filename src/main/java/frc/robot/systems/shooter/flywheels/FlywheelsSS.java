@@ -147,7 +147,9 @@ public class FlywheelsSS extends SubsystemBase {
     mLeaderFlywheelIO.setMotorVelAndAccel(
         pRotsPerS.getRotations(),
         0.0,
-        kFlywheelControlConfig.feedforward().calculate(getFlywheelRPS().getRotations()));
+        kFlywheelControlConfig.feedforward().calculate(
+          mLeaderFlywheelInputs.iFlywheelClosedLoopReference.getRotations(),
+          mLeaderFlywheelInputs.iFlywheelClosedLoopReferenceSlope.getRotations()));
     mFollowerFlywheelIO.enforceFollower();
   }
 
