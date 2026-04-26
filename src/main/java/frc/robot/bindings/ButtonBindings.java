@@ -493,7 +493,7 @@ public class ButtonBindings {
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
 
         mPilotController.x().and(isTesting())
-            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.TUNING_VOLTAGE))
+            .onTrue(mIntakeSS.anshulCompact())
             .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.STOPPED));
 
         mPilotController.y().and(isTesting())
