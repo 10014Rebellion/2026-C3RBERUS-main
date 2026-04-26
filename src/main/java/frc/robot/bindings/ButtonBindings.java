@@ -490,11 +490,15 @@ public class ButtonBindings {
         
         mPilotController.b().and(isTesting())
             .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_VOLTAGE))
-            .onFalse(mHoodSS.setStateCmd(HoodStates.TUNING_VOLTAGE));
+            .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
 
         mPilotController.x().and(isTesting())
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.TUNING_VELOCITY))
             .onFalse(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
+
+        mPilotController.y().and(isTesting())
+            .onTrue(mHoodSS.setStateCmd(HoodStates.TUNING_SETPOINT))
+            .onFalse(mHoodSS.setStateCmd(HoodStates.STOPPED));
     }
 
     public void initTriggers() {

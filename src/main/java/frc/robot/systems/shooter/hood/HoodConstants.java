@@ -25,7 +25,7 @@ public class HoodConstants {
             55, // Motor CAN ID
             RobotConstants.kSubsystemsCANBus, // CANBus
             (133.0 / 9.0) * (20.0 / 12.0), // Rotor to Mechanism Gear Ratio
-            InvertedValue.Clockwise_Positive, // Direction
+            InvertedValue.CounterClockwise_Positive, // Direction
             NeutralModeValue.Brake, // Neutral Mode
             new CurrentLimits(
                     40, // Supply
@@ -35,13 +35,13 @@ public class HoodConstants {
     public static final ArmControllerMotionMagic kHoodControlConfig = new ArmControllerMotionMagic(
             0, // not currently used
             new PDConstants(300, 5), // Tuned for C3RBERUS!
-            new MotionMagicConstants(4000.0 / 360.0, 4000. / 360.0, 0), // Tuned for C3RBERUS!
-            new ArmFeedforward(0.9, 0.06, 0, 0) // Tuned for C3RBERUS!
+            new MotionMagicConstants(8000.0 / 360.0, 8000. / 360.0, 0), // Tuned for C3RBERUS!
+            new ArmFeedforward(0.7, 0.1, 0, 0) // Tuned for C3RBERUS!
     );
 
     public static final RotationSoftLimits kHoodLimits = new RotationSoftLimits(
             Rotation2d.fromDegrees(0.02),
-            Rotation2d.fromDegrees(21.2) // Tuned for C3RBERUS!
+            Rotation2d.fromDegrees(40.0) // Tuned for C3RBERUS!
     );
 
     public static final Rotation2d kAdjustStepAmount = Rotation2d.fromDegrees(2);
