@@ -63,7 +63,7 @@ public class HoodSS extends SubsystemBase {
             "Shooter/Hood/Control/Profile/MaxJerks3",
             HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk() * 360);
     private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Shooter/Hood/Control/Tolerance",
-            HoodConstants.kTolerance.getDegrees());
+            HoodConstants.kTolerance.getRotations());
 
     @AutoLogOutput(key = "Shooter/Hood/States/CurrentState")
     private HoodStates mCurrentHoodState = HoodStates.STOPPED;

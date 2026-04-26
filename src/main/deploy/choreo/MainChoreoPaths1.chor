@@ -62,6 +62,20 @@
    }
   },
   "poses":{
+   "DynamicShootStay":{
+    "x":{
+     "exp":"1.8461698293685913 m",
+     "val":1.8461698293685913
+    },
+    "y":{
+     "exp":"2 m",
+     "val":2.0
+    },
+    "heading":{
+     "exp":"30 deg",
+     "val":0.5235987755982988
+    }
+   },
    "HubPose":{
     "x":{
      "exp":"HubOrTrenchX",

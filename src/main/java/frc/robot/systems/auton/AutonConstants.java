@@ -3,7 +3,7 @@ package frc.robot.systems.auton;
 public class AutonConstants {
     
     // Left Single Swipe Auto Constants no climb //
-    public static final double leftSingleSwipeFirstAlignTime = 4.94;
+    public static final double leftSingleSwipeFirstAlignTime = 5.5;
     public static final double leftSignleSwipeBeginningTimeout = 0.0;
 
     // Right Single Swipe Auto Constants no climb //

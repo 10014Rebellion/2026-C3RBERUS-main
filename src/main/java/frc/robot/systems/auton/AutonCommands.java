@@ -76,7 +76,9 @@ public class AutonCommands extends SubsystemBase {
         "L_ST_IB_ST_BUMP",
         "R_IT_IC_ST",
         "R_ST_IB_ST",
-        "R_ST_IB_ST_BUMP"
+        "R_ST_IB_ST_BUMP",
+        "L1_TL_BL_Single",
+        "H_D"
     };
 
     public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, ClimbSS pClimbSS, FuelInjectorSS pInjectorSS) {
@@ -108,7 +110,7 @@ public class AutonCommands extends SubsystemBase {
             new SingleSwipe(
                 this,  
                 "LeftSingleSwipe", 
-                "L_IT_IC_ST", 
+                "L1_TL_BL_Single", 
                 AutonConstants.leftSingleSwipeFirstAlignTime,
                 AutonConstants.leftSignleSwipeBeginningTimeout);
 
@@ -210,6 +212,15 @@ public class AutonCommands extends SubsystemBase {
             "R_IT_IC_ST_Snake2",                 
             AutonConstants.rightDoubleSnakeSwipeSecondAlignTime);
 
+        // Shoot and Stay //
+        ShootStay mShootAndStay = new ShootStay(
+            this,
+            "ShootAndStay",
+            "H_D",
+            0.9,
+            0.0
+        );
+
         tryToAddPathToChooser(
             "LeftDoubleSnakeSwipe", 
             () -> mLeftDoubleSnakeSwipe.getAuton()
@@ -261,6 +272,9 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser("RightDoubleSwipeBumpClimb", 
             () -> mRightDoubleSwipeBumpClimbAuto.getAuton()
         );
+
+        tryToAddPathToChooser("ShootPreloadAndStay", 
+            () -> mShootAndStay.getAuton());
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     }
@@ -382,6 +396,25 @@ public class AutonCommands extends SubsystemBase {
             true)
                 .debounce(0.25, DebounceType.kRising)
                 .debounce(5.0, DebounceType.kFalling);
+    }
+
+    @SuppressWarnings("unlikely-arg-type")
+    public Trigger setUpShooterFromStationary(Trigger condition, AutoEvent routine){
+        condition  
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+
+        return routine.loggedCondition(
+        "Stationary/InShootingTolerance", 
+            () -> 
+                mHoodSS.atGoal()
+                    &&
+                mFlywheelsSS.atLatestClosedLoopGoal()
+                    && 
+                mHoodSS.getCurrentGoal().equals(HoodStates.SHOTMAP_POSITION)
+                    &&
+                mFlywheelsSS.getFlywheelState().equals(FlywheelStates.SHOTMAP_VELOCITY), 
+            true);
     }
 
     public void resetAllStates(Trigger condition) {
