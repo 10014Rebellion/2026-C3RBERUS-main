@@ -19,7 +19,7 @@ import frc.robot.RobotConstants;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 
 public class FuelPumpConstants {
-    public static final double kToleranceRPS = 12.0;
+    public static final double kToleranceRPS = 3.0;
     public static final Rotation2d kRPSForShooting = Rotation2d.fromRotations(50);
 
     public static final BasicMotorHardware kFuelPumpLeaderConfig = new BasicMotorHardware(
@@ -40,7 +40,7 @@ public class FuelPumpConstants {
     public static final SimpleController kFuelPumpControlConfig = new SimpleController(
         0, 
         new PDConstants(0.22, 0), 
-        new SimpleMotorFeedforward(0, 0.11)
+        new SimpleMotorFeedforward(0.35, 0.0989)
     );
 
     public static final HashMap<FuelPumpState, LoggedTunableNumber> kStateToTuneableFuelPumpVolts = new HashMap<FuelPumpState, LoggedTunableNumber>();

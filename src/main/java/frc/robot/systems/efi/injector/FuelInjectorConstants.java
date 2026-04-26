@@ -19,7 +19,7 @@ public class FuelInjectorConstants {
         43, 
         RobotConstants.kSubsystemsCANBus,
         1, 
-        InvertedValue.CounterClockwise_Positive, 
+        InvertedValue.Clockwise_Positive, 
         NeutralModeValue.Brake, 
         new CurrentLimits(40, 80));
 
