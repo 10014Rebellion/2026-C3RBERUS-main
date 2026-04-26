@@ -179,7 +179,10 @@ public class RobotContainer {
 
                 mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOSim());
 
-                mClimbSS = new ClimbSS(new ClimbIO() {});
+                mClimbSS = new ClimbSS(new ClimbIOSim(
+                    ClimbConstants.kSimElevator, 
+                    ClimbConstants.kClimbMotorConstants, 
+                    ClimbConstants.kSoftLimits));
                 break;
             }
 

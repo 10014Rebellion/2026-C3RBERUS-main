@@ -369,6 +369,27 @@ public class DriveManager {
     public Command setToGenericAutoAlign(Supplier<Pose2d> pGoalPoseSup, ConstraintType pConstraintType) {
         return new InstantCommand(() -> {
             mGoalPoseSup = pGoalPoseSup;
+            mChassisSpeedSup = () -> new ChassisSpeeds();
+            mAutoAlignController.setConstraintType(pConstraintType);
+            mAutoAlignController.reset(
+                mDrive.getPoseEstimate(), 
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                    mDrive.getRobotChassisSpeeds(), 
+                    mDrive.getPoseEstimate().getRotation()),
+                mGoalPoseSup.get());
+            }).andThen( setDriveStateCommandContinued( DriveState.AUTO_ALIGN ) );
+    }
+
+    /*
+     * Reference GameDriveManager to use game-specific implementation of mDrive command
+     * @param Goal strategy, based on where you're aligning
+     * @param Constraint type, linear or on an axis
+     */
+    public Command setToGenericAutoAlign(Supplier<Pose2d> pGoalPoseSup, Supplier<ChassisSpeeds> speedSup, ConstraintType pConstraintType) {
+        return new InstantCommand(() -> {
+            mGoalPoseSup = pGoalPoseSup;
+            mChassisSpeedSup = speedSup;
+            mChassisSpeedSup = () -> new ChassisSpeeds();
             mAutoAlignController.setConstraintType(pConstraintType);
             mAutoAlignController.reset(
                 mDrive.getPoseEstimate(), 
@@ -564,7 +585,7 @@ public class DriveManager {
                 : AllianceFlipUtil.apply(GameGoalPoseChooser.kBottomRightBumpPose);
 
         ConditionalCommand farTraversalCommand = new ConditionalCommand(
-            mDrive.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
+            mDrive.getDriveManager().setToGenericAutoAlign(
                 farPose,
                 () -> new ChassisSpeeds(
                     AllianceFlipUtil.shouldFlip() ? 0.5 : -0.5, 
@@ -574,7 +595,7 @@ public class DriveManager {
             farTraversal);
 
         ConditionalCommand closeTraversalCommand = new ConditionalCommand(
-            mDrive.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
+            mDrive.getDriveManager().setToGenericAutoAlign(
                 closePose,
                 () -> new ChassisSpeeds(
                     AllianceFlipUtil.shouldFlip() ? 0.5 : -0.5, 
@@ -583,7 +604,7 @@ public class DriveManager {
             new InstantCommand(), 
             shortTraversal);
 
-        Command goalPoseCommand = mDrive.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
+        Command goalPoseCommand = mDrive.getDriveManager().setToGenericAutoAlign(
                 () -> goal,
                 ConstraintType.LINEAR);
 

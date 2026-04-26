@@ -7,6 +7,7 @@ import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.commands.FollowPathCommand;
 
 public class DoubleSwipe extends Auton {
@@ -86,7 +87,9 @@ public class DoubleSwipe extends Auton {
 
         /* Takes over mid path */
         Trigger autoAlignShotReadySwipe2 = mAutos.transitionFromPathTraversingToAutoAlignHubShoot(
-            mDriveSS.getDriveManager().runAutoAlignThroughTrench(getSwipeEndPose(lastPoseOfSecondSwipe)), 
+            mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
+                () -> getSwipeEndPose(lastPoseOfSecondSwipe), 
+                ConstraintType.LINEAR), 
             secondSwipePath.atTime(mSecondSwipeSwitchToAlignTime), 
             mSecondSwipePathName, 
             auto);
@@ -97,6 +100,7 @@ public class DoubleSwipe extends Auton {
             mSecondSwipePathName, 
             auto);
 
+        mAutos.resetAllStates(fuelToHubHasEndedSwipe2);
         fuelToHubHasEndedSwipe2.onTrue(mAutos.endAuto(auto));
 
         return auto;

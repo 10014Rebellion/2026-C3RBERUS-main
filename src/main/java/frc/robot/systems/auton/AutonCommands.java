@@ -20,6 +20,8 @@ import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -30,8 +32,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.systems.climb.ClimbSS;
+import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
+import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.intake.Intake;
@@ -118,7 +122,6 @@ public class AutonCommands extends SubsystemBase {
                 FieldConstants.kClimbLeftPose);
         
         // LEFT
-        double kLeftSecondShootTimestamp = 3.9; // L_ST_IB_ST_BUMP
         DoubleSwipe mLeftDoubleSwipeBumpAuto =
             new DoubleSwipe(
                 this, 
@@ -132,11 +135,9 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftDoubleSwipeBumpClimb", 
                 "L_IT_IC_ST", 
-                4.93,
-                () -> GameGoalPoseChooser.leftTrenchApproachPose(),
-                () -> GameGoalPoseChooser.leftTrenchExitPose(),
+                4.94,
                 "L_ST_IB_ST_BUMP",
-                kLeftSecondShootTimestamp,
+                3.98,
                 FieldConstants.kClimbLeftPose);
 
         // RIGHT
@@ -172,8 +173,6 @@ public class AutonCommands extends SubsystemBase {
                 "RightDoubleSwipeBumpClimb", 
                 "R_IT_IC_ST", 
                 4.83,
-                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
-                () -> GameGoalPoseChooser.rightTrenchExitPose(),
                 "R_ST_IB_ST_BUMP",
                 4.8,
                 FieldConstants.kClimbRightPose);
@@ -380,6 +379,18 @@ public class AutonCommands extends SubsystemBase {
                 .debounce(5.0, DebounceType.kFalling);
     }
 
+    public void resetAllStates(Trigger condition) {
+        condition
+            .onTrue(mRobotDrive.getDriveManager().setDriveStateCommand(DriveState.TELEOP))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
+            .onTrue(mIntake.setRackStateCmd(IntakeRackState.INTAKE))
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mClimbSS.setStateCmd(ClimbState.IDLE));
+    }
+
     public Trigger shootFuelToHub(double shotTime, Trigger condition, String pathName, AutoEvent routine) {
         SequentialEndingCommandGroup injectorShot = timedInjectorShot(shotTime, 0.02);
         SequentialEndingCommandGroup intakeShot = timedIntakeShot(shotTime, 0.02);
@@ -408,6 +419,69 @@ public class AutonCommands extends SubsystemBase {
             true);
     }
 
+    public Trigger goToClimb(Trigger condition, Supplier<Pose2d> pClimbPose, String name, AutoEvent auto) {
+        SequentialEndingCommandGroup goToPreClimbPose = new SequentialEndingCommandGroup(
+            mRobotDrive.getDriveManager().setToGenericAutoAlign(
+                () -> pClimbPose.get().transformBy(
+                    new Transform2d(
+                        Math.signum(
+                            pClimbPose.get().getX() - FieldConstants.kFieldXM / 2.0) 
+                        * 0.05, 
+                        0.00, 
+                        Rotation2d.kZero)), 
+                ConstraintType.LINEAR));
+
+        Trigger atPreClimbPose = auto.loggedCondition(
+            name+"/AtPreClimbPose", 
+            () -> 
+                goToPreClimbPose.isRunning()
+                    &&
+                mRobotDrive.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
+        SequentialEndingCommandGroup prepareForClimb = 
+            new SequentialEndingCommandGroup(mClimbSS.goUpTillClimbHeightThenStay());
+
+        Trigger preparedForClimb = auto.loggedCondition(
+            name+"/PreparedForClimb", 
+            () -> prepareForClimb.hasEnded(), 
+            true);
+
+        SequentialEndingCommandGroup goToClimbPose = new SequentialEndingCommandGroup(
+            mRobotDrive.getDriveManager().setToGenericAutoAlign(
+                pClimbPose, 
+                ConstraintType.LINEAR));
+
+        Trigger atClimbPose = auto.loggedCondition(
+            name+"/AtClimbPose", 
+            () -> 
+                goToClimbPose.isRunning()
+                    &&
+                mRobotDrive.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
+        SequentialEndingCommandGroup climb = 
+            new SequentialEndingCommandGroup(mClimbSS.goDownTillClimbedThenStayClimbed());
+
+        Trigger hasClimbed = auto.loggedCondition(
+            name+"/HasClimbed", 
+            () -> climb.hasEnded(), 
+            true);
+
+        condition
+            .onTrue(goToPreClimbPose)
+            .onTrue(prepareForClimb);
+
+        atPreClimbPose.and(preparedForClimb)
+            .onTrue(goToClimbPose);
+
+        atClimbPose
+            .onTrue(climb);
+
+        return hasClimbed;
+    }
+
+    /* Super structure commands */
     public SequentialEndingCommandGroup timedIndexShot(double timeout, double endTimeout) {
         return new SequentialEndingCommandGroup(
                 mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(timeout),

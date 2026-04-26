@@ -56,8 +56,8 @@ public class HolonomicController {
     // public static final LoggedTunableNumber tOmegaIZone = new LoggedTunableNumber("AutoAlign/Omega/kIZone", 0.0);
     // public static final LoggedTunableNumber tOmegaIRange = new LoggedTunableNumber("AutoAlign/Omega/kIRange", 0.0);
 
-    public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPS", 600);
-    public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPSS", 12000);
+    public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPS", 180);
+    public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPSS", 360);
 
     public static final LoggedTunableNumber tOmegaS = new LoggedTunableNumber("AutoAlign/Omega/kS", 0.0);
     public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("AutoAlign/Omega/kV", 0.25);
@@ -68,7 +68,7 @@ public class HolonomicController {
 
     public static final LoggedTunableNumber tDistanceToleranceMeters = new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.05);
 
-    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 0.75);
+    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 0.25);
 
     private ProfiledPIDController tXController;
     private ProfiledPIDController tYController;
@@ -80,8 +80,8 @@ public class HolonomicController {
 
     private ConstraintType tType = ConstraintType.AXIS;
 
-    private LinearFilter xValueFilter = LinearFilter.movingAverage(5);
-    private LinearFilter yValueFilter = LinearFilter.movingAverage(5);
+    private LinearFilter xValueFilter = LinearFilter.movingAverage(2);
+    private LinearFilter yValueFilter = LinearFilter.movingAverage(2);
 
     public HolonomicController() {
         this.tXController = new ProfiledPIDController(
@@ -164,15 +164,15 @@ public class HolonomicController {
                 1.0);
         Pose2d currentPose = filterTranslationOfPose(pCurrentPose);
 
-        if(pGoalPose.minus(currentPose).getTranslation().getNorm() < 0.03) return new ChassisSpeeds(
-            0.0, 0.0,
-            (Math.toRadians(tOmegaController.calculate(
-                currentPose.getRotation().getDegrees(),
-                new TrapezoidProfile.State(
-                    pGoalPose.getRotation().getDegrees(),
-                    Math.toDegrees(pGoalSpeed.omegaRadiansPerSecond)))
-            + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity)))
-        );
+        // if(pGoalPose.minus(currentPose).getTranslation().getNorm() < 0.03) return new ChassisSpeeds(
+        //     0.0, 0.0,
+        //     (Math.toRadians(tOmegaController.calculate(
+        //         currentPose.getRotation().getDegrees(),
+        //         new TrapezoidProfile.State(
+        //             pGoalPose.getRotation().getDegrees(),
+        //             Math.toDegrees(pGoalSpeed.omegaRadiansPerSecond)))
+        //     + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity)))
+        // );
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
             (tXController.calculate(
