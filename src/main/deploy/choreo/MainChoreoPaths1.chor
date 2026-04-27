@@ -63,8 +63,8 @@
    "ShootYawTolerance":{
     "dimension":"Angle",
     "var":{
-     "exp":"5 deg",
-     "val":0.08726646259971647
+     "exp":"1 deg",
+     "val":0.017453292519943295
     }
    },
    "TLCenterY":{
