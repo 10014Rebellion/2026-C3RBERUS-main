@@ -18,11 +18,25 @@
      "val":2.518918
     }
    },
+   "CenterLineX":{
+    "dimension":"Length",
+    "var":{
+     "exp":"16.540988 / 2 m",
+     "val":8.270494
+    }
+   },
    "FieldY":{
     "dimension":"Length",
     "var":{
      "exp":"8.069326 m",
      "val":8.069326
+    }
+   },
+   "GlobalMaxVel":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"4.5 m / s",
+     "val":4.5
     }
    },
    "HubOrTrenchX":{
@@ -32,39 +46,11 @@
      "val":4.625594
     }
    },
-   "MaxAccel":{
-    "dimension":"LinAcc",
-    "var":{
-     "exp":"2.5 m / s ^ 2",
-     "val":2.5
-    }
-   },
-   "MaxAngularAccel":{
-    "dimension":"AngAcc",
-    "var":{
-     "exp":"360 deg / s ^ 2",
-     "val":6.283185307179586
-    }
-   },
-   "MaxAngularVel":{
-    "dimension":"AngVel",
-    "var":{
-     "exp":"90 deg / s",
-     "val":1.5707963267948966
-    }
-   },
-   "MaxVel":{
-    "dimension":"LinVel",
-    "var":{
-     "exp":"1.5 m / s",
-     "val":1.5
-    }
-   },
    "ShootYawTolerance":{
     "dimension":"Angle",
     "var":{
-     "exp":"1 deg",
-     "val":0.017453292519943295
+     "exp":"5 deg",
+     "val":0.08726646259971647
     }
    },
    "TLCenterY":{
@@ -83,18 +69,46 @@
    }
   },
   "poses":{
-   "DynamicShootStay":{
+   "BS":{
     "x":{
-     "exp":"1.8461698293685913 m",
-     "val":1.8461698293685913
+     "exp":"3.2043821811676025 m",
+     "val":3.2043821811676025
     },
     "y":{
-     "exp":"2 m",
-     "val":2.0
+     "exp":"BLCenterY",
+     "val":5.550408
     },
     "heading":{
-     "exp":"30 deg",
-     "val":0.5235987755982988
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "CatchHub":{
+    "x":{
+     "exp":"7.0055975914001465 m",
+     "val":7.0055975914001465
+    },
+    "y":{
+     "exp":"FieldY / 2",
+     "val":4.034663
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "ClimbL":{
+    "x":{
+     "exp":"1.5925679206848145 m",
+     "val":1.5925679206848145
+    },
+    "y":{
+     "exp":"4.184183120727539 m",
+     "val":4.184183120727539
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
     }
    },
    "HubPose":{
@@ -111,18 +125,46 @@
      "val":3.141592653589793
     }
    },
-   "TLBLTL1End":{
+   "TLS":{
     "x":{
-     "exp":"3.154878854751587 m",
-     "val":3.154878854751587
+     "exp":"4.212966442108154 m",
+     "val":4.212966442108154
     },
     "y":{
-     "exp":"5.036575794219971 m",
-     "val":5.036575794219971
+     "exp":"7.237675189971924 m",
+     "val":7.237675189971924
     },
     "heading":{
      "exp":"0 deg",
      "val":0.0
+    }
+   },
+   "TrenchLeft":{
+    "x":{
+     "exp":"4.090744972229004 m",
+     "val":4.090744972229004
+    },
+    "y":{
+     "exp":"TLCenterY",
+     "val":7.425817
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "TrenchLeftSub":{
+    "x":{
+     "exp":"3.569653272628784 m",
+     "val":3.569653272628784
+    },
+    "y":{
+     "exp":"TLCenterY",
+     "val":7.425817
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    }
   }
