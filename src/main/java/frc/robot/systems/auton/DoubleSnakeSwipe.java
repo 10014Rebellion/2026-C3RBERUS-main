@@ -32,6 +32,7 @@ public class DoubleSnakeSwipe extends Auton {
     private final double mFirstSwipeSwitchToAlignTime;
     private final String mSecondSwipePathName;
     private final double mSecondSwipeSwitchToAlignTime;
+    private final boolean mIsMirrored;
 
     private final double kShotTime1Seconds = 5.0;
     private final double kShotTime2Seconds = 5.0;
@@ -43,13 +44,15 @@ public class DoubleSnakeSwipe extends Auton {
         String pFirstSwipePathName,
         double pFirstSwipeSwitchToAlignTime,
         String pSecondSwipePathName, 
-        double pSecondSwipeSwitchToAlignTime) {
+        double pSecondSwipeSwitchToAlignTime,
+        boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
         mSecondSwipePathName = pSecondSwipePathName;
         mSecondSwipeSwitchToAlignTime = pSecondSwipeSwitchToAlignTime;
+        mIsMirrored = pIsMirrored;
     }
 
     @Override
@@ -76,13 +79,13 @@ public class DoubleSnakeSwipe extends Auton {
             .debounce(5.0, DebounceType.kFalling);
 
         FollowPathCommand firstSwipePath = 
-            followChoreoPath(mFirstSwipePathName, true, auto);
+            followChoreoPath(mFirstSwipePathName, true, auto, mIsMirrored);
 
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
         FollowPathCommand secondSwipePath = 
-            followChoreoPath(mSecondSwipePathName, false, auto);
+            followChoreoPath(mSecondSwipePathName, false, auto, mIsMirrored);
 
         Pose2d lastPoseOfSecondSwipe = mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().size() - 1);

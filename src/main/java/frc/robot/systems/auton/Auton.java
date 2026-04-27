@@ -35,12 +35,12 @@ public class Auton {
     }
 
     protected FollowPathCommand followChoreoPath(
-            String pPathName, boolean pIsFirst, AutoEvent pAutoEvent) {
-        return mAutos.followChoreoPath(pPathName, pIsFirst, pAutoEvent);
+            String pPathName, boolean pIsFirst, AutoEvent pAutoEvent, boolean isMirrored) {
+        return mAutos.followChoreoPath(pPathName, pIsFirst, pAutoEvent, isMirrored);
     }
 
-    protected FollowPathCommand followChoreoPath(String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst, AutoEvent pAutoEvent) {
-        return mAutos.followChoreoPath(pPathName, pPID, pIsFirst, pAutoEvent);
+    protected FollowPathCommand followChoreoPath(String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst, AutoEvent pAutoEvent, boolean isMirrored) {
+        return mAutos.followChoreoPath(pPathName, pPID, pIsFirst, pAutoEvent, isMirrored);
     }
 
     protected AutoEvent getAuton() {

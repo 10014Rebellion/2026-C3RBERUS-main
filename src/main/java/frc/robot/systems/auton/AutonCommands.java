@@ -110,7 +110,8 @@ public class AutonCommands extends SubsystemBase {
                 "LeftSingleSwipe", 
                 "L1_TL_BL_Single", 
                 AutonConstants.leftSingleSwipeFirstAlignTime,
-                AutonConstants.leftSignleSwipeBeginningTimeout);
+                AutonConstants.leftSignleSwipeBeginningTimeout,
+                false);
 
         SingleSwipeClimb mLeftSingleSwipeClimbAuto =
             new SingleSwipeClimb(
@@ -120,7 +121,8 @@ public class AutonCommands extends SubsystemBase {
                 4.94, 
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
-                FieldConstants.kClimbLeftPose);
+                FieldConstants.kClimbLeftPose,
+                false);
         
         // LEFT
         DoubleSwipe mLeftDoubleSwipeBumpAuto =
@@ -131,7 +133,8 @@ public class AutonCommands extends SubsystemBase {
                 AutonConstants.leftDoubleSwipeFirstAlignTime,
                 "TLBLTL_OneHalf_2",
                 AutonConstants.leftDoubleSwipeSecondAlignTime,
-                AutonConstants.leftDoubleSwipeBeginningTimeout);
+                AutonConstants.leftDoubleSwipeBeginningTimeout,
+                false);
 
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
@@ -141,7 +144,8 @@ public class AutonCommands extends SubsystemBase {
                 AutonConstants.leftDoubleSwipeFirstAlignTime,
                 "TLBLTL_OneHalf_2",
                 AutonConstants.leftDoubleSwipeSecondAlignTime,
-                FieldConstants.kClimbLeftPose);
+                FieldConstants.kClimbLeftPose,
+                false);
 
         // // RIGHT
         // SingleSwipe mRightSingleSwipeAuto = 
@@ -186,7 +190,8 @@ public class AutonCommands extends SubsystemBase {
             this, 
             "LeftSnakeSwipe", 
             "L_IT_IC_ST_Snake", 
-            AutonConstants.leftSingleSnakeSwipeFirstAlignTime);
+            AutonConstants.leftSingleSnakeSwipeFirstAlignTime, 
+            false);
 
         DoubleSnakeSwipe mLeftDoubleSnakeSwipe = new DoubleSnakeSwipe(
             this, 
@@ -194,7 +199,8 @@ public class AutonCommands extends SubsystemBase {
             "L_IT_IC_ST_Snake", 
             AutonConstants.leftDoubleSnakeSwipeFirstAlignTime,
             "L_IT_IC_ST_Snake2", 
-            AutonConstants.leftDoubleSnakeSwipeSecondAlignTime);
+            AutonConstants.leftDoubleSnakeSwipeSecondAlignTime,
+            false);
 
         // SnakeSwipe mRightSnakeSwipe = new SnakeSwipe(
         //     this, 
@@ -216,7 +222,8 @@ public class AutonCommands extends SubsystemBase {
             "ShootAndStay",
             "H_D",
             0.9,
-            0.0
+            0.0,
+            false
         );
 
         ShootPreloadClimb mShootAndClimb = new ShootPreloadClimb(
@@ -224,7 +231,8 @@ public class AutonCommands extends SubsystemBase {
             "ShootAndClimb",
             "H_D",
             0.9,
-            0.0
+            0.0,
+            false
         );
 
         tryToAddPathToChooser(
@@ -549,17 +557,17 @@ public class AutonCommands extends SubsystemBase {
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\
     public FollowPathCommand followChoreoPath(
-            String pPathName, boolean pIsFirst, AutoEvent pAuto) {
+            String pPathName, boolean pIsFirst, AutoEvent pAuto, boolean isMirrored) {
         return mRobotDrive.getDriveManager().followPathCommand(
-            getTraj(pPathName).get(), 
+            (!isMirrored) ? getTraj(pPathName).get() : getTraj(pPathName).get().mirrorPath(), 
             pIsFirst,
             pAuto);
     }
 
     public FollowPathCommand followChoreoPath(
-            String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst, AutoEvent pAuto) {
+            String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst, AutoEvent pAuto, boolean isMirrored) {
         return mRobotDrive.getDriveManager().followPathCommand(
-            getTraj(pPathName).get(),
+            (!isMirrored) ? getTraj(pPathName).get() : getTraj(pPathName).get().mirrorPath(),
             pPID, 
             pIsFirst,
             pAuto);

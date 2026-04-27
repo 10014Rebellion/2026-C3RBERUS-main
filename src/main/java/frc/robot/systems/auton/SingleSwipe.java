@@ -18,17 +18,21 @@ public class SingleSwipe extends Auton {
 
     private final double kShotTimeSeconds = 6.5;
 
+    private final boolean mIsMirrored;
+
     public SingleSwipe(
         AutonCommands pAutos, 
         String pAutoName, 
         String pFirstSwipePathName, 
         double pFirstSwipeAlignTime,
-        double pFirstBeginningTimeout) {
+        double pFirstBeginningTimeout,
+        boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeAlignTime;
         mFirstBeginningTimeout = pFirstBeginningTimeout;
+        mIsMirrored = pIsMirrored;
     }
 
     @Override
@@ -45,7 +49,7 @@ public class SingleSwipe extends Auton {
             auto);
 
         FollowPathCommand firstSwipePath = 
-            followChoreoPath(mFirstSwipePathName, true, auto);
+            followChoreoPath(mFirstSwipePathName, true, auto, mIsMirrored);
 
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);

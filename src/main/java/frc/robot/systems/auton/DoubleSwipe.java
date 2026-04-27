@@ -17,6 +17,7 @@ public class DoubleSwipe extends Auton {
     private final String mSecondSwipePathName;
     private final double mSecondSwipeSwitchToAlignTime;
     private final double mFirstBeginningTimeout;
+    private final boolean mIsMirrored;
 
     private final double kShotTime1Seconds = 3.0;
     private final double kShotTime2Seconds = 6.5;
@@ -28,7 +29,8 @@ public class DoubleSwipe extends Auton {
         double pFirstSwipeSwitchToAlignTime,
         String pSecondSwipePathName, 
         double pSecondSwipeSwitchToAlignTime,
-        double pFirstBeginningTimeout) {
+        double pFirstBeginningTimeout,
+        boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
@@ -36,6 +38,7 @@ public class DoubleSwipe extends Auton {
         mSecondSwipePathName = pSecondSwipePathName;
         mSecondSwipeSwitchToAlignTime = pSecondSwipeSwitchToAlignTime;
         mFirstBeginningTimeout = pFirstBeginningTimeout;
+        mIsMirrored = pIsMirrored;
     }
 
     @Override
@@ -52,7 +55,7 @@ public class DoubleSwipe extends Auton {
             auto);
 
         FollowPathCommand firstSwipePath = 
-            followChoreoPath(mFirstSwipePathName, true, auto);
+            followChoreoPath(mFirstSwipePathName, true, auto, mIsMirrored);
             
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
@@ -78,7 +81,7 @@ public class DoubleSwipe extends Auton {
             auto);
 
         FollowPathCommand secondSwipePath = 
-            followChoreoPath(mSecondSwipePathName, false, auto);
+            followChoreoPath(mSecondSwipePathName, false, auto, mIsMirrored);
         Pose2d lastPoseOfSecondSwipe = mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().size() - 1);
 
