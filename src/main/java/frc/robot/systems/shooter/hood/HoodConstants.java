@@ -45,7 +45,7 @@ public class HoodConstants {
     );
 
     public static final Rotation2d kAdjustStepAmount = Rotation2d.fromDegrees(2);
-    public static final Rotation2d kTolerance = Rotation2d.fromDegrees(.5);
+    public static final Rotation2d kTolerance = Rotation2d.fromRotations(0.03);
     public static final double kHoodLength = Units.feetToMeters(8.061);
     public static final double kHoodMass = Units.inchesToMeters(1.258);
 
