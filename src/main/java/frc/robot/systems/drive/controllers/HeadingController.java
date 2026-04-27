@@ -32,7 +32,7 @@ public class HeadingController {
     //     new LoggedTunableNumber("SwerveHeadingController/Stabilizing/kD", 0.0);
 
     public static final LoggedTunableNumber mToleranceDegrees =
-            new LoggedTunableNumber("SwerveHeadingController/ToleranceDeg", 3.0);
+            new LoggedTunableNumber("SwerveHeadingController/ToleranceDeg", 0.5);
 
     private ProfiledPIDController mSnapController;
     private TurnPointFeedforward mTurnPointFF;

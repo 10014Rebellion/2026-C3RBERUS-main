@@ -522,7 +522,7 @@ public class DriveManager {
     @AutoLogOutput(key = "Drive/Tolerance/HeadingController")
     public boolean inHeadingTolerance() {
         /* Accounts for angle wrapping issues with rotation 2D error */
-        return mHeadingController.inTolerance(mDrive.getRobotRotation(), Rotation2d.fromDegrees(5.0));
+        return mHeadingController.inTolerance(mDrive.getRobotRotation(), Rotation2d.fromDegrees(1.0));
     }
 
     public boolean validHeadingState(DriveState state) {

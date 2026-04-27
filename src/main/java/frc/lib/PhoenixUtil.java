@@ -14,6 +14,8 @@ import frc.lib.telemetry.Telemetry;
 
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 public class PhoenixUtil {
     public static enum CanivoreBus {
         UNDERWORLD,
@@ -53,10 +55,10 @@ public class PhoenixUtil {
                 break;
 
             case RIO:
-                BaseStatusSignal[] newSignals3 = new BaseStatusSignal[underworldSignals.length + signals.length];
-                System.arraycopy(underworldSignals, 0, newSignals3, 0, underworldSignals.length);
-                System.arraycopy(signals, 0, newSignals3, underworldSignals.length, signals.length);
-                underworldSignals = newSignals3;
+                BaseStatusSignal[] newSignals3 = new BaseStatusSignal[rioSignals.length + signals.length];
+                System.arraycopy(rioSignals, 0, newSignals3, 0, rioSignals.length);
+                System.arraycopy(signals, 0, newSignals3, rioSignals.length, signals.length);
+                rioSignals = newSignals3;
                 break;
         
             default:
@@ -76,7 +78,8 @@ public class PhoenixUtil {
         }
 
         if (rioSignals.length > 0) {
-            BaseStatusSignal.refreshAll(rioSignals);
+            StatusCode code = BaseStatusSignal.refreshAll(rioSignals);
+            Logger.recordOutput("Rio/CAN/Error", code.getName());
         }
     }
 

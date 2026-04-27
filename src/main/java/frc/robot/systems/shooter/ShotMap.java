@@ -25,13 +25,13 @@ public class ShotMap {
     public record ShotMapSetpoint(double distance, Rotation2d pHoodSetpoint, Rotation2d flywheelSpeedPS) {}
 
     public ShotMapSetpoint[] setpoints = new ShotMapSetpoint[] {
-        new ShotMapSetpoint(1.25, Rotation2d.fromDegrees(7.0), Rotation2d.fromRotations(50.0 + velocityRPSOffset)),
-        new ShotMapSetpoint(1.75, Rotation2d.fromDegrees(8.5), Rotation2d.fromRotations(51.5 + velocityRPSOffset)),
-        new ShotMapSetpoint(2.25, Rotation2d.fromDegrees(10.5), Rotation2d.fromRotations(53.0 + velocityRPSOffset)),
-        new ShotMapSetpoint(2.75, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(54.5 + velocityRPSOffset)),
-        new ShotMapSetpoint(3.25, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(57.5 + velocityRPSOffset)),
-        new ShotMapSetpoint(3.75, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(62.5 + velocityRPSOffset)),
-        new ShotMapSetpoint(4.17, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(65.5 + velocityRPSOffset)),
+        new ShotMapSetpoint(1.551, Rotation2d.fromDegrees(11.0), Rotation2d.fromRotations(41.5)),
+        new ShotMapSetpoint(2.124, Rotation2d.fromDegrees(12.0), Rotation2d.fromRotations(44.0)),
+        new ShotMapSetpoint(2.624, Rotation2d.fromDegrees(12.5), Rotation2d.fromRotations(45.5)),
+        new ShotMapSetpoint(3.124, Rotation2d.fromDegrees(14.5), Rotation2d.fromRotations(47.5)),
+        new ShotMapSetpoint(3.46, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(49.5)),
+        new ShotMapSetpoint(3.973, Rotation2d.fromDegrees(15.0), Rotation2d.fromRotations(51.5)),
+        new ShotMapSetpoint(4.42, Rotation2d.fromDegrees(15.0), Rotation2d.fromRotations(52.5)),
         // new ShotMapSetpoint(5.05, Rotation2d.fromDegrees(16.0), Rotation2d.fromRotations(65.5 + velocityRPSOffset))
     };
 

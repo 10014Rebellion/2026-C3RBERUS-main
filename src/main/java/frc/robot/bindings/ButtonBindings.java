@@ -178,9 +178,9 @@ public class ButtonBindings {
         final double kShootingReadyDebounceSeconds = 0.35;
         final double kKickbackTime = 0.5;
 
-        Trigger dynamicShootReady = shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal))
+        Trigger dynamicShootReady = shooterAtGoal.and(headingAlignAtGoal.or(atHeadingGoal)).and(fuelPumpAtGoal)
                 .debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
-        double dynamicShootTimeout = 0.8;
+        double dynamicShootTimeout = 1.5;
 
         Trigger staticShootReady = shooterAtGoal.debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
         double staticShootTimeout = 0.8;
@@ -369,14 +369,12 @@ public class ButtonBindings {
 
         /* SHOOTS FROM ANYWHERE IN OUR FLYWHEEL RANGE */
         wantToDynamicShootBtn
-                .onTrue(
-                        mFuelInjectorSS.setStateCmd(FuelInjectorState.KICKBACK).until(anyCANRangesTriggered)
-                                .andThen(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE)))
-                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.BOOST_SHOTMAP_VELOCITY))
+                .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
+                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
                 .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
-                .onTrue(new WaitCommand(kKickbackTime).andThen(mFuelPumpSS
-                        .setStateCmd(closedLoopFuelPump ? FuelPumpState.INTAKE_VELOCITY : FuelPumpState.INTAKE_VOLT)));
+                .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY));
 
+        // TODO: ADD BACK DRIVE AUTOMATION
         wantToDynamicShootBtn.and(autonomousWorking)
                 .onTrue(mDriveSS.getDriveManager().setToGenericHeadingAlign(
                         () -> GameGoalPoseChooser.turnFromHub(mDriveSS.getPoseEstimate()),
@@ -391,30 +389,20 @@ public class ButtonBindings {
         // If at goal, shoot it in
         wantToDynamicShootBtn.and(dynamicShootReady)
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-                .onTrue(
-                        mFlywheelsSS.setStateCmd(FlywheelStates.BOOST_SHOTMAP_VELOCITY)
-                                .withTimeout(0.5).andThen(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-                )
+                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
         /* Debounce if not at goal */
         wantToDynamicShootBtn.debounce(dynamicShootTimeout, DebounceType.kRising).and(dynamicShootReady.negate())
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
-                .onTrue(
-                        mFlywheelsSS.setStateCmd(FlywheelStates.BOOST_SHOTMAP_VELOCITY)
-                                .withTimeout(0.5).andThen(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-                )
+                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
         wantToDynamicShootBtn
                 .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
                 .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
-                .onFalse(
-                        mFuelPumpSS.setStateCmd(FuelPumpState.KICKBACK_VOLT).withTimeout(kKickbackTime)
-                                .andThen(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED)))
-                .onFalse(
-                        mFuelInjectorSS.setStateCmd(FuelInjectorState.KICKBACK).withTimeout(kKickbackTime)
-                                .andThen(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE)))
+                .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+                .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
                 .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* Feeding Logic */
@@ -529,7 +517,7 @@ public class ButtonBindings {
         new Trigger(() -> DriverStation.isTeleopEnabled())
                 .onTrue(mDriveSS.getDriveManager().setToTeleop())
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED))
+                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
                 .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
         new Trigger(() -> DriverStation.isFMSAttached()).and(() -> DriverStation.isTeleopEnabled())
