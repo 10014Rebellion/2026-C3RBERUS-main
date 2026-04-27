@@ -138,9 +138,9 @@ public class AutonCommands extends SubsystemBase {
                 this, 
                 "LeftDoubleSwipeBumpClimb", 
                 "TLBLTL_OneHalf_1", 
-                4.94,
+                AutonConstants.leftDoubleSwipeFirstAlignTime,
                 "TLBLTL_OneHalf_2",
-                3.98,
+                AutonConstants.leftDoubleSwipeSecondAlignTime,
                 FieldConstants.kClimbLeftPose);
 
         // // RIGHT

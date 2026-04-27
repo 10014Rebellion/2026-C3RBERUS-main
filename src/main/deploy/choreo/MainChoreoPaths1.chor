@@ -32,11 +32,32 @@
      "val":4.625594
     }
    },
+   "MaxAccel":{
+    "dimension":"LinAcc",
+    "var":{
+     "exp":"2.5 m / s ^ 2",
+     "val":2.5
+    }
+   },
+   "MaxAngularAccel":{
+    "dimension":"AngAcc",
+    "var":{
+     "exp":"360 deg / s ^ 2",
+     "val":6.283185307179586
+    }
+   },
+   "MaxAngularVel":{
+    "dimension":"AngVel",
+    "var":{
+     "exp":"90 deg / s",
+     "val":1.5707963267948966
+    }
+   },
    "MaxVel":{
     "dimension":"LinVel",
     "var":{
-     "exp":"4.5 m / s",
-     "val":4.5
+     "exp":"1.5 m / s",
+     "val":1.5
     }
    },
    "ShootYawTolerance":{
