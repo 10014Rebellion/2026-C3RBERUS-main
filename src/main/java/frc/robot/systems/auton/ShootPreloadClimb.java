@@ -2,47 +2,39 @@ package frc.robot.systems.auton;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import frc.robot.commands.FollowPathCommand;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
-import frc.robot.commands.FollowPathCommand;
 
-public class SingleSwipe extends Auton {
+public class ShootPreloadClimb extends Auton{
+
     private final String mAutoName;
     private final String mFirstSwipePathName;
     private final double mFirstSwipeSwitchToAlignTime;
     private final double mFirstBeginningTimeout;
 
     private final double kShotTimeSeconds = 6.5;
-
-    public SingleSwipe(
+    
+    public ShootPreloadClimb(
         AutonCommands pAutos, 
-        String pAutoName, 
-        String pFirstSwipePathName, 
-        double pFirstSwipeAlignTime,
-        double pFirstBeginningTimeout) {
+        String pAutoName,
+        String pFirstSwipePathName,
+        double pFirstSwipeSwitchToAlignTime,
+        double pFirstBeginningTimeout){
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
-        mFirstSwipeSwitchToAlignTime = pFirstSwipeAlignTime;
+        mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
         mFirstBeginningTimeout = pFirstBeginningTimeout;
     }
 
     @Override
     protected AutoEvent getAuton() {
         AutoEvent auto = new AutoEvent(mAutoName, mAutos);
-        Trigger autoActivted = auto.getIsRunningTrigger();
-
-        mAutos.runIntake(
-            auto.loggedCondition(
-                auto.getName() + "/IntakeWhileInCenter", 
-                () -> GameGoalPoseChooser.inCenter(mDriveSS.getPoseEstimate()), 
-                false), 
-            auto.getName(), 
-            auto);
+        Trigger autoActivated = auto.getIsRunningTrigger();
 
         FollowPathCommand firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true, auto);
@@ -53,12 +45,12 @@ public class SingleSwipe extends Auton {
         Trigger firstPathEnded = mAutos.traversePathWithIntakeOutOnly(
             0.1 + mFirstBeginningTimeout,
             firstSwipePath, 
-            autoActivted, 
+            autoActivated, 
             mFirstSwipePathName, 
             auto);
 
         Trigger autoAlignShotReadySwipe1 = mAutos.transitionFromPathTraversingToAutoAlignHubShoot(
-            mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
+            mDriveSS.getDriveManager().setToGenericAutoAlign(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
             firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime), 
             mFirstSwipePathName, 
             auto);
@@ -68,6 +60,19 @@ public class SingleSwipe extends Auton {
             autoAlignShotReadySwipe1, 
             mFirstSwipePathName, 
             auto);
+
+        Pose2d climbPose = AllianceFlipUtil.apply(GameGoalPoseChooser.getClosestClimbPose(lastPoseOfFirstSwipe));
+
+
+        Trigger hasClimbEnded = mAutos.goToClimb(
+            fuelToHubHasEndedSwipe1, 
+            () -> AllianceFlipUtil.apply(climbPose), 
+            "/Climb", 
+            auto);
+
+        mAutos.resetAllStates(hasClimbEnded);
+        hasClimbEnded.onTrue(mAutos.endAuto(auto));
+
 
         return auto;
     }

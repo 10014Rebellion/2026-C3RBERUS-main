@@ -9,7 +9,7 @@ import frc.robot.commands.FollowPathCommand;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 
-public class ShootStay extends Auton{
+public class ShootPreload extends Auton{
 
     private final String mAutoName;
     private final String mFirstSwipePathName;
@@ -18,7 +18,7 @@ public class ShootStay extends Auton{
 
     private final double kShotTimeSeconds = 6.5;
     
-    public ShootStay(
+    public ShootPreload(
         AutonCommands pAutos, 
         String pAutoName,
         String pFirstSwipePathName,
@@ -50,7 +50,7 @@ public class ShootStay extends Auton{
             auto);
 
         Trigger autoAlignShotReadySwipe1 = mAutos.transitionFromPathTraversingToAutoAlignHubShoot(
-            mDriveSS.getDriveManager().setToGenericAutoAlign(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
+            mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
             firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime), 
             mFirstSwipePathName, 
             auto);
