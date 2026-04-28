@@ -29,14 +29,15 @@ public class SingleSwipeClimb extends Auton {
         String pFirstSwipePathName, 
         double pFirstSwipeAlignTime,
         double pFirstBeginningTimeout,
+        Pose2d pClimbPose,
         boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeAlignTime;
         mFirstBeginningTimeout = pFirstBeginningTimeout;
+        mClimbPose = pClimbPose;
         mIsMirrored = pIsMirrored;
-        mClimbPose = new Pose2d();
     }
 
     @Override
@@ -53,7 +54,7 @@ public class SingleSwipeClimb extends Auton {
             auto);
 
         FollowPathCommand firstSwipePath = 
-            followChoreoPath(mFirstSwipePathName, true, auto, false);
+            followChoreoPath(mFirstSwipePathName, true, auto, mIsMirrored);
 
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
@@ -65,8 +66,8 @@ public class SingleSwipeClimb extends Auton {
             mFirstSwipePathName, 
             auto);
 
-        Trigger autoAlignShotReadySwipe1 = mAutos.transitionFromPathTraversingToAutoAlignHubShoot(
-            mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
+        Trigger autoAlignShotReadySwipe1 = mAutos.followPathToAutoAlignShoot(
+            mDriveSS.getDriveManager().setToGenericAutoAlign(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
             firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime), 
             mFirstSwipePathName, 
             auto);
@@ -85,8 +86,7 @@ public class SingleSwipeClimb extends Auton {
             "/Climb", 
             auto);
 
-        mAutos.resetAllStates(hasClimbEnded);
-        hasClimbEnded.onTrue(mAutos.endAuto(auto));
+        mAutos.resetAndEndAutos(hasClimbEnded, auto);
 
         return auto;
     }

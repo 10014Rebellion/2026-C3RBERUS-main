@@ -35,8 +35,8 @@
    "GlobalMaxVel":{
     "dimension":"LinVel",
     "var":{
-     "exp":"4.5 m / s",
-     "val":4.5
+     "exp":"2.5 m / s",
+     "val":2.5
     }
    },
    "HubOrTrenchX":{

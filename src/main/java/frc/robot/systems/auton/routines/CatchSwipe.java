@@ -12,33 +12,27 @@ import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.commands.FollowPathCommand;
 
-public class DoubleSwipe extends Auton {
+public class CatchSwipe extends Auton {
     private final String mAutoName;
     private final String mFirstSwipePathName;
     private final double mFirstSwipeSwitchToAlignTime;
-    private final String mSecondSwipePathName;
-    private final double mSecondSwipeSwitchToAlignTime;
     private final double mFirstBeginningTimeout;
+
+    private final double kShotTimeSeconds = 6.5;
+
     private final boolean mIsMirrored;
 
-    private final double kShotTime1Seconds = 3.0;
-    private final double kShotTime2Seconds = 6.5;
-
-    public DoubleSwipe(
+    public CatchSwipe(
         AutonCommands pAutos, 
         String pAutoName, 
-        String pFirstSwipePathName,
-        double pFirstSwipeSwitchToAlignTime,
-        String pSecondSwipePathName, 
-        double pSecondSwipeSwitchToAlignTime,
+        String pFirstSwipePathName, 
+        double pFirstSwipeAlignTime,
         double pFirstBeginningTimeout,
         boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
-        mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
-        mSecondSwipePathName = pSecondSwipePathName;
-        mSecondSwipeSwitchToAlignTime = pSecondSwipeSwitchToAlignTime;
+        mFirstSwipeSwitchToAlignTime = pFirstSwipeAlignTime;
         mFirstBeginningTimeout = pFirstBeginningTimeout;
         mIsMirrored = pIsMirrored;
     }
@@ -46,69 +40,40 @@ public class DoubleSwipe extends Auton {
     @Override
     public AutoEvent getAuton() {
         AutoEvent auto = new AutoEvent(mAutoName, mAutos);
-        Trigger autoActivated = auto.getIsRunningTrigger();
+        Trigger autoActivted = auto.getIsRunningTrigger();
 
         mAutos.runIntake(
             auto.loggedCondition(
-                auto.getName()+"/IntakeWhileInCenter", 
-                () -> GameGoalPoseChooser.inCenter(mDriveSS.getPoseEstimate()),
-                true), 
+                auto.getName() + "/IntakeWhileInCenter", 
+                () -> GameGoalPoseChooser.inCenter(mDriveSS.getPoseEstimate()), 
+                false), 
             auto.getName(), 
             auto);
 
         FollowPathCommand firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true, auto, mIsMirrored);
-            
+
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
         Trigger firstPathEnded = mAutos.traversePathWithIntakeOutOnly(
-            0.1 + mFirstBeginningTimeout, 
+            0.1 + mFirstBeginningTimeout,
             firstSwipePath, 
-            autoActivated, 
+            autoActivted, 
             mFirstSwipePathName, 
             auto);
 
-        /* Takes over mid path */
-        Trigger autoAlignShotReadySwipe1 = mAutos.followPathToAutoAlignShoot(
-            mDriveSS.getDriveManager().runAutoAlignThroughTrench(getSwipeEndPose(lastPoseOfFirstSwipe)), 
+        Trigger autoAlignShotReadySwipe1 = mAutos.followPathToAutoAlignFeed(
+            mDriveSS.getDriveManager().setToGenericAutoAlign(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
             firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime), 
             mFirstSwipePathName, 
             auto);
 
         Trigger fuelToHubHasEndedSwipe1 = mAutos.shootFuelToHub(
-            kShotTime1Seconds, 
+            kShotTimeSeconds, 
             autoAlignShotReadySwipe1, 
             mFirstSwipePathName, 
             auto);
-
-        FollowPathCommand secondSwipePath = 
-            followChoreoPath(mSecondSwipePathName, false, auto, mIsMirrored);
-        Pose2d lastPoseOfSecondSwipe = mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().get(
-            mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().size() - 1);
-
-        Trigger secondPathHasEnded = mAutos.traversePathWithIntakeOutOnly(
-            secondSwipePath, 
-            fuelToHubHasEndedSwipe1, 
-            mSecondSwipePathName, 
-            auto);
-
-        /* Takes over mid path */
-        Trigger autoAlignShotReadySwipe2 = mAutos.followPathToAutoAlignShoot(
-            mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
-                () -> getSwipeEndPose(lastPoseOfSecondSwipe), 
-                ConstraintType.LINEAR), 
-            secondSwipePath.atTime(mSecondSwipeSwitchToAlignTime), 
-            mSecondSwipePathName, 
-            auto);
-
-        Trigger fuelToHubHasEndedSwipe2 = mAutos.shootFuelToHub(
-            kShotTime2Seconds, 
-            autoAlignShotReadySwipe2, 
-            mSecondSwipePathName, 
-            auto);
-
-        mAutos.resetAndEndAutos(fuelToHubHasEndedSwipe2, auto);
 
         return auto;
     }
