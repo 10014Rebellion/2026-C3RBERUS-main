@@ -63,7 +63,7 @@ public class SingleSwipe extends Auton {
             mFirstSwipePathName, 
             auto);
 
-        Trigger autoAlignShotReadySwipe1 = mAutos.transitionFromPathTraversingToAutoAlignHubShoot(
+        Trigger autoAlignShotReadySwipe1 = mAutos.followPathToAutoAlignShoot(
             mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
             firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime), 
             mFirstSwipePathName, 
@@ -74,6 +74,8 @@ public class SingleSwipe extends Auton {
             autoAlignShotReadySwipe1, 
             mFirstSwipePathName, 
             auto);
+
+        mAutos.resetAndEndAutos(fuelToHubHasEndedSwipe1, auto);
 
         return auto;
     }

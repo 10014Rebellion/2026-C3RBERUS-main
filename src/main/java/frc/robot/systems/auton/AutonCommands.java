@@ -108,15 +108,23 @@ public class AutonCommands extends SubsystemBase {
         mAutoChooser.setDefaultOption("StationaryDefault", () -> backUpAuton());
 
         ShootPreload mShootPreload = new ShootPreload(
-            this, 
-            "ShootPreload", 
-            "H_D",
-            0.5, 
-            0);
+            this,
+            "PreloadShootCenter",
+            GameGoalPoseChooser.getHub().plus(new Transform2d(-2.0, 0.0, Rotation2d.kZero)));
 
         tryToAddPathToChooser(
-            "ShootPreload", 
+            "ShootPreloadCenter", 
             () -> mShootPreload.getAuton()
+        );
+
+        ShootPreload mShootPreloadClimb = new ShootPreload(
+            this,
+            "PreloadShootCenterCenterClimb",
+            GameGoalPoseChooser.getHub().plus(new Transform2d(-2.0, 0.0, Rotation2d.kZero)));
+
+        tryToAddPathToChooser(
+            "ShootPreloadCenterClimb", 
+            () -> mShootPreloadClimb.getAuton()
         );
 
         SingleSwipe mLeftTrenchSingleSwipe = new SingleSwipe(
@@ -124,7 +132,8 @@ public class AutonCommands extends SubsystemBase {
             "LeftTrenchSingleSwipe", 
             "TL_TL_BS", 
             AutonConstants.leftTrenchSingleSwipeAlignTime,
-            AutonConstants.leftTrenchSingleSwipeStartTimeout);
+            AutonConstants.leftTrenchSingleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftTrenchSingleSwipe", 
@@ -136,7 +145,8 @@ public class AutonCommands extends SubsystemBase {
             "LeftBumpSingleSwipe", 
             "TL_BL_BS", 
             AutonConstants.leftBumpSingleSwipeAlignTime,
-            AutonConstants.leftBumpSingleSwipeStartTimeout);
+            AutonConstants.leftBumpSingleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftBumpSingleSwipe", 
@@ -148,7 +158,9 @@ public class AutonCommands extends SubsystemBase {
             "LeftTrenchClimbSingleSwipe", 
             "TL_TL_BS", 
             AutonConstants.leftTrenchSingleSwipeAlignTime,
-            AutonConstants.leftTrenchSingleSwipeStartTimeout);
+            AutonConstants.leftTrenchSingleSwipeStartTimeout,
+            GameGoalPoseChooser.closestClimbPose(kBottomLeftBump),
+            false);
 
         tryToAddPathToChooser(
             "LeftTrenchClimbSingleSwipe", 
@@ -160,7 +172,9 @@ public class AutonCommands extends SubsystemBase {
             "LeftBumpClimbSingleSwipe", 
             "TL_BL_BS", 
             AutonConstants.leftBumpSingleSwipeAlignTime,
-            AutonConstants.leftBumpSingleSwipeStartTimeout);
+            AutonConstants.leftBumpSingleSwipeStartTimeout,
+            GameGoalPoseChooser.closestClimbPose(kBottomLeftBump),
+            false);
 
         tryToAddPathToChooser(
             "LeftBumpClimbSingleSwipe", 
@@ -174,7 +188,8 @@ public class AutonCommands extends SubsystemBase {
             AutonConstants.leftTrenchDoubleSwipeOneAlignTime, 
             "BS_TL_Half", 
             AutonConstants.leftDoubleSwipeTwoAlignTime,
-            AutonConstants.leftDoubleSwipeStartTimeout);
+            AutonConstants.leftDoubleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftTrenchDoubleSwipe", 
@@ -187,7 +202,8 @@ public class AutonCommands extends SubsystemBase {
             AutonConstants.leftBumpDoubleSwipeOneAlignTime, 
             "BS_TL_Half", 
             AutonConstants.leftDoubleSwipeTwoAlignTime,
-            AutonConstants.leftDoubleSwipeStartTimeout);
+            AutonConstants.leftDoubleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftBumpDoubleSwipe", 
@@ -285,13 +301,44 @@ public class AutonCommands extends SubsystemBase {
         return traversePathWithIntakeOutOnly(0.0, pathCommand, condition, pathName, routine);
     }
 
-    public Trigger transitionFromPathTraversingToAutoAlignHubShoot(Command autoAlignCommand, Trigger condition, String pathName, AutoEvent routine) {
+    public Trigger followPathToAutoAlignShoot(Command autoAlignCommand, Trigger condition, String pathName, AutoEvent routine) {
         SequentialEndingCommandGroup autoAlignEndingCommand = new SequentialEndingCommandGroup(autoAlignCommand);
 
         condition
             .onTrue(autoAlignEndingCommand)
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
             .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+
+        return routine.loggedCondition(
+            pathName+"/InShootingTolerance", 
+            () -> 
+                mRobotDrive.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean()
+                    &&
+                mHoodSS.atGoal()
+                    &&
+                mFlywheelsSS.atLatestClosedLoopGoal()
+                    &&
+                !GameGoalPoseChooser.inCenter(mRobotDrive.getPoseEstimate())
+                    &&
+                mHoodSS.getHoodState().equals(HoodStates.SHOTMAP_POSITION)
+                    &&
+                mFlywheelsSS.getFlywheelState().equals(FlywheelStates.SHOTMAP_VELOCITY)
+                    &&
+                mRobotDrive.getDriveManager().getDriveState().equals(DriveState.AUTO_ALIGN)
+                    &&
+                autoAlignEndingCommand.isRunning(),
+            true)
+                .debounce(0.25, DebounceType.kRising)
+                .debounce(5.0, DebounceType.kFalling);
+    }
+
+    public Trigger followPathToAutoAlignFeed(Command autoAlignCommand, Trigger condition, String pathName, AutoEvent routine) {
+        SequentialEndingCommandGroup autoAlignEndingCommand = new SequentialEndingCommandGroup(autoAlignCommand);
+
+        condition
+            .onTrue(autoAlignEndingCommand)
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MID));
 
         return routine.loggedCondition(
             pathName+"/InShootingTolerance", 
@@ -345,6 +392,12 @@ public class AutonCommands extends SubsystemBase {
             .onTrue(mIntake.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mClimbSS.setStateCmd(ClimbState.IDLE));
+    }
+
+    public void resetAndEndAutos(Trigger condition, AutoEvent routine) {
+        resetAllStates(condition);
+        condition
+            .onTrue(endAuto(routine));
     }
 
     public Trigger shootFuelToHub(double shotTime, Trigger condition, String pathName, AutoEvent routine) {
