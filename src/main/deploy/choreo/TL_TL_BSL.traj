@@ -1,5 +1,5 @@
 {
- "name":"TL_TL_BS",
+ "name":"TL_TL_BSL",
  "version":3,
  "snapshot":{
   "waypoints":[
@@ -32,7 +32,7 @@
     {"x":{"exp":"8.049456596374512 m", "val":8.049456596374512}, "y":{"exp":"6.611819267272949 m", "val":6.611819267272949}, "heading":{"exp":"-2.3818298770623882 rad", "val":-2.381829877062388}, "intervals":22, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
     {"x":{"exp":"5.892423152923584 m", "val":5.892423152923584}, "y":{"exp":"TLCenterY", "val":7.425817}, "heading":{"exp":"270 deg", "val":4.71238898038469}, "intervals":22, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"3.0718202590942383 m", "val":3.0718202590942383}, "y":{"exp":"TLCenterY", "val":7.425817}, "heading":{"exp":"270 deg", "val":4.71238898038469}, "intervals":23, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"BS.x", "val":3.2043821811676025}, "y":{"exp":"BS.y", "val":5.550408}, "heading":{"exp":"BS.heading", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false}],
+    {"x":{"exp":"BSL.x", "val":3.2043821811676025}, "y":{"exp":"BSL.y", "val":5.550408}, "heading":{"exp":"BSL.heading", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
