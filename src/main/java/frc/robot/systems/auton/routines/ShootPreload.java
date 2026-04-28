@@ -1,4 +1,4 @@
-package frc.robot.systems.auton;
+package frc.robot.systems.auton.routines;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -7,9 +7,11 @@ import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
 import frc.robot.commands.FollowPathCommand;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.auton.Auton;
+import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 
-public class ShootPreloadClimb extends Auton{
+public class ShootPreload extends Auton{
 
     private final String mAutoName;
     private final String mFirstSwipePathName;
@@ -18,7 +20,7 @@ public class ShootPreloadClimb extends Auton{
 
     private final double kShotTimeSeconds = 6.5;
     
-    public ShootPreloadClimb(
+    public ShootPreload(
         AutonCommands pAutos, 
         String pAutoName,
         String pFirstSwipePathName,
@@ -32,7 +34,7 @@ public class ShootPreloadClimb extends Auton{
     }
 
     @Override
-    protected AutoEvent getAuton() {
+    public AutoEvent getAuton() {
         AutoEvent auto = new AutoEvent(mAutoName, mAutos);
         Trigger autoActivated = auto.getIsRunningTrigger();
 
@@ -50,7 +52,7 @@ public class ShootPreloadClimb extends Auton{
             auto);
 
         Trigger autoAlignShotReadySwipe1 = mAutos.transitionFromPathTraversingToAutoAlignHubShoot(
-            mDriveSS.getDriveManager().setToGenericAutoAlign(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
+            mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(() -> getSwipeEndPose(lastPoseOfFirstSwipe), ConstraintType.LINEAR), 
             firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime), 
             mFirstSwipePathName, 
             auto);
@@ -60,19 +62,6 @@ public class ShootPreloadClimb extends Auton{
             autoAlignShotReadySwipe1, 
             mFirstSwipePathName, 
             auto);
-
-        Pose2d climbPose = AllianceFlipUtil.apply(GameGoalPoseChooser.getClosestClimbPose(lastPoseOfFirstSwipe));
-
-
-        Trigger hasClimbEnded = mAutos.goToClimb(
-            fuelToHubHasEndedSwipe1, 
-            () -> AllianceFlipUtil.apply(climbPose), 
-            "/Climb", 
-            auto);
-
-        mAutos.resetAllStates(hasClimbEnded);
-        hasClimbEnded.onTrue(mAutos.endAuto(auto));
-
 
         return auto;
     }

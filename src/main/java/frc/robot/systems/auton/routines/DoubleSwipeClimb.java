@@ -1,4 +1,4 @@
-package frc.robot.systems.auton;
+package frc.robot.systems.auton.routines;
 
 import java.util.function.Supplier;
 
@@ -13,7 +13,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.game.GameGoalPoseChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.FollowPathCommand;
-
+import frc.robot.systems.auton.Auton;
+import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 public class DoubleSwipeClimb extends Auton {
     private final String mAutoName;

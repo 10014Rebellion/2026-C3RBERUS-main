@@ -1,4 +1,4 @@
-package frc.robot.systems.auton;
+package frc.robot.systems.auton.routines;
 
 import java.util.function.Supplier;
 
@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.FollowPathCommand;
 import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
+import frc.robot.systems.auton.Auton;
+import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
@@ -29,7 +31,8 @@ public class SnakeSwipe extends Auton {
     private final String mFirstSwipePathName;
     private final double mFirstSwipeAlignTime;
 
-    private final double kShotTimeSeconds = 6.5;
+    // No point of not shooting ! // 
+    private final double kShotTimeSeconds = 15.0;
     private final double kShotEndTimeSeconds = 0.02; 
 
     public SnakeSwipe(AutonCommands pAutos, String pAutoName, String pFirstSwipePathName, double pFirstSwipeAlignTime) {

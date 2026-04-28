@@ -1,40 +1,53 @@
-package frc.robot.systems.auton;
+package frc.robot.systems.auton.routines;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
-import frc.robot.commands.FollowPathCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.auton.Auton;
+import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
+import frc.robot.commands.FollowPathCommand;
 
-public class ShootPreload extends Auton{
-
+public class SingleSwipeClimb extends Auton {
     private final String mAutoName;
     private final String mFirstSwipePathName;
     private final double mFirstSwipeSwitchToAlignTime;
     private final double mFirstBeginningTimeout;
 
     private final double kShotTimeSeconds = 6.5;
-    
-    public ShootPreload(
+
+    private Pose2d mClimbPose;
+
+    public SingleSwipeClimb(
         AutonCommands pAutos, 
-        String pAutoName,
-        String pFirstSwipePathName,
-        double pFirstSwipeSwitchToAlignTime,
-        double pFirstBeginningTimeout){
+        String pAutoName, 
+        String pFirstSwipePathName, 
+        double pFirstSwipeAlignTime,
+        double pFirstBeginningTimeout) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
-        mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
+        mFirstSwipeSwitchToAlignTime = pFirstSwipeAlignTime;
         mFirstBeginningTimeout = pFirstBeginningTimeout;
+        mClimbPose = new Pose2d();
     }
 
     @Override
-    protected AutoEvent getAuton() {
+    public AutoEvent getAuton() {
         AutoEvent auto = new AutoEvent(mAutoName, mAutos);
-        Trigger autoActivated = auto.getIsRunningTrigger();
+        Trigger autoActivted = auto.getIsRunningTrigger();
+
+        mAutos.runIntake(
+            auto.loggedCondition(
+                auto.getName() + "/IntakeWhileInCenter", 
+                () -> GameGoalPoseChooser.inCenter(mDriveSS.getPoseEstimate()), 
+                false), 
+            auto.getName(), 
+            auto);
 
         FollowPathCommand firstSwipePath = 
             followChoreoPath(mFirstSwipePathName, true, auto);
@@ -45,7 +58,7 @@ public class ShootPreload extends Auton{
         Trigger firstPathEnded = mAutos.traversePathWithIntakeOutOnly(
             0.1 + mFirstBeginningTimeout,
             firstSwipePath, 
-            autoActivated, 
+            autoActivted, 
             mFirstSwipePathName, 
             auto);
 
@@ -60,6 +73,17 @@ public class ShootPreload extends Auton{
             autoAlignShotReadySwipe1, 
             mFirstSwipePathName, 
             auto);
+
+        mClimbPose = GameGoalPoseChooser.getClosestClimbPose(mDriveSS.getPoseEstimate());
+
+        Trigger hasClimbEnded = mAutos.goToClimb(
+            fuelToHubHasEndedSwipe1, 
+            () -> AllianceFlipUtil.apply(mClimbPose), 
+            "/Climb", 
+            auto);
+
+        mAutos.resetAllStates(hasClimbEnded);
+        hasClimbEnded.onTrue(mAutos.endAuto(auto));
 
         return auto;
     }

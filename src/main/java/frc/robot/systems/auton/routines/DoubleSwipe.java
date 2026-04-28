@@ -1,4 +1,4 @@
-package frc.robot.systems.auton;
+package frc.robot.systems.auton.routines;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -7,6 +7,8 @@ import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.auton.Auton;
+import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.commands.FollowPathCommand;
 
@@ -39,7 +41,7 @@ public class DoubleSwipe extends Auton {
     }
 
     @Override
-    protected AutoEvent getAuton() {
+    public AutoEvent getAuton() {
         AutoEvent auto = new AutoEvent(mAutoName, mAutos);
         Trigger autoActivated = auto.getIsRunningTrigger();
 
