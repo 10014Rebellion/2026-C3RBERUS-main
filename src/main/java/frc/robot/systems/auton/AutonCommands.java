@@ -73,13 +73,20 @@ public class AutonCommands extends SubsystemBase {
     private final AutoFactory mAutoFactory;
 
     private String[] usedPathNames = new String[] {
-        "H_D",
-        "BS_TL_Half",
-        "L2_TL_TL_Single",
-        "TLSub_Corall_Catch",
-        "TL_BL_BS",
         "TL_Round_CS",
-        "TL_TL_BS"
+        "H_D",
+        "BL_Catch",
+        "BR_Catch",
+        "TR_Round_CS",
+        "L2_TL_TL_Single",
+        "BSL_TL_Half",
+        "BSR_TR_Half",
+        "TLSub_Corall_Catch",
+        "TL_BL_ BSL",
+        "TL_TL_BSL",
+        "TRSub_Corall_Catch",
+        "TR_BR_BSR",
+        "TR_TR_BSR"
     };
 
     public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, ClimbSS pClimbSS, FuelInjectorSS pInjectorSS) {
@@ -130,7 +137,7 @@ public class AutonCommands extends SubsystemBase {
         SingleSwipe mLeftTrenchSingleSwipe = new SingleSwipe(
             this, 
             "LeftTrenchSingleSwipe", 
-            "TL_TL_BS", 
+            "TL_TL_BSL", 
             AutonConstants.leftTrenchSingleSwipeAlignTime,
             AutonConstants.leftTrenchSingleSwipeStartTimeout,
             false);
@@ -143,7 +150,7 @@ public class AutonCommands extends SubsystemBase {
         SingleSwipe mLeftBumpSingleSwipe = new SingleSwipe(
             this, 
             "LeftBumpSingleSwipe", 
-            "TL_BL_BS", 
+            "TL_BL_BSL", 
             AutonConstants.leftBumpSingleSwipeAlignTime,
             AutonConstants.leftBumpSingleSwipeStartTimeout,
             false);
@@ -156,7 +163,7 @@ public class AutonCommands extends SubsystemBase {
         SingleSwipeClimb mLeftTrenchClimbSingleSwipe = new SingleSwipeClimb(
             this, 
             "LeftTrenchClimbSingleSwipe", 
-            "TL_TL_BS", 
+            "TL_TL_BSL", 
             AutonConstants.leftTrenchSingleSwipeAlignTime,
             AutonConstants.leftTrenchSingleSwipeStartTimeout,
             GameGoalPoseChooser.closestClimbPose(kBottomLeftBump),
@@ -170,7 +177,7 @@ public class AutonCommands extends SubsystemBase {
         SingleSwipeClimb mLeftBumpClimbSingleSwipe = new SingleSwipeClimb(
             this, 
             "LeftBumpClimbSingleSwipe", 
-            "TL_BL_BS", 
+            "TL_BL_BSL", 
             AutonConstants.leftBumpSingleSwipeAlignTime,
             AutonConstants.leftBumpSingleSwipeStartTimeout,
             GameGoalPoseChooser.closestClimbPose(kBottomLeftBump),
@@ -184,9 +191,9 @@ public class AutonCommands extends SubsystemBase {
         DoubleSwipe mLeftTrenchDoubleSwipe = new DoubleSwipe(
             this, 
             "LeftTrenchDoubleSwipe", 
-            "TL_TL_BS", 
+            "TL_TL_BSL", 
             AutonConstants.leftTrenchDoubleSwipeOneAlignTime, 
-            "BS_TL_Half", 
+            "BSL_TL_Half", 
             AutonConstants.leftDoubleSwipeTwoAlignTime,
             AutonConstants.leftDoubleSwipeStartTimeout,
             false);
@@ -198,9 +205,9 @@ public class AutonCommands extends SubsystemBase {
         DoubleSwipe mLeftBumpDoubleSwipe = new DoubleSwipe(
             this, 
             "LeftBumpDoubleSwipe", 
-            "TL_BL_BS", 
+            "TL_BL_BSL", 
             AutonConstants.leftBumpDoubleSwipeOneAlignTime, 
-            "BS_TL_Half", 
+            "BSL_TL_Half", 
             AutonConstants.leftDoubleSwipeTwoAlignTime,
             AutonConstants.leftDoubleSwipeStartTimeout,
             false);
@@ -208,6 +215,88 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser(
             "LeftBumpDoubleSwipe", 
             () -> mLeftBumpDoubleSwipe.getAuton());
+
+        // SingleSwipe mRightTrenchSingleSwipe = new SingleSwipe(
+        //     this, 
+        //     "RightTrenchSingleSwipe", 
+        //     "TR_TR_BSR", 
+        //     AutonConstants.rightTrenchSingleSwipeAlignTime,
+        //     AutonConstants.rightTrenchSingleSwipeStartTimeout,
+        //     false);
+
+        // tryToAddPathToChooser(
+        //     "RightTrenchSingleSwipe", 
+        //     () -> mRightTrenchSingleSwipe.getAuton()
+        // );
+        
+        // SingleSwipe mRightBumpSingleSwipe = new SingleSwipe(
+        //     this, 
+        //     "RightBumpSingleSwipe", 
+        //     "TR_BR_BSR", 
+        //     AutonConstants.rightBumpSingleSwipeAlignTime,
+        //     AutonConstants.rightBumpSingleSwipeStartTimeout,
+        //     false);
+
+        // tryToAddPathToChooser(
+        //     "RightBumpSingleSwipe", 
+        //     () -> mRightBumpSingleSwipe.getAuton()
+        // );
+
+        // SingleSwipeClimb mRightTrenchClimbSingleSwipe = new SingleSwipeClimb(
+        //     this, 
+        //     "RightTrenchClimbSingleSwipe", 
+        //     "TR_TR_BSR", 
+        //     AutonConstants.rightTrenchSingleSwipeAlignTime,
+        //     AutonConstants.rightTrenchSingleSwipeStartTimeout,
+        //     GameGoalPoseChooser.closestClimbPose(kBottomRightBump),
+        //     false);
+
+        // tryToAddPathToChooser(
+        //     "RightTrenchClimbSingleSwipe", 
+        //     () -> mRightTrenchClimbSingleSwipe.getAuton()
+        // );
+
+        // SingleSwipeClimb mRightBumpClimbSingleSwipe = new SingleSwipeClimb(
+        //     this, 
+        //     "RightBumpClimbSingleSwipe", 
+        //     "TR_BR_BSR", 
+        //     AutonConstants.rightBumpSingleSwipeAlignTime,
+        //     AutonConstants.rightBumpSingleSwipeStartTimeout,
+        //     GameGoalPoseChooser.closestClimbPose(kBottomRightBump),
+        //     false);
+
+        // tryToAddPathToChooser(
+        //     "RightBumpClimbSingleSwipe", 
+        //     () -> mRightBumpClimbSingleSwipe.getAuton()
+        // );
+
+        // DoubleSwipe mRightTrenchDoubleSwipe = new DoubleSwipe(
+        //     this, 
+        //     "RightTrenchDoubleSwipe", 
+        //     "TL_TL_BSL", 
+        //     AutonConstants.RightTrenchDoubleSwipeOneAlignTime, 
+        //     "BSL_TL_Half", 
+        //     AutonConstants.RightDoubleSwipeTwoAlignTime,
+        //     AutonConstants.RightDoubleSwipeStartTimeout,
+        //     false);
+
+        // tryToAddPathToChooser(
+        //     "RightTrenchDoubleSwipe", 
+        //     () -> mRightTrenchDoubleSwipe.getAuton());
+
+        // DoubleSwipe mRightBumpDoubleSwipe = new DoubleSwipe(
+        //     this, 
+        //     "RightBumpDoubleSwipe", 
+        //     "TL_BL_BSL", 
+        //     AutonConstants.RightBumpDoubleSwipeOneAlignTime, 
+        //     "BSL_TL_Half", 
+        //     AutonConstants.RightDoubleSwipeTwoAlignTime,
+        //     AutonConstants.RightDoubleSwipeStartTimeout,
+        //     false);
+
+        // tryToAddPathToChooser(
+        //     "RightBumpDoubleSwipe", 
+        //     () -> mRightBumpDoubleSwipe.getAuton());
 
 
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
