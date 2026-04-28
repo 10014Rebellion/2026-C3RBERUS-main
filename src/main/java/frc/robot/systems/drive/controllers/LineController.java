@@ -36,8 +36,8 @@ public class LineController {
     // public static final LoggedTunableNumber tOmegaIZone = new LoggedTunableNumber("LineAlign/Omega/kIZone", 0.0);
     // public static final LoggedTunableNumber tOmegaIRange = new LoggedTunableNumber("LineAlign/Omega/kIRange", 0.0);
 
-    public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPS", 600);
-    public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPSS", 12000);
+    public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPS", 180);
+    public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("LineAlign/Omega/kMaxVDPSS", 360);
 
     public static final LoggedTunableNumber tOmegaS = new LoggedTunableNumber("LineAlign/Omega/kS", 0.0);
     public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("LineAlign/Omega/kV", 0.25);

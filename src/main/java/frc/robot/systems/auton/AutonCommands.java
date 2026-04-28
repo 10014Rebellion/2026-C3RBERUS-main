@@ -152,6 +152,26 @@ public class AutonCommands extends SubsystemBase {
             0.0, 
             true);
 
+        SingleSwipeClimb AroundTheWorldClimbLeft = new SingleSwipeClimb(
+            this,
+            "AroundTheWorldLeft", 
+            "AroundTheWorld", 
+            9.9, 
+            0.0, 
+            kBottomLeftBump, 
+            false);
+
+        ShootPreload mPreload = new ShootPreload(
+            this,
+            "Preload", 
+            () -> GameGoalPoseChooser.getHub().plus(new Transform2d(AllianceFlipUtil.shouldFlip() ? -2.0 : 2.0, 0.0, Rotation2d.kZero))
+            );
+
+        tryToAddPathToChooser(
+            "Preload", 
+            () -> mPreload.getAuton()
+        );
+
         tryToAddPathToChooser(
             "LeftBumpDoubleSwipe", 
             () -> mLeftBumpDoubleSwipe.getAuton()
@@ -160,6 +180,11 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser(
             "AroundTheWorldLeft", 
             () -> AroundTheWorldLeft.getAuton()
+        );
+
+        tryToAddPathToChooser(
+            "AroundTheWorldLeftClimb", 
+            () -> AroundTheWorldClimbLeft.getAuton()
         );
 
         tryToAddPathToChooser(
@@ -298,37 +323,6 @@ public class AutonCommands extends SubsystemBase {
                 mFlywheelsSS.atLatestClosedLoopGoal()
                     &&
                 mFuelPumpSS.atGoal()
-                    &&
-                !GameGoalPoseChooser.inCenter(mRobotDrive.getPoseEstimate())
-                    &&
-                mHoodSS.getHoodState().equals(HoodStates.SHOTMAP_POSITION)
-                    &&
-                mFlywheelsSS.getFlywheelState().equals(FlywheelStates.SHOTMAP_VELOCITY)
-                    &&
-                mRobotDrive.getDriveManager().getDriveState().equals(DriveState.AUTO_ALIGN)
-                    &&
-                autoAlignEndingCommand.isRunning(),
-            true)
-                .debounce(0.25, DebounceType.kRising)
-                .debounce(5.0, DebounceType.kFalling);
-    }
-
-    public Trigger followPathToAutoAlignFeed(Command autoAlignCommand, Trigger condition, String pathName, AutoEvent routine) {
-        SequentialEndingCommandGroup autoAlignEndingCommand = new SequentialEndingCommandGroup(autoAlignCommand);
-
-        condition
-            .onTrue(autoAlignEndingCommand)
-            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.MID));
-
-        return routine.loggedCondition(
-            pathName+"/InShootingTolerance", 
-            () -> 
-                mRobotDrive.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean()
-                    &&
-                mHoodSS.atGoal()
-                    &&
-                mFlywheelsSS.atLatestClosedLoopGoal()
                     &&
                 !GameGoalPoseChooser.inCenter(mRobotDrive.getPoseEstimate())
                     &&
