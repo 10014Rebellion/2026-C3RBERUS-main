@@ -17,6 +17,7 @@ public class ShootPreload extends Auton{
     private final String mFirstSwipePathName;
     private final double mFirstSwipeSwitchToAlignTime;
     private final double mFirstBeginningTimeout;
+    private final boolean mIsMirrored;
 
     private final double kShotTimeSeconds = 6.5;
     
@@ -25,12 +26,14 @@ public class ShootPreload extends Auton{
         String pAutoName,
         String pFirstSwipePathName,
         double pFirstSwipeSwitchToAlignTime,
-        double pFirstBeginningTimeout){
+        double pFirstBeginningTimeout,
+        boolean pIsMirrored){
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
         mFirstBeginningTimeout = pFirstBeginningTimeout;
+        mIsMirrored = pIsMirrored;
     }
 
     @Override
@@ -39,7 +42,7 @@ public class ShootPreload extends Auton{
         Trigger autoActivated = auto.getIsRunningTrigger();
 
         FollowPathCommand firstSwipePath = 
-            followChoreoPath(mFirstSwipePathName, true, auto);
+            followChoreoPath(mFirstSwipePathName, true, auto, mIsMirrored);
 
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);

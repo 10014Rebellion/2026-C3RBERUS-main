@@ -458,17 +458,17 @@ public class AutonCommands extends SubsystemBase {
 
     ///////////////// DRIVE COMMANDS AND DATA \\\\\\\\\\\\\\\\\\\\\\
     public FollowPathCommand followChoreoPath(
-            String pPathName, boolean pIsFirst, AutoEvent pAuto) {
+            String pPathName, boolean pIsFirst, AutoEvent pAuto, boolean isMirrored) {
         return mRobotDrive.getDriveManager().followPathCommand(
-            getTraj(pPathName).get(), 
+            (!isMirrored) ? getTraj(pPathName).get() : getTraj(pPathName).get().mirrorPath(), 
             pIsFirst,
             pAuto);
     }
 
     public FollowPathCommand followChoreoPath(
-            String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst, AutoEvent pAuto) {
+            String pPathName, PPHolonomicDriveController pPID, boolean pIsFirst, AutoEvent pAuto, boolean isMirrored) {
         return mRobotDrive.getDriveManager().followPathCommand(
-            getTraj(pPathName).get(),
+            (!isMirrored) ? getTraj(pPathName).get() : getTraj(pPathName).get().mirrorPath(),
             pPID, 
             pIsFirst,
             pAuto);

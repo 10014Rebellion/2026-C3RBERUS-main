@@ -36,7 +36,7 @@
     {"x":{"exp":"8.504968643188477 m", "val":8.504968643188477}, "y":{"exp":"BLCenterY", "val":5.550408}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":22, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"5.667471408843994 m", "val":5.667471408843994}, "y":{"exp":"BLCenterY", "val":5.550408}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":18, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"3.5447638034820557 m", "val":3.5447638034820557}, "y":{"exp":"BLCenterY", "val":5.550408}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":14, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"BS.x", "val":3.2043821811676025}, "y":{"exp":"BS.y", "val":5.550408}, "heading":{"exp":"BS.heading", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false}],
+    {"x":{"exp":"BSL.x", "val":3.2043821811676025}, "y":{"exp":"BSL.y", "val":5.550408}, "heading":{"exp":"BSL.heading", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},

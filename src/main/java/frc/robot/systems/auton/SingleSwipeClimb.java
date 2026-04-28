@@ -1,4 +1,4 @@
-package frc.robot.systems.auton.routines;
+package frc.robot.systems.auton;
 
 import java.util.function.Supplier;
 
@@ -18,48 +18,49 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.FollowPathCommand;
 import frc.robot.systems.intake.rack.IntakeRackSS.IntakeRackState;
 import frc.robot.systems.intake.roller.IntakeRollerSS.IntakeRollerState;
-import frc.robot.systems.auton.Auton;
-import frc.robot.systems.auton.AutonCommands;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
-import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.shooter.flywheels.FlywheelsSS.FlywheelStates;
 import frc.robot.systems.shooter.hood.HoodSS.HoodStates;
 import frc.robot.systems.shooter.fuelpump.FuelPumpSS.FuelPumpState;
 
-public class DoubleSnakeSwipe extends Auton {
+public class SingleSwipeClimb extends Auton {
     private boolean mWantToShoot = false;
-
     private final String mAutoName;
     private final String mFirstSwipePathName;
-    private final double mFirstSwipeSwitchToAlignTime;
-    private final String mSecondSwipePathName;
-    private final double mSecondSwipeSwitchToAlignTime;
-    private final boolean mIsMirrored;
+    private final double mFirstSwipeAlignTime;
 
-    private final double kShotTime1Seconds = 5.0;
-    private final double kShotTime2Seconds = 5.0;
+    private final Supplier<Pose2d> mTrenchApproachPose;
+    private final Supplier<Pose2d> mTrenchExitPose;
+
+    private final double kShotTimeSeconds = 6.5;
     private final double kShotEndTimeSeconds = 0.02; 
 
-    public DoubleSnakeSwipe(
+    private final Pose2d mClimbPose;
+
+    private final boolean mIsMirrored;
+
+    public SingleSwipeClimb(
         AutonCommands pAutos, 
         String pAutoName, 
-        String pFirstSwipePathName,
-        double pFirstSwipeSwitchToAlignTime,
-        String pSecondSwipePathName, 
-        double pSecondSwipeSwitchToAlignTime,
+        String pFirstSwipePathName, 
+        double pFirstSwipeAlignTime,
+        Supplier<Pose2d> pTrenchApproachPose, Supplier<Pose2d> pTrenchExitPose,
+        Pose2d pClimbPose,
         boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
-        mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
-        mSecondSwipePathName = pSecondSwipePathName;
-        mSecondSwipeSwitchToAlignTime = pSecondSwipeSwitchToAlignTime;
+        mFirstSwipeAlignTime = pFirstSwipeAlignTime;
+        mTrenchApproachPose = pTrenchApproachPose;
+        mTrenchExitPose = pTrenchExitPose;
+        mClimbPose = pClimbPose;
         mIsMirrored = pIsMirrored;
     }
 
     @Override
     protected AutoEvent getAuton() {
         AutoEvent auto = new AutoEvent(mAutoName, mAutos);
+
         Trigger autoActivted = auto.getIsRunningTrigger();
 
         Trigger intakingRange = mAutos.inIntakeRange(auto);
@@ -86,11 +87,58 @@ public class DoubleSnakeSwipe extends Auton {
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
-        FollowPathCommand secondSwipePath = 
-            followChoreoPath(mSecondSwipePathName, false, auto, mIsMirrored);
+        SequentialEndingCommandGroup firstSwipeIntakeShot = 
+            mAutos.timedIntakeShot(kShotTimeSeconds, kShotEndTimeSeconds);
 
-        Pose2d lastPoseOfSecondSwipe = mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().get(
-            mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().size() - 1);
+        SequentialEndingCommandGroup firstSwipeInjectorShot = 
+            mAutos.timedInjectorShot(kShotTimeSeconds, kShotEndTimeSeconds);
+
+        Trigger hasFirstShotEnded = auto.loggedCondition(
+            mFirstSwipePathName+"/FirstShotEnded", 
+            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeInjectorShot.hasEnded()),
+            true);
+
+        SequentialEndingCommandGroup goToPreClimbPose = new SequentialEndingCommandGroup(
+            mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> getClimbEndPose(mClimbPose.transformBy(new Transform2d(0.0, -0.05, Rotation2d.kZero))), 
+                ConstraintType.LINEAR));
+
+        Trigger atPreClimbPose = auto.loggedCondition(
+            "ClimbEnd/AtPreClimbPose", 
+            () -> 
+                goToPreClimbPose.isRunning()
+                    &&
+                mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
+        SequentialEndingCommandGroup goToClimbPose = new SequentialEndingCommandGroup(
+            mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> getClimbEndPose(mClimbPose), 
+                ConstraintType.LINEAR));
+
+        Trigger atClimbPose = auto.loggedCondition(
+            "ClimbEnd/ReadyToPreClimb", 
+            () -> 
+                goToPreClimbPose.isRunning()
+                    &&
+                mDriveSS.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
+        SequentialEndingCommandGroup prepareForClimb = 
+            new SequentialEndingCommandGroup(mClimbSS.goUpTillClimbHeightThenStay());
+
+        Trigger preparedForClimb = auto.loggedCondition(
+            "ClimbEnd/PreparedForClimb", 
+            () -> prepareForClimb.hasEnded(), 
+            true);
+
+        SequentialEndingCommandGroup climb = 
+            new SequentialEndingCommandGroup(mClimbSS.goUpTillClimbHeightThenStay());
+
+        Trigger hasClimbed = auto.loggedCondition(
+            "ClimbEnd/HasClimbed", 
+            () -> climb.hasEnded(), 
+            true);
 
         intakingRange
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
@@ -105,42 +153,21 @@ public class DoubleSnakeSwipe extends Auton {
             .onFalse(mHoodSS.setStateCmd(HoodStates.MIN))
             .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED));
 
-        SequentialEndingCommandGroup firstSwipeIntakeShot = 
-            mAutos.timedIntakeShot(kShotTime1Seconds, kShotEndTimeSeconds);
-
-        SequentialEndingCommandGroup firstSwipeInjectorShot = 
-            mAutos.timedInjectorShot(kShotTime1Seconds, kShotEndTimeSeconds);
-
-        Trigger hasFirstShotEnded = auto.loggedCondition(
-            mFirstSwipePathName+"/FirstShotEnded", 
-            () -> (firstSwipeIntakeShot.hasEnded() && firstSwipeInjectorShot.hasEnded()),
-            true);
-
-        SequentialEndingCommandGroup secondSwipeIntakeShot = 
-            mAutos.timedIntakeShot(kShotTime2Seconds, kShotEndTimeSeconds);
-
-        SequentialEndingCommandGroup secondSwipeInjectorShot = 
-            mAutos.timedInjectorShot(kShotTime2Seconds, kShotEndTimeSeconds);
-
-        Trigger hasSecondShotEnded = auto.loggedCondition(
-            mSecondSwipePathName+"/SecondShotEnded", 
-            () -> (secondSwipeIntakeShot.hasEnded() && secondSwipeInjectorShot.hasEnded()),
-            true);
-
-        //////////////////// FIRST SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
+        /* FIRST PATHHH */
         autoActivted
-            .onTrue(Commands.waitSeconds(0.1).andThen(firstSwipePath))
+            .onTrue(Commands.waitSeconds(0.5).andThen(firstSwipePath))
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(Commands.runOnce(() -> mWantToShoot = false));
 
-        firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime)
+        firstSwipePath.atTime(mFirstSwipeAlignTime)
             .onTrue(Commands.runOnce(() -> mWantToShoot = true))
-            .onTrue(
-                new SequentialEndingCommandGroup(
+            .onTrue((new SequentialEndingCommandGroup(
+                    transitionPose(mTrenchApproachPose),
+                    transitionPose(mTrenchExitPose),
                     mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
                         () -> getSwipeEndPose(lastPoseOfFirstSwipe),
-                        ConstraintType.LINEAR)));
+                        ConstraintType.LINEAR))));
 
         firstSwipePath.hasEnded().and(() -> mWantToShoot).and(hasFirstShotEnded.negate()).and(inShootingToleranceDebounced)
             .onTrue(firstSwipeIntakeShot)
@@ -152,27 +179,17 @@ public class DoubleSnakeSwipe extends Auton {
             .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
             .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
             .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
-            .onTrue(mInjectorSS.setStateCmd(FuelInjectorState.IDLE))
-            .onTrue(secondSwipePath);
+            .onTrue(goToPreClimbPose)
+            .onTrue(prepareForClimb);
 
-        //////////////////// SECOND SWIPE \\\\\\\\\\\\\\\\\\\\\\\\\\\
-        secondSwipePath.atTime(mSecondSwipeSwitchToAlignTime)
-            .onTrue(Commands.runOnce(() -> mWantToShoot = true))
-            .onTrue(mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
-                () -> getSwipeEndPose(lastPoseOfSecondSwipe),
-                ConstraintType.LINEAR));
+        /* GO CLIMBBB */
+        atPreClimbPose.and(preparedForClimb)
+            .onTrue(goToClimbPose);
 
-        secondSwipePath.hasEnded().and(() -> mWantToShoot).and(hasSecondShotEnded.negate()).and(inShootingToleranceDebounced)
-            .onTrue(secondSwipeIntakeShot)
-            .onTrue(secondSwipeInjectorShot)
-            .onTrue(mIntakeSS.trashCompact());
+        atClimbPose.and(preparedForClimb)
+            .onTrue(climb);
 
-        secondSwipePath.hasEnded().and(hasSecondShotEnded)
-            .onTrue(Commands.runOnce(() -> mWantToShoot = false))
-            .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
-            .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
-            .onTrue(mInjectorSS.setStateCmd(FuelInjectorState.IDLE))
-            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+        hasClimbed
             .onTrue(mAutos.endAuto(auto));
 
         return auto;
@@ -187,6 +204,10 @@ public class DoubleSnakeSwipe extends Auton {
                         ? Rotation2d.k180deg 
                         : Rotation2d.kZero)
         ));
+    }
+
+    private Pose2d getClimbEndPose(Pose2d pose) {
+        return AllianceFlipUtil.apply(pose);
     }
 
     public Command transitionPose(Supplier<Pose2d> poseSup) {
