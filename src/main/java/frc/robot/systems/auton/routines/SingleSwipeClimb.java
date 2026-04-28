@@ -17,6 +17,7 @@ public class SingleSwipeClimb extends Auton {
     private final String mFirstSwipePathName;
     private final double mFirstSwipeSwitchToAlignTime;
     private final double mFirstBeginningTimeout;
+    private final boolean mIsMirrored;
 
     private final double kShotTimeSeconds = 6.5;
 
@@ -27,12 +28,14 @@ public class SingleSwipeClimb extends Auton {
         String pAutoName, 
         String pFirstSwipePathName, 
         double pFirstSwipeAlignTime,
-        double pFirstBeginningTimeout) {
+        double pFirstBeginningTimeout,
+        boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeAlignTime;
         mFirstBeginningTimeout = pFirstBeginningTimeout;
+        mIsMirrored = pIsMirrored;
         mClimbPose = new Pose2d();
     }
 
@@ -50,7 +53,7 @@ public class SingleSwipeClimb extends Auton {
             auto);
 
         FollowPathCommand firstSwipePath = 
-            followChoreoPath(mFirstSwipePathName, true, auto);
+            followChoreoPath(mFirstSwipePathName, true, auto, false);
 
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);

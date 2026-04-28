@@ -112,7 +112,8 @@ public class AutonCommands extends SubsystemBase {
             "ShootPreload", 
             "H_D",
             0.5, 
-            0);
+            0,
+            false);
 
         tryToAddPathToChooser(
             "ShootPreload", 
@@ -124,7 +125,8 @@ public class AutonCommands extends SubsystemBase {
             "LeftTrenchSingleSwipe", 
             "TL_TL_BS", 
             AutonConstants.leftTrenchSingleSwipeAlignTime,
-            AutonConstants.leftTrenchSingleSwipeStartTimeout);
+            AutonConstants.leftTrenchSingleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftTrenchSingleSwipe", 
@@ -136,7 +138,8 @@ public class AutonCommands extends SubsystemBase {
             "LeftBumpSingleSwipe", 
             "TL_BL_BS", 
             AutonConstants.leftBumpSingleSwipeAlignTime,
-            AutonConstants.leftBumpSingleSwipeStartTimeout);
+            AutonConstants.leftBumpSingleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftBumpSingleSwipe", 
@@ -148,7 +151,8 @@ public class AutonCommands extends SubsystemBase {
             "LeftTrenchClimbSingleSwipe", 
             "TL_TL_BS", 
             AutonConstants.leftTrenchSingleSwipeAlignTime,
-            AutonConstants.leftTrenchSingleSwipeStartTimeout);
+            AutonConstants.leftTrenchSingleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftTrenchClimbSingleSwipe", 
@@ -160,7 +164,8 @@ public class AutonCommands extends SubsystemBase {
             "LeftBumpClimbSingleSwipe", 
             "TL_BL_BS", 
             AutonConstants.leftBumpSingleSwipeAlignTime,
-            AutonConstants.leftBumpSingleSwipeStartTimeout);
+            AutonConstants.leftBumpSingleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftBumpClimbSingleSwipe", 
@@ -174,7 +179,8 @@ public class AutonCommands extends SubsystemBase {
             AutonConstants.leftTrenchDoubleSwipeOneAlignTime, 
             "BS_TL_Half", 
             AutonConstants.leftDoubleSwipeTwoAlignTime,
-            AutonConstants.leftDoubleSwipeStartTimeout);
+            AutonConstants.leftDoubleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftTrenchDoubleSwipe", 
@@ -187,7 +193,8 @@ public class AutonCommands extends SubsystemBase {
             AutonConstants.leftBumpDoubleSwipeOneAlignTime, 
             "BS_TL_Half", 
             AutonConstants.leftDoubleSwipeTwoAlignTime,
-            AutonConstants.leftDoubleSwipeStartTimeout);
+            AutonConstants.leftDoubleSwipeStartTimeout,
+            false);
 
         tryToAddPathToChooser(
             "LeftBumpDoubleSwipe", 
