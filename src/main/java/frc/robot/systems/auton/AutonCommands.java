@@ -20,6 +20,8 @@ import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -30,8 +32,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoEvent;
 import frc.robot.systems.climb.ClimbSS;
+import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
 import frc.robot.systems.drive.DriveManager.DriveState;
+import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.efi.FuelInjectorSS;
 import frc.robot.systems.efi.FuelInjectorSS.FuelInjectorState;
 import frc.robot.systems.intake.Intake;
@@ -65,14 +69,14 @@ public class AutonCommands extends SubsystemBase {
     private final AutoFactory mAutoFactory;
 
     private String[] usedPathNames = new String[] {
-        "L_IT_IC_ST",
-        "L_ST_IB_ST_Snake",
-        "L_ST_IB_ST_Snake2",
-        "L_ST_IB_ST",
-        "L_ST_IB_ST_BUMP",
-        "R_IT_IC_ST",
-        "R_ST_IB_ST",
-        "R_ST_IB_ST_BUMP"
+        "L1_TL_BL_Single",
+        "L1_TL_TL_Single",
+        "L2_TL_BL_Single",
+        "TL1_BL_Single",
+        "TLBLTL_OneHalf_1",
+        "TLBLTL_OneHalf_2",
+        "TLTL_Single",
+        "H_D"
     };
 
     public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, ClimbSS pClimbSS, FuelInjectorSS pInjectorSS) {
@@ -104,107 +108,124 @@ public class AutonCommands extends SubsystemBase {
             new SingleSwipe(
                 this,  
                 "LeftSingleSwipe", 
-                "L_IT_IC_ST", 
-                4.94);
+                "L1_TL_BL_Single", 
+                AutonConstants.leftSingleSwipeFirstAlignTime,
+                AutonConstants.leftSignleSwipeBeginningTimeout);
 
         SingleSwipeClimb mLeftSingleSwipeClimbAuto =
             new SingleSwipeClimb(
                 this, 
                 "LeftSingleSwipeClimb", 
-                "L_IT_IC_ST", 
+                "L1_TL_BL_Single", 
                 4.94, 
                 () -> GameGoalPoseChooser.leftTrenchApproachPose(),
                 () -> GameGoalPoseChooser.leftTrenchExitPose(),
                 FieldConstants.kClimbLeftPose);
         
         // LEFT
-        double kLeftSecondShootTimestamp = 3.9; // L_ST_IB_ST_BUMP
         DoubleSwipe mLeftDoubleSwipeBumpAuto =
             new DoubleSwipe(
                 this, 
                 "LeftDoubleSwipeBump", 
-                "L_IT_IC_ST", 
-                4.94,
-                "L_ST_IB_ST_BUMP",
-                3.98);
+                "TLBLTL_OneHalf_1", 
+                AutonConstants.leftDoubleSwipeFirstAlignTime,
+                "TLBLTL_OneHalf_2",
+                AutonConstants.leftDoubleSwipeSecondAlignTime,
+                AutonConstants.leftDoubleSwipeBeginningTimeout);
+
         DoubleSwipeClimb mLeftDoubleSwipeBumpClimbAuto =
             new DoubleSwipeClimb(
                 this, 
                 "LeftDoubleSwipeBumpClimb", 
-                "L_IT_IC_ST", 
-                4.93,
-                () -> GameGoalPoseChooser.leftTrenchApproachPose(),
-                () -> GameGoalPoseChooser.leftTrenchExitPose(),
-                "L_ST_IB_ST_BUMP",
-                kLeftSecondShootTimestamp,
+                "TLBLTL_OneHalf_1", 
+                AutonConstants.leftDoubleSwipeFirstAlignTime,
+                "TLBLTL_OneHalf_2",
+                AutonConstants.leftDoubleSwipeSecondAlignTime,
                 FieldConstants.kClimbLeftPose);
 
-        // RIGHT
-        SingleSwipe mRightSingleSwipeAuto = 
-            new SingleSwipe(
-                this, 
-                "RightSingleSwipe", 
-                "R_IT_IC_ST", 
-                4.83);
+        // // RIGHT
+        // SingleSwipe mRightSingleSwipeAuto = 
+        //     new SingleSwipe(
+        //         this, 
+        //         "RightSingleSwipe", 
+        //         "R_IT_IC_ST", 
+        //         AutonConstants.rightSingleSwipeFirstAlignTime,
+        //         AutonConstants.rightSingleSwipeBeginningTimeout);
 
-        SingleSwipeClimb mRightSingleSwipeClimbAuto =
-            new SingleSwipeClimb(
-                this, 
-                "RightSingleSwipeClimb", 
-                "R_IT_IC_ST", 
-                4.83, 
-                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
-                () -> GameGoalPoseChooser.rightTrenchExitPose(),
-                FieldConstants.kClimbRightPose);
+        // SingleSwipeClimb mRightSingleSwipeClimbAuto =
+        //     new SingleSwipeClimb(
+        //         this, 
+        //         "RightSingleSwipeClimb", 
+        //         "R_IT_IC_ST", 
+        //         AutonConstants.rightSingleSwipeFirstAlignTime, 
+        //         () -> GameGoalPoseChooser.rightTrenchApproachPose(),
+        //         () -> GameGoalPoseChooser.rightTrenchExitPose(),
+        //         FieldConstants.kClimbRightPose);
 
-        DoubleSwipe mRightDoubleSwipeBumpAuto =
-            new DoubleSwipe(
-                this, 
-                "RightDoubleSwipeBump", 
-                "R_IT_IC_ST", 
-                4.83,
-                "R_ST_IB_ST_BUMP",
-                4.8);
+        // DoubleSwipe mRightDoubleSwipeBumpAuto =
+        //     new DoubleSwipe(
+        //         this, 
+        //         "RightDoubleSwipeBump", 
+        //         "R_IT_IC_ST", 
+        //         AutonConstants.rightDoubleSwipeFirstAlignTime,
+        //         "R_ST_IB_ST_BUMP",
+        //         AutonConstants.rightDoubleSwipeSecondAlignTime,
+        //         AutonConstants.rightDoubleSwipeBeginningTimeout);
 
-        DoubleSwipeClimb mRightDoubleSwipeBumpClimbAuto =
-            new DoubleSwipeClimb(
-                this, 
-                "RightDoubleSwipeBumpClimb", 
-                "R_IT_IC_ST", 
-                4.83,
-                () -> GameGoalPoseChooser.rightTrenchApproachPose(),
-                () -> GameGoalPoseChooser.rightTrenchExitPose(),
-                "R_ST_IB_ST_BUMP",
-                4.8,
-                FieldConstants.kClimbRightPose);
+        // DoubleSwipeClimb mRightDoubleSwipeBumpClimbAuto =
+        //     new DoubleSwipeClimb(
+        //         this, 
+        //         "RightDoubleSwipeBumpClimb", 
+        //         "R_IT_IC_ST", 
+        //         AutonConstants.rightDoubleSwipeFirstAlignTime,
+        //         "R_ST_IB_ST_BUMP",
+        //         AutonConstants.rightDoubleSwipeSecondAlignTime,
+        //         FieldConstants.kClimbRightPose);
 
         SnakeSwipe mLeftSnakeSwipe = new SnakeSwipe(
             this, 
             "LeftSnakeSwipe", 
             "L_IT_IC_ST_Snake", 
-            4.1);
+            AutonConstants.leftSingleSnakeSwipeFirstAlignTime);
 
         DoubleSnakeSwipe mLeftDoubleSnakeSwipe = new DoubleSnakeSwipe(
             this, 
             "LeftDoubleSnakeSwipe", 
             "L_IT_IC_ST_Snake", 
-            4.1,
+            AutonConstants.leftDoubleSnakeSwipeFirstAlignTime,
             "L_IT_IC_ST_Snake2", 
-            3.2);
+            AutonConstants.leftDoubleSnakeSwipeSecondAlignTime);
 
-        SnakeSwipe mRightSnakeSwipe = new SnakeSwipe(
-            this, 
-            "RightSnakeSwipe", 
-            "R_IT_IC_ST_Snake", 
-            6.6);
+        // SnakeSwipe mRightSnakeSwipe = new SnakeSwipe(
+        //     this, 
+        //     "RightSnakeSwipe", 
+        //     "R_IT_IC_ST_Snake", 
+        //     AutonConstants.rightSingleSnakeSwipeFirstAlignTime);
     
-        DoubleSnakeSwipe mRightDoubleSnakeSwipe = new DoubleSnakeSwipe(
-            this, 
-            "RightDoubleSnakeSwipe", 
-            "R_IT_IC_ST_Snake", 
-            6.6,
-            "R_IT_IC_ST_Snake2",                 
-            3.2);
+        // DoubleSnakeSwipe mRightDoubleSnakeSwipe = new DoubleSnakeSwipe(
+        //     this, 
+        //     "RightDoubleSnakeSwipe", 
+        //     "R_IT_IC_ST_Snake", 
+        //     AutonConstants.rightDoubleSnakeSwipeFirstAlignTime,
+        //     "R_IT_IC_ST_Snake2",                 
+        //     AutonConstants.rightDoubleSnakeSwipeSecondAlignTime);
+
+        // Shoot and Stay //
+        ShootPreload mShootAndStay = new ShootPreload(
+            this,
+            "ShootAndStay",
+            "H_D",
+            0.9,
+            0.0
+        );
+
+        ShootPreloadClimb mShootAndClimb = new ShootPreloadClimb(
+            this,
+            "ShootAndClimb",
+            "H_D",
+            0.9,
+            0.0
+        );
 
         tryToAddPathToChooser(
             "LeftDoubleSnakeSwipe", 
@@ -216,15 +237,15 @@ public class AutonCommands extends SubsystemBase {
             () -> mLeftSnakeSwipe.getAuton()
         );
 
-        tryToAddPathToChooser(
-            "RightDoubleSnakeSwipe", 
-            () -> mRightDoubleSnakeSwipe.getAuton()
-        );
+        // tryToAddPathToChooser(
+        //     "RightDoubleSnakeSwipe", 
+        //     () -> mRightDoubleSnakeSwipe.getAuton()
+        // );
 
-        tryToAddPathToChooser(
-            "RightSnakeSwipe", 
-            () -> mRightSnakeSwipe.getAuton()
-        );
+        // tryToAddPathToChooser(
+        //     "RightSnakeSwipe", 
+        //     () -> mRightSnakeSwipe.getAuton()
+        // );
 
         tryToAddPathToChooser("LeftSingleSwipe", 
             () -> mLeftSingleSwipeAuto.getAuton()
@@ -242,21 +263,27 @@ public class AutonCommands extends SubsystemBase {
             () -> mLeftDoubleSwipeBumpClimbAuto.getAuton()
         );
 
-        tryToAddPathToChooser("RightSingleSwipe", 
-            () -> mRightSingleSwipeAuto.getAuton()
-        );
+        // tryToAddPathToChooser("RightSingleSwipe", 
+        //     () -> mRightSingleSwipeAuto.getAuton()
+        // );
 
-        tryToAddPathToChooser("RightSingleSwipeClimb", 
-            () -> mRightSingleSwipeClimbAuto.getAuton()
-        );
+        // tryToAddPathToChooser("RightSingleSwipeClimb", 
+        //     () -> mRightSingleSwipeClimbAuto.getAuton()
+        // );
 
-        tryToAddPathToChooser("RightDoubleSwipeBump", 
-            () -> mRightDoubleSwipeBumpAuto.getAuton()
-        );
+        // tryToAddPathToChooser("RightDoubleSwipeBump", 
+        //     () -> mRightDoubleSwipeBumpAuto.getAuton()
+        // );
 
-        tryToAddPathToChooser("RightDoubleSwipeBumpClimb", 
-            () -> mRightDoubleSwipeBumpClimbAuto.getAuton()
-        );
+        // tryToAddPathToChooser("RightDoubleSwipeBumpClimb", 
+        //     () -> mRightDoubleSwipeBumpClimbAuto.getAuton()
+        // );
+
+        tryToAddPathToChooser("ShootPreloadAndStay", 
+            () -> mShootAndStay.getAuton());
+
+        tryToAddPathToChooser("ShootPreloadAndClimb", 
+            () -> mShootAndClimb.getAuton());
         
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     }
@@ -380,6 +407,37 @@ public class AutonCommands extends SubsystemBase {
                 .debounce(5.0, DebounceType.kFalling);
     }
 
+    @SuppressWarnings("unlikely-arg-type")
+    public Trigger setUpShooterFromStationary(Trigger condition, AutoEvent routine){
+        condition  
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+
+        return routine.loggedCondition(
+        "Stationary/InShootingTolerance", 
+            () -> 
+                mHoodSS.atGoal()
+                    &&
+                mFlywheelsSS.atLatestClosedLoopGoal()
+                    && 
+                mHoodSS.getCurrentGoal().equals(HoodStates.SHOTMAP_POSITION)
+                    &&
+                mFlywheelsSS.getFlywheelState().equals(FlywheelStates.SHOTMAP_VELOCITY), 
+            true);
+    }
+
+    public void resetAllStates(Trigger condition) {
+        condition
+            .onTrue(mRobotDrive.getDriveManager().setDriveStateCommand(DriveState.TELEOP))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
+            .onTrue(mIntake.setRackStateCmd(IntakeRackState.INTAKE))
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mClimbSS.setStateCmd(ClimbState.IDLE));
+    }
+
     public Trigger shootFuelToHub(double shotTime, Trigger condition, String pathName, AutoEvent routine) {
         SequentialEndingCommandGroup injectorShot = timedInjectorShot(shotTime, 0.02);
         SequentialEndingCommandGroup intakeShot = timedIntakeShot(shotTime, 0.02);
@@ -408,6 +466,69 @@ public class AutonCommands extends SubsystemBase {
             true);
     }
 
+    public Trigger goToClimb(Trigger condition, Supplier<Pose2d> pClimbPose, String name, AutoEvent auto) {
+        SequentialEndingCommandGroup goToPreClimbPose = new SequentialEndingCommandGroup(
+            mRobotDrive.getDriveManager().setToGenericAutoAlign(
+                () -> pClimbPose.get().transformBy(
+                    new Transform2d(
+                        Math.signum(
+                            pClimbPose.get().getX() - FieldConstants.kFieldXM / 2.0) 
+                        * 0.05, 
+                        0.00, 
+                        Rotation2d.kZero)), 
+                ConstraintType.LINEAR));
+
+        Trigger atPreClimbPose = auto.loggedCondition(
+            name+"/AtPreClimbPose", 
+            () -> 
+                goToPreClimbPose.isRunning()
+                    &&
+                mRobotDrive.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
+        SequentialEndingCommandGroup prepareForClimb = 
+            new SequentialEndingCommandGroup(mClimbSS.goUpTillClimbHeightThenStay());
+
+        Trigger preparedForClimb = auto.loggedCondition(
+            name+"/PreparedForClimb", 
+            () -> prepareForClimb.hasEnded(), 
+            true);
+
+        SequentialEndingCommandGroup goToClimbPose = new SequentialEndingCommandGroup(
+            mRobotDrive.getDriveManager().setToGenericAutoAlign(
+                pClimbPose, 
+                ConstraintType.LINEAR));
+
+        Trigger atClimbPose = auto.loggedCondition(
+            name+"/AtClimbPose", 
+            () -> 
+                goToClimbPose.isRunning()
+                    &&
+                mRobotDrive.getDriveManager().waitUntilAutoAlignFinishes().getAsBoolean(), 
+            true);
+
+        SequentialEndingCommandGroup climb = 
+            new SequentialEndingCommandGroup(mClimbSS.goDownTillClimbedThenStayClimbed());
+
+        Trigger hasClimbed = auto.loggedCondition(
+            name+"/HasClimbed", 
+            () -> climb.hasEnded(), 
+            true);
+
+        condition
+            .onTrue(goToPreClimbPose)
+            .onTrue(prepareForClimb);
+
+        atPreClimbPose.and(preparedForClimb)
+            .onTrue(goToClimbPose);
+
+        atClimbPose
+            .onTrue(climb);
+
+        return hasClimbed;
+    }
+
+    /* Super structure commands */
     public SequentialEndingCommandGroup timedIndexShot(double timeout, double endTimeout) {
         return new SequentialEndingCommandGroup(
                 mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT).withTimeout(timeout),

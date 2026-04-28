@@ -7,6 +7,7 @@ import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.commands.FollowPathCommand;
 
 public class DoubleSwipe extends Auton {
@@ -15,6 +16,7 @@ public class DoubleSwipe extends Auton {
     private final double mFirstSwipeSwitchToAlignTime;
     private final String mSecondSwipePathName;
     private final double mSecondSwipeSwitchToAlignTime;
+    private final double mFirstBeginningTimeout;
 
     private final double kShotTime1Seconds = 3.0;
     private final double kShotTime2Seconds = 6.5;
@@ -25,13 +27,15 @@ public class DoubleSwipe extends Auton {
         String pFirstSwipePathName,
         double pFirstSwipeSwitchToAlignTime,
         String pSecondSwipePathName, 
-        double pSecondSwipeSwitchToAlignTime) {
+        double pSecondSwipeSwitchToAlignTime,
+        double pFirstBeginningTimeout) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeSwitchToAlignTime = pFirstSwipeSwitchToAlignTime;
         mSecondSwipePathName = pSecondSwipePathName;
         mSecondSwipeSwitchToAlignTime = pSecondSwipeSwitchToAlignTime;
+        mFirstBeginningTimeout = pFirstBeginningTimeout;
     }
 
     @Override
@@ -54,7 +58,7 @@ public class DoubleSwipe extends Auton {
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
 
         Trigger firstPathEnded = mAutos.traversePathWithIntakeOutOnly(
-            0.1, 
+            0.1 + mFirstBeginningTimeout, 
             firstSwipePath, 
             autoActivated, 
             mFirstSwipePathName, 
@@ -86,7 +90,9 @@ public class DoubleSwipe extends Auton {
 
         /* Takes over mid path */
         Trigger autoAlignShotReadySwipe2 = mAutos.transitionFromPathTraversingToAutoAlignHubShoot(
-            mDriveSS.getDriveManager().runAutoAlignThroughTrench(getSwipeEndPose(lastPoseOfSecondSwipe)), 
+            mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
+                () -> getSwipeEndPose(lastPoseOfSecondSwipe), 
+                ConstraintType.LINEAR), 
             secondSwipePath.atTime(mSecondSwipeSwitchToAlignTime), 
             mSecondSwipePathName, 
             auto);
@@ -97,6 +103,7 @@ public class DoubleSwipe extends Auton {
             mSecondSwipePathName, 
             auto);
 
+        mAutos.resetAllStates(fuelToHubHasEndedSwipe2);
         fuelToHubHasEndedSwipe2.onTrue(mAutos.endAuto(auto));
 
         return auto;

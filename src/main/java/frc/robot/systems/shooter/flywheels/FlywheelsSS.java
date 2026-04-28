@@ -15,6 +15,7 @@ import frc.robot.systems.shooter.flywheels.encoder.EncoderIO;
 import frc.robot.systems.shooter.flywheels.encoder.EncoderInputsAutoLogged;
 
 import static frc.robot.systems.shooter.flywheels.FlywheelConstants.kFlywheelControlConfig;
+import static frc.robot.systems.shooter.flywheels.FlywheelConstants.tTuningAmperage;
 
 public class FlywheelsSS extends SubsystemBase {
   public static enum FlywheelStates {
@@ -32,7 +33,8 @@ public class FlywheelsSS extends SubsystemBase {
     TOWER_VELOCITY,
     BUMP_VELOCITY,
     CORNER_VELOCITY,
-    TRENCH_VELOCITY
+    TRENCH_VELOCITY,
+    TUNING_AMPERAGE
   }
 
   private final FlywheelIO mLeaderFlywheelIO;
@@ -114,6 +116,9 @@ public class FlywheelsSS extends SubsystemBase {
         case BOOST_SHOTMAP_VELOCITY -> {
           setFlywheelVelocity(Rotation2d.fromRotations(ShotMap.getInstance().getFlywheelVel().getRotations() * tBoostFactor.get()));
         }
+        case TUNING_AMPERAGE -> {
+          setFlywheelAmperage(tTuningAmperage.get());
+        }
         default -> {
           Telemetry.reportIssue(new UnaccountedEnum(mCurrentFlywheelState.toString()));
         }
@@ -131,13 +136,20 @@ public class FlywheelsSS extends SubsystemBase {
     mFollowerFlywheelIO.enforceFollower();
   }
 
+  private void setFlywheelAmperage(double pVoltage) {
+    mLeaderFlywheelIO.setMotorAmperage(pVoltage);
+    mFollowerFlywheelIO.enforceFollower();
+  }
+
   private void setFlywheelVelocity(Rotation2d pRotsPerS) {
     mLastestClosedLoopGoalRPS = pRotsPerS;
     Logger.recordOutput("Shooter/Flywheel/Control/FunctionSetpoint", mLastestClosedLoopGoalRPS);
     mLeaderFlywheelIO.setMotorVelAndAccel(
         pRotsPerS.getRotations(),
         0.0,
-        kFlywheelControlConfig.feedforward().calculate(getFlywheelRPS().getRotations()));
+        kFlywheelControlConfig.feedforward().calculate(
+          mLeaderFlywheelInputs.iFlywheelClosedLoopReference.getRotations(),
+          mLeaderFlywheelInputs.iFlywheelClosedLoopReferenceSlope.getRotations()));
     mFollowerFlywheelIO.enforceFollower();
   }
 

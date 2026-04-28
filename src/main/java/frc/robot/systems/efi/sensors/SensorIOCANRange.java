@@ -11,7 +11,6 @@ import edu.wpi.first.units.measure.Time;
 import frc.lib.PhoenixUtil;
 import frc.lib.PhoenixUtil.CanivoreBus;
 import frc.lib.hardware.HardwareRecords.CANRangeConfiguration;
-import frc.robot.RobotConstants;
 
 public class SensorIOCANRange implements SensorIO{
 
@@ -26,7 +25,7 @@ public class SensorIOCANRange implements SensorIO{
     private final StatusSignal<Time> measurementTime;
 
     public SensorIOCANRange(CANRangeConfiguration configuration){
-        mCANRange = new CANrange(configuration.canRangeID(), RobotConstants.kSubsystemsCANBus);
+        mCANRange = new CANrange(configuration.canRangeID());
 
         CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
 
@@ -48,7 +47,7 @@ public class SensorIOCANRange implements SensorIO{
         mCANRange.optimizeBusUtilization(0.0);
 
         PhoenixUtil.registerSignals(
-            CanivoreBus.OVERWORLD, 
+            CanivoreBus.RIO, 
             distanceFromFuel,
             isDetected, 
             distanceFromFuelStdev,

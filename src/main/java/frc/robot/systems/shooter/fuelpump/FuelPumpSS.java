@@ -63,15 +63,18 @@ public class FuelPumpSS extends SubsystemBase {
   }
 
   public boolean atGoal() {
-    // return (!FuelPumpConstants.kStateToTuneableFuelPumpVelocity.containsKey(mCurrentFuelPumpState)) ||
-    //   (Math.abs(getAvgFuelPumpRPS() - FuelPumpConstants.kStateToTuneableFuelPumpVelocity.get(mCurrentFuelPumpState).get().getRotations()) < FuelPumpConstants.kToleranceRPS);
-
     if(FuelPumpConstants.kStateToTuneableFuelPumpVelocity.containsKey(mCurrentFuelPumpState)) {
-      return (Math.abs(getAvgFuelPumpRPS() - FuelPumpConstants.kStateToTuneableFuelPumpVelocity.get(mCurrentFuelPumpState).get().getRotations()) < FuelPumpConstants.kToleranceRPS);
-    }
-
-    else{
+      return getRPSErrorForState() < FuelPumpConstants.kToleranceRPS;
+    } else{
         return getAvgFuelPumpRPS() >= FuelPumpConstants.kRPSForShooting.getRotations();
+    }
+  }
+
+  public double getRPSErrorForState() {
+    if(FuelPumpConstants.kStateToTuneableFuelPumpVelocity.containsKey(mCurrentFuelPumpState)) {
+      return Math.abs(getAvgFuelPumpRPS() - FuelPumpConstants.kStateToTuneableFuelPumpVelocity.get(mCurrentFuelPumpState).get().getRotations());
+    } else {
+      return Double.MAX_VALUE;
     }
   }
 

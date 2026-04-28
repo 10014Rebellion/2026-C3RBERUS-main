@@ -46,9 +46,9 @@ public class FlywheelConstants {
 
     public static final MotionMagicFOCControllerFF kFlywheelControlConfig = new MotionMagicFOCControllerFF(
             0,
-            new PDConstants(10.0, 0), // Tuned for C3RBERUS!
-            new SimpleMotorFeedforward(0.37, 0.13, 0), // Tuned for C3RBERUS!
-            new MotionMagicConstants(0.0, 1000.0, 0.0));
+            new PDConstants(7.5, 0), // Tuned for C3RBERUS!
+            new SimpleMotorFeedforward(2.5, 0.22, 1.8), // Tuned for C3RBERUS!
+            new MotionMagicConstants(0.0, 60.0, 0.0));
 
     public static final HashMap<FlywheelStates, LoggedTunableNumber> kFlywheelSetpointToVoltageTuneable = new HashMap<FlywheelStates, LoggedTunableNumber>();
     public static final HashMap<FlywheelStates, Supplier<Rotation2d>> kFlywheelSetpointToVelocity = new HashMap<FlywheelStates, Supplier<Rotation2d>>();
@@ -80,6 +80,9 @@ public class FlywheelConstants {
             "Shooter/Flywheel/SetpointRPS/CornerVelocity", 90);
     public static final LoggedTunableNumber tTrenchVelocity = new LoggedTunableNumber(
             "Shooter/Flywheel/SetpointRPS/TrenchVelocity", 80);
+
+    public static final LoggedTunableNumber tTuningAmperage 
+        = new LoggedTunableNumber("Shooter/Flywheel/TuningAmperage", 0.0);
 
     static {
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.STANDBY_VOLTAGE, tStandbyVoltage);

@@ -32,6 +32,8 @@ public interface FlywheelIO {
 
     public default void setMotorVolts(double pVolts) {}
 
+    public default void setMotorAmperage(double pAmps) {}
+
     public default void stopMotor() {}
 
     public default void enforceFollower() {}

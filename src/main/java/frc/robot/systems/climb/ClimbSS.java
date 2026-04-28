@@ -4,6 +4,8 @@
 
 package frc.robot.systems.climb;
 
+import java.util.function.BooleanSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -75,13 +77,21 @@ public class ClimbSS extends SubsystemBase {
     public Command goUpTillClimbHeightThenStay() {
         return setStateCmd(ClimbState.UP)
             .until(() -> mClimbInputs.iClimbPositionMeters > ClimbConstants.kClimbHeight)
-            .andThen(setStateCmd(ClimbState.STAY));
+            .andThen(setStateCmd(ClimbState.STAY).withTimeout(0.02));
+    }
+
+    public boolean readyToPreClimb() {
+        return mClimbInputs.iClimbPositionMeters > ClimbConstants.kClimbHeight;
     }
 
     public Command goDownTillClimbedThenStayClimbed() {
         return setStateCmd(ClimbState.DOWN)
             .until(() -> mClimbInputs.iClimbPositionMeters < ClimbConstants.kClimbedHeight)
-            .andThen(setStateCmd(ClimbState.STAY_ROBOT));
+            .andThen(setStateCmd(ClimbState.STAY_ROBOT).withTimeout(0.02));
+    }
+
+    public boolean hasClimbed() {
+        return mClimbInputs.iClimbPositionMeters < ClimbConstants.kClimbedHeight;
     }
 
     public void setClimbVolts(double pVolts) {

@@ -62,7 +62,7 @@ public class HoodSS extends SubsystemBase {
     private final LoggedTunableNumber tHoodMaxJerkDegS3 = new LoggedTunableNumber(
             "Shooter/Hood/Control/Profile/MaxJerks3",
             HoodConstants.kHoodControlConfig.motionMagicConstants().maxJerk() * 360);
-    private final LoggedTunableNumber tHoodTolerance = new LoggedTunableNumber("Shooter/Hood/Control/Tolerance",
+    private final LoggedTunableNumber tHoodToleranceDegrees = new LoggedTunableNumber("Shooter/Hood/Control/Tolerance",
             HoodConstants.kTolerance.getDegrees());
 
     @AutoLogOutput(key = "Shooter/Hood/States/CurrentState")
@@ -254,7 +254,7 @@ public class HoodSS extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/Hood/Feedback/AtGoal")
     public boolean atGoal() {
-        return Math.abs(getErrorRot()) <= tHoodTolerance.get();
+        return Math.abs(getErrorRot()) <= (tHoodToleranceDegrees.get() / 360.0);
     }
 
     private Rotation2d clampRotToSoftLimits(Rotation2d pRotToClamp) {
