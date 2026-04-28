@@ -105,9 +105,9 @@ public class RobotContainer {
                 );
 
                 mCANRangesSS = new CANRangeSS(
-                    new SensorIOCANRange(SensorConstants.leftCANRangeConfiguration), 
-                    new SensorIOCANRange(SensorConstants.centerCANRangeConfiguration), 
-                    new SensorIOCANRange(SensorConstants.rightCANRangeConfiguration)
+                    new SensorIO() {}, 
+                    new SensorIO() {}, 
+                    new SensorIO() {}
                 );
                 
                 mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig), mCANRangesSS);
