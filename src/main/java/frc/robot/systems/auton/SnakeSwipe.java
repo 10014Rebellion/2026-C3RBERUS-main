@@ -32,11 +32,14 @@ public class SnakeSwipe extends Auton {
     private final double kShotTimeSeconds = 6.5;
     private final double kShotEndTimeSeconds = 0.02; 
 
-    public SnakeSwipe(AutonCommands pAutos, String pAutoName, String pFirstSwipePathName, double pFirstSwipeAlignTime) {
+    private final boolean mIsMirrored;
+
+    public SnakeSwipe(AutonCommands pAutos, String pAutoName, String pFirstSwipePathName, double pFirstSwipeAlignTime, boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
         mFirstSwipeAlignTime = pFirstSwipeAlignTime;
+        mIsMirrored = pIsMirrored;
     }
 
     @Override
@@ -64,7 +67,7 @@ public class SnakeSwipe extends Auton {
             .debounce(5.0, DebounceType.kFalling);
 
         FollowPathCommand firstSwipePath = 
-            followChoreoPath(mFirstSwipePathName, true, auto);
+            followChoreoPath(mFirstSwipePathName, true, auto, mIsMirrored);
 
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);

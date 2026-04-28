@@ -37,13 +37,16 @@ public class SingleSwipeClimb extends Auton {
 
     private final Pose2d mClimbPose;
 
+    private final boolean mIsMirrored;
+
     public SingleSwipeClimb(
         AutonCommands pAutos, 
         String pAutoName, 
         String pFirstSwipePathName, 
         double pFirstSwipeAlignTime,
         Supplier<Pose2d> pTrenchApproachPose, Supplier<Pose2d> pTrenchExitPose,
-        Pose2d pClimbPose) {
+        Pose2d pClimbPose,
+        boolean pIsMirrored) {
         super(pAutos);
         mAutoName = pAutoName;
         mFirstSwipePathName = pFirstSwipePathName;
@@ -51,6 +54,7 @@ public class SingleSwipeClimb extends Auton {
         mTrenchApproachPose = pTrenchApproachPose;
         mTrenchExitPose = pTrenchExitPose;
         mClimbPose = pClimbPose;
+        mIsMirrored = pIsMirrored;
     }
 
     @Override
@@ -78,7 +82,7 @@ public class SingleSwipeClimb extends Auton {
             .debounce(5.0, DebounceType.kFalling);
 
         FollowPathCommand firstSwipePath = 
-            followChoreoPath(mFirstSwipePathName, true, auto);
+            followChoreoPath(mFirstSwipePathName, true, auto, mIsMirrored);
 
         Pose2d lastPoseOfFirstSwipe = mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().get(
             mAutos.getTraj(mFirstSwipePathName).get().getPathPoses().size() - 1);
