@@ -182,8 +182,10 @@ public class ButtonBindings {
                 .debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
         double dynamicShootTimeout = 1.5;
 
-        Trigger staticShootReady = shooterAtGoal.debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
-        double staticShootTimeout = 0.8;
+        // Trigger staticShootReady = shooterAtGoal.debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
+
+        Trigger staticShootReady = shooterAtGoal.and(fuelPumpAtGoal).and(headingAlignAtGoal.or(atHeadingGoal)).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth);
+        double staticShootTimeout = 4.0;
 
         anyCANRangesTriggered.and(wantToShoot.negate())
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.KICKBACK))
@@ -206,7 +208,7 @@ public class ButtonBindings {
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
         /* Debounce if not at goal */
-        wantToStaticShoot.debounce(staticShootTimeout, DebounceType.kRising).and(staticShootReady.negate())
+        wantToStaticShoot.debounce(staticShootTimeout, DebounceType.kRising).and(staticShootReady.negate()).and(wantToDisableCANRangeBtn)
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
@@ -261,7 +263,7 @@ public class ButtonBindings {
                 .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE));
 
         wantToRevFlywheelsBtn
-                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VOLTAGE));
+                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.REV_VOLTAGE));
 
         wantToStopFlywheelsBtn
                 .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STOPPED));
@@ -394,7 +396,7 @@ public class ButtonBindings {
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));
 
         /* Debounce if not at goal */
-        wantToDynamicShootBtn.debounce(dynamicShootTimeout, DebounceType.kRising).and(dynamicShootReady.negate())
+        wantToDynamicShootBtn.debounce(dynamicShootTimeout, DebounceType.kRising).and(dynamicShootReady.negate()).and(wantToDisableCANRangeBtn)
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE))
                 .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE));

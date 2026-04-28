@@ -21,6 +21,7 @@ public class FlywheelsSS extends SubsystemBase {
   public static enum FlywheelStates {
     STOPPED,
     STANDBY_VOLTAGE,
+    REV_VOLTAGE,
     TUNING_VOLTAGE,
     MAX_VOLTAGE,
     TUNING_VELOCITY,

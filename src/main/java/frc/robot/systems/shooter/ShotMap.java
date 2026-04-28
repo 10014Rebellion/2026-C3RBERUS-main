@@ -33,6 +33,7 @@ public class ShotMap {
         new ShotMapSetpoint(3.46, Rotation2d.fromDegrees(14.0), Rotation2d.fromRotations(49.5)),
         new ShotMapSetpoint(3.973, Rotation2d.fromDegrees(15.0), Rotation2d.fromRotations(51.5)),
         new ShotMapSetpoint(4.42, Rotation2d.fromDegrees(15.0), Rotation2d.fromRotations(52.5)),
+        new ShotMapSetpoint(5.332, Rotation2d.fromDegrees(17.0), Rotation2d.fromRotations(56))
         // new ShotMapSetpoint(5.05, Rotation2d.fromDegrees(16.0), Rotation2d.fromRotations(65.5 + velocityRPSOffset))
     };
 
