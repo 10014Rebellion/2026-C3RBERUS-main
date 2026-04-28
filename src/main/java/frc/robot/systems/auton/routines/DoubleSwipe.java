@@ -90,6 +90,7 @@ public class DoubleSwipe extends Auton {
             mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().size() - 1);
 
         Trigger secondPathHasEnded = mAutos.traversePathWithIntakeOutOnly(
+            0.0,
             secondSwipePath, 
             fuelToHubHasEndedSwipe1, 
             mSecondSwipePathName, 

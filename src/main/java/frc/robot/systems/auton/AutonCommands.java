@@ -259,6 +259,22 @@ public class AutonCommands extends SubsystemBase {
             true);
     }
 
+    public Trigger traversePathWithIntakeInOnly(double delaySeconds, FollowPathCommand pathCommand, Trigger condition, String pathName, AutoEvent routine) {
+        condition
+            .onTrue(Commands.waitSeconds(delaySeconds).andThen(pathCommand))
+            .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.STANDBY_VELOCITY))
+            .onTrue(mHoodSS.setStateCmd(HoodStates.MIN))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+            .onTrue(mIntake.setRollerStateCmd(IntakeRollerState.IDLE))
+            .onTrue(mIntake.setRackStateCmd(IntakeRackState.STOW))
+            .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE));
+
+        return routine.loggedCondition(
+            pathName+"/HasEnded", 
+            pathCommand.hasEnded(), 
+            true);
+    }
+
     public Trigger traversePathWithIntakeOutOnly(FollowPathCommand pathCommand, Trigger condition, String pathName, AutoEvent routine) {
         return traversePathWithIntakeOutOnly(0.0, pathCommand, condition, pathName, routine);
     }
@@ -269,7 +285,8 @@ public class AutonCommands extends SubsystemBase {
         condition
             .onTrue(autoAlignEndingCommand)
             .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.SHOTMAP_VELOCITY))
-            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION));
+            .onTrue(mHoodSS.setStateCmd(HoodStates.SHOTMAP_POSITION))
+            .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY));
 
         return routine.loggedCondition(
             pathName+"/InShootingTolerance", 
@@ -279,6 +296,8 @@ public class AutonCommands extends SubsystemBase {
                 mHoodSS.atGoal()
                     &&
                 mFlywheelsSS.atLatestClosedLoopGoal()
+                    &&
+                mFuelPumpSS.atGoal()
                     &&
                 !GameGoalPoseChooser.inCenter(mRobotDrive.getPoseEstimate())
                     &&
