@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.game.GameGoalPoseChooser;
 
@@ -61,7 +62,7 @@ public class ShotMap {
         Math.max(setpoints[0].distance() + 0.01,
             Math.min(
                 setpoints[setpoints.length - 1].distance() - 0.01,
-                Math.hypot(
+                Units.inchesToMeters(5.5) + Math.hypot(
                     robotPose.get().getX() - GameGoalPoseChooser.getHub().getX(),
                     robotPose.get().getY() - GameGoalPoseChooser.getHub().getY()
             ))

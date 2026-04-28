@@ -276,7 +276,8 @@ public class ButtonBindings {
 
         wantToDeployClimbBtn
                 .onTrue(mClimbSS.setStateCmd(ClimbState.UP))
-                .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
+                .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.OUTTAKE))
+                .onTrue(mIntakeSS.setRackStateCmd(IntakeRackState.STOW))
                 .onFalse(mClimbSS.setStateCmd(ClimbState.STOP));
 
         wantToClimbAscendBtn
