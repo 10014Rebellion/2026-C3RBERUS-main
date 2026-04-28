@@ -114,190 +114,63 @@ public class AutonCommands extends SubsystemBase {
         mAutoChooser = new SendableChooser<>();
         mAutoChooser.setDefaultOption("StationaryDefault", () -> backUpAuton());
 
-        ShootPreload mShootPreload = new ShootPreload(
-            this,
-            "PreloadShootCenter",
-            GameGoalPoseChooser.getHub().plus(new Transform2d(-2.0, 0.0, Rotation2d.kZero)));
-
-        tryToAddPathToChooser(
-            "ShootPreloadCenter", 
-            () -> mShootPreload.getAuton()
-        );
-
-        ShootPreload mShootPreloadClimb = new ShootPreload(
-            this,
-            "PreloadShootCenterCenterClimb",
-            GameGoalPoseChooser.getHub().plus(new Transform2d(-2.0, 0.0, Rotation2d.kZero)));
-
-        tryToAddPathToChooser(
-            "ShootPreloadCenterClimb", 
-            () -> mShootPreloadClimb.getAuton()
-        );
-
-        SingleSwipe mLeftTrenchSingleSwipe = new SingleSwipe(
-            this, 
-            "LeftTrenchSingleSwipe", 
-            "TL_TL_BSL", 
-            AutonConstants.leftTrenchSingleSwipeAlignTime,
-            AutonConstants.leftTrenchSingleSwipeStartTimeout,
-            false);
-
-        tryToAddPathToChooser(
-            "LeftTrenchSingleSwipe", 
-            () -> mLeftTrenchSingleSwipe.getAuton()
-        );
-        
-        SingleSwipe mLeftBumpSingleSwipe = new SingleSwipe(
-            this, 
-            "LeftBumpSingleSwipe", 
-            "TL_BL_BSL", 
-            AutonConstants.leftBumpSingleSwipeAlignTime,
-            AutonConstants.leftBumpSingleSwipeStartTimeout,
-            false);
-
-        tryToAddPathToChooser(
-            "LeftBumpSingleSwipe", 
-            () -> mLeftBumpSingleSwipe.getAuton()
-        );
-
-        SingleSwipeClimb mLeftTrenchClimbSingleSwipe = new SingleSwipeClimb(
-            this, 
-            "LeftTrenchClimbSingleSwipe", 
-            "TL_TL_BSL", 
-            AutonConstants.leftTrenchSingleSwipeAlignTime,
-            AutonConstants.leftTrenchSingleSwipeStartTimeout,
-            GameGoalPoseChooser.closestClimbPose(kBottomLeftBump),
-            false);
-
-        tryToAddPathToChooser(
-            "LeftTrenchClimbSingleSwipe", 
-            () -> mLeftTrenchClimbSingleSwipe.getAuton()
-        );
-
-        SingleSwipeClimb mLeftBumpClimbSingleSwipe = new SingleSwipeClimb(
-            this, 
-            "LeftBumpClimbSingleSwipe", 
-            "TL_BL_BSL", 
-            AutonConstants.leftBumpSingleSwipeAlignTime,
-            AutonConstants.leftBumpSingleSwipeStartTimeout,
-            GameGoalPoseChooser.closestClimbPose(kBottomLeftBump),
-            false);
-
-        tryToAddPathToChooser(
-            "LeftBumpClimbSingleSwipe", 
-            () -> mLeftBumpClimbSingleSwipe.getAuton()
-        );
-
-        DoubleSwipe mLeftTrenchDoubleSwipe = new DoubleSwipe(
-            this, 
-            "LeftTrenchDoubleSwipe", 
-            "TL_TL_BSL", 
-            AutonConstants.leftTrenchDoubleSwipeOneAlignTime, 
-            "BSL_TL_BL_BSL", 
-            AutonConstants.leftDoubleSwipeTwoAlignTime,
-            AutonConstants.leftDoubleSwipeStartTimeout,
-            false);
-
-        tryToAddPathToChooser(
-            "LeftTrenchDoubleSwipe", 
-            () -> mLeftTrenchDoubleSwipe.getAuton());
-
         DoubleSwipe mLeftBumpDoubleSwipe = new DoubleSwipe(
-            this, 
-            "LeftBumpDoubleSwipe", 
-            "TL_BL_BSL", 
-            AutonConstants.leftBumpDoubleSwipeOneAlignTime, 
-            "BSL_TL_Half", 
-            AutonConstants.leftDoubleSwipeTwoAlignTime,
-            AutonConstants.leftDoubleSwipeStartTimeout,
-            false);
-
-        tryToAddPathToChooser(
-            "LeftBumpDoubleSwipe", 
-            () -> mLeftBumpDoubleSwipe.getAuton());
-
-        SingleSwipe mRightTrenchSingleSwipe = new SingleSwipe(
-            this, 
-            "RightTrenchSingleSwipe", 
-            "TR_TR_BSR", 
-            AutonConstants.rightTrenchSingleSwipeAlignTime,
-            AutonConstants.rightTrenchSingleSwipeStartTimeout,
-            false);
-
-        tryToAddPathToChooser(
-            "RightTrenchSingleSwipe", 
-            () -> mRightTrenchSingleSwipe.getAuton()
+            this,
+            "LeftBumpDoubleSwipe",
+            "L_IT_IC_ST",
+            5.25,
+            "L_ST_IB_ST_BUMP",
+            3.37,
+            0.0,
+            false
         );
-        
-        SingleSwipe mRightBumpSingleSwipe = new SingleSwipe(
-            this, 
-            "RightBumpSingleSwipe", 
-            "TR_BR_BSR", 
-            AutonConstants.rightBumpSingleSwipeAlignTime,
-            AutonConstants.rightBumpSingleSwipeStartTimeout,
-            false);
-
-        tryToAddPathToChooser(
-            "RightBumpSingleSwipe", 
-            () -> mRightBumpSingleSwipe.getAuton()
-        );
-
-        SingleSwipeClimb mRightTrenchClimbSingleSwipe = new SingleSwipeClimb(
-            this, 
-            "RightTrenchClimbSingleSwipe", 
-            "TR_TR_BSR", 
-            AutonConstants.rightTrenchSingleSwipeAlignTime,
-            AutonConstants.rightTrenchSingleSwipeStartTimeout,
-            GameGoalPoseChooser.closestClimbPose(kBottomRightBump),
-            false);
-
-        tryToAddPathToChooser(
-            "RightTrenchClimbSingleSwipe", 
-            () -> mRightTrenchClimbSingleSwipe.getAuton()
-        );
-
-        SingleSwipeClimb mRightBumpClimbSingleSwipe = new SingleSwipeClimb(
-            this, 
-            "RightBumpClimbSingleSwipe", 
-            "TR_BR_BSR", 
-            AutonConstants.rightBumpSingleSwipeAlignTime,
-            AutonConstants.rightBumpSingleSwipeStartTimeout,
-            GameGoalPoseChooser.closestClimbPose(kBottomRightBump),
-            false);
-
-        tryToAddPathToChooser(
-            "RightBumpClimbSingleSwipe", 
-            () -> mRightBumpClimbSingleSwipe.getAuton()
-        );
-
-        DoubleSwipe mRightTrenchDoubleSwipe = new DoubleSwipe(
-            this, 
-            "RightTrenchDoubleSwipe", 
-            "TL_TL_BSL", 
-            AutonConstants.rightTrenchDoubleSwipeOneAlignTime, 
-            "BSL_TL_Half", 
-            AutonConstants.rightDoubleSwipeTwoAlignTime,
-            AutonConstants.rightDoubleSwipeStartTimeout,
-            false);
-
-        tryToAddPathToChooser(
-            "RightTrenchDoubleSwipe", 
-            () -> mRightTrenchDoubleSwipe.getAuton());
 
         DoubleSwipe mRightBumpDoubleSwipe = new DoubleSwipe(
+            this,
+            "RightBumpDoubleSwipe",
+            "R_IT_IC_ST",
+            5.25,
+            "R_ST_IB_ST_BUMP",
+            3.37,
+            0.0,
+            false
+        );
+
+        SingleSwipe AroundTheWorldLeft = new SingleSwipe(
             this, 
-            "RightBumpDoubleSwipe", 
-            "TL_BL_BSL", 
-            AutonConstants.rightBumpDoubleSwipeOneAlignTime, 
-            "BSL_TL_Half", 
-            AutonConstants.rightDoubleSwipeTwoAlignTime,
-            AutonConstants.rightDoubleSwipeStartTimeout,
+            "AroundTheWorldLeft", 
+            "AroundTheWorld", 
+            9.9, 
+            0.0, 
             false);
+
+        SingleSwipe AroundTheWorldRight = new SingleSwipe(
+            this, 
+            "AroundTheWorldRight", 
+            "AroundTheWorld", 
+            9.9, 
+            0.0, 
+            true);
+
+        tryToAddPathToChooser(
+            "LeftBumpDoubleSwipe", 
+            () -> mLeftBumpDoubleSwipe.getAuton()
+        );
+
+        tryToAddPathToChooser(
+            "AroundTheWorldLeft", 
+            () -> AroundTheWorldLeft.getAuton()
+        );
 
         tryToAddPathToChooser(
             "RightBumpDoubleSwipe", 
-            () -> mRightBumpDoubleSwipe.getAuton());
+            () -> mRightBumpDoubleSwipe.getAuton()
+        );
 
+        tryToAddPathToChooser(
+            "AroundTheWorldRight", 
+            () -> AroundTheWorldRight.getAuton()
+        );
 
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);
     }

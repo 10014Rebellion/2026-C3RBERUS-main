@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import frc.robot.game.FieldConstants;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.auton.Auton;
 import frc.robot.systems.auton.AutonCommands;
@@ -83,11 +83,8 @@ public class SingleSwipe extends Auton {
     private Pose2d getSwipeEndPose(Pose2d pose) {
         return AllianceFlipUtil.apply(
             new Pose2d(
-                pose.getX(), pose.getY(),
-                GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(pose))
-                    .plus((AllianceFlipUtil.shouldFlip()) 
-                        ? Rotation2d.k180deg 
-                        : Rotation2d.kZero)
+                pose.getX(), (!mIsMirrored) ? pose.getY() : FieldConstants.kFieldYM - pose.getY(),
+                GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(mDriveSS.getPoseEstimate()))
         ));
     }
 }
