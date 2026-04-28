@@ -193,7 +193,7 @@ public class AutonCommands extends SubsystemBase {
             "LeftTrenchDoubleSwipe", 
             "TL_TL_BSL", 
             AutonConstants.leftTrenchDoubleSwipeOneAlignTime, 
-            "BSL_TL_Half", 
+            "BSL_TL_BL_BSL", 
             AutonConstants.leftDoubleSwipeTwoAlignTime,
             AutonConstants.leftDoubleSwipeStartTimeout,
             false);
