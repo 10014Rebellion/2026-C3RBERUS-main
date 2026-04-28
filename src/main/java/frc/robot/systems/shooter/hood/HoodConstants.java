@@ -71,7 +71,7 @@ public class HoodConstants {
     public static final LoggedTunableNumber tTrenchShotSetpointDeg = new LoggedTunableNumber(
             "Hood/Setpoint/TrenchShotSetpointDegrees", 15.0);
     public static final LoggedTunableNumber tCornerShotSetpointDeg = new LoggedTunableNumber(
-            "Hood/Setpoint/TrenchShotSetpointDegrees", 20.0);
+            "Hood/Setpoint/CornerShotSetpointDegrees", 20.0);
 
     static {
         kStateToSetpointMapHood.put(HoodStates.MAX, () -> Rotation2d.fromDegrees(tMaxSetpointDeg.get()));

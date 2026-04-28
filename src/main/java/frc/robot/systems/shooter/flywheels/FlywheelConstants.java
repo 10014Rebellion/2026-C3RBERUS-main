@@ -53,6 +53,8 @@ public class FlywheelConstants {
     public static final HashMap<FlywheelStates, LoggedTunableNumber> kFlywheelSetpointToVoltageTuneable = new HashMap<FlywheelStates, LoggedTunableNumber>();
     public static final HashMap<FlywheelStates, Supplier<Rotation2d>> kFlywheelSetpointToVelocity = new HashMap<FlywheelStates, Supplier<Rotation2d>>();
 
+    public static final LoggedTunableNumber tRevVoltage = new LoggedTunableNumber(
+            "Shooter/Flywheel/SetpointsVoltage/StandbyVoltage", 6.0);
     public static final LoggedTunableNumber tStandbyVoltage = new LoggedTunableNumber(
             "Shooter/Flywheel/SetpointsVoltage/StandbyVoltage", 0.0);
     public static final LoggedTunableNumber tTuningVoltage = new LoggedTunableNumber(
@@ -86,6 +88,7 @@ public class FlywheelConstants {
 
     static {
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.STANDBY_VOLTAGE, tStandbyVoltage);
+        kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.REV_VOLTAGE, tRevVoltage);
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.TUNING_VOLTAGE, tTuningVoltage);
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.MAX_VOLTAGE, tMaxVoltage);
 
