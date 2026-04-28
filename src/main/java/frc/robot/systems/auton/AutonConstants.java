@@ -8,9 +8,9 @@ public class AutonConstants {
     public static double leftBumpSingleSwipeAlignTime = 7;
     public static double leftBumpSingleSwipeStartTimeout = 0.0;
 
-    public static double leftTrenchDoubleSwipeOneAlignTime = 6.3;
-    public static double leftBumpDoubleSwipeOneAlignTime = 7;
-    public static double leftDoubleSwipeTwoAlignTime = 3.2;
+    public static double leftTrenchDoubleSwipeOneAlignTime = 6.2;
+    public static double leftBumpDoubleSwipeOneAlignTime = 4.01;
+    public static double leftDoubleSwipeTwoAlignTime = 4.01;
     public static double leftDoubleSwipeStartTimeout = 0.0;
 
     public static double rightTrenchSingleSwipeAlignTime = 6.3;
