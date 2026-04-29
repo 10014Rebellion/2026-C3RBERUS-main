@@ -45,6 +45,14 @@ public class GameGoalPoseChooser {
         return AllianceFlipUtil.apply(new Pose2d());
     }
 
+    public static Pose2d getPreloadStartingPosition() {
+        return AllianceFlipUtil.apply(new Pose2d(
+            3.5746593475341797,
+            4.012706756591797,
+            Rotation2d.kZero
+        ));
+    }
+
     public static Pose2d getO() {
         return AllianceFlipUtil.apply(new Pose2d());
     }
@@ -186,6 +194,11 @@ public class GameGoalPoseChooser {
     }
 
     public static Pose2d getCloseShotPose() {
+        Logger.recordOutput("Autos/CloseShot", AllianceFlipUtil.apply(new Pose2d(
+            3.351194381713867 - 1.0, 
+            4.036095142364502, 
+            Rotation2d.kZero)));
+
         return AllianceFlipUtil.apply(new Pose2d(
             3.351194381713867 - 1.0, 
             4.036095142364502, 

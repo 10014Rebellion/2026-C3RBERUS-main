@@ -118,9 +118,9 @@ public class AutonCommands extends SubsystemBase {
             this,
             "LeftBumpDoubleSwipe",
             "L_IT_IC_ST",
-            5.25,
+            5.8,
             "L_ST_IB_ST_BUMP",
-            3.37,
+            4.0,
             0.0,
             false
         );
@@ -129,9 +129,9 @@ public class AutonCommands extends SubsystemBase {
             this,
             "RightBumpDoubleSwipe",
             "R_IT_IC_ST",
-            5.25,
+            5.2,
             "R_ST_IB_ST_BUMP",
-            3.37,
+            4.6,
             0.0,
             false
         );
@@ -139,27 +139,36 @@ public class AutonCommands extends SubsystemBase {
         SingleSwipe AroundTheWorldLeft = new SingleSwipe(
             this, 
             "AroundTheWorldLeft", 
-            "AroundTheWorld", 
+            "L_AroundTheWorld", 
             9.9, 
             0.0, 
+            false);
+
+        SingleSwipeClimb AroundTheWorldClimbLeft = new SingleSwipeClimb(
+            this,
+            "L_AroundTheWorldLeftClimb", 
+            "L_AroundTheWorld", 
+            9.9, 
+            0.0, 
+            kBottomLeftBump, 
             false);
 
         SingleSwipe AroundTheWorldRight = new SingleSwipe(
             this, 
             "AroundTheWorldRight", 
-            "AroundTheWorld", 
+            "L_AroundTheWorld", 
             9.9, 
             0.0, 
             true);
 
-        SingleSwipeClimb AroundTheWorldClimbLeft = new SingleSwipeClimb(
+        SingleSwipeClimb AroundTheWorldClimbRight = new SingleSwipeClimb(
             this,
-            "AroundTheWorldLeft", 
-            "AroundTheWorld", 
+            "AroundTheWorldLeftClimbRight", 
+            "L_AroundTheWorld", 
             9.9, 
             0.0, 
             kBottomLeftBump, 
-            false);
+            true);
 
         ShootPreload mPreload = new ShootPreload(
             this,
@@ -195,6 +204,11 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser(
             "AroundTheWorldRight", 
             () -> AroundTheWorldRight.getAuton()
+        );
+
+        tryToAddPathToChooser(
+            "AroundTheWorldRightClimb", 
+            () -> AroundTheWorldClimbRight.getAuton()
         );
 
         mAutoChooserLogged = new LoggedDashboardChooser<>("Autos", mAutoChooser);

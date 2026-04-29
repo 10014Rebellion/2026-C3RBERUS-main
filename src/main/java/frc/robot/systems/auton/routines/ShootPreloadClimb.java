@@ -1,7 +1,10 @@
 package frc.robot.systems.auton.routines;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
@@ -13,14 +16,14 @@ import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 public class ShootPreloadClimb extends Auton{
 
     private final String mAutoName;
-    private final Pose2d mShootPose;
+    private final Supplier<Pose2d> mShootPose;
 
     private final double kShotTimeSeconds = 6.5;
     
     public ShootPreloadClimb(
         AutonCommands pAutos, 
         String pAutoName,
-        Pose2d pShootPose){
+        Supplier<Pose2d> pShootPose){
         super(pAutos);
         mAutoName = pAutoName;
         mShootPose = pShootPose;
@@ -31,9 +34,12 @@ public class ShootPreloadClimb extends Auton{
         AutoEvent auto = new AutoEvent(mAutoName, mAutos);
         Trigger autoActivated = auto.getIsRunningTrigger();
 
+        autoActivated
+            .onTrue(new InstantCommand(() -> mDriveSS.setPose(GameGoalPoseChooser.getPreloadStartingPosition())));
+
         Trigger autoAlignShotReadySwipe1 = mAutos.followPathToAutoAlignShoot(
-            mDriveSS.getDriveManager().setToGenericAutoAlign(() -> getSwipeEndPose(mShootPose), ConstraintType.LINEAR), 
-            autoActivated,
+            mDriveSS.getDriveManager().setToGenericAutoAlign(mShootPose, ConstraintType.LINEAR), 
+            autoActivated.debounce(0.5),
             mAutoName, 
             auto);
 
