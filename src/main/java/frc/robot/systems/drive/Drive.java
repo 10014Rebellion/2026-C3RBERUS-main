@@ -295,7 +295,7 @@ public class Drive extends SubsystemBase {
 
         mDefaultFF = mPreviousSetpoint.feedforwards();
         
-        kUseGenerator = true; // !mDriveManager.getDriveState().equals(DriveState.AUTON);
+        kUseGenerator = !mDriveManager.getDriveState().equals(DriveState.AUTON);
         Logger.recordOutput("Drive/Swerve/UseGenerator", kUseGenerator);
 
         if (kUseGenerator) {
@@ -394,7 +394,7 @@ public class Drive extends SubsystemBase {
                     unoptimizedSetpointStates[i],
                     i);
 
-        if(mUseFeedForward) {
+        if(!mUseFeedForward) {
             driveAmps = 0.0; 
             // SwerveHelper.lowPassFilter(
             //     mPrevDriveAmps[i], 

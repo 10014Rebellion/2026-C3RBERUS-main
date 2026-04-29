@@ -82,7 +82,7 @@ public class SingleSwipeClimb extends Auton {
 
         Trigger hasClimbEnded = mAutos.goToClimb(
             fuelToHubHasEndedSwipe1, 
-            () -> AllianceFlipUtil.apply(mClimbPose), 
+            () -> mClimbPose, 
             "/Climb", 
             auto);
 

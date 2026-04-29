@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.AutoEvent;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import frc.robot.game.FieldConstants;
 import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.auton.Auton;
 import frc.robot.systems.auton.AutonCommands;
@@ -71,7 +71,9 @@ public class DoubleSwipe extends Auton {
 
         /* Takes over mid path */
         Trigger autoAlignShotReadySwipe1 = mAutos.followPathToAutoAlignShoot(
-            mDriveSS.getDriveManager().runAutoAlignThroughTrench(getSwipeEndPose(lastPoseOfFirstSwipe)), 
+            mDriveSS.getDriveManager().setToGenericAutoAlign(
+                () -> getSwipeEndPose(lastPoseOfFirstSwipe),
+                ConstraintType.LINEAR), 
             firstSwipePath.atTime(mFirstSwipeSwitchToAlignTime), 
             mFirstSwipePathName, 
             auto);
@@ -88,6 +90,7 @@ public class DoubleSwipe extends Auton {
             mAutos.getTraj(mSecondSwipePathName).get().getPathPoses().size() - 1);
 
         Trigger secondPathHasEnded = mAutos.traversePathWithIntakeOutOnly(
+            0.0,
             secondSwipePath, 
             fuelToHubHasEndedSwipe1, 
             mSecondSwipePathName, 
@@ -95,7 +98,7 @@ public class DoubleSwipe extends Auton {
 
         /* Takes over mid path */
         Trigger autoAlignShotReadySwipe2 = mAutos.followPathToAutoAlignShoot(
-            mDriveSS.getDriveManager().setToGenericAutoAlignWithGeneratorReset(
+            mDriveSS.getDriveManager().setToGenericAutoAlign(
                 () -> getSwipeEndPose(lastPoseOfSecondSwipe), 
                 ConstraintType.LINEAR), 
             secondSwipePath.atTime(mSecondSwipeSwitchToAlignTime), 
@@ -120,7 +123,7 @@ public class DoubleSwipe extends Auton {
                 GameGoalPoseChooser.turnFromHub(AllianceFlipUtil.apply(pose))
                     .plus((AllianceFlipUtil.shouldFlip()) 
                         ? Rotation2d.k180deg 
-                        : Rotation2d.kZero)
-        ));
+                        : Rotation2d.kZero)));
     }
+    
 }
