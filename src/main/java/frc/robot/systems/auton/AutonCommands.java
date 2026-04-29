@@ -120,7 +120,18 @@ public class AutonCommands extends SubsystemBase {
             "L_IT_IC_ST",
             5.8,
             "L_ST_IB_ST_BUMP",
-            4.0,
+            3.7,
+            0.0,
+            false
+        );
+
+        DoubleSwipe mLeftTrenchDoubleSwipe = new DoubleSwipe(
+            this,
+            "LeftTrenchDoubleSwipe",
+            "L_IT_IC_ST",
+            5.8,
+            "L_ST_IB_ST",
+            6.0,
             0.0,
             false
         );
@@ -136,20 +147,31 @@ public class AutonCommands extends SubsystemBase {
             false
         );
 
+        DoubleSwipe mRightTrenchDoubleSwipe = new DoubleSwipe(
+            this,
+            "RightTrenchDoubleSwipe",
+            "R_IT_IC_ST",
+            5.2,
+            "R_ST_IB_ST",
+            5.8,
+            0.0,
+            false
+        );
+
         SingleSwipe AroundTheWorldLeft = new SingleSwipe(
-            this, 
+            this,
             "AroundTheWorldLeft", 
             "L_AroundTheWorld", 
             9.9, 
-            0.0, 
+            5.0, 
             false);
 
         SingleSwipeClimb AroundTheWorldClimbLeft = new SingleSwipeClimb(
             this,
-            "L_AroundTheWorldLeftClimb", 
+            "AroundTheWorldLeftClimb", 
             "L_AroundTheWorld", 
             9.9, 
-            0.0, 
+            5.0, 
             kBottomLeftBump, 
             false);
 
@@ -158,15 +180,15 @@ public class AutonCommands extends SubsystemBase {
             "AroundTheWorldRight", 
             "L_AroundTheWorld", 
             9.9, 
-            0.0, 
+            5.0, 
             true);
 
         SingleSwipeClimb AroundTheWorldClimbRight = new SingleSwipeClimb(
             this,
-            "AroundTheWorldLeftClimbRight", 
+            "AroundTheWorldClimbRight", 
             "L_AroundTheWorld", 
             9.9, 
-            0.0, 
+            5.0, 
             kBottomLeftBump, 
             true);
 
@@ -187,6 +209,11 @@ public class AutonCommands extends SubsystemBase {
         );
 
         tryToAddPathToChooser(
+            "LefttTrenchDoubleSwipe", 
+            () -> mLeftTrenchDoubleSwipe.getAuton()
+        );
+
+        tryToAddPathToChooser(
             "AroundTheWorldLeft", 
             () -> AroundTheWorldLeft.getAuton()
         );
@@ -199,6 +226,11 @@ public class AutonCommands extends SubsystemBase {
         tryToAddPathToChooser(
             "RightBumpDoubleSwipe", 
             () -> mRightBumpDoubleSwipe.getAuton()
+        );
+
+        tryToAddPathToChooser(
+            "RightTrenchDoubleSwipe", 
+            () -> mRightTrenchDoubleSwipe.getAuton()
         );
 
         tryToAddPathToChooser(
