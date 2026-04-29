@@ -35,11 +35,11 @@ public class ShootPreload extends Auton{
         Trigger autoActivated = auto.getIsRunningTrigger();
 
         autoActivated
-            .onTrue(new InstantCommand(() -> mDriveSS.setPose(GameGoalPoseChooser.getCloseShotPose())));
+            .onTrue(new InstantCommand(() -> mDriveSS.setPose(GameGoalPoseChooser.getPreloadStartingPosition())));
 
         Trigger autoAlignShotReadySwipe1 = mAutos.followPathToAutoAlignShoot(
             mDriveSS.getDriveManager().setToGenericAutoAlign(mShootPose, ConstraintType.LINEAR), 
-            autoActivated,
+            autoActivated.debounce(0.5),
             mAutoName, 
             auto);
 
