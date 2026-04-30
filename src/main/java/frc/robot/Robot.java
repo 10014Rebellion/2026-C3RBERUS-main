@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.PhoenixUtil;
 import frc.robot.RobotConstants.DashboardConstants;
 import frc.robot.game.TransitionTracker;
+import frc.robot.game.HubShift;
 // import frc.robot.systems.shooter.ShotCalculator;
 
 import java.util.Optional;
@@ -49,6 +50,11 @@ public class Robot extends LoggedRobot {
         // ShotCalculator.getInstance().clearShootingParameters();
         CommandScheduler.getInstance().run();
         TransitionTracker.periodic();
+
+        Logger.recordOutput("HubShift/Official", HubShift.getOfficialShiftInfo());
+        Logger.recordOutput("HubShift/Shifted", HubShift.getShiftedShiftInfo());
+        Logger.recordOutput("GameTime/Match Time", DriverStation.getMatchTime());
+
         Logger.recordOutput("GameStates/TELEOPERATED TIME", mTracker.getTeleopTimeLeft());
         Logger.recordOutput("GameStates/PHASE TIME", mTracker.getTimeLeftInPhase());
         Logger.recordOutput("GameStates/AUTONOMOUS TIME", mTracker.getAutonTimeLeft());
@@ -60,6 +66,8 @@ public class Robot extends LoggedRobot {
         if (mAutonomousCommand != null) {
             mAutonomousCommand.cancel();
         }
+        
+        HubShift.initialize();
     }
 
     @Override
@@ -71,6 +79,7 @@ public class Robot extends LoggedRobot {
     public void autonomousInit() {
         mAutonomousCommand = mRobotContainer.getAutonomousCommand().get();
         TransitionTracker.autonInit();
+        HubShift.initialize();
 
         if (mAutonomousCommand != null) {
             CommandScheduler.getInstance().schedule(mAutonomousCommand);
@@ -86,6 +95,7 @@ public class Robot extends LoggedRobot {
             mAutonomousCommand.cancel();
         }
         TransitionTracker.teleopInit();
+        HubShift.initialize();
         mRobotContainer.getDrivetrain().getDriveManager().setToTeleop();
         CommandScheduler.getInstance().schedule(mRobotContainer.getDriverProfileCommand());
     }
