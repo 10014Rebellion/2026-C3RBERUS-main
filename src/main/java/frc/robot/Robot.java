@@ -5,6 +5,7 @@ package frc.robot;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,9 +36,9 @@ public class Robot extends LoggedRobot {
 
     public Robot() {
         beginAKLogger();
-        
+
         startWebServers();
-        
+
         mTracker = new TransitionTracker();
         mRobotContainer = new RobotContainer();
 
@@ -66,7 +67,7 @@ public class Robot extends LoggedRobot {
         if (mAutonomousCommand != null) {
             mAutonomousCommand.cancel();
         }
-        
+
         HubShift.initialize();
     }
 
@@ -87,7 +88,8 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {
+    }
 
     @Override
     public void teleopInit() {
@@ -103,6 +105,18 @@ public class Robot extends LoggedRobot {
     @Override
     public void teleopPeriodic() {
         SmartDashboard.putNumber("MATCH TIME", DriverStation.getMatchTime());
+
+        // Update from HubShiftUtil
+        SmartDashboard.putString(
+                "Shifts/Remaining Shift Time",
+                String.format("%.1f", Math.max(HubShift.getShiftedShiftInfo().remainingTime(), 0.0)));
+        SmartDashboard.putBoolean("Shifts/Shift Active", HubShift.getShiftedShiftInfo().active());
+        SmartDashboard.putString(
+                "Shifts/Game State", HubShift.getShiftedShiftInfo().currentShift().toString());
+        SmartDashboard.putBoolean(
+                "Shifts/Active First?",
+                DriverStation.getAlliance().orElse(Alliance.Blue) == HubShift.getFirstActiveAlliance());
+
     }
 
     @Override
@@ -111,15 +125,18 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void testPeriodic() {}
+    public void testPeriodic() {
+    }
 
     @Override
-    public void simulationInit() {}
+    public void simulationInit() {
+    }
 
     @Override
-    public void simulationPeriodic() {}
+    public void simulationPeriodic() {
+    }
 
-    private void beginAKLogger () {
+    private void beginAKLogger() {
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
         Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
         Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);

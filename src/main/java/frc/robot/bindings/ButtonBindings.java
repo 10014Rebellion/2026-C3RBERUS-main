@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controllers.FlydigiApex4;
@@ -20,6 +21,7 @@ import frc.lib.controllers.RebelButtonBoardRebuilt;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.game.HubShift;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
@@ -87,6 +89,18 @@ public class ButtonBindings {
 
         initCompBindings();
         testBindings();
+    }
+
+    private Command rumbleForShift(double pRumbleTimeSec) {
+                return rumbleForShift(pRumbleTimeSec, 0.7);
+    }
+
+    private Command rumbleForShift(double pRumbleTimeSec, double pRumbleValue) {
+                return new SequentialCommandGroup(
+                        new InstantCommand(() -> mPilotController.setRumble(RumbleType.kBothRumble, pRumbleValue)),
+                        new WaitCommand(pRumbleTimeSec),
+                        new InstantCommand(() -> mPilotController.setRumble(RumbleType.kBothRumble, 0))
+                );
     }
 
     private Trigger constructPreshotPos(Trigger pBtn, FlywheelStates pFlywheelState, HoodStates pHoodState) {
@@ -517,6 +531,21 @@ public class ButtonBindings {
     }
 
     public void initTriggers() {
+        // new Trigger(() -> HubShift.getShiftedShiftInfo().remainingTime() <= 5 && HubShift.getShiftedShiftInfo().remainingTime() > 3)
+        //         .onTrue(rumbleForShift(1.0, 0.4));
+
+        final double kSecLeftToRumble = 4;
+        final double kRumbleTime = 0.5;
+        final double kRumbleWait = 0.2;
+        final double kRumbleStrength = 0.8;
+
+        new Trigger(() -> HubShift.getShiftedShiftInfo().remainingTime() <= kSecLeftToRumble)
+                .onTrue(
+                        rumbleForShift(kRumbleTime, kRumbleStrength)
+                        .andThen(new WaitCommand(kRumbleWait))
+                        .andThen(rumbleForShift(kRumbleTime, kRumbleStrength))
+                );
+
         new Trigger(() -> DriverStation.isTeleopEnabled())
                 .onTrue(mDriveSS.getDriveManager().setToTeleop())
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))

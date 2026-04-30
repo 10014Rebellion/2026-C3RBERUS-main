@@ -81,166 +81,190 @@ public class RobotContainer {
         switch (RobotConstants.kCurrentMode) {
             case REAL: {
                 mDriveSS = new Drive(
-                    new Module[] {
-                        new Module("FL", new ModuleIOKraken(kFrontLeftHardware)),
-                        new Module("FR", new ModuleIOKraken(kFrontRightHardware)),
-                        new Module("BL", new ModuleIOKraken(kBackLeftHardware)),
-                        new Module("BR", new ModuleIOKraken(kBackRightHardware))
-                    },
-                    new GyroIOPigeon2(),
-                    new ATagVision(new ATagCameraIOPV[]{
-                        new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
-                    }));
+                        new Module[] {
+                                new Module("FL", new ModuleIOKraken(kFrontLeftHardware)),
+                                new Module("FR", new ModuleIOKraken(kFrontRightHardware)),
+                                new Module("BL", new ModuleIOKraken(kBackLeftHardware)),
+                                new Module("BR", new ModuleIOKraken(kBackRightHardware))
+                        },
+                        new GyroIOPigeon2(),
+                        new ATagVision(new ATagCameraIOPV[] {
+                                new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
+                                new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
+                                new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
+                                new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
+                        }));
 
-                
                 mFuelPumpSS = new FuelPumpSS(
-                        new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpLeaderConfig), 
-                        new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpFollowerConfig)
-                );
+                        new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpLeaderConfig),
+                        new FuelPumpIOKrakenX44(FuelPumpConstants.kFuelPumpFollowerConfig));
 
                 mCANRangesSS = new CANRangeSS(
-                    new SensorIO() {}, 
-                    new SensorIO() {}, 
-                    new SensorIO() {}
-                );
-                
-                mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig), mCANRangesSS);
+                        new SensorIO() {
+                        },
+                        new SensorIO() {
+                        },
+                        new SensorIO() {
+                        });
+
+                mHoodSS = new HoodSS(new HoodIOKrakenX44(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig),
+                        mCANRangesSS);
 
                 mFlywheelsSS = new FlywheelsSS(
                         new FlywheelIOKrakenX44(FlywheelConstants.kFlywheelLeaderConfig),
                         new FlywheelIOKrakenX44(FlywheelConstants.kFlywheelFollowerConfig),
                         mCANRangesSS,
-                        new EncoderIO(){}
-                );
+                        new EncoderIO() {
+                        });
 
                 mIntakeSS = new Intake(
-                    new IntakeRackSS(new IntakeRackIOKrakenX60(
-                        IntakeConstants.RackConstants.kRackMotorConfig)),
-                    new IntakeRollerSS(new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig))
-                );
+                        new IntakeRackSS(new IntakeRackIOKrakenX60(
+                                IntakeConstants.RackConstants.kRackMotorConfig)),
+                        new IntakeRollerSS(
+                                new IntakeRollerIOKrakenX44(IntakeConstants.RollerConstants.kRollerMotorConfig)));
 
                 mClimbSS = new ClimbSS(
-                    new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants));
+                        new ClimbIOKrakenx44(ClimbConstants.kClimbMotorConstants));
 
-                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig));
+                mFuelInjectorSS = new FuelInjectorSS(
+                        new FuelInjectorIOKrakenX60(FuelInjectorConstants.kFuelInjectorConfig));
                 break;
             }
             case SIM: {
                 mDriveSS = new Drive(
-                    new Module[] {
-                        new Module("FL", new ModuleIOSim()),
-                        new Module("FR", new ModuleIOSim()),
-                        new Module("BL", new ModuleIOSim()),
-                        new Module("BR", new ModuleIOSim())
-                    },
-                    new GyroIO() {},
-                    new ATagVision(new ATagCameraIO[]{
-                        new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
-                        new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
-                    }));
-                
+                        new Module[] {
+                                new Module("FL", new ModuleIOSim()),
+                                new Module("FR", new ModuleIOSim()),
+                                new Module("BL", new ModuleIOSim()),
+                                new Module("BR", new ModuleIOSim())
+                        },
+                        new GyroIO() {
+                        },
+                        new ATagVision(new ATagCameraIO[] {
+                                new ATagCameraIOPV(ATagVisionConstants.kFLATagCamHardware),
+                                new ATagCameraIOPV(ATagVisionConstants.kFRATagCamHardware),
+                                new ATagCameraIOPV(ATagVisionConstants.kBLATagCamHardware),
+                                new ATagCameraIOPV(ATagVisionConstants.kBRATagCamHardware)
+                        }));
+
                 FlywheelIOSim leaderSim = new FlywheelIOSim(FlywheelConstants.kFlywheelLeaderConfig);
-                FlywheelIOSim followerSim = new FlywheelIOSim(FlywheelConstants.kFlywheelLeaderConfig);;
-                
+                FlywheelIOSim followerSim = new FlywheelIOSim(FlywheelConstants.kFlywheelLeaderConfig);
+                ;
+
                 mFuelPumpSS = new FuelPumpSS(
-                    new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig), 
-                    new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig)
-                );
+                        new FuelPumpIOSim(FuelPumpConstants.kFuelPumpLeaderConfig),
+                        new FuelPumpIOSim(FuelPumpConstants.kFuelPumpFollowerConfig));
 
                 mCANRangesSS = new CANRangeSS(
-                    new SensorIO(){}, 
-                    new SensorIO(){}, 
-                    new SensorIO(){}
-                );
+                        new SensorIO() {
+                        },
+                        new SensorIO() {
+                        },
+                        new SensorIO() {
+                        });
 
-                mHoodSS = new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig), mCANRangesSS);
+                mHoodSS = new HoodSS(new HoodIOSim(HoodConstants.kHoodConfig, HoodConstants.kHoodControlConfig),
+                        mCANRangesSS);
 
                 mFlywheelsSS = new FlywheelsSS(
-                    leaderSim,
-                    followerSim,
-                    mCANRangesSS,
-                    new EncoderIO() {}
-                );
+                        leaderSim,
+                        followerSim,
+                        mCANRangesSS,
+                        new EncoderIO() {
+                        });
 
                 mIntakeSS = new Intake(
-                    new IntakeRackSS(new IntakeRackIOSim(
-                        IntakeConstants.RackConstants.kRackElevator,
-                        IntakeConstants.RackConstants.kRackMotorConfig)),
-                    new IntakeRollerSS(new IntakeRollerIOSim())
-                );
+                        new IntakeRackSS(new IntakeRackIOSim(
+                                IntakeConstants.RackConstants.kRackElevator,
+                                IntakeConstants.RackConstants.kRackMotorConfig)),
+                        new IntakeRollerSS(new IntakeRollerIOSim()));
 
                 mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIOSim());
 
                 mClimbSS = new ClimbSS(new ClimbIOSim(
-                    ClimbConstants.kSimElevator, 
-                    ClimbConstants.kClimbMotorConstants, 
-                    ClimbConstants.kSoftLimits));
+                        ClimbConstants.kSimElevator,
+                        ClimbConstants.kClimbMotorConstants,
+                        ClimbConstants.kSoftLimits));
                 break;
             }
 
             default: {
                 mDriveSS = new Drive(
-                    new Module[] {
-                        new Module("FL", new ModuleIO() {}),
-                        new Module("FR", new ModuleIO() {}),
-                        new Module("BL", new ModuleIO() {}),
-                        new Module("BR", new ModuleIO() {})
-                    },
-                    new GyroIO() {},
-                    new ATagVision(new ATagCameraIO[] {
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}, 
-                        new ATagCameraIO() {}
-                    }));
-                
+                        new Module[] {
+                                new Module("FL", new ModuleIO() {
+                                }),
+                                new Module("FR", new ModuleIO() {
+                                }),
+                                new Module("BL", new ModuleIO() {
+                                }),
+                                new Module("BR", new ModuleIO() {
+                                })
+                        },
+                        new GyroIO() {
+                        },
+                        new ATagVision(new ATagCameraIO[] {
+                                new ATagCameraIO() {
+                                },
+                                new ATagCameraIO() {
+                                },
+                                new ATagCameraIO() {
+                                },
+                                new ATagCameraIO() {
+                                }
+                        }));
+
                 mFuelPumpSS = new FuelPumpSS(
-                    new FuelPumpIO() {}, 
-                    new FuelPumpIO() {}
-                );
+                        new FuelPumpIO() {
+                        },
+                        new FuelPumpIO() {
+                        });
 
                 mCANRangesSS = new CANRangeSS(
-                    new SensorIO(){}, 
-                    new SensorIO(){}, 
-                    new SensorIO(){}
-                );
-                
-                mHoodSS = new HoodSS(new HoodIO() {}, mCANRangesSS);
-                
+                        new SensorIO() {
+                        },
+                        new SensorIO() {
+                        },
+                        new SensorIO() {
+                        });
+
+                mHoodSS = new HoodSS(new HoodIO() {
+                }, mCANRangesSS);
+
                 mFlywheelsSS = new FlywheelsSS(
-                    new FlywheelIO() {},
-                    new FlywheelIO() {},
-                    mCANRangesSS,
-                    new EncoderIO() {}
-                );
+                        new FlywheelIO() {
+                        },
+                        new FlywheelIO() {
+                        },
+                        mCANRangesSS,
+                        new EncoderIO() {
+                        });
 
                 mIntakeSS = new Intake(
-                    new IntakeRackSS(new IntakeRackIO() {}),
-                    new IntakeRollerSS(new IntakeRollerIO() {})
-                );
+                        new IntakeRackSS(new IntakeRackIO() {
+                        }),
+                        new IntakeRollerSS(new IntakeRollerIO() {
+                        }));
 
-                mClimbSS = new ClimbSS(new ClimbIO() {});
+                mClimbSS = new ClimbSS(new ClimbIO() {
+                });
 
-                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIO() {});
+                mFuelInjectorSS = new FuelInjectorSS(new FuelInjectorIO() {
+                });
 
                 break;
             }
         }
 
         ShotMap.getInstance().setPoseSupplier(() -> mDriveSS.getPoseEstimate());
-        
-        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS, mClimbSS, mCANRangesSS);
+
+        mButtonBindings = new ButtonBindings(mDriveSS, mFuelPumpSS, mHoodSS, mFlywheelsSS, mIntakeSS, mFuelInjectorSS,
+                mClimbSS, mCANRangesSS);
 
         initBindings();
-        initBaseTriggers();
 
         mDriverProfileChooser.addDefaultOption(
-                BindingsConstants.kDefaultProfile.key(), mDriveSS.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
+                BindingsConstants.kDefaultProfile.key(),
+                mDriveSS.getDriveManager().setDriveProfile(BindingsConstants.kDefaultProfile));
         for (DriverProfiles profile : BindingsConstants.kProfiles)
             mDriverProfileChooser.addOption(profile.key(), mDriveSS.getDriveManager().setDriveProfile(profile));
 
@@ -253,10 +277,6 @@ public class RobotContainer {
 
     private void initBindings() {
         mButtonBindings.initBindings();
-    }
-
-    private void initBaseTriggers() {
-        
     }
 
     public Supplier<Command> getAutonomousCommand() {

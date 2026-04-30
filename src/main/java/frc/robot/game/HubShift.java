@@ -1,18 +1,16 @@
 package frc.robot.game;
 
 // Copyright (c) 2025-2026 Littleton Robotics
+
 // http://github.com/Mechanical-Advantage
 //
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public class HubShift {
   public enum ShiftEnum {
@@ -27,36 +25,24 @@ public class HubShift {
   }
 
   public record ShiftInfo(
-      ShiftEnum currentShift, double elapsedTime, double remainingTime, boolean active) {}
+      ShiftEnum currentShift, double elapsedTime, double remainingTime, boolean active) {
+  }
 
   private static Timer shiftTimer = new Timer();
   private static final ShiftEnum[] shiftsEnums = ShiftEnum.values();
 
-  private static final double[] shiftStartTimes = {0.0, 10.0, 35.0, 60.0, 85.0, 110.0};
-  private static final double[] shiftEndTimes = {10.0, 35.0, 60.0, 85.0, 110.0, 140.0};
+  private static final double[] shiftStartTimes = { 0.0, 10.0, 35.0, 60.0, 85.0, 110.0 };
+  private static final double[] shiftEndTimes = { 10.0, 35.0, 60.0, 85.0, 110.0, 140.0 };
 
   public static final double autoEndTime = 20.0;
   public static final double teleopDuration = 140.0;
-  private static final boolean[] activeSchedule = {true, true, false, true, false, true};
-  private static final boolean[] inactiveSchedule = {true, false, true, false, true, true};
+  private static final boolean[] activeSchedule = { true, true, false, true, false, true };
+  private static final boolean[] inactiveSchedule = { true, false, true, false, true, true };
   private static final double timeResetThreshold = 3.0;
   private static double shiftTimerOffset = 0.0;
-  private static Supplier<Optional<Boolean>> allianceWinOverride = () -> Optional.empty();
-
-  public static Optional<Boolean> getAllianceWinOverride() {
-    return allianceWinOverride.get();
-  }
 
   public static Alliance getFirstActiveAlliance() {
     var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
-
-    // Return override value
-    var winOverride = getAllianceWinOverride();
-    if (!winOverride.isEmpty()) {
-      return winOverride.get()
-          ? (alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue)
-          : (alliance == Alliance.Blue ? Alliance.Blue : Alliance.Red);
-    }
 
     // Return FMS value
     String message = DriverStation.getGameSpecificMessage();
@@ -82,10 +68,9 @@ public class HubShift {
   private static boolean[] getSchedule() {
     boolean[] currentSchedule;
     Alliance startAlliance = getFirstActiveAlliance();
-    currentSchedule =
-        startAlliance == DriverStation.getAlliance().orElse(Alliance.Blue)
-            ? activeSchedule
-            : inactiveSchedule;
+    currentSchedule = startAlliance == DriverStation.getAlliance().orElse(Alliance.Blue)
+        ? activeSchedule
+        : inactiveSchedule;
     return currentSchedule;
   }
 
@@ -124,7 +109,8 @@ public class HubShift {
         currentShiftIndex = shiftStartTimes.length - 1;
       }
 
-      // Calculate elapsed and remaining time in the current shift, ignoring combined shifts
+      // Calculate elapsed and remaining time in the current shift, ignoring combined
+      // shifts
       stateTimeElapsed = currentTime - shiftStartTimes[currentShiftIndex];
       stateTimeRemaining = shiftEndTimes[currentShiftIndex] - currentTime;
 
@@ -158,38 +144,38 @@ public class HubShift {
     // Starting active
     if (shiftSchedule[1] == true) {
       double[] shiftedShiftStartTimes = {
+          0.0,
+          10.0,
+          35.0,
+          60.0,
+          85.0,
+          110.0
+      };
+      double[] shiftedShiftEndTimes = {
+          10.0,
+          35.0,
+          60.0,
+          85.0,
+          110.0,
+          140.0
+      };
+      return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
+    }
+    double[] shiftedShiftStartTimes = {
         0.0,
         10.0,
         35.0,
         60.0,
         85.0,
         110.0
-      };
-      double[] shiftedShiftEndTimes = {
+    };
+    double[] shiftedShiftEndTimes = {
         10.0,
         35.0,
         60.0,
         85.0,
         110.0,
         140.0
-      };
-      return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
-    }
-    double[] shiftedShiftStartTimes = {
-      0.0,
-      10.0,
-      35.0,
-      60.0,
-      85.0,
-      110.0
-    };
-    double[] shiftedShiftEndTimes = {
-      10.0,
-      35.0,
-      60.0,
-      85.0,
-      110.0,
-      140.0
     };
     return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
     // }
