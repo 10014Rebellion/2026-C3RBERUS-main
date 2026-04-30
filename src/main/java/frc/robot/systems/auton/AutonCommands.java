@@ -140,7 +140,7 @@ public class AutonCommands extends SubsystemBase {
 
         DoubleSwipe mLeftBumpDoubleSwipe2 = new DoubleSwipe(
             this,
-            "DNU_WorldsLeftDoubleSwipe",
+            "WorldsLeftDoubleSwipe",
             "L_IB_IC_ST",
             6.4,
             "L_ST_BUMP",
