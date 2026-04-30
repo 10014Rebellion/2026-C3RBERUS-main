@@ -27,6 +27,7 @@ public class FlywheelsSS extends SubsystemBase {
     TUNING_VELOCITY,
     FEED_VELOCITY,
     OPPONENT_FEED_VELOCITY,
+    HAILSTORM_VOLTAGE,
     MAX_VELOCITY,
     SHOTMAP_VELOCITY,
     STANDBY_VELOCITY,
@@ -125,6 +126,10 @@ public class FlywheelsSS extends SubsystemBase {
         }
       }
     }
+  }
+
+  public boolean isHailstormReady(){
+    return getFlywheelRPS().getRotations() >= FlywheelConstants.tLowestHailstormRPS.getAsDouble();
   }
 
   private void stopFlywheels() {

@@ -25,6 +25,7 @@ public class HoodSS extends SubsystemBase {
         SHOTMAP_POSITION,
         STEP_INCREMENT,
         STEP_DECREMENT,
+        OPPONENT_FEED_ANGLE,
 
         // CONSTANT SETPOINTS
         TUNING_SETPOINT,

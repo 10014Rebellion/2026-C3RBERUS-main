@@ -86,7 +86,9 @@ public class AutonCommands extends SubsystemBase {
         "TL_TL_BSL",
         "TRSub_Corall_Catch",
         "TR_BR_BSR",
-        "TR_TR_BSR"
+        "TR_TR_BSR",
+        "L_IB_IC_ST",
+        "L_ST_BUMP"
     };
 
     public AutonCommands(Drive pRobotDrive, Intake pIntake, FuelPumpSS pFuelPumpSS, HoodSS pHoodSS, FlywheelsSS pFlywheelsSS, ClimbSS pClimbSS, FuelInjectorSS pInjectorSS) {
@@ -129,20 +131,31 @@ public class AutonCommands extends SubsystemBase {
             this,
             "LeftTrenchDoubleSwipe",
             "L_IT_IC_ST",
-            5.8,
+            5.4,
             "L_ST_IB_ST",
-            6.0,
+            5.3,
             0.0,
             false
         );
 
-        DoubleSwipe mRightBumpDoubleSwipe = new DoubleSwipe(
+        DoubleSwipe mLeftBumpDoubleSwipe2 = new DoubleSwipe(
             this,
-            "RightBumpDoubleSwipe",
-            "R_IT_IC_ST",
-            5.2,
-            "R_ST_IB_ST_BUMP",
-            4.6,
+            "WorldsLeftDoubleSwipe",
+            "L_IB_IC_ST",
+            7.2,
+            "L_ST_BUMP",
+            4.0,
+            0.0,
+            false
+        );
+
+        DoubleSwipe mRightBumpDoubleSwipe2 = new DoubleSwipe(
+            this,
+            "WorldsRightDoubleSwipe",
+            "R_IB_IC_ST",
+            7.2,
+            "R_ST_BUMP",
+            4.0,
             0.0,
             false
         );
@@ -151,9 +164,9 @@ public class AutonCommands extends SubsystemBase {
             this,
             "RightTrenchDoubleSwipe",
             "R_IT_IC_ST",
-            5.2,
+            4.9,
             "R_ST_IB_ST",
-            5.8,
+            5.0,
             0.0,
             false
         );
@@ -224,8 +237,13 @@ public class AutonCommands extends SubsystemBase {
         );
 
         tryToAddPathToChooser(
-            "RightBumpDoubleSwipe", 
-            () -> mRightBumpDoubleSwipe.getAuton()
+            "WorldsLeftBumpDoubleSwipe", 
+            () -> mLeftBumpDoubleSwipe2.getAuton()
+        );
+
+        tryToAddPathToChooser(
+            "WorldsRightBumpDoubleSwipe", 
+            () -> mRightBumpDoubleSwipe2.getAuton()
         );
 
         tryToAddPathToChooser(

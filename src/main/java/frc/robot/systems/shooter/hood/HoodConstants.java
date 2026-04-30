@@ -39,6 +39,8 @@ public class HoodConstants {
             new ArmFeedforward(0.7, 0.1, 0, 0) // Tuned for C3RBERUS!
     );
 
+    public static final Rotation2d kRestingTrueAngle = Rotation2d.fromDegrees(7.5);
+
     public static final RotationSoftLimits kHoodLimits = new RotationSoftLimits(
             Rotation2d.fromDegrees(0.02),
             Rotation2d.fromDegrees(40.0) // Tuned for C3RBERUS!
@@ -73,10 +75,16 @@ public class HoodConstants {
     public static final LoggedTunableNumber tCornerShotSetpointDeg = new LoggedTunableNumber(
             "Hood/Setpoint/CornerShotSetpointDegrees", 20.0);
 
+    public static final LoggedTunableNumber tOpponentFeedShotSetpointDeg = new LoggedTunableNumber(
+        "Hood/Setpoint/OpponentFeedShot", Rotation2d.fromDegrees(37.5).minus(kRestingTrueAngle).getDegrees());
+
+
     static {
         kStateToSetpointMapHood.put(HoodStates.MAX, () -> Rotation2d.fromDegrees(tMaxSetpointDeg.get()));
         kStateToSetpointMapHood.put(HoodStates.MID, () -> Rotation2d.fromDegrees(tMidSetpointDeg.get()));
         kStateToSetpointMapHood.put(HoodStates.MIN, () -> Rotation2d.fromDegrees(tMinSetpointDeg.get()));
+
+        kStateToSetpointMapHood.put(HoodStates.OPPONENT_FEED_ANGLE, () -> Rotation2d.fromDegrees(tOpponentFeedShotSetpointDeg.get()));
 
         kStateToSetpointMapHood.put(HoodStates.TOWER_ANGLE, () -> Rotation2d.fromDegrees(tTowerShotSetpointDeg.get()));
         kStateToSetpointMapHood.put(HoodStates.BUMP_ANGLE, () -> Rotation2d.fromDegrees(tBumpShotSetpointDeg.get()));

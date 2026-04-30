@@ -21,7 +21,6 @@ import frc.lib.controllers.RebelButtonBoardRebuilt;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.commands.DriveCharacterizationCommands;
 import frc.robot.game.GameGoalPoseChooser;
-import frc.robot.game.HubShift;
 import frc.robot.systems.climb.ClimbSS;
 import frc.robot.systems.climb.ClimbSS.ClimbState;
 import frc.robot.systems.drive.Drive;
@@ -430,12 +429,15 @@ public class ButtonBindings {
                 .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
         wantToHailstormBtn
-                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.OPPONENT_FEED_VELOCITY))
-                .onTrue(mFuelPumpSS
-                        .setStateCmd(FuelPumpState.INTAKE_VOLT))
-                .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
+                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.HAILSTORM_VOLTAGE))
+                .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
+                .onTrue(mHoodSS.setStateCmd(HoodStates.OPPONENT_FEED_ANGLE));
 
-        wantToSnowPlowBtn.or(wantToHailstormBtn).and(fuelPumpAtGoal)
+        wantToHailstormBtn.and(() -> mFlywheelsSS.isHailstormReady())
+                .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+                .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
+
+        wantToSnowPlowBtn.and(fuelPumpAtGoal)
                 .and((shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth)))
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
@@ -539,12 +541,12 @@ public class ButtonBindings {
         final double kRumbleWait = 0.2;
         final double kRumbleStrength = 0.8;
 
-        new Trigger(() -> HubShift.getShiftedShiftInfo().remainingTime() <= kSecLeftToRumble)
-                .onTrue(
-                        rumbleForShift(kRumbleTime, kRumbleStrength)
-                        .andThen(new WaitCommand(kRumbleWait))
-                        .andThen(rumbleForShift(kRumbleTime, kRumbleStrength))
-                );
+        // new Trigger(() -> HubShift.getShiftedShiftInfo().remainingTime() <= kSecLeftToRumble)
+        //         .onTrue(
+        //                 rumbleForShift(kRumbleTime, kRumbleStrength)
+        //                 .andThen(new WaitCommand(kRumbleWait))
+        //                 .andThen(rumbleForShift(kRumbleTime, kRumbleStrength))
+        //         );
 
         new Trigger(() -> DriverStation.isTeleopEnabled())
                 .onTrue(mDriveSS.getDriveManager().setToTeleop())

@@ -50,6 +50,11 @@ public class FlywheelConstants {
             new SimpleMotorFeedforward(2.5, 0.22, 1.8), // Tuned for C3RBERUS!
             new MotionMagicConstants(0.0, 60.0, 0.0));
 
+    public static final LoggedTunableNumber tLowestHailstormRPS = new LoggedTunableNumber(
+        "Shooter/Flywheel/HailstormMinimumRPS", 90
+    );
+
+
     public static final HashMap<FlywheelStates, LoggedTunableNumber> kFlywheelSetpointToVoltageTuneable = new HashMap<FlywheelStates, LoggedTunableNumber>();
     public static final HashMap<FlywheelStates, Supplier<Rotation2d>> kFlywheelSetpointToVelocity = new HashMap<FlywheelStates, Supplier<Rotation2d>>();
 
@@ -67,6 +72,7 @@ public class FlywheelConstants {
             60.0);
     public static final LoggedTunableNumber tOpponentFeedVelocity = new LoggedTunableNumber(
             "Shooter/Flywheel/OpponentFeedVelocity", 110.0);
+    public static final LoggedTunableNumber tHailstormVoltage = new LoggedTunableNumber("Shooter/Flywheel/HailstormVoltage", 12.0);
     public static final LoggedTunableNumber tCloseVelocity = new LoggedTunableNumber(
             "Shooter/Flywheel/SetpointRPS/CloseVelocity", 47.5);
     public static final LoggedTunableNumber tMaxVelocity = new LoggedTunableNumber(
@@ -87,6 +93,7 @@ public class FlywheelConstants {
         = new LoggedTunableNumber("Shooter/Flywheel/TuningAmperage", 0.0);
 
     static {
+        kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.HAILSTORM_VOLTAGE, tHailstormVoltage);
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.STANDBY_VOLTAGE, tStandbyVoltage);
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.REV_VOLTAGE, tRevVoltage);
         kFlywheelSetpointToVoltageTuneable.put(FlywheelStates.TUNING_VOLTAGE, tTuningVoltage);

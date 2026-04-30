@@ -16,8 +16,8 @@
  "params":{
   "waypoints":[
     {"x":{"exp":"ITR.x", "val":4.0898661613464355}, "y":{"exp":"ITR.y", "val":0.4869867646694184}, "heading":{"exp":"ITR.heading", "val":1.5707963267948966}, "intervals":19, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"IBR.x", "val":6.25}, "y":{"exp":"1.4378660917282104 m", "val":1.4378660917282104}, "heading":{"exp":"90 deg", "val":1.5707963267948966}, "intervals":13, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"IBR.x", "val":6.25}, "y":{"exp":"IBR.y", "val":2.7200045585632324}, "heading":{"exp":"IBR.heading", "val":1.5707963267948966}, "intervals":19, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+    {"x":{"exp":"IBR.x", "val":6.1}, "y":{"exp":"1.4378660917282104 m", "val":1.4378660917282104}, "heading":{"exp":"90 deg", "val":1.5707963267948966}, "intervals":13, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"IBR.x", "val":6.1}, "y":{"exp":"IBR.y", "val":2.7200045585632324}, "heading":{"exp":"IBR.heading", "val":1.5707963267948966}, "intervals":19, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
