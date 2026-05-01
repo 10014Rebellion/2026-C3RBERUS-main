@@ -160,7 +160,7 @@ public class AutonCommands extends SubsystemBase {
             6.4,
             "L_ST_BUMP",
             4.0,
-            0.0,
+            3.0,
             false
         );
 
@@ -335,7 +335,7 @@ public class AutonCommands extends SubsystemBase {
         );
 
         tryToAddPathToChooser(
-            "DNU_WorldsLeftBumpDoubleSwipe", 
+            "WorldsLeftBumpDoubleSwipe", 
             () -> mLeftBumpDoubleSwipe2.getAuton()
         );
 
