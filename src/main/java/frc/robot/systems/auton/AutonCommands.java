@@ -197,6 +197,18 @@ public class AutonCommands extends SubsystemBase {
             false
         );
 
+        DoubleSwipe q97DoubleSwipe = new DoubleSwipe(
+            this,
+            "RightTrenchDoubleSwipe",
+            "R_IT_IC_ST",
+            4.9,
+            "R_ST_IB_ST",
+            5.0,
+            8.0,
+            false
+        );
+        tryToAddPathToChooser("Q97", () -> q97DoubleSwipe.getAuton());
+
         SingleSwipe AroundTheWorldLeft = new SingleSwipe(
             this,
             "AroundTheWorldLeft", 

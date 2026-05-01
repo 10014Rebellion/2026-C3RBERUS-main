@@ -442,7 +442,7 @@ public class ButtonBindings {
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
 
         wantToSnowPlowBtn.debounce(0.75, DebounceType.kRising)
-                .or(wantToHailstormBtn.debounce(3.3, DebounceType.kRising))
+                .or(wantToHailstormBtn.debounce(2.0, DebounceType.kRising))
                 .and(((shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth)))
                         .negate())
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
