@@ -233,10 +233,10 @@ public class AutonCommands extends SubsystemBase {
 
         SingleSwipeClimb AroundTheWorldClimbLeft = new SingleSwipeClimb(
             this,
-            "DNU_AroundTheWorldLeftClimb", 
-            "L_AroundTheWorldB", 
-            8.0, 
-            5.0, 
+            "DNU_AroundTheWorldLeftBumpClimb", 
+            "L_AroundTheWorldBump", 
+            5.1, 
+            3.0, 
             kBottomLeftBump, 
             false);
 
@@ -259,7 +259,7 @@ public class AutonCommands extends SubsystemBase {
 
             SingleSwipe AroundTheWorldLeftBump = new SingleSwipe(
                 this,
-            "DNU_AroundTheWorldLeftBump", 
+            "EOU_AroundTheWorldLeftBump", 
                 "L_AroundTheWorldBump", 
                 5.1, 
                 5.0, 
@@ -276,7 +276,7 @@ public class AutonCommands extends SubsystemBase {
     
             SingleSwipe AroundTheWorldRightBump = new SingleSwipe(
                 this, 
-                "DNU_AroundTheWorldRightBump", 
+                "AroundTheWorldRightBump", 
                 "L_AroundTheWorldBump", 
                 5.1,
                 5.0, 
@@ -348,7 +348,7 @@ public class AutonCommands extends SubsystemBase {
         );
 
         tryToAddPathToChooser(
-            "AroundTheWorldLeftBump", 
+            "EUO_AroundTheWorldLeftBump", 
             () -> AroundTheWorldLeftBump.getAuton()
         );
 

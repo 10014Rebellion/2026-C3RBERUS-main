@@ -424,8 +424,7 @@ public class ButtonBindings {
         /* Feeding Logic */
         wantToSnowPlowBtn
                 .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.FEED_VELOCITY))
-                .onTrue(mFuelPumpSS
-                        .setStateCmd(FuelPumpState.INTAKE_VOLT))
+                .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
                 .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
         wantToHailstormBtn
@@ -455,6 +454,34 @@ public class ButtonBindings {
                 .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
                 .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
                 .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
+
+        // wantToHailstormBtn
+        //         .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.HAILSTORM_VOLTAGE))
+        //         .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
+        //         .onTrue(mHoodSS.setStateCmd(HoodStates.OPPONENT_FEED_ANGLE));
+
+        // wantToHailstormBtn.and(() -> mFlywheelsSS.isHailstormReady())
+        //         .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+        //         .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
+
+        // wantToSnowPlowBtn.and(fuelPumpAtGoal)
+        //         .and((shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth)))
+        //         .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+        //         .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
+
+        // wantToSnowPlowBtn.debounce(0.75, DebounceType.kRising)
+        //         .or(wantToHailstormBtn.debounce(0.75, DebounceType.kRising))
+        //         .and(((shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth)))
+        //                 .negate())
+        //         .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+        //         .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
+
+        // wantToHailstormBtn.or(wantToSnowPlowBtn)
+        //         .onFalse(mFuelPumpSS.setStateCmd(FuelPumpState.STOPPED))
+        //         .onFalse(mIntakeSS.setRollerStateCmd(IntakeRollerState.IDLE))
+        //         .onFalse(mIntakeSS.setRackStateCmd(IntakeRackState.INTAKE))
+        //         .onFalse(mFuelInjectorSS.setStateCmd(FuelInjectorState.IDLE))
+        //         .onFalse(mHoodSS.setStateCmd(HoodStates.MIN));
 
         /* Makes flywheel stand by */
         wantToShoot.negate()

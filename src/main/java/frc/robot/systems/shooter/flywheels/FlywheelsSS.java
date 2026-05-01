@@ -128,6 +128,7 @@ public class FlywheelsSS extends SubsystemBase {
     }
   }
 
+  @AutoLogOutput(key="Flywheels/IsHailStormReady")
   public boolean isHailstormReady(){
     return getFlywheelRPS().getRotations() >= FlywheelConstants.tLowestHailstormRPS.getAsDouble();
   }
