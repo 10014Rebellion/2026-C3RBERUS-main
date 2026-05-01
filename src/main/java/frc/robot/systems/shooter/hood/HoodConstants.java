@@ -76,7 +76,7 @@ public class HoodConstants {
             "Hood/Setpoint/CornerShotSetpointDegrees", 20.0);
 
     public static final LoggedTunableNumber tOpponentFeedShotSetpointDeg = new LoggedTunableNumber(
-        "Hood/Setpoint/OpponentFeedShot", Rotation2d.fromDegrees(37.5).minus(kRestingTrueAngle).getDegrees());
+        "Hood/Setpoint/OpponentFeedShot", Rotation2d.fromDegrees(27.5+5).minus(kRestingTrueAngle).getDegrees());
 
 
     static {

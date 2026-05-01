@@ -179,7 +179,7 @@ public class FlywheelsSS extends SubsystemBase {
   }
 
   public Rotation2d getFlywheelRPS() {
-    return mEncoderInputs.iEncoderVelocityRPS;
+    return mLeaderFlywheelInputs.iFlywheelRotorVelocityRPS;
   }
 
   private void setBothPDConstants(double pKP, double pKD) {

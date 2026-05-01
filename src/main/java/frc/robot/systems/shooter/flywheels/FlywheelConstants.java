@@ -71,7 +71,7 @@ public class FlywheelConstants {
     public static final LoggedTunableNumber tFeedVelocity = new LoggedTunableNumber("Shooter/Flywheel/FeedVelocity",
             60.0);
     public static final LoggedTunableNumber tOpponentFeedVelocity = new LoggedTunableNumber(
-            "Shooter/Flywheel/OpponentFeedVelocity", 110.0);
+            "Shooter/Flywheel/OpponentFeedVelocity", 90.0);
     public static final LoggedTunableNumber tHailstormVoltage = new LoggedTunableNumber("Shooter/Flywheel/HailstormVoltage", 12.0);
     public static final LoggedTunableNumber tCloseVelocity = new LoggedTunableNumber(
             "Shooter/Flywheel/SetpointRPS/CloseVelocity", 47.5);

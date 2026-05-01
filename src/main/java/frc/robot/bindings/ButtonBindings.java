@@ -428,21 +428,21 @@ public class ButtonBindings {
                 .onTrue(mHoodSS.setStateCmd(HoodStates.MAX));
 
         wantToHailstormBtn
-                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.HAILSTORM_VOLTAGE))
-                .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VOLT))
+                .onTrue(mFlywheelsSS.setStateCmd(FlywheelStates.OPPONENT_FEED_VELOCITY))
+                .onTrue(mFuelPumpSS.setStateCmd(FuelPumpState.INTAKE_VELOCITY))
                 .onTrue(mHoodSS.setStateCmd(HoodStates.OPPONENT_FEED_ANGLE));
 
-        wantToHailstormBtn.and(() -> mFlywheelsSS.isHailstormReady())
-                .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
-                .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
+        // wantToHailstormBtn.and(() -> mFlywheelsSS.isHailstormReady())
+        //         .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
+        //         .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
 
-        wantToSnowPlowBtn.and(fuelPumpAtGoal)
+        wantToSnowPlowBtn.or(wantToHailstormBtn).and(fuelPumpAtGoal)
                 .and((shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth)))
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
                 .onTrue(mIntakeSS.setRollerStateCmd(IntakeRollerState.INTAKE));
 
         wantToSnowPlowBtn.debounce(0.75, DebounceType.kRising)
-                .or(wantToHailstormBtn.debounce(0.75, DebounceType.kRising))
+                .or(wantToHailstormBtn.debounce(3.3, DebounceType.kRising))
                 .and(((shooterAtGoal.and(atHeadingGoal).debounce(kShootingReadyDebounceSeconds, DebounceType.kBoth)))
                         .negate())
                 .onTrue(mFuelInjectorSS.setStateCmd(FuelInjectorState.INTAKE))
